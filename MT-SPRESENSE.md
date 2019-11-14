@@ -27,3 +27,20 @@ iPod in
 PIN 1: Line + 
 PIN 2: ---
 PIN 3: GND
+
+---
+
+2019-11-13  
+
+### audio setup
+
+#### init Recorder
+
+https://developer.sony.com/develop/spresense/developer-tools/api-reference/api-references-spresense-sdk/group__audioutils__audio__high__level__api.html#ga6371c7e9a02e618ed19de38534856e26
+
+max bitrate = 510000 (wahrscheinlich kByte)  
+min bitlength = 16  
+--> 192000 samples/s * 16 bit/s = 3072000 bit/s = 3 Mbit/s  
+--> 3Mbit/s / 8 = 384kByte/s  
+
+RAM hat 1,5 MB --> 1,5MB/384kB = 3,906s Aufnahmezeit in FIFO
