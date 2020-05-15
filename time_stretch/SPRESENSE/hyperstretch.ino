@@ -51,6 +51,7 @@ static bool mediaplayer_done_callback(AsPlayerEvent event, uint32_t result, uint
 
         if (event == AsPlayerEventPlay)
         {
+          theRecorder->start();
                 /**
                  * @brief Start Recording
                  *
@@ -63,7 +64,7 @@ static bool mediaplayer_done_callback(AsPlayerEvent event, uint32_t result, uint
                  *          This will continue until you call "stop API".
                  *
                  */
-                theRecorder->start();
+          puts("start recorder");
         }
 
         return true;
@@ -115,22 +116,26 @@ void setup()
 
         // initialize recorder:
         theRecorder->init(
-                AS_CODECTYPE_WAV, /**< Select compression code. AS_CODECTYPE_MP3 or AS_CODECTYPE_WAV or AS_CODECTYPE_LPCM*/
+                AS_CODECTYPE_LPCM, /**< Select compression code. AS_CODECTYPE_MP3 or AS_CODECTYPE_WAV or AS_CODECTYPE_LPCM*/
                 AS_CHANNEL_MONO,/**< Set chennel number. AS_CHANNEL_MONO or AS_CHANNEL_STEREO, 2CH, 4CH, 8CH */
-                AS_SAMPLINGRATE_192000, /**< Set sampling rate. AS_SAMPLINGRATE_XXXXX */
+                // AS_SAMPLINGRATE_192000, /**< Set sampling rate. AS_SAMPLINGRATE_XXXXX */
+                AS_SAMPLINGRATE_48000,
                 AS_BITLENGTH_16, /**< Set bit length. AS_BITLENGTH_16 or AS_BITLENGTH_24 */
-                AS_BITRATE_384000 /**< Set bit rate. AS_BITRATE_XXXXX */
+                // AS_BITRATE_384000 /**< Set bit rate. AS_BITRATE_XXXXX */
+                AS_BITRATE_24000
                 // --> RAM = 1.5MByte --> audio = 3.9sec
                 // TODO: write to file rather than to FIFO?
                 );
+        puts("recorder init");
 
         // initialize Player:
         thePlayer->init(
                 MediaPlayer::Player0, /**< Select Player ID. */
                 AS_CODECTYPE_WAV, /**< Set compression code. AS_CODECTYPE_MP3 or AS_CODECTYPE_WAV */
-                AS_SAMPLINGRATE_44100, /**< Set sampling rate. AS_SAMPLINGRATE_XXXXX */
+                AS_SAMPLINGRATE_48000, /**< Set sampling rate. AS_SAMPLINGRATE_XXXXX */
                 AS_CHANNEL_MONO/**< Set channnel number. AS_CHANNEL_MONO or AS_CHANNEL_STEREO */
                 );
+        puts("player init");
 
         theMixer->setVolume(
                 0, /**< Master volume. -1020(-102db) - 120(12db) */
@@ -173,7 +178,7 @@ void loop()
           /* get recorded data and play */
                 uint32_t read_size = 0;
 
-                while (read_size != 0)
+                do // reads frames
                 {
                         theRecorder->readFrames(
                                 s_buffer, // uint8_t* p_buffer,
@@ -186,7 +191,7 @@ void loop()
                                 thePlayer->writeFrames(MediaPlayer::Player0, s_buffer, read_size);
                         }
 
-                }
+                } while (read_size != 0);
         }
         else {}
 
@@ -204,6 +209,8 @@ exitRecording:
 
         thePlayer->stop(MediaPlayer::Player0);
         theRecorder->stop();
+
+        puts("Exit.");
 
         exit(1);
 

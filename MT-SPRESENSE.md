@@ -44,3 +44,20 @@ min bitlength = 16
 --> 3Mbit/s / 8 = 384kByte/s  
 
 RAM hat 1,5 MB --> 1,5MB/384kB = 3,906s Aufnahmezeit in FIFO
+
+---
+
+2019-11-20  
+Audio.cpp 
++-- [AudioClass::writeFrames ](https://github.com/sonydevworld/spresense-arduino-compatible/blob/master/Arduino15/packages/SPRESENSE/hardware/spresense/1.0.0/libraries/Audio/Audio.cpp#L912)
+	+-- `CMN_simpleFifoHandle *handle --> m_player0_handle`
+		+-- [Struct Reference from Memory Utils](https://developer.sony.com/develop/spresense/developer-tools/api-reference/api-references-spresense-sdk/structCMN__SimpleFifoHandle.html#details)
+		+-- what is `m_player0_handle` ??
+		+-- 
+
+---
+
+2019-11-21  
+hilfreiche Suchmaschineneingabe: `Improved phase vocoder time-scale modification of audio` 
+		
+		
