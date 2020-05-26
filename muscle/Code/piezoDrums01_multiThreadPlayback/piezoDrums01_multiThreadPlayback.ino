@@ -15,8 +15,8 @@
 
 SDClass theSD;
 
-// static const uint8_t pins[] = {A0, A1, A2, A3};
-// static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN1, LED_BUILTIN2, LED_BUILTIN3};
+static const uint8_t pins[] = {A0, A1, A2, A3};
+static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN1, LED_BUILTIN2, LED_BUILTIN3};
 // uint8_t vals[4];
 // static const uint8_t inputAmount = 3; // that makes 4 input since number 0 is counted as well
 
@@ -128,24 +128,39 @@ static int player_thread(int argc, FAR char *argv[])
   //    exit(1);
   //  }
 
+  printf("play_id unformatted = %d\n", play_id);
+  int input_pin, led_pin;
+  int player_id_int = (int)atoi(argv[1]);
+  printf("player_id_int = %d\n", player_id_int);
+
+  if (player_id_int == 0)
+  {
+    input_pin = pins[0];
+    led_pin = leds[0];
+    printf("%d input pin: %d\n" , play_id, input_pin);
+  }
+  else if (player_id_int == 1)
+  {
+    input_pin = pins[1];
+    led_pin = leds[1];
+    printf("%d input pin: %d\n" , play_id, input_pin);
+  }
+
   usleep(10);
 
   while (1)
   {
-    int val = 260 - analogRead(A0); // TODO: make sensor read dynamic
+    int val = 260 - analogRead(input_pin); // TODO: make sensor read dynamic
     val = abs(val);
     val = map(val, 0, 762, 0, 255);
-    Serial.print("A0 = ");
-    Serial.println(analogRead(A0));
-    Serial.print("val = ");
-    Serial.println(val);
+    printf("%s sensor value = %d\n", argv[0], val);
 
     if (val > 90)
     {
 
       //while (1)
       //{
-      digitalWrite(LED_BUILTIN, HIGH);
+      digitalWrite(led_pin, HIGH);
       /*
          Set player to decode stereo mp3. Stream sample rate is set to "auto detect"
          Search for MP3 decoder in "/mnt/sd0/BIN" directory
@@ -188,7 +203,7 @@ static int player_thread(int argc, FAR char *argv[])
         break;
       }
 
-      printf("Play%d!\n", play_id);
+      printf("Play %d!\n", play_id);
 
       /* Play! */
 
@@ -264,6 +279,48 @@ void setup()
   argv1[2] = NULL;
 
   /* Start task */
+  /****************************************************************************
+    from task_create.c:
+
+      This function creates and activates a new task with a specified
+      priority and returns its system-assigned ID.
+
+      The entry address entry is the address of the "main" function of the
+      task.  This function will be called once the C environment has been
+      set up.  The specified function will be called with four arguments.
+      Should the specified routine return, a call to exit() will
+      automatically be made.
+
+      Note that four (and only four) arguments must be passed for the spawned
+      functions.
+
+    Input Parameters:
+      name       - Name of the new task
+      priority   - Priority of the new task
+      stack_size - size (in bytes) of the stack needed
+      entry      - Entry point of a new task
+      arg        - A pointer to an array of input parameters. Up to
+                   CONFIG_MAX_TASK_ARG parameters may be provided.  If fewer
+                   than CONFIG_MAX_TASK_ARG parameters are passed, the list
+                   should be terminated with a NULL argv[] value. If no
+                   parameters are required, argv may be NULL.
+
+    Return Value:
+      Returns the non-zero process ID of the new task or ERROR if memory is
+      insufficient or the task cannot be created.  The errno will be set to
+      indicate the nature of the error (always ENOMEM).
+
+  ****************************************************************************/
+
+  Serial.println("i, pin, led");
+  for (int i = 0; i < 4; i++)
+  {
+    Serial.print(i);
+    Serial.print(", ");
+    Serial.print(pins[i]);
+    Serial.print(", ");
+    Serial.println(leds[i]);
+  }
 
   task_create("player_thread0", 155, 2048, player_thread, (char* const*)argv0);
   //task_create("player_thread1", 155, 2048, player_thread, (char* const*)argv1);
