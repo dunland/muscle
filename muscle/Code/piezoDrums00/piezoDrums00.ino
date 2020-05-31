@@ -1,6 +1,6 @@
 const int noiseFloor = 260; // TODO: create function to assess noiseFloor upon startup
 const int max_val = 762;
-const int globalThreshold = 32;
+const int globalThreshold = 100;
 static const uint8_t pins[] = {A0, A1, A2, A3};
 static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN1, LED_BUILTIN2, LED_BUILTIN3};
 static const uint8_t inputAmount = 3; // that makes 4 input since number 0 is counted as well
@@ -12,7 +12,7 @@ void setup() {
   for (int i = 0; i < inputAmount; i++)
   {
     pinMode(leds[i], OUTPUT);
-    pinMode(pins[i], INPUT);
+    //pinMode(pins[i], INPUT);
   }
 }
 

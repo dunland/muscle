@@ -129,22 +129,22 @@ static int player_thread(int argc, FAR char *argv[])
         //  }
 
         //printf("play_id unformatted = %d\n", play_id);
-        int input_pin, led_pin;
-        int player_id_int = (int)atoi(argv[1]);
+        int input_pin = int(argv[3]);
+        int led_pin = argv[4];
+         printf("%s input pin: %d, led pin: %d\n", argv[0], input_pin, led_pin);
         //printf("player_id_int = %d\n", player_id_int);
 
-        if (player_id_int == 0)
-        {
-                input_pin = pins[0];
-                led_pin = leds[0];
-                printf("%s input pin: %d\n", argv[0], input_pin);
-        }
-        else if (player_id_int == 1)
-        {
-                input_pin = pins[1];
-                led_pin = leds[1];
-                printf("%s input pin: %d\n", argv[0], input_pin);
-        }
+        // if (player_id_int == 0)
+        // {
+        //         input_pin = pins[0];
+        //         led_pin = leds[0];
+        // }
+        // else if (player_id_int == 1)
+        // {
+        //         input_pin = pins[1];
+        //         led_pin = leds[1];
+        //         printf("%s input pin: %d\n", argv[0], input_pin);
+        // }
 
 
         usleep(10);
@@ -271,10 +271,12 @@ void setup()
 
         /* Initialize task parameter. */
 
-        const char *argv0[3];
-        const char *argv1[3];
+        const char *argv0[4];
+        const char *argv1[4];
         char play_no0[4];
         char play_no1[4];
+        int pin = A0;
+        int led = LED_BUILTIN;
 
         snprintf(play_no0, 4, "%d", AS_PLAYER_ID_0);
         snprintf(play_no1, 4, "%d", AS_PLAYER_ID_1);
@@ -282,9 +284,13 @@ void setup()
         argv0[0] = play_no0;
         argv0[1] = PLAY0_FILE_NAME;
         argv0[2] = NULL;
+        argv0[3] = pin; // A0
+        argv0[4] = led; // LED_BUILTIN;
         argv1[0] = play_no1;
         argv1[1] = PLAY1_FILE_NAME;
         argv1[2] = NULL;
+        argv1[3] = 129; // A1
+        argv1[4] = 61; //LED_BUILTIN1;
 
         Serial.println("i, pin, led");
         for (int i = 0; i < 4; i++)
