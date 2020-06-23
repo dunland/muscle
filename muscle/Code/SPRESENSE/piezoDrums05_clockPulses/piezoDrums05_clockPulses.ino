@@ -1,21 +1,22 @@
 /*
    MULTIFUNCTIONAL DRUMS-TO-MIDI-SETUP:
    ------------------------------------
-   v.1.0
+   v.1.0 Setup & Code für Auftritt bei Anachronism in der Schwankhalle am 10.06.2020:
+   - etwas wackelige Bühne
+   - scheinbar viel Überspielen von Standtom auf Becken
+   --> Mögliche Ursachen:
+      --> Mapping von Sensor-Read auf 8-bit reduziert Genauigkeit
+      --> Metallkästchen stromleitend
    ------------------------------------
    June 2020
    by David Unland david[at]unland[dot]eu
    ------------------------------------
-   featuring:
-   global tap tempo by trigger instrument
-   two instruments with note sends (so far: linear from list of phrygian scale notes)
-   one instrument to control notes to be send
    ------------------------------------
    INSTRUMENTS:
-   A0 = cowbell?  = tap tempo trigger
-   A1 = Tom1      = note trigger 1
-   A2 = Tom2      = note trigger 2
-   A3 = Standtom  = note shifter
+   A0 = Hihat     = tap tempo
+   A1 = Crash 1   = change rhythm
+   A2 = Crash 2   = change notes
+   A3 = Standtom  = play a note
 
 */
 
@@ -41,9 +42,9 @@ int vals[numInputs];
 int noiseFloor; // typical values: Arduino = 512, SPRESENSE = 260
 const int max_val = 1023;
 //const int globalThreshold = 30; // typical values: 60-190 for toms (SPRESENSE, 3.3V)
-const int threshold[] = {50, 120, 150, 100}; // hihat, crash1, ride, X
+const int threshold[] = {30, 170, 170, 60}; // hihat, crash1, ride, Standtom
 /*
-   instrument min max übersprache tom
+   instrument, min, max, übersprache tom
    hihat
    crash 1        190   (60)
    ride       60  190   (60)
@@ -52,17 +53,17 @@ const int threshold[] = {50, 120, 150, 100}; // hihat, crash1, ride, X
 
 // -------------------------- tap tempo
 elapsedMillis timeSinceFirstHit;
-int bpm = 120;
-int clock_interval = 500; // that is 120 BPM
+int bpm = 0;
+int clock_interval = 0; // that is 120 BPM
 int tapState = 1; // 0 = none; 1 = waiting for first hit; 2 = waiting for second hit
 // int index; // pointer for lists
 
-// elapsedMillis lastHit_Pin3; // debounce for pin3 (it has an independent function (note shift))
-elapsedMillis timeSinceLastClockSent;
+// elapsedMillis timeSinceLastClockSent;
 elapsedMillis timeSinceLastPulse;
 // elapsedMillis clockCount;
 unsigned long pulseCount = 0;
-// int num_of_taps = 0;
+long clock_sum = 0;
+int num_of_taps = 0;
 
 unsigned long lastHit_Pin[numInputs];
 
@@ -74,11 +75,16 @@ unsigned long lastHit_Pin[numInputs];
 int rhythm_frac[numInputs];
 //boolean invertRhythmDivision[numInputs];
 int notes_list[] = {60, 61, 63, 65, 67, 68, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
+//48, 48, 48, // transition
+//53, 54, 56, 58, 60, 61, 64}; // phrygian mode: {F, Fis, Gis, H, C, Des, Es)
 int note_idx[numInputs]; // instrument-specific pointer for notes
 //int noteState[numInputs]; // 0 = OFF, 1 = ON
 // boolean noteStateChecked = false;
 uint64_t lastNoteSent[numInputs];
 boolean noteSent[numInputs];
+
+int cutoff = 35;
+int cutoff_step = 1;
 
 /* -------------------------------------------------------------------------- */
 /* ---------------------------------- SETUP --------------------------------- */
@@ -102,10 +108,10 @@ void setup() {
   int led_idx = 0;
   for (int n = 0; n < 400; n++)
   {
-    Serial.print(".");
+    // Serial.print(".");
     if (n % 100 == 0)
     {
-      Serial.print("|");
+      // Serial.println("");
       digitalWrite(leds[led_idx], HIGH);
       led_idx++;
     }
@@ -114,7 +120,7 @@ void setup() {
   }
 
   noiseFloor = totalSamples / 400;
-  printf("\nnoiseFloor is at %d\n", noiseFloor);
+  // printf("\nnoiseFloor is at %d\n", noiseFloor);
 
   for (int i = 0; i < 4; i++) // turn LEDs off again
   {
@@ -127,6 +133,7 @@ void setup() {
   // set start notes and rhythms
   note_idx[1] = 0; // C
   note_idx[2] = 3; // F
+  note_idx[3] = 0;
   rhythm_frac[1] = 1; // full note
   rhythm_frac[2] = 2; // half note
   lastNoteSent[1] = 0;
@@ -147,12 +154,6 @@ void loop() {
 
   /* ------------------------------- TAP TEMPO ------------------------------ */
 
-  // -------------------------------------- tap activator
-  //if (pinValue(PIN_TAP_ACTIVATOR) > threshold[i])
-  //{
-  //tapState = 1; // start waiting for tap
-  //}
-
   // -------------------------------------- tap trigger
 
   int val = pinValue(pins[0]);
@@ -169,6 +170,13 @@ void loop() {
     case 1:   // waiting for first hit
       if (val > threshold[0]) // Hihat
       {
+        if (timeSinceFirstHit > 10000)
+        {
+          num_of_taps = 0;
+          clock_sum = 0;
+          // TODO: RHYTHM RESET???????????
+          puts("TAP RESET!\n");
+        }
         timeSinceFirstHit = 0; // start recording interval
         tapState = 2; // next: wait for second hit
         // index = i; // only look at this pin to be tapped again
@@ -181,29 +189,31 @@ void loop() {
       {
         if (timeSinceFirstHit < 2000) // skip tap evaluation when time was too long
         {
-          //if (lastTap < 8000) // new tapping after 8 s
+          //if (timeSinceFirstHit < 10000) // start new timing if 10 s without tapping
           //{
 
           // printf("\n%d: tap 2", index);
-          clock_interval = timeSinceFirstHit;
-          // num_of_taps++;
-          // clock_interval = (clock_interval + timeSinceFirstHit) / num_of_taps
+          // clock_interval = timeSinceFirstHit;
+          num_of_taps++;
+          clock_sum += timeSinceFirstHit;
+          clock_interval = clock_sum / num_of_taps;
           bpm = 60000 / clock_interval;
           tapState = 1;
           // clockCount = 0;
           //}
+
         }
       }
       if (timeSinceFirstHit > 2000) // forget tap if time was too long
       {
         tapState = 1;
-        Serial.println("too long...");
+        // Serial.println("too long...");
       }
       // }
       break;
   }
 
-  printf("%d, %d,\t %d, %d,\t %d, %d, \t%d\n", bpm, clock_interval, notes_list[note_idx[1]], notes_list[note_idx[2]], rhythm_frac[1], rhythm_frac[2], tapState);
+  // printf("bpm: %d\tint: %d\tNotes: %d, %d\tRtm: (%d/%d)\tcut: %d\ttap: %d\n", bpm, clock_interval, notes_list[note_idx[1]], notes_list[note_idx[2]], rhythm_frac[1], rhythm_frac[2], cutoff, tapState);
 
   /* ---------------------------- OTHER TRIGGERS ---------------------------- */
   // Crash 1: increase rhythm fractions
@@ -222,19 +232,37 @@ void loop() {
     lastHit_Pin[2] = millis();
     for (int i = 1; i < 3; i++) // for instruments 1 and 2
     {
+      MIDI.sendNoteOff(notes_list[note_idx[i]], 127, 2);
       note_idx[i] = (note_idx[i] + 1) % 7;
     }
+    MIDI.sendNoteOff(notes_list[note_idx[3]], 127, 2);
+    note_idx[3] = (note_idx[3] + 1) % 3;
   }
 
-  // something
-  // if (pinValue(pins[3]) > threshold[3] && lastHit_Pin[3] > 150)
-  // {
-  //   lastHit_Pin[3] = millis();
-  //   for (int i = 1; i < 3; i++) // for instruments 1 and 2
-  //   {
-  //     note_idx[i] = (note_idx[i] + 1) % 7;
-  //   }
-  // }
+  // Standtom: play note
+  if (pinValue(pins[3]) > threshold[3])
+  {
+    lastHit_Pin[3] = millis();
+    MIDI.sendNoteOn(notes_list[note_idx[3]] + 12, 127, 2);
+  }
+
+  // stop Note from Tom
+  if (millis() >= lastHit_Pin[3] + 30) // notes have length of 10 ms
+  {
+    MIDI.sendNoteOff(notes_list[note_idx[3]] + 12, 127, 2); // sends one octave higher than note[1]
+  }
+
+  // Snare: change Cutoff
+  //if (pinValue(pins[3]) > threshold[3])
+  //{
+  // cutoff = cutoff + 2 * cutoff_step;
+  // if (cutoff >= 99 || cutoff <= 35) cutoff_step = cutoff_step * -1; // change cutoff step direction
+  // MIDI.sendControlChange(74, cutoff, 2);
+  // Serial2.write(0xB0);
+  // Serial2.write(0x4A); // 74
+  // Serial2.write(cutoff, HEX);
+  //}
+
 
   /* -------------------------------- TIME EVENTS --------------------------- */
   //  // -------------------------------------- blink clock LED
@@ -254,53 +282,52 @@ void loop() {
      only one midi clock signal should be send per 24th quarter note
   */
 
-  // if (millis() % (clock_interval / 24) == 0 && !clockSent)
-  //if (millis() % (clock_interval[0] / (6 * 24) == 0 && !clockSent))
-  if (timeSinceLastPulse >= (clock_interval / 32))
+  if (bpm != 0)
   {
-    if (pulseCount % 24 == 0)
+
+    if (timeSinceLastPulse >= (clock_interval / 32))
     {
-      Serial2.write(0xF8);
-      digitalWrite(leds[0], HIGH);
-      timeSinceLastClockSent = 0;
+      if (pulseCount * 3 % 4 == 0)
+      {
+        Serial2.write(0xF8);
+        //digitalWrite(leds[0], HIGH);
+        // timeSinceLastClockSent = 0;
+      }
+
+      if (pulseCount % 32 == 0)
+      {
+        digitalWrite(leds[0], HIGH);
+        lastNoteSent[0] = millis();
+      }
+      if ((pulseCount * rhythm_frac[1]) % 32 == 0)
+      {
+        MIDI.sendNoteOn(notes_list[note_idx[1]], 127, 2);
+        digitalWrite(leds[1], HIGH);
+        lastNoteSent[1] = millis();
+      }
+
+      if ((pulseCount * rhythm_frac[2]) % 32 == 0)
+      {
+        MIDI.sendNoteOn(notes_list[note_idx[2]], 127, 2);
+        digitalWrite(leds[2], HIGH);
+        lastNoteSent[2] = millis();
+      }
+
+      timeSinceLastPulse = 0;
+      pulseCount++;
     }
 
-    if ((pulseCount * rhythm_frac[1]) % 32 == 0)
+    // -------------------------------------- turn notes and LEDs off after 100 ms
+    for (int i = 0; i < numInputs; i++)
     {
-      MIDI.sendNoteOn(notes_list[note_idx[1]], 127, 2);
-      digitalWrite(leds[1], HIGH);
-      lastNoteSent[1] = millis();
+      if (millis() > lastNoteSent[i] + 100)
+      {
+        //puts("2\n");
+        digitalWrite(leds[i], LOW);
+        if (i > 0) MIDI.sendNoteOff(notes_list[note_idx[i]], 127, 2);
+      }
     }
 
-    if ((pulseCount * rhythm_frac[2]) % 32 == 0)
-    {
-      MIDI.sendNoteOn(notes_list[note_idx[2]], 127, 2);
-      digitalWrite(leds[2], HIGH);
-      lastNoteSent[2] = millis();
-    }
-
-    timeSinceLastPulse = 0;
-    pulseCount++;
-  }
-
-  // -------------------------------------- turn notes and LEDs off after 100 ms
-  if (timeSinceLastClockSent > 100)
-  {
-    //puts("2\n");
-    digitalWrite(leds[0], LOW);
-  }
-
-  if (millis() > lastNoteSent[1] + 100)
-  {
-    //puts("2\n");
-    MIDI.sendNoteOff(notes_list[note_idx[1]], 127, 2);
-    digitalWrite(leds[1], LOW);
-  }
-  if (millis() > lastNoteSent[2] + 100)
-  {
-    //puts("2\n");
-    MIDI.sendNoteOff(notes_list[note_idx[2]], 127, 2);
-    digitalWrite(leds[2], LOW);
   }
 
 
