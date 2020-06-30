@@ -1,12 +1,6 @@
 /*
    MULTIFUNCTIONAL DRUMS-TO-MIDI-SETUP:
    ------------------------------------
-   v.1.0 Setup & Code für Auftritt bei Anachronism in der Schwankhalle am 10.06.2020:
-   - etwas wackelige Bühne
-   - scheinbar viel Überspielen von Standtom auf Becken
-   --> Mögliche Ursachen:
-      --> Mapping von Sensor-Read auf 8-bit reduziert Genauigkeit
-      --> Metallkästchen stromleitend
    - nur ganzzahlige Vielfache des Tap Tempos
    ------------------------------------
    June 2020
@@ -24,11 +18,13 @@
 /* -------------------------------------------------------------------------- */
 /* --------------------------------- GLOBAL --------------------------------- */
 /* -------------------------------------------------------------------------- */
-#include <elapsedMillis.h>
-#include <MIDI.h>
+// #include <elapsedMillis.h>
+//#include <MIDI.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
 
 // MIDI_CREATE_DEFAULT_INSTANCE();
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
+//MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
 // -------------------------- pins
 static const uint8_t numInputs = 4;
@@ -36,7 +32,8 @@ static const uint8_t numInputs = 4;
 const int PIN_TAP_ACTIVATOR = A0;
 
 static const uint8_t pins[] = {PIN_TAP_ACTIVATOR, A1, A2, A3};
-static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN1, LED_BUILTIN2, LED_BUILTIN3}; // array when using SPRESENSE
+//static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN1, LED_BUILTIN2, LED_BUILTIN3}; // array when using SPRESENSE
+static const uint8_t leds[] = {13, 13, 13, 13}; // array when using SPRESENSE
 int vals[numInputs];
 
 // -------------------------- sensitivity
@@ -53,14 +50,14 @@ const int threshold[] = {30, 170, 170, 60}; // hihat, crash1, ride, Standtom
 */
 
 // -------------------------- tap tempo
-elapsedMillis timeSinceFirstHit;
+// elapsedMillis timeSinceFirstHit;
 int bpm = 0;
 int clock_interval = 0; // that is 120 BPM
 int tapState = 1; // 0 = none; 1 = waiting for first hit; 2 = waiting for second hit
 // int index; // pointer for lists
 
 // elapsedMillis timeSinceLastClockSent;
-elapsedMillis timeSinceLastPulse;
+// elapsedMillis timeSinceLastPulse;
 // elapsedMillis clockCount;
 unsigned long pulseCount = 0;
 long clock_sum = 0;
@@ -70,22 +67,25 @@ unsigned long lastHit_Pin[numInputs];
 
 /* ----------------------------- MUSICAL PARAMETERS ------------------------- */
 
-// const float rhythm_list[] = {0.03125, 0.04166, 0.0625, 0.0833, 0.0938, 0.125, 0.1667, 0.1875, 0.25, 0.33333, 0.375, 0.5, 0.6667, 0.75, 1, 1.25, 1.3, 1.5, 1.625, 1.6667, 1.75, 1.8125, 1.833, 1.825, 1.9062, 1.9167, 1.9375, 1.95833, 1.96875}; //{1/32, 1/24, 1/16, 1/12, 3/32, 1/8, 1/6, 3/16, 1/4, 1/3, 3/8, 1/2, 2/3, 3/4, 1/1, 5/4, 4/3, 3/2, 9/8, 5/3, 7/4, 19/16, 11/6, 15/8, 49/32, 23/12, 31/16, 47/24, 63/32} ????
-// int rhythm_idx[numInputs]; // instrument-specific pointer for rhythms
-// int rhythm[numInputs];
 int rhythm_frac[numInputs];
-//boolean invertRhythmDivision[numInputs];
 int notes_list[] = {60, 61, 63, 65, 67, 68, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
 //48, 48, 48, // transition
 //53, 54, 56, 58, 60, 61, 64}; // phrygian mode: {F, Fis, Gis, H, C, Des, Es)
 int note_idx[numInputs]; // instrument-specific pointer for notes
-//int noteState[numInputs]; // 0 = OFF, 1 = ON
-// boolean noteStateChecked = false;
 uint64_t lastNoteSent[numInputs];
 boolean noteSent[numInputs];
 
-int cutoff = 35;
-int cutoff_step = 1;
+
+/* -------------------------------------------------------------------------- */
+/* ------------------------------- INTERRUPTS ------------------------------- */
+/* -------------------------------------------------------------------------- */
+
+volatile unsigned int pinCount = 0;
+
+ISR(INT0_vect)
+{
+  pinCount++;
+}
 
 /* -------------------------------------------------------------------------- */
 /* ---------------------------------- SETUP --------------------------------- */
@@ -95,7 +95,7 @@ void setup() {
 
   // Serial2 for UART2 pin on SPRESENSE --> "Serial" can be used for USB communication!
   // Serial2.begin(31250); // required clock rate for midi signals
-  MIDI.begin(MIDI_CHANNEL_OMNI);
+  //MIDI.begin(MIDI_CHANNEL_OMNI);
   Serial.begin(115200);
 
   //--------------------------------------- setup all required pins
@@ -233,10 +233,10 @@ void loop() {
     lastHit_Pin[2] = millis();
     for (int i = 1; i < 3; i++) // for instruments 1 and 2
     {
-      MIDI.sendNoteOff(notes_list[note_idx[i]], 127, 2);
+      // MIDI.sendNoteOff(notes_list[note_idx[i]], 127, 2);
       note_idx[i] = (note_idx[i] + 1) % 7;
     }
-    MIDI.sendNoteOff(notes_list[note_idx[3]], 127, 2);
+    // MIDI.sendNoteOff(notes_list[note_idx[3]], 127, 2);
     note_idx[3] = (note_idx[3] + 1) % 3;
   }
 
@@ -244,13 +244,13 @@ void loop() {
   if (pinValue(pins[3]) > threshold[3])
   {
     lastHit_Pin[3] = millis();
-    MIDI.sendNoteOn(notes_list[note_idx[3]] + 12, 127, 2);
+    // MIDI.sendNoteOn(notes_list[note_idx[3]] + 12, 127, 2);
   }
 
   // stop Note from Tom
   if (millis() >= lastHit_Pin[3] + 30) // notes have length of 10 ms
   {
-    MIDI.sendNoteOff(notes_list[note_idx[3]] + 12, 127, 2); // sends one octave higher than note[1]
+    // MIDI.sendNoteOff(notes_list[note_idx[3]] + 12, 127, 2); // sends one octave higher than note[1]
   }
 
   // Snare: change Cutoff
@@ -304,15 +304,15 @@ void loop() {
       // send MIDI note 1
       if ((pulseCount * rhythm_frac[1]) % 32 == 0)
       {
-        MIDI.sendNoteOn(notes_list[note_idx[1]], 127, 2);
+        // MIDI.sendNoteOn(notes_list[note_idx[1]], 127, 2);
         digitalWrite(leds[1], HIGH);
         lastNoteSent[1] = millis();
       }
-      
+
       // send MIDI note 2
       if ((pulseCount * rhythm_frac[2]) % 32 == 0)
       {
-        MIDI.sendNoteOn(notes_list[note_idx[2]], 127, 2);
+        // MIDI.sendNoteOn(notes_list[note_idx[2]], 127, 2);
         digitalWrite(leds[2], HIGH);
         lastNoteSent[2] = millis();
       }
@@ -328,7 +328,7 @@ void loop() {
       {
         //puts("2\n");
         digitalWrite(leds[i], LOW);
-        if (i > 0) MIDI.sendNoteOff(notes_list[note_idx[i]], 127, 2);
+        // if (i > 0) MIDI.sendNoteOff(notes_list[note_idx[i]], 127, 2);
       }
     }
 
