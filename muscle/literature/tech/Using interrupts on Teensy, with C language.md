@@ -1,12 +1,7 @@
 # Using interrupts on Teensy, with C language
 
 from [https://www.pjrc.com/teensy/interrupts.html](https://www.pjrc.com/teensy/interrupts.html)
-
-The flag bit is set even if interrupts are not used.  Software
-polling can read the flag bit to check if the condition has
-occured, do whatever is necessary, and then reset the flag.
-
-  
+ 
 Interrupts are a hardware feature that allows a special piece of code, called an "interrupt service routine" to be called when a physical condition occurs. Many interrupts are available for conditions such as pins changing, data received, timers overflowing.
 
 Polling Versus Interrupts

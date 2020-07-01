@@ -135,13 +135,13 @@ void setup() {
   note_idx[1] = 0; // C
   note_idx[2] = 3; // F
   note_idx[3] = 0;
-  rhythm_frac[1] = 1; // full note
-  rhythm_frac[2] = 2; // half note
-  lastNoteSent[1] = 0;
-  lastNoteSent[2] = 0;
+  // rhythm_frac[1] = 1; // full note
+  // rhythm_frac[2] = 2; // half note
+  // lastNoteSent[1] = 0;
+  // lastNoteSent[2] = 0;
 
   // clockCount = 0; // let's go!
-  timeSinceLastPulse = 0;
+  // timeSinceLastPulse = 0;
 }
 
 
