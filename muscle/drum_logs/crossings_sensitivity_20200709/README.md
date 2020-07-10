@@ -1,3 +1,50 @@
+# Preparing Sensor Calibration for Snaredrum
+2020-07-09
+
+Four piezomics used with different sensitivities:
+
+1 - 30
+2 - 60
+3 - 90
+4 - 120
+
+and 20 ms delay after lastPinHit to evaluate zero-crossings.
+
+
+
+
+
+sensitivities used in the Code as follows:
+
+in interrupt:
+``` C++
+    if (pinValue(pinNum) > threshold[pinNum])
+    {
+      lastPinActiveTime[pinNum] = millis();
+      crossings[pinNum]++;
+    }
+```
+
+with
+
+``` C++
+
+int pinValue(int pinNumber_in)
+{
+  int pinVal_temp = noiseFloor - analogRead(pinNumber_in); 
+  pinVal_temp = abs(pinVal_temp); // positive values only
+  return pinVal_temp;
+}
+
+```
+
+where `noiseFloor` is average of 400 sensor values taken without any inputs
+
+
+complete Code:
+
+``` C++
+
 IntervalTimer myTimer; // Create an IntervalTimer object
 
 // ----------------------------------- input pins ------------------------------
@@ -137,3 +184,5 @@ int pinValue(int pinNumber_in)
   pinVal_temp = abs(pinVal_temp); // positive values only
   return pinVal_temp;
 }
+
+```

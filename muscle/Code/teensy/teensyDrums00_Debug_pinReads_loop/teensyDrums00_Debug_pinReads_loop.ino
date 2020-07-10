@@ -33,20 +33,35 @@ void loop() {
   unsigned long startMeasuring = micros();
   volatile unsigned int totalMeasurements = 0;
   volatile int val;
+  volatile int vals[numInputs][1000];
+  volatile int totalLoops = 0;
 
   digitalWrite(LED_BUILTIN, HIGH);
 
-  while (micros() < startMeasuring + 1000) // 10 ms of sampling time
+  while (micros() < startMeasuring + 1000) // 1 ms of sampling time
   {
     for (int pinNum = 0; pinNum < numInputs; pinNum++)
     {
-      val = pinValue(pinNum);
+      vals[pinNum][totalLoops] = pinValue(pinNum);
       totalMeasurements++;
     }
+    totalLoops++;
   }
-  Serial.println(totalMeasurements);
-  Serial.println(" taken in 1000 microseconds");
+  Serial.print(totalMeasurements);
+  Serial.println(" readings taken in 1000 microseconds. Values:");
   digitalWrite(LED_BUILTIN, LOW);
+  
+  for (int j = 0; j < numInputs; j++)
+  {
+    for (int n = 0; n < totalLoops; n++)
+    {
+      Serial.print(vals[j][n]);
+      Serial.print(" ");
+    }
+    Serial.println("");
+  }
+  
+  Serial.println("");
   delay(10);
 }
 

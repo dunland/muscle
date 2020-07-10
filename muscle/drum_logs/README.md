@@ -36,6 +36,7 @@ while (micros() < startMeasuring + 1000) // 1 ms of sampling time
   totalLoops++;
 }
 ```
+
 (from teensyDrums00_Debug_pinReads_loop.ino)
 
 results in:
@@ -67,11 +68,30 @@ results in:
 
 Instrument	| Duration	| significant zero-crossings
 ----------------|---------------|----------------------------
-Snare		|
-Tom 1		|
-Tom 2		|
-Standtom	|
-Hihat		|
-Ride		|
-Crash 1		|
-Crash 2		|
+Snare		|		|
+Tom 1		|		|
+Tom 2		|		|
+Standtom	|		|
+Hihat		|		|
+Ride		|		|
+Crash 1		|		|
+Crash 2		|		|
+
+
+### Multi-sample-taking
+
+use 4-8 piezos at one instrument at the same time to create a multidimensional multi-variant chart to plot:  
+x = time  
+y = piezos 1 - 8  
+
+**1. take sensor values every 1 ms and plot directly**  
+**2. plot only crossings taken**  
+and vary:  
+sensor threshold -> will result in different counts of zero-crossings  
+release time  
+
+plot:  
+millis	pinNum	crossings
+
+### evaluate timing precision for multiple pins
+...but how?
