@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/home/dav/.arduino15/packages/SPRESENSE/tools/**",
+                "/home/dav/.arduino15/packages/SPRESENSE/hardware/spresense/1.5.1/**",
+                "${workspaceFolder}/**",
+                "/home/dav/.arduino15/packages/SPRESENSE/hardware/spresense/2.0.1/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "clang-x64",
+            "forcedInclude": []
+        }
+    ],
+    "version": 4
+}

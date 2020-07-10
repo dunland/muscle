@@ -1,0 +1,47 @@
+#N canvas 4 61 450 361 10;
+#X obj 124 230 timer;
+#X obj 192 220 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 212 220 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 232 220 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 199 151 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X floatatom 124 250 5 0 0 0 - - -, f 5;
+#X obj 190 185 sel 1 0;
+#X obj 117 9 inlet;
+#X obj 123 297 outlet;
+#X text 124 313 number out;
+#X obj 213 272 outlet;
+#X text 214 288 bang out;
+#X obj 156 94 spigot;
+#X msg 257 51 1;
+#X msg 229 50 0;
+#X obj 231 77 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X obj 279 24 loadbang;
+#X text 225 4 DEBOUNCER;
+#X text 9 5 TAP TEMPO;
+#X text 219 149 TAP;
+#X text 11 197 TODO: TIME LIMITER;
+#X obj 212 23 delay 50;
+#X connect 0 0 5 0;
+#X connect 1 0 10 0;
+#X connect 2 0 10 0;
+#X connect 4 0 6 0;
+#X connect 5 0 8 0;
+#X connect 6 0 1 0;
+#X connect 6 0 0 0;
+#X connect 6 1 2 0;
+#X connect 6 1 0 1;
+#X connect 6 2 3 0;
+#X connect 7 0 12 0;
+#X connect 7 0 14 0;
+#X connect 7 0 21 0;
+#X connect 12 0 4 0;
+#X connect 13 0 15 0;
+#X connect 14 0 15 0;
+#X connect 15 0 12 1;
+#X connect 16 0 13 0;
+#X connect 21 0 13 0;

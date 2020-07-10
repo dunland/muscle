@@ -3,15 +3,18 @@
 
 Four piezomics used with different sensitivities:
 
-1 - 30
-2 - 60
-3 - 90
-4 - 120
+1 - 30  
+2 - 60  
+3 - 90  
+4 - 120  
 
-and 20 ms delay after lastPinHit to evaluate zero-crossings.
+**20 ms delay after lastPinHit to evaluate zero-crossings:**
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/F3zaDZ7aYvg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
+**50 ms delay after lastPinHit:**
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/bO6Gt8GH-C8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
 sensitivities used in the Code as follows:
