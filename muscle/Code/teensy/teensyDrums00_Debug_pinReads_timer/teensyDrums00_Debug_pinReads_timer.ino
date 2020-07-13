@@ -61,14 +61,14 @@ void setup() {
   myTimer.begin(samplePin0, 1000);  // sample pin every 1 millisecond
 }
 
-/* -------------------------------------------------------------------------- */
-/* ---------------------------------- TIMER --------------------------------- */
-/* -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------- */
+/* ------------------------------- TIMER ------------------------------- */
+/* --------------------------------------------------------------------- */
 void samplePin0()
 // functions called by IntervalTimer should be short, run as quickly as
 // possible, and should avoid calling other functions if possible.
 {
-  for (int pinNum = 0; pinNum < numInputs; pinNum++)
+  for (int pinNum = 0; pinNum < numInputs; pinNum++) // TODO: must pinNum also be volatile?
   {
     if (pinValue(pinNum) > threshold[pinNum])
     {
@@ -78,20 +78,16 @@ void samplePin0()
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* ----------------------------------- LOOP --------------------------------- */
-/* -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------- */
+/* --------------------------------- LOOP ------------------------------ */
+/* --------------------------------------------------------------------- */
 
 void loop() {
   static int crossingsCopy[numInputs];
   static unsigned long lastPinActiveTimeCopy[numInputs];
   static int lastValue[numInputs]; // for LED toggle
   static boolean toggleState = false; // for LED toggle
-  static int n = 0;
-  static unsigned long lastMilliSecond;
-
-  //if (lastMilliSecond != millis()) Serial.println(millis());
-  //lastMilliSecond = millis();
+  // static int n = 0; // for loop debugging
 
   for (int i = 0; i < numInputs; i++)
   {
