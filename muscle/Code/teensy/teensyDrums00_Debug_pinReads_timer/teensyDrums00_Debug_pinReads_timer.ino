@@ -106,7 +106,7 @@ void loop() {
       if (crossingsCopy[i] >= min_crossings_for_signature[i])
       {
         //Serial.println(n++);
-        if (crossingsCopy[i] != lastValue) toggleState = !toggleState;
+        if (crossingsCopy[i] != lastValue[i]) toggleState = !toggleState;
         digitalWrite(LED_BUILTIN, toggleState);
         Serial.print(millis());
         Serial.print("\t");

@@ -1,15 +1,7 @@
 /*
    MULTIFUNCTIONAL DRUMS-TO-MIDI-SETUP:
    ------------------------------------
-   v.1.0 Setup & Code für Auftritt bei Anachronism in der Schwankhalle am 10.06.2020:
-   - etwas wackelige Bühne
-   - scheinbar viel Überspielen von Standtom auf Becken
-   --> Mögliche Ursachen:
-      --> Mapping von Sensor-Read auf 8-bit reduziert Genauigkeit
-      --> Metallkästchen stromleitend
-   - nur ganzzahlige Vielfache des Tap Tempos
-   ------------------------------------
-   June 2020
+   14.07.2020
    by David Unland david[at]unland[dot]eu
    ------------------------------------
    ------------------------------------
@@ -21,9 +13,9 @@
 
 */
 
-/* -------------------------------------------------------------------------- */
-/* --------------------------------- GLOBAL --------------------------------- */
-/* -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------- */
+/* ------------------------------- GLOBAL ------------------------------ */
+/* --------------------------------------------------------------------- */
 // #include <MIDI.h>
 
 // MIDI_CREATE_DEFAULT_INSTANCE();
@@ -40,11 +32,19 @@ int vals[numInputs];
 // ------------------ variables for interrupt timers ------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
 IntervalTimer masterClock; // 1 bar
-IntervalTimer clockPulse; // 1/32 bar
 volatile int crossings[numInputs];
 volatile unsigned long lastPinActiveTime[numInputs];
+volatile unsigned long firstPinActiveTime[numInputs];
 
-// -------------------------- sensitivity
+// ------------------ timing and rhythm tracking ------------------
+int current_beat_pos; // always stores the current position in the beat
+
+// int bpm = 0;
+// int tapInterval = 500; // 0.5 s per beat for 120 BPM
+// int tapState = 1; // 0 = none; 1 = waiting for first hit; 2 = waiting for second hit
+
+
+// ------------- sensitivity and instrument calibration -----------------
 int noiseFloor; // typical values: Arduino (5V) = 512, SPRESENSE (3.3V) = 260
 const int max_val = 1023;
 //const int globalThreshold = 30; // typical values: 60-190 for toms (SPRESENSE, 3.3V)
@@ -52,27 +52,15 @@ const int max_val = 1023;
 const int threshold[] = {60, 60, 60, 60, 60, 60, 60, 60};
 int globalDelayAfterStroke = 50; // 50 ms TODO: assess best timing
 
-// -------------------------- tap tempo
-int bpm = 0;
-// int clock_interval = 0;
-int tapInterval = 500; // 0.5 s per beat for 120 BPM
-int tapState = 1; // 0 = none; 1 = waiting for first hit; 2 = waiting for second hit
-// int index; // pointer for lists
-
-// unsigned long pulseCount = 0;
-// long clock_sum = 0;
-// int num_of_taps = 0;
-
-// unsigned long lastHit_Pin[numInputs];
-
-/* ----------------------------- MUSICAL PARAMETERS ------------------------- */
+/* --------------------------- MUSICAL PARAMETERS ---------------------- */
 
 // const float rhythm_list[] = {0.03125, 0.04166, 0.0625, 0.0833, 0.0938, 0.125, 0.1667, 0.1875, 0.25, 0.33333, 0.375, 0.5, 0.6667, 0.75, 1, 1.25, 1.3, 1.5, 1.625, 1.6667, 1.75, 1.8125, 1.833, 1.825, 1.9062, 1.9167, 1.9375, 1.95833, 1.96875}; //{1/32, 1/24, 1/16, 1/12, 3/32, 1/8, 1/6, 3/16, 1/4, 1/3, 3/8, 1/2, 2/3, 3/4, 1/1, 5/4, 4/3, 3/2, 9/8, 5/3, 7/4, 19/16, 11/6, 15/8, 49/32, 23/12, 31/16, 47/24, 63/32} ????
-int rhythm_frac[numInputs];
+// int rhythm_frac[numInputs];
+boolean rhythm_slot[numInputs][32];
 int notes_list[] = {60, 61, 63, 65, 67, 68, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
 int note_idx[numInputs]; // instrument-specific pointer for notes
-uint64_t lastNoteSent[numInputs];
-boolean noteSent[numInputs];
+// uint64_t lastNoteSent[numInputs];
+// boolean noteSent[numInputs];
 
 /* --------------------------------------------------------------------- */
 /* ---------------------------------- SETUP ---------------------------- */
@@ -129,7 +117,7 @@ void setup() {
 
   // ------------------------------ begin timer --------------------------------
   pinMonitor.begin(samplePins, 1000);  // sample pin every 1 millisecond
-  masterClock.begin(masterClockTimer, tapInterval*(32*5)); // 1 bar initially at 120 bpm = 2 sec
+  masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds
 }
 
 /* --------------------------------------------------------------------- */
@@ -142,225 +130,84 @@ void samplePins()
   {
     if (pinValue(pinNum) > threshold[pinNum])
     {
+      if (crossings[pinNum] < 1) firstPinActiveTime[pinNum] = millis();
       lastPinActiveTime[pinNum] = millis();
       crossings[pinNum]++;
     }
   } 
 }
 
-volatile unsigned long masterClockCount = 0;
+volatile unsigned long masterClockCount = 0; // 4*32 = 128 masterClockCount per cycle
 volatile unsigned long beatCount = 0;
-volatile int bar_step; // 0-32
+// volatile int bar_step; // 0-32
 volatile int currentStep; // 0-32
+int nextStep = 0;  // will be reset when timer restarts
 
 void masterClockTimer()
 {
   /*
   * timing              fraction          bar @ 120 BPM    bar @ 180 BPM
   * 1 bar             = 1               = 2 s       = 1.3 s
-  * 1 clockPulse      = 1/32 bar        = 62.5 ms   = 41.7 ms 
+  * 1 beatCount       = 1/32 bar        = 62.5 ms   = 41.7 ms 
   * stroke precision  = 1/4 clockPulse  = 15.625 ms = 10.4166 ms
   */
 
  masterClockCount++;
 
- if (masterClockCount % (32*5) == 0)
+ if (masterClockCount % (32*4) == 0)
  {
    beatCount++;
  }
 
-/*
-// TODO: take care of this!!
-  bar_step = beatCount % 32;
-  if (beatCount >= bar_step - 2 && beatCount <= bar_step + 2)
+  // evaluate current position of beat in bar for stroke precision
+  if ((masterClockCount % 128) >= nextStep - 2)
   {
-    currentStep = bar_step;
+    currentStep = nextStep;
+    nextStep += 4;
   }
-*/
+
 }
 
 /* --------------------------------------------------------------------- */
 /* ------------------------------- LOOP -------------------------------- */
 /* --------------------------------------------------------------------- */
 
-void loop() {
-
-  assessPins();
-  executePinActions();
-
-  /* ---------------------------- TAP TEMPO ---------------------------- */
-  // ---------------------------- tap trigger
-
-  /* int val = pinValue(pins[0]);
-  switch (tapState) {
-    //    case 0: // this is for activation of tap tempo listen
-    //      // for (int i = 0; i < numInputs; i++)
-    //      // {
-    //        // printf("\nid= %d\t interval= %d\t bpm= %d", i, clock_interval[i], bpm[i]);
-    //      // }
-    //      // puts("\n");
-    //      tapState = 1;
-    //      break;
-
-    case 1:   // waiting for first hit
-      if (val > threshold[0]) // Hihat
-      {
-        if (timeSinceFirstHit > 10000)
-        {
-          num_of_taps = 0;
-          clock_sum = 0;
-          // TODO: RHYTHM RESET???????????
-          puts("TAP RESET!\n");
-        }
-        timeSinceFirstHit = 0; // start recording interval
-        tapState = 2; // next: wait for second hit
-        // index = i; // only look at this pin to be tapped again
-        // puts("%d: tap 1 \n");
-      }
-      break;
-
-    case 2:   // waiting for second hit
-      if (val > threshold[0] && timeSinceFirstHit > 300)
-      {
-        if (timeSinceFirstHit < 2000) // skip tap evaluation when time was too long
-        {
-          //if (timeSinceFirstHit < 10000) // start new timing if 10 s without tapping
-          //{
-
-          // printf("\n%d: tap 2", index);
-          // clock_interval = timeSinceFirstHit;
-          num_of_taps++;
-          clock_sum += timeSinceFirstHit;
-          clock_interval = clock_sum / num_of_taps;
-          bpm = 60000 / clock_interval;
-          tapState = 1;
-          // clockCount = 0;
-          //}
-
-        }
-      }
-      if (timeSinceFirstHit > 2000) // forget tap if time was too long
-      {
-        tapState = 1;
-        // Serial.println("too long...");
-      }
-      // }
-      break;
-  }
-
-*/
-
-  /* ------------------------- OTHER TRIGGERS -------------------------- */
-  // Crash 1: increase rhythm fractions
-  /*
-  if (pinValue(pins[1]) > threshold[1] && millis() >= (lastHit_Pin[1] + 1000))
+void loop() 
+{
+  for (int i = 0; i < numInputs; i++)
   {
-    lastHit_Pin[1] = millis();
-    for (int i = 1; i < 3; i++) // for instruments 1 and 2
+    if (stroke_detected(pins[i])) // evaluates pins for activity repeatedly
     {
-      rhythm_frac[i]++;
-    }
-  }
-
-  // Crash 2: increase note pointer
-  if (pinValue(pins[2]) > threshold[2] && millis() >= (lastHit_Pin[2] + 1000))
-  {
-    lastHit_Pin[2] = millis();
-    for (int i = 1; i < 3; i++) // for instruments 1 and 2
-    {
-      MIDI.sendNoteOff(notes_list[note_idx[i]], 127, 2);
-      note_idx[i] = (note_idx[i] + 1) % 7;
-    }
-    MIDI.sendNoteOff(notes_list[note_idx[3]], 127, 2);
-    note_idx[3] = (note_idx[3] + 1) % 3;
-  }
-
-  // Standtom: play note
-  if (pinValue(pins[3]) > threshold[3])
-  {
-    lastHit_Pin[3] = millis();
-    MIDI.sendNoteOn(notes_list[note_idx[3]] + 12, 127, 2);
-  }
-
-  // stop Note from Tom
-  if (millis() >= lastHit_Pin[3] + 30) // notes have length of 10 ms
-  {
-    MIDI.sendNoteOff(notes_list[note_idx[3]] + 12, 127, 2); // sends one octave higher than note[1]
-  }
-  */
-
-  /* ----------------------------- TIME EVENTS ------------------------- */
-  //  // -------------------------------------- blink clock LED
-  //
-  // if (millis() % clock_interval < 100) // turns LED on for 100 ms
-  // {
-  //   digitalWrite(leds[0], HIGH);
-  // }
-  // else
-  // {
-  //   digitalWrite(leds[0], LOW);
-  // }
-
-  // -------------------------------------- MIDI Clock Sync
-  /* MIDI Clock events are sent at a rate of 24 pulses per quarter note
-     one tap beat equals one quarter note
-     only one midi clock signal should be send per 24th quarter note
-  */
-
-  /*
-  // -------------------------------------- original pulseCount Code:
-  if (bpm != 0) // do this only if an initial BPM (tap tempo) has been triggered
-  {
-
-    if (timeSinceLastPulse >= (clock_interval / 32))
-    {
-      // send MIDI-Clock
-      if (pulseCount * 3 % 4 == 0) // 24 is 3/4 of 32
-      {
-        Serial2.write(0xF8); // 0xF8 = 11110000 = dataByte for MIDI Timing Clock Realtime Message (https://www.midi.org/specifications-old/item/table-1-summary-of-midi-message)
-      }
-
-      // blink Tap Tempo
-      if (pulseCount % 32 == 0)
-      {
-        digitalWrite(leds[0], HIGH);
-        lastNoteSent[0] = millis();
-      }
-
-      // send MIDI note 1
-      if ((pulseCount * rhythm_frac[1]) % 32 == 0)
-      {
-        MIDI.sendNoteOn(notes_list[note_idx[1]], 127, 2);
-        digitalWrite(leds[1], HIGH);
-        lastNoteSent[1] = millis();
-      }
-      
-      // send MIDI note 2
-      if ((pulseCount * rhythm_frac[2]) % 32 == 0)
-      {
-        MIDI.sendNoteOn(notes_list[note_idx[2]], 127, 2);
-        digitalWrite(leds[2], HIGH);
-        lastNoteSent[2] = millis();
-      }
-
-      timeSinceLastPulse = 0;
-      pulseCount++;
+      considerPinAction(pins[i]); // what to do? tapTempo? first oder second hit? rhythmical coded triggers?
     }
 
-    // -------------------------------------- turn notes and LEDs off after 100 ms
+    executePinAction(pins[i], pinAction); // actually perform the action...
+  }
+
+  // timed action:
+  static int last_beat_pos = 0;
+
+  noInterrupts();
+  current_beat_pos = beatCount % 32;
+  interrupts();
+
+  if (current_beat_pos != last_beat_pos)
+  {
     for (int i = 0; i < numInputs; i++)
     {
-      if (millis() > lastNoteSent[i] + 100)
+      if (rhythm_slot[pins[i]][current_beat_pos] == true)
       {
-        //puts("2\n");
-        digitalWrite(leds[i], LOW);
-        if (i > 0) MIDI.sendNoteOff(notes_list[note_idx[i]], 127, 2);
+        /* perform action, e.g. send MIDI note */
       }
     }
-
   }
-  */
+  current_beat_pos = last_beat_pos;
+
 }
+
+/* --------------------------------------------------------------------- */
+/* ----------------------------- FUNCTIONS ----------------------------- */
+/* --------------------------------------------------------------------- */
 
 int pinValue(int pinNumber_in)
 {
@@ -370,25 +217,30 @@ int pinValue(int pinNumber_in)
   return pinVal_temp;
 }
 
-void assessPins()
+boolean stroke_detected(int assess_pin)
 {
   static int crossingsCopy[numInputs];
   static unsigned long lastPinActiveTimeCopy[numInputs];
+  static unsigned long firstPinActiveTimeCopy[numInputs];
+  static int lastValue[numInputs]; // for LED toggle
+  static boolean toggleState = false; // for LED toggle
 
-  for (int i = 0; i < numInputs; i++)
-  {
+  // for (int i = 0; i < numInputs; i++)
+  // {
     noInterrupts();
-    lastPinActiveTimeCopy[i] = lastPinActiveTime[i];
+    lastPinActiveTimeCopy[assess_pin] = lastPinActiveTime[assess_pin];
+    firstPinActiveTimeCopy[assess_pin] = firstPinActiveTime[assess_pin];
     interrupts();
 
-    if (millis() > lastPinActiveTimeCopy[i] + globalDelayAfterStroke) // get crossings only X ms after last hit
+    // if (millis() > lastPinActiveTimeCopy[assess_pin] + globalDelayAfterStroke) // get crossings only X ms after last hit
+    if (millis() > firstPinActiveTimeCopy[assess_pin] + globalDelayAfterStroke) // get crossings only X ms after first hit ??
     {
       noInterrupts();
-      crossingsCopy[i] = crossings[i];
-      crossings[i] = 0;
+      crossingsCopy[assess_pin] = crossings[assess_pin];
+      crossings[assess_pin] = 0;
       interrupts();
 
-      if (crossingsCopy[i] >= min_crossings_for_signature[i])
+      if (crossingsCopy[assess_pin] >= min_crossings_for_signature[assess_pin])
       {
 
         /* STROKE DETECTED. EXECUTE EITHER FIRST OR SECOND HIT ACTION 
@@ -396,24 +248,78 @@ void assessPins()
         */
 
         // Serial output and LED blink:
-        if (crossingsCopy[i] != lastValue) toggleState = !toggleState;
+        if (crossingsCopy[assess_pin] != lastValue[assess_pin]) toggleState = !toggleState;
         digitalWrite(LED_BUILTIN, toggleState);
         Serial.print(millis());
         Serial.print("\t");
-        Serial.print(pins[i]);
+        Serial.print(pins[assess_pin]);
         Serial.print("\t");
-        Serial.print(crossingsCopy[i]);
+        Serial.print(crossingsCopy[assess_pin]);
         Serial.print("\t");
-        Serial.println(threshold[i]);
+        Serial.println(threshold[assess_pin]);
       }
-      lastValue[i] = crossingsCopy[i];
+      lastValue[assess_pin] = crossingsCopy[assess_pin];
+      return true;
     }
-  }
+    else
+    {
+      {
+        return false;
+      }
+    }
+    
+  // }
 }
 
-void executePinActions()
+void considerPinAction(int considered_pin)
 {
+  static int pinTapAmount[numInputs];
+  static int firstHitTime[numInputs];
+  static int secondHitTime[numInputs];
   /* e.g. firstHit --> store current clockPulse
    * secondHit --> store current clockPulse, get time difference
    */
+
+  // relative clock tapping:
+  if (pinTapAmount[considered_pin] == 1)
+  {
+    noInterrupts();
+    firstHitTime[considered_pin] = currentStep;
+    interrupts();
+    // TODO: fill rhythm_slot[action_pin][current_beat_pos] ? 
+
+  }
+  else if (pinTapAmount[considered_pin] == 2)
+  {
+    noInterrupts();
+    secondHitTime[considered_pin] = currentStep;
+    interrupts();
+    // TODO: fill rhythm_slot[action_pin][current_beat_pos] ? 
+    
+    // TODO: diff = secondHitTime[considered_pin] - firstHitTime[considered_pin];
+  }
+
+  // poly-rhythmic figures here?
+}
+
+void executePinAction(int action_pin, int action)
+{
+
+  switch (action)
+  {
+  case 0:
+    /* code
+     * fill rhythm_slot[action_pin][current_beat_pos] ?
+     */
+    break;
+
+  case 1:
+    /* code
+     * fill rhythm_slot[action_pin][current_beat_pos] ?
+     */
+    break;
+  
+  default:
+    break;
+  }
 }
