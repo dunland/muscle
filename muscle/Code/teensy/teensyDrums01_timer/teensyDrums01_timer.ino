@@ -20,14 +20,10 @@
 
 // MIDI_CREATE_DEFAULT_INSTANCE();
 // MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
-// ------------------------- Debug variables --------------------------
 
-boolean responsiveCalibration = false;
-boolean printStrokes = true;
-boolean printNormalizedValues_ = false;
 
 // ----------------------------- pins ---------------------------------
-static const uint8_t numInputs = 4;
+static const uint8_t numInputs = 5;
 static const uint8_t pins[] = {A0, A1, A2, A3, A4, A5, A6, A7};
 const int SNARE = 0;
 const int HIHAT = 1;
@@ -40,6 +36,12 @@ const int CRASH2 = 7;
 const int KICK = 4;
 // static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN1, LED_BUILTIN2, LED_BUILTIN3}; // array when using SPRESENSE
 static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN};
+
+// ------------------------- Debug variables --------------------------
+boolean responsiveCalibration = false;
+boolean printStrokes = true;
+boolean printNormalizedValues_ = false;
+String output_string[numInputs];
 
 // ------------------ variables for interrupt timers ------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
@@ -61,8 +63,8 @@ int tapInterval = 500; // 0.5 s per beat for 120 BPM
 int noiseFloor[numInputs]; // typical values: Arduino (5V) = 512, SPRESENSE (3.3V) = 260
 const int max_val = 1023;
 //const int globalThreshold = 30; // typical values: 60-190 for toms (SPRESENSE, 3.3V)
-const int threshold[] = {110, 90, 400, 400, 60, 60, 60, 60}; // minimum peak from noiseFloor to be counted
-int min_counts_for_signature[] = {15, 20, 12, 40, 1, 1, 1, 1}; // characteristic instrument signatures; 0:snare, 1:hihat, 2:tom1, 3:Standtom
+const int threshold[] = {110, 90, 400, 400, 200, 60, 60, 60}; // minimum peak from noiseFloor to be counted
+int min_counts_for_signature[] = {15, 20, 12, 40, 10, 1, 1, 1}; // characteristic instrument signatures; 0:snare, 1:hihat, 2:tom1, 3:Standtom
 int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each instrument
 
 /* --------------------------- MUSICAL PARAMETERS ---------------------- */
@@ -70,7 +72,7 @@ int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each inst
 boolean rhythm_slot[numInputs][32];
 int notes_list[] = {60, 61, 63, 65, 67, 68, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
 int note_idx[numInputs]; // instrument-specific pointer for notes
-int pinAction[] = {1, 1, 1, 1};
+int pinAction[] = {1, 1, 1, 1, 1, 1, 1, 1};
 /* 0 = tapTempo
    1 = binary beat logger (print beat)
    2 = toggle rhythm_slot
@@ -131,7 +133,7 @@ void setup() {
   for (int i = 0; i < numInputs; i++) // turn LEDs off again
   {
     digitalWrite(leds[i], LOW);
-    // noteSent[i] = false;
+    output_string[i] = "\t";
   }
 
   // --------------------------------------- setup initial values
@@ -201,7 +203,7 @@ void masterClockTimer()
 
 void loop()
 {
-  static String output_string = "";
+  
   // ------------------------- debug area -----------------------------
   printNormalizedValues(printNormalizedValues_);
 
@@ -245,15 +247,15 @@ void loop()
             //Serial.print("\t");
             //Serial.print(countsCopy[i]);
             //Serial.print("\t");
-            if (i == HIHAT) output_string += "\tx\t"; // Hi-Hat
-            if (i == KICK) output_string += "\t_\t"; // Kickdrum
-            if (i == SNARE) output_string +="\t-\t"; // Snaredrum
-            if (i == TOM1) output_string +="\t°\t"; // Tom 1
-            if (i == TOM2) output_string +="\to\t"; // Tom 2
-            if (i == STANDTOM) output_string +="\tO\t"; // Standtom
-            if (i == RIDE) output_string +="\txx\t"; // Ride
-            if (i == CRASH1) output_string +="\tX\t"; // Crash
-            if (i == CRASH2) output_string +="\tXX\t"; // Crash
+            if (i == HIHAT) output_string[0] += "x\t"; // Hi-Hat
+            if (i == KICK) output_string[2] += "※\t"; // Kickdrum
+            if (i == SNARE) output_string[1] +="᠅\t"; // Snaredrum
+            if (i == TOM1) output_string[3] +="°\t"; // Tom 1
+            if (i == TOM2) output_string[i] +="o\t"; // Tom 2
+            if (i == STANDTOM) output_string[4] +="O\t"; // Standtom
+            if (i == RIDE) output_string[i] +="xx\t"; // Ride
+            if (i == CRASH1) output_string[i] +="X\t"; // Crash
+            if (i == CRASH2) output_string[i] +="XX\t"; // Crash
             // Serial.println("");
           }
           break;
@@ -291,8 +293,12 @@ void loop()
     Serial.print(millis());
     Serial.print("\t");
     Serial.print(current_beat_pos);
-    Serial.println(output_string);
-    output_string = "";
+    for (int i = 0; i< numInputs; i++)
+    {
+      Serial.print(output_string[i]);
+      output_string[i] = "\t";
+    }
+    Serial.println("");
   }
   last_beat_pos = current_beat_pos;
 
