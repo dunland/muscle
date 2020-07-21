@@ -27,7 +27,7 @@ boolean printStrokes = true;
 boolean printNormalizedValues_ = false;
 
 // ----------------------------- pins ---------------------------------
-static const uint8_t numInputs = 5;
+static const uint8_t numInputs = 4;
 static const uint8_t pins[] = {A0, A1, A2, A3, A4, A5, A6, A7};
 const int SNARE = 0;
 const int HIHAT = 1;
@@ -49,6 +49,7 @@ volatile unsigned long lastPinActiveTime[numInputs];
 volatile unsigned long firstPinActiveTime[numInputs];
 
 // ------------------ timing and rhythm tracking ------------------
+int countsCopy[numInputs];
 int current_beat_pos; // always stores the current position in the beat
 
 // int bpm = 0;
@@ -165,7 +166,7 @@ volatile unsigned long masterClockCount = 0; // 4*32 = 128 masterClockCount per 
 volatile unsigned long beatCount = 0;
 // volatile int bar_step; // 0-32
 volatile int currentStep; // 0-32
-int nextStep = 0;  // will be reset when timer restarts
+int next_beatCount = 0;  // will be reset when timer restarts
 
 void masterClockTimer()
 {
@@ -173,24 +174,24 @@ void masterClockTimer()
     timing              fraction          bar @ 120 BPM    bar @ 180 BPM
     1 bar             = 1               = 2 s       | 1.3 s
     1 beatCount       = 1/32 bar        = 62.5 ms   | 41.7 ms
-    stroke precision  = 1/4 clockPulse  = 15.625 ms | 10.4166 ms
+    stroke precision  = 1/4 beatCount   = 15.625 ms | 10.4166 ms
   */
 
-  /*
+  
     masterClockCount++;
 
-    if (masterClockCount % (32 * 4) == 0)
+    // ------------ 1/32 increase in 4 full precisionCounts -----------
+    if (masterClockCount % 4 == 0)
     {
-      beatCount++;
+      beatCount++; // will rise infinitely
     }
 
     // evaluate current position of beat in bar for stroke precision
-    if ((masterClockCount % 128) >= nextStep - 2)
+    if ((masterClockCount % 4) >= next_beatCount - 2)
     {
-      currentStep = nextStep;
-      nextStep += 4;
+      currentStep = next_beatCount;
+      next_beatCount += 4;
     }
-  */
 
 }
 
@@ -200,6 +201,7 @@ void masterClockTimer()
 
 void loop()
 {
+  static String output_string = "";
   // ------------------------- debug area -----------------------------
   printNormalizedValues(printNormalizedValues_);
 
@@ -239,18 +241,20 @@ void loop()
         case 1: // --- monitor: just print what is being played. ------
           if (printStrokes)
           {
-            //            Serial.print(millis());
-            //            Serial.print("\t");
-            //            if (i == HIHAT) Serial.print("x\t"); // Hi-Hat
-            //            if (i == KICK) Serial.print("_\t"); // Kickdrum
-            //            if (i == SNARE) Serial.print("-\t"); // Snaredrum
-            //            if (i == TOM1) Serial.print("°\t"); // Tom 1
-            //            if (i == TOM2) Serial.print("o\t"); // Tom 2
-            //            if (i == STANDTOM) Serial.print("O\t"); // Standtom
-            //            if (i == RIDE) Serial.print("xx\t"); // Ride
-            //            if (i == CRASH1) Serial.print("X\t"); // Crash
-            //            if (i == CRASH2) Serial.print("XX\t"); // Crash
-            //            Serial.println("");
+            //Serial.print(pins[i]);
+            //Serial.print("\t");
+            //Serial.print(countsCopy[i]);
+            //Serial.print("\t");
+            if (i == HIHAT) output_string += "\tx\t"; // Hi-Hat
+            if (i == KICK) output_string += "\t_\t"; // Kickdrum
+            if (i == SNARE) output_string +="\t-\t"; // Snaredrum
+            if (i == TOM1) output_string +="\t°\t"; // Tom 1
+            if (i == TOM2) output_string +="\to\t"; // Tom 2
+            if (i == STANDTOM) output_string +="\tO\t"; // Standtom
+            if (i == RIDE) output_string +="\txx\t"; // Ride
+            if (i == CRASH1) output_string +="\tX\t"; // Crash
+            if (i == CRASH2) output_string +="\tXX\t"; // Crash
+            // Serial.println("");
           }
           break;
 
@@ -266,24 +270,31 @@ void loop()
 
   }
   // timed action:
-  // static int last_beat_pos = 0;
+  static int last_beat_pos = 0;
+  static boolean toggleLED = true;
 
-  // noInterrupts();
-  // current_beat_pos = beatCount % 32;
-  // interrupts();
+  noInterrupts();
+  current_beat_pos = beatCount % 32; // beatCount increases infinitely
+  interrupts();
 
-  // if (current_beat_pos != last_beat_pos)
-  // {
-  //   for (int i = 0; i < numInputs; i++)
-  //   {
-  //     if (rhythm_slot[pins[i]][current_beat_pos] == true)
-  //     {
-  //       /* perform action, e.g. send MIDI note */
-  //     }
-  //   }
-  //   //Serial.println("|\t");
-  // }
-  // current_beat_pos = last_beat_pos;
+  if (current_beat_pos != last_beat_pos)
+  {
+    if (current_beat_pos % 4 == 0) toggleLED = !toggleLED;
+    digitalWrite(LED_BUILTIN, toggleLED);
+    for (int i = 0; i < numInputs; i++)
+    {
+      // if (rhythm_slot[pins[i]][current_beat_pos] == true)
+      // {
+      //   /* perform action, e.g. send MIDI note */
+      // }
+    }
+    Serial.print(millis());
+    Serial.print("\t");
+    Serial.print(current_beat_pos);
+    Serial.println(output_string);
+    output_string = "";
+  }
+  last_beat_pos = current_beat_pos;
 
 }
 
@@ -293,18 +304,11 @@ void loop()
 
 int pinValue(int pinVal_pointer_in)
 {
-  //int pinVal_temp = noiseFloor[pinVal_pointer_in] - analogRead(pins[pinVal_pointer_in]);
-  //pinVal_temp = abs(pinVal_temp); // positive values only
-  //return pinVal_temp;
-  //return analogRead(pins[pinVal_pointer_in]) - 400; // works
-  //return analogRead(pins[pinVal_pointer_in]) - noiseFloor[pinVal_pointer_in]; // works
-  //return noiseFloor[pinVal_pointer_in] - analogRead(pins[pinVal_pointer_in]); // works
   return abs(noiseFloor[pinVal_pointer_in] - analogRead(pins[pinVal_pointer_in]));
 }
 
 boolean stroke_detected(int pinDect_pointer_in)
 {
-  static int countsCopy[numInputs];
   static unsigned long lastPinActiveTimeCopy[numInputs];
   static unsigned long firstPinActiveTimeCopy[numInputs];
   static int lastValue[numInputs]; // for LED toggle
@@ -327,33 +331,32 @@ boolean stroke_detected(int pinDect_pointer_in)
     if (countsCopy[pinDect_pointer_in] >= min_counts_for_signature[pinDect_pointer_in])
     {
       // LED blink:
-      if (countsCopy[pinDect_pointer_in] != lastValue[pinDect_pointer_in]) toggleState = !toggleState;
-      digitalWrite(LED_BUILTIN, toggleState);
+      //if (countsCopy[pinDect_pointer_in] != lastValue[pinDect_pointer_in]) toggleState = !toggleState;
+      //digitalWrite(LED_BUILTIN, toggleState);
       lastValue[pinDect_pointer_in] = countsCopy[pinDect_pointer_in];
-      Serial.print(millis());
-      Serial.print("\t");
-      Serial.print(pins[pinDect_pointer_in]);
-      Serial.print("\t");
-      Serial.print(countsCopy[pinDect_pointer_in]);
-      Serial.print("\t");
+
       // countsCopy[pinDect_pointer_in] = 0;
 
-      Serial.print("\t");
-      if (pinDect_pointer_in == HIHAT) Serial.print("x\t"); // Hi-Hat
-      if (pinDect_pointer_in == KICK) Serial.print("_\t"); // Kickdrum
-      if (pinDect_pointer_in == SNARE) Serial.print("-\t"); // Snaredrum
-      if (pinDect_pointer_in == TOM1) Serial.print("°\t"); // Tom 1
-      if (pinDect_pointer_in == TOM2) Serial.print("o\t"); // Tom 2
-      if (pinDect_pointer_in == STANDTOM) Serial.print("O\t"); // Standtom
-      if (pinDect_pointer_in == RIDE) Serial.print("xx\t"); // Ride
-      if (pinDect_pointer_in == CRASH1) Serial.print("X\t"); // Crash
-      if (pinDect_pointer_in == CRASH2) Serial.print("XX\t"); // Crash
-      Serial.println("");
+      // Serial.print("\t");
+      // if (pinDect_pointer_in == HIHAT) Serial.print("x\t"); // Hi-Hat
+      // if (pinDect_pointer_in == KICK) Serial.print("_\t"); // Kickdrum
+      // if (pinDect_pointer_in == SNARE) Serial.print("-\t"); // Snaredrum
+      // if (pinDect_pointer_in == TOM1) Serial.print("°\t"); // Tom 1
+      // if (pinDect_pointer_in == TOM2) Serial.print("o\t"); // Tom 2
+      // if (pinDect_pointer_in == STANDTOM) Serial.print("O\t"); // Standtom
+      // if (pinDect_pointer_in == RIDE) Serial.print("xx\t"); // Ride
+      // if (pinDect_pointer_in == CRASH1) Serial.print("X\t"); // Crash
+      // if (pinDect_pointer_in == CRASH2) Serial.print("XX\t"); // Crash
+      // Serial.println("");
 
       return true;
     }
+    else // timing ok but no significant counts
+    {
+      return false;
+    }
   }
-  else
+  else // TODO: timing not ok (obsolete: will always be ok!)
   {
     {
       return false;
@@ -361,13 +364,13 @@ boolean stroke_detected(int pinDect_pointer_in)
   }
 }
 
-/* ----------------------- DEBUG FUNCTIONS ----------------------------- */
+/* ----------------------- DEBUG FUNCTIONS ---------------------------- */
 
-void printNormalizedValues(boolean criterion)
+void printNormalizedValues(boolean printNorm_criterion)
 {
   // useful debugger for column-wise output of raw/normalised values:
 
-  if (criterion == true)
+  if (printNorm_criterion == true)
   {
     static unsigned long lastMillis;
     if (millis() != lastMillis)
