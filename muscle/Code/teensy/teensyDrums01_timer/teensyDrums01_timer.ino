@@ -54,7 +54,6 @@ volatile unsigned long firstPinActiveTime[numInputs];
 int countsCopy[numInputs];
 int current_beat_pos; // always stores the current position in the beat
 
-// int bpm = 0;
 int tapInterval = 500; // 0.5 s per beat for 120 BPM
 // int tapState = 1; // 0 = none; 1 = waiting for first hit; 2 = waiting for second hit
 
@@ -179,21 +178,21 @@ void masterClockTimer()
     stroke precision  = 1/4 beatCount   = 15.625 ms | 10.4166 ms
   */
 
-  
-    masterClockCount++;
 
-    // ------------ 1/32 increase in 4 full precisionCounts -----------
-    if (masterClockCount % 4 == 0)
-    {
-      beatCount++; // will rise infinitely
-    }
+  masterClockCount++;
 
-    // evaluate current position of beat in bar for stroke precision
-    if ((masterClockCount % 4) >= next_beatCount - 2)
-    {
-      currentStep = next_beatCount;
-      next_beatCount += 4;
-    }
+  // ------------ 1/32 increase in 4 full precisionCounts -----------
+  if (masterClockCount % 4 == 0)
+  {
+    beatCount++; // will rise infinitely
+  }
+
+  // evaluate current position of beat in bar for stroke precision
+  if ((masterClockCount % 4) >= next_beatCount - 2)
+  {
+    currentStep = next_beatCount;
+    next_beatCount += 4;
+  }
 
 }
 
@@ -203,7 +202,7 @@ void masterClockTimer()
 
 void loop()
 {
-  
+
   // ------------------------- debug area -----------------------------
   printNormalizedValues(printNormalizedValues_);
 
@@ -216,28 +215,8 @@ void loop()
       switch (pinAction[i])
       {
         case 0: // ------------------ tapTempo ------------------------
-          // static int pinTapAmount[numInputs];
-          // static int firstHitTime[numInputs];
-          // static int secondHitTime[numInputs];
-          // /* e.g. firstHit --> store current clockPulse
-          //   secondHit --> store current clockPulse, get time difference
-          // */
 
-          // // relative clock tapping:
-          // if (pinTapAmount[i] == 1)
-          // {
-          //   noInterrupts();
-          //   firstHitTime[i] = currentStep;
-          //   interrupts();
-          // }
-          // else if (pinTapAmount[i] == 2)
-          // {
-          //   noInterrupts();
-          //   secondHitTime[i] = currentStep;
-          //   interrupts();
-
-          //   // TODO: diff = secondHitTime[i] - firstHitTime[i];
-          // }
+          getTapTempo();
           break;
 
         case 1: // --- monitor: just print what is being played. ------
@@ -249,13 +228,13 @@ void loop()
             //Serial.print("\t");
             if (i == HIHAT) output_string[0] += "x\t"; // Hi-Hat
             if (i == KICK) output_string[2] += "※\t"; // Kickdrum
-            if (i == SNARE) output_string[1] +="᠅\t"; // Snaredrum
-            if (i == TOM1) output_string[3] +="°\t"; // Tom 1
-            if (i == TOM2) output_string[i] +="o\t"; // Tom 2
-            if (i == STANDTOM) output_string[4] +="O\t"; // Standtom
-            if (i == RIDE) output_string[i] +="xx\t"; // Ride
-            if (i == CRASH1) output_string[i] +="X\t"; // Crash
-            if (i == CRASH2) output_string[i] +="XX\t"; // Crash
+            if (i == SNARE) output_string[1] += "᠅\t"; // Snaredrum
+            if (i == TOM1) output_string[3] += "°\t"; // Tom 1
+            if (i == TOM2) output_string[i] += "o\t"; // Tom 2
+            if (i == STANDTOM) output_string[4] += "O\t"; // Standtom
+            if (i == RIDE) output_string[i] += "xx\t"; // Ride
+            if (i == CRASH1) output_string[i] += "X\t"; // Crash
+            if (i == CRASH2) output_string[i] += "XX\t"; // Crash
             // Serial.println("");
           }
           break;
@@ -293,7 +272,7 @@ void loop()
     Serial.print(millis());
     Serial.print("\t");
     Serial.print(current_beat_pos);
-    for (int i = 0; i< numInputs; i++)
+    for (int i = 0; i < numInputs; i++)
     {
       Serial.print(output_string[i]);
       output_string[i] = "\t";
@@ -367,6 +346,58 @@ boolean stroke_detected(int pinDect_pointer_in)
     {
       return false;
     }
+  }
+}
+
+void getTapTempo()
+{
+  static unsigned long timeSinceFirstTap = 0;
+  static int tapState = 1;
+  static int num_of_taps = 0;
+  static int clock_sum = 0;
+
+  switch (tapState) {
+    //    case 0: // this is for activation of tap tempo listen
+    //      // for (int i = 0; i < numInputs; i++)
+    //      // {
+    //      // }
+    //      // puts("\n");
+    //      tapState = 1;
+    //      break;
+
+    case 1:   // waiting for first hit
+      if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
+      {
+        num_of_taps = 0;
+        clock_sum = 0;
+        // TODO: RHYTHM RESET???????????
+        puts("TAP RESET!\n");
+      }
+      timeSinceFirstTap = millis(); // record time of first hit
+      tapState = 2; // next: wait for second hit
+
+      break;
+
+    case 2:   // waiting for second hit
+
+      if (timeSinceFirstTap < 2000) // only record tap if interval was not too long
+      {
+        num_of_taps++;
+        clock_sum += timeSinceFirstTap;
+        tapInterval = clock_sum / num_of_taps;
+        // bpm = 60000 / tapInterval;
+        tapState = 1;
+
+        masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // taps are always understood as quarter notes
+      }
+
+      if (timeSinceFirstTap > 2000) // forget tap if time was too long
+      {
+        tapState = 1;
+        // Serial.println("too long...");
+      }
+      // }
+      break;
   }
 }
 

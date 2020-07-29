@@ -55,7 +55,7 @@ const int threshold[] = {30, 170, 170, 60}; // hihat, crash1, ride, Standtom
 // -------------------------- tap tempo
 elapsedMillis timeSinceFirstHit;
 int bpm = 0;
-int clock_interval = 0; // that is 120 BPM
+int clock_interval = 0; // 500 is 120 BPM
 int tapState = 1; // 0 = none; 1 = waiting for first hit; 2 = waiting for second hit
 // int index; // pointer for lists
 
