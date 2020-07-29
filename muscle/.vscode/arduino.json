@@ -1,5 +1,4 @@
 {
     "port": "/dev/ttyUSB0",
-    "board": "SPRESENSE:spresense:spresense",
-    "configuration": "Core=Main,Debug=Disabled,UploadSpeed=115200"
+    "board": "arduino:avr:uno"
 }

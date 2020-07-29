@@ -15,8 +15,8 @@ int globalThreshold = 30;
 void setup()
 {
   size(800, 600, P2D);
-  String portName = Serial.list()[32];
-  myPort = new Serial(this, portName, 19200);
+  //String portName = Serial.list()[32];
+  //myPort = new Serial(this, portName, 19200);
 }
 
 void draw()

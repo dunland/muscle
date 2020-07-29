@@ -14,7 +14,7 @@ const int ledPin = LED_BUILTIN;  // the pin with a LED
 
 // ---------------- calibration- and sensitive-variant variables ---------------
 // const int threshold[] = {30, 170, 170, 60}; // hihat, crash1, ride, Standtom
-const int threshold[] = {400, 90, 150, 200, 90, 110, 130};
+const int threshold[] = {200, 90, 150, 200, 90, 110, 130};
 int noiseFloor[numInputs]; // to be set in setup
 int min_crossings_for_signature[] = {1, 1, 1, 1, 1, 1, 1, 1}; // TODO: find characteristic signatures and insert here
 int globalStrokeDelay = 50;
@@ -31,7 +31,7 @@ volatile unsigned long lastPinActiveTime[numInputs];
 
 void setup() {
   pinMode(ledPin, OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(115200);
   while (!Serial);
 
   // ----------------------------- calculate noiseFloor ------------------------
@@ -109,7 +109,6 @@ void loop() {
   static unsigned long lastMillis;
 
   //if (millis() != lastMillis) Serial.println(millis());
-  lastMillis = millis();
 
   for (int i = 0; i < numInputs; i++)
   {
@@ -148,6 +147,8 @@ void loop() {
       lastValue[i] = crossingsCopy[i];
     }
   }
+  lastMillis = millis();
+
   //interrupts();
 }
 
