@@ -1,15 +1,12 @@
 /*
-   MULTIFUNCTIONAL DRUMS-TO-MIDI-SETUP:
+  logs what is being played on the drum set.
+  1. define pin variables according to how they are plugged in to the MCU
+  2. run sketch and show monitor (CTRL+m)
    ------------------------------------
-   July 2020
+   August 2020
    by David Unland david[at]unland[dot]eu
    ------------------------------------
    ------------------------------------
-   INSTRUMENTS:
-   A0 = ? = tap tempo
-   A1 = ? = change rhythm
-   A2 = ? = change notes
-   A3 = ? = play a note
 
 */
 
@@ -25,17 +22,19 @@
 // ----------------------------- pins ---------------------------------
 static const uint8_t numInputs = 5;
 static const uint8_t pins[] = {A0, A1, A2, A3, A4, A5, A6, A7};
-const int SNARE = 0;
-const int HIHAT = 1;
-const int TOM1 = 2;
-const int STANDTOM = 3;
-const int TOM2 = 8;
-const int RIDE = 5;
-const int CRASH1 = 6;
-const int CRASH2 = 7;
-const int KICK = 4;
+const int SNARE = 6;
+const int HIHAT = 4;
+const int TOM1 = 5;
+const int TOM2 = 7;
+const int STANDTOM1 = 1;
+const int STANDTOM2 = 2;
+const int RIDE = 8;
+const int CRASH1 = 8;
+const int CRASH2 = 8;
+const int KICK = 0;
 // static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN1, LED_BUILTIN2, LED_BUILTIN3}; // array when using SPRESENSE
 static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN};
+//static const int VIBR = 0;
 
 // ------------------------- Debug variables --------------------------
 boolean responsiveCalibration = false;
@@ -46,6 +45,7 @@ String output_string[numInputs];
 // ------------------ variables for interrupt timers ------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
 IntervalTimer masterClock; // 1 bar
+IntervalTimer stateChecker; // runs functions and sets flags for timed functions etc
 volatile int counts[numInputs];
 volatile unsigned long lastPinActiveTime[numInputs];
 volatile unsigned long firstPinActiveTime[numInputs];
@@ -87,12 +87,16 @@ void setup() {
   while (!Serial);
   // MIDI.begin(MIDI_CHANNEL_OMNI);
 
-  //--------------------------------------- initialize pins and arrays
+  //------------------------ initialize pins and arrays ------------------------
   for (int i = 0; i < numInputs; i++)
   {
     pinMode(leds[i], OUTPUT);
     counts[i] = 0;
   }
+  //pinMode(VIBR, OUTPUT);
+  // ---------------------------------------------------------------------------
+
+
   // ----------------------------- calculate noiseFloor ------------------------
   // calculates the average noise floor out of 400 samples from all inputs
 
@@ -134,17 +138,24 @@ void setup() {
     digitalWrite(leds[i], LOW);
     output_string[i] = "\t";
   }
+  // ---------------------------------------------------------------------------
 
-  // --------------------------------------- setup initial values
+  // -------------------------- setup initial values ---------------------------
   // set start notes and rhythms
   note_idx[1] = 0; // C
   note_idx[2] = 3; // F
   note_idx[3] = 0;
+  // ---------------------------------------------------------------------------
 
-  // ------------------------------ begin timer --------------------------------
+
+  // ------------------------------ start timer --------------------------------
   pinMonitor.begin(samplePins, 1000);  // sample pin every 1 millisecond
   masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+  //stateChecker.begin(checkStates, 10000); // 10 ms
+
+  // ---------------------------------------------------------------------------
 }
+
 
 /* --------------------------------------------------------------------- */
 /* -------------------------- TIMED INTERRUPTS ------------------------- */
@@ -152,6 +163,7 @@ void setup() {
 
 void samplePins()
 {
+  // ------------------------- read all pins -----------------------------------
   for (int pinNum = 0; pinNum < numInputs; pinNum++)
   {
     if (pinValue(pinNum) > threshold[pinNum])
@@ -162,7 +174,9 @@ void samplePins()
     }
   }
 }
+// -----------------------------------------------------------------------------
 
+// ----------------------------- timer counter ---------------------------------
 volatile unsigned long masterClockCount = 0; // 4*32 = 128 masterClockCount per cycle
 volatile unsigned long beatCount = 0;
 // volatile int bar_step; // 0-32
@@ -176,10 +190,21 @@ void masterClockTimer()
     1 bar             = 1               = 2 s       | 1.3 s
     1 beatCount       = 1/32 bar        = 62.5 ms   | 41.7 ms
     stroke precision  = 1/4 beatCount   = 15.625 ms | 10.4166 ms
+
+
+    |     .-.
+    |    /   \         .-.
+    |   /     \       /   \       .-.     .-.     _   _
+    +--/-------\-----/-----\-----/---\---/---\---/-\-/-\/\/---
+    | /         \   /       \   /     '-'     '-'
+    |/           '-'         '-'
+    |--------2 oscil---------|
+    |------snare = 10 ms-----|
+
   */
 
 
-  masterClockCount++;
+  masterClockCount++; // will rise infinitely
 
   // ------------ 1/32 increase in 4 full precisionCounts -----------
   if (masterClockCount % 4 == 0)
@@ -193,8 +218,13 @@ void masterClockTimer()
     currentStep = next_beatCount;
     next_beatCount += 4;
   }
+  // ---------------------------------------------------------------------------
 
 }
+/*void checkStates() // a timer to run several functions and set flags
+{
+  checkVibration(); // turns off vibration motor
+}*/
 
 /* --------------------------------------------------------------------- */
 /* ------------------------------- LOOP -------------------------------- */
@@ -206,7 +236,8 @@ void loop()
   // ------------------------- debug area -----------------------------
   printNormalizedValues(printNormalizedValues_);
 
-  // -------------------------- main loop -----------------------------
+  // --------------------- INCOMING SIGNALS FROM PIEZOS ---------------
+  // (define what should happen when instruments are hit)
   for (int i = 0; i < numInputs; i++)
   {
     if (stroke_detected(i)) // evaluates pins for activity repeatedly
@@ -226,15 +257,16 @@ void loop()
             //Serial.print("\t");
             //Serial.print(countsCopy[i]);
             //Serial.print("\t");
-            if (i == HIHAT) output_string[0] += "x\t"; // Hi-Hat
-            if (i == KICK) output_string[2] += "※\t"; // Kickdrum
-            if (i == SNARE) output_string[1] += "᠅\t"; // Snaredrum
-            if (i == TOM1) output_string[3] += "°\t"; // Tom 1
-            if (i == TOM2) output_string[i] += "o\t"; // Tom 2
-            if (i == STANDTOM) output_string[4] += "O\t"; // Standtom
-            if (i == RIDE) output_string[i] += "xx\t"; // Ride
-            if (i == CRASH1) output_string[i] += "X\t"; // Crash
-            if (i == CRASH2) output_string[i] += "XX\t"; // Crash
+            if (i == KICK) output_string[i] += "※\t"; // Kickdrum
+            else if (i == STANDTOM1) output_string[i] += "O\t"; // Standtom
+            else if (i == STANDTOM2) output_string[i] += "O\t"; // Standtom
+            else if (i == HIHAT) output_string[i] += "x\t"; // Hi-Hat
+            else if (i == TOM1) output_string[i] += "°\t"; // Tom 1
+            else if (i == SNARE) output_string[i] += "᠅\t"; // Snaredrum
+            else if (i == TOM2) output_string[i] += "o\t"; // Tom 2
+            else if (i == RIDE) output_string[i] += "xx\t"; // Ride
+            else if (i == CRASH1) output_string[i] += "X\t"; // Crash
+            else if (i == CRASH2) output_string[i] += "XX\t"; // Crash
             // Serial.println("");
           }
           break;
@@ -249,17 +281,21 @@ void loop()
 
     }
 
-  }
-  // timed action:
+  } // end main commands loop
+  // ---------------------------------------------------------------------------
+
+  // ------------------------------- TIMED ACTIONS --------------------
+  // (automatically invoke rhythm-linked actions)
   static int last_beat_pos = 0;
   static boolean toggleLED = true;
 
   noInterrupts();
-  current_beat_pos = beatCount % 32; // beatCount increases infinitely
+  current_beat_pos = beatCount % 32; // (beatCount increases infinitely)
   interrupts();
 
   if (current_beat_pos != last_beat_pos)
   {
+    // ----------------------------- draw time log to console
     if (current_beat_pos % 4 == 0) toggleLED = !toggleLED;
     digitalWrite(LED_BUILTIN, toggleLED);
     for (int i = 0; i < numInputs; i++)
@@ -278,6 +314,9 @@ void loop()
       output_string[i] = "\t";
     }
     Serial.println("");
+
+    // ---------------------------- vibrate on beat
+    //vibrate(millis(), 50);
   }
   last_beat_pos = current_beat_pos;
 
@@ -321,18 +360,6 @@ boolean stroke_detected(int pinDect_pointer_in)
       lastValue[pinDect_pointer_in] = countsCopy[pinDect_pointer_in];
 
       // countsCopy[pinDect_pointer_in] = 0;
-
-      // Serial.print("\t");
-      // if (pinDect_pointer_in == HIHAT) Serial.print("x\t"); // Hi-Hat
-      // if (pinDect_pointer_in == KICK) Serial.print("_\t"); // Kickdrum
-      // if (pinDect_pointer_in == SNARE) Serial.print("-\t"); // Snaredrum
-      // if (pinDect_pointer_in == TOM1) Serial.print("°\t"); // Tom 1
-      // if (pinDect_pointer_in == TOM2) Serial.print("o\t"); // Tom 2
-      // if (pinDect_pointer_in == STANDTOM) Serial.print("O\t"); // Standtom
-      // if (pinDect_pointer_in == RIDE) Serial.print("xx\t"); // Ride
-      // if (pinDect_pointer_in == CRASH1) Serial.print("X\t"); // Crash
-      // if (pinDect_pointer_in == CRASH2) Serial.print("XX\t"); // Crash
-      // Serial.println("");
 
       return true;
     }
@@ -400,6 +427,36 @@ void getTapTempo()
       break;
   }
 }
+
+// ---------------------------- vibration motor -------------------------
+/*boolean vibrate_bool = false;
+unsigned long vibration_begin_;
+int vibration_duration_;
+
+void vibrate(long vibration_begin, int vibration_duration)
+{
+  vibration_begin_ = vibration_begin;
+  vibration_duration_ = vibration_duration;
+  vibrate_bool = true;
+}
+
+void checkVibration() // is run in timer
+{
+  if (vibrate_bool)
+  {
+    if (millis() < vibration_begin_ + vibration_duration_)
+    {
+      digitalWrite(VIBR, HIGH);
+    }
+    else
+    {
+      digitalWrite(VIBR, LOW);
+      vibrate_bool = false;
+    }
+  }
+}
+*/
+
 
 /* ----------------------- DEBUG FUNCTIONS ---------------------------- */
 

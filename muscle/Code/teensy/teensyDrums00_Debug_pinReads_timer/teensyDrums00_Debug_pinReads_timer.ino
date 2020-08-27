@@ -1,23 +1,29 @@
 /* teensyDrums00_Debug_pinReads_timer.ino
    for debugging the timer counts after instrument stroke.
    output can be nicely displayed by multiSensorLogging.py !
-   github.com/dunland, July 2020
+   github.com/dunland, August 2020
+
+   0. get threshold-values from teensy_contactMic.ino
+   1. set threshold[] values for all pins
+   2. maybe set globalStrokeDelay
+
+   program will print counted crossings for all pins
 */
 
 IntervalTimer myTimer; // Create an IntervalTimer object
 
 // ----------------------------------- input pins ------------------------------
 static const uint8_t pins[] = {A0, A1, A2, A3, A4, A5, A6, A7};
-const int numInputs = 1;
+const int numInputs = 7;
 
 const int ledPin = LED_BUILTIN;  // the pin with a LED
 
 // ---------------- calibration- and sensitive-variant variables ---------------
 // const int threshold[] = {30, 170, 170, 60}; // hihat, crash1, ride, Standtom
-const int threshold[] = {200, 90, 150, 200, 90, 110, 130};
+const int threshold[] = {180, 60, 100, 200, 300, 70, 80};
 int noiseFloor[numInputs]; // to be set in setup
 int min_crossings_for_signature[] = {1, 1, 1, 1, 1, 1, 1, 1}; // TODO: find characteristic signatures and insert here
-int globalStrokeDelay = 50;
+int globalStrokeDelay = 10;
 
 // ------------------ volatile variables forinterrupt timers ------------------
 volatile int crossings[numInputs];
@@ -74,6 +80,15 @@ void setup() {
     //pinActive[i] = false;
     crossings[i] = 0;
   }
+  Serial.print("millis");
+  Serial.print("\t");
+  Serial.print("pin");
+  Serial.print("\t");
+  Serial.print("cross");
+  Serial.print("\t");
+  Serial.print("thrshld");
+  Serial.print("\t");
+  Serial.println("noisFl");
 
   // ------------------------------ begin timer --------------------------------
   myTimer.begin(samplePin0, 1000);  // sample pin every 1 millisecond
