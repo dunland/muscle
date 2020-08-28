@@ -76,7 +76,7 @@ int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each inst
 
 /* --------------------------- MUSICAL PARAMETERS ---------------------- */
 
-boolean rhythm_slot[numInputs][32];
+boolean rhythm_slot[numInputs][8];
 int notes_list[] = {60, 61, 39, 65, 67, 44, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
 int note_idx[numInputs]; // instrument-specific pointer for notes
 int pinAction[] = {2, 2, 2, 2, 2, 2, 0, 2};
@@ -214,11 +214,11 @@ void setup() {
   note_idx[1] = 0; // C
   note_idx[2] = 3; // F
   note_idx[3] = 0;
-  
+
   // set all rhythm slots to false
-  for (int i = 0; i<numInputs; i++)
+  for (int i = 0; i < numInputs; i++)
   {
-    for (int j = 0; j < 32; j++)
+    for (int j = 0; j < 8; j++)
     {
       rhythm_slot[i][j] = false;
     }
@@ -349,6 +349,8 @@ void masterClockTimer()
 
 void loop()
 {
+  static int eighthNoteCount = 0;
+  static int last_eighth_count = 0;
 
   // ------------------------- DEBUG AREA -----------------------------
   printNormalizedValues(printNormalizedValues_);
@@ -369,12 +371,16 @@ void loop()
           break;
 
         case 1: // monitor: just print what is being played.
-          if (printStrokes) printInstrumentLog(i);
+          if (printStrokes)
+          {
+            if (!rhythm_slot[i][eighthNoteCount])
+            setInstrumentPrintString(i);
+          }
           break;
 
         case 2: // toggle beat slot
-          if (printStrokes) printInstrumentLog(i);
-          rhythm_slot[i][current_beat_pos] = (rhythm_slot[i][current_beat_pos] == true) ? false : true;
+          if (printStrokes) setInstrumentPrintString(i);
+          rhythm_slot[i][eighthNoteCount] = (rhythm_slot[i][eighthNoteCount] == true) ? false : true;
           break;
 
         default:
@@ -397,30 +403,41 @@ void loop()
 
   if (current_beat_pos != last_beat_pos)
   {
-    if (current_beat_pos % 4 == 0) toggleLED = !toggleLED;
+    if (current_beat_pos % 4 == 0)
+    {
+      eighthNoteCount = (eighthNoteCount + 1) % 8;
+      toggleLED = !toggleLED;
+    }
     digitalWrite(LED_BUILTIN, toggleLED);
 
     // ----------------------------- draw time log to console
-
-    for (int i = 0; i < numInputs; i++)
+    if (eighthNoteCount != last_eighth_count)
     {
-      if (rhythm_slot[i][current_beat_pos])
+      for (int i = 0; i < numInputs; i++)
       {
-        printInstrumentLog(i);
-        MIDI.sendNoteOn(notes_list[i], 127, 2);
+        if (rhythm_slot[i][eighthNoteCount])
+        {
+          setInstrumentPrintString(i);
+          MIDI.sendNoteOn(notes_list[i], 127, 2);
+        }
+        else MIDI.sendNoteOff(notes_list[i], 127, 2);
       }
-      else MIDI.sendNoteOff(notes_list[i], 127, 2);
-    }
 
-    Serial.print(millis());
-    Serial.print("\t");
-    Serial.print(current_beat_pos);
-    for (int i = 0; i < numInputs; i++)
-    {
-      Serial.print(output_string[i]);
-      output_string[i] = "\t";
+      Serial.print(millis());
+      Serial.print("\t");
+      Serial.print(eighthNoteCount+1);
+      //Serial.print(current_beat_pos);
+      Serial.print("\t");
+      /*Serial.print(current_beat_pos / 4);
+      Serial.print("\t");
+      Serial.print(eighthNoteCount);*/
+      for (int i = 0; i < numInputs; i++)
+      {
+        Serial.print(output_string[i]);
+        output_string[i] = "\t";
+      }
+      Serial.println("");
     }
-    Serial.println("");
 
     // ---------------------------- vibrate on beat
     if (current_beat_pos % 8 == 0) // current_beat_pos holds 32 → %8 makes 4.
@@ -435,6 +452,7 @@ void loop()
 
   }
   last_beat_pos = current_beat_pos;
+  last_eighth_count = eighthNoteCount;
 
   // turn off vibration
   if (millis() > vibration_begin + vibration_duration) digitalWrite(VIBR, LOW);
@@ -511,7 +529,7 @@ void getTapTempo()
     //      // for (int i = 0; i < numInputs; i++)
     //      // {
     //      // }
-    //      // puts("\n");
+    //      // Serial.print("\n");
     //      tapState = 1;
     //      break;
 
@@ -560,19 +578,19 @@ void getTapTempo()
 }
 
 // ---------- print instrument at String position ---------------------
-void printInstrumentLog(int incoming_i)
+void setInstrumentPrintString(int incoming_i)
 {
-  if (incoming_i == KICK) output_string[incoming_i] += "■\t"; // Kickdrum
-  else if (incoming_i == COWBELL) output_string[incoming_i] += "▲\t"; // Crash
-  else if (incoming_i == STANDTOM1) output_string[incoming_i] += "□\t"; // Standtom
-  else if (incoming_i == STANDTOM2) output_string[incoming_i] += "O\t"; // Standtom
-  else if (incoming_i == HIHAT) output_string[incoming_i] += "x\t"; // Hi-Hat
-  else if (incoming_i == TOM1) output_string[incoming_i] += "°\t"; // Tom 1
-  else if (incoming_i == SNARE) output_string[incoming_i] += "※\t"; // Snaredrum
-  else if (incoming_i == TOM2) output_string[incoming_i] += "o\t"; // Tom 2
-  else if (incoming_i == RIDE) output_string[incoming_i] += "xx\t"; // Ride
-  else if (incoming_i == CRASH1) output_string[incoming_i] += "-X-\t"; // Crash
-  else if (incoming_i == CRASH2) output_string[incoming_i] += "-XX-\t"; // Crash
+  if (incoming_i == KICK) output_string[incoming_i] = "■\t"; // Kickdrum
+  else if (incoming_i == COWBELL) output_string[incoming_i] = "▲\t"; // Crash
+  else if (incoming_i == STANDTOM1) output_string[incoming_i] = "□\t"; // Standtom
+  else if (incoming_i == STANDTOM2) output_string[incoming_i] = "O\t"; // Standtom
+  else if (incoming_i == HIHAT) output_string[incoming_i] = "x\t"; // Hi-Hat
+  else if (incoming_i == TOM1) output_string[incoming_i] = "°\t"; // Tom 1
+  else if (incoming_i == SNARE) output_string[incoming_i] = "※\t"; // Snaredrum
+  else if (incoming_i == TOM2) output_string[incoming_i] = "o\t"; // Tom 2
+  else if (incoming_i == RIDE) output_string[incoming_i] = "xx\t"; // Ride
+  else if (incoming_i == CRASH1) output_string[incoming_i] = "-X-\t"; // Crash
+  else if (incoming_i == CRASH2) output_string[incoming_i] = "-XX-\t"; // Crash
 }
 
 // --------------------------------------------------------------------
