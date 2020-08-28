@@ -1,12 +1,19 @@
 /*
-  0. calibrate sensors
-  1. set calibration[instrument][0/1] values. (in setup())
-      0:threshold, 1:min num of threshold crossings
+  logs drum playing, toggles binary instrument position on beat,
+  plays MIDI-notes at those sites
    ------------------------------------
    August 2020
    by David Unland david[at]unland[dot]eu
    ------------------------------------
    ------------------------------------
+  0. calibrate sensors
+  1. set calibration[instrument][0/1] values. (in setup())
+    0:threshold, 1:min num of threshold crossings
+  2. set mode for instruments:
+    pinActions:
+    0 = tapTempo
+    1 = binary beat logger (print beat)
+    2 = toggle rhythm_slot
 */
 
 /* --------------------------------------------------------------------- */
@@ -55,7 +62,7 @@ volatile unsigned long firstPinActiveTime[numInputs];
 
 // ------------------ timing and rhythm tracking ------------------
 int countsCopy[numInputs];
-int current_beat_pos; // always stores the current position in the beat
+int current_beat_pos = 0; // always stores the current position in the beat
 
 int tapInterval = 500; // 0.5 s per beat for 120 BPM
 // int tapState = 1; // 0 = none; 1 = waiting for first hit; 2 = waiting for second hit
@@ -63,12 +70,8 @@ int tapInterval = 500; // 0.5 s per beat for 120 BPM
 
 // ------------- sensitivity and instrument calibration -----------------
 
-int calibration[numInputs][2]; // [instrument][0:threshold, 1:min_counts_for_signature]
-int noiseFloor[numInputs]; // typical values: Arduino (5V) = 512, SPRESENSE (3.3V) = 260
-const int max_val = 1023;
-//const int globalThreshold = 30; // typical values: 60-190 for toms (SPRESENSE, 3.3V)
-// const int threshold[] = {110, 90, 400, 400, 200, 60, 60, 60}; // minimum peak from noiseFloor to be counted
-// int min_counts_for_signature[] = {15, 20, 12, 40, 10, 1, 1, 1}; // characteristic instrument signatures; 0:snare, 1:hihat, 2:tom1, 3:Standtom
+int calibration[numInputs][2]; // [instrument][0:threshold, 1:min_counts_for_signature], will be set in setup()
+int noiseFloor[numInputs];
 int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each instrument
 
 /* --------------------------- MUSICAL PARAMETERS ---------------------- */
@@ -76,7 +79,7 @@ int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each inst
 boolean rhythm_slot[numInputs][32];
 int notes_list[] = {60, 61, 39, 65, 67, 44, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
 int note_idx[numInputs]; // instrument-specific pointer for notes
-int pinAction[] = {2, 2, 2, 2, 2, 2, 2, 2};
+int pinAction[] = {2, 2, 2, 2, 2, 2, 0, 2};
 /* pinActions:
    0 = tapTempo
    1 = binary beat logger (print beat)
@@ -122,12 +125,12 @@ void setup() {
   int led_idx = 0;
   for (int pinNum = 0; pinNum < numInputs; pinNum++)
   {
-    Serial.print("calculating noiseFloor for pin ");
-    Serial.print(pins[pinNum]);
+    Serial.print("calculating noiseFloor for ");
+    Serial.print(names[pinNum]);
     Serial.print(" ..waiting for stroke");
     if (responsiveCalibration)
     {
-      while (analogRead(pins[pinNum]) < 500 + calibration[pinNum][0]); // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
+      while (analogRead(pins[pinNum]) < 700 + calibration[pinNum][0]); // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
       Serial.print(" .");
       delay(1000); // should be long enough for drum not to oscillate anymore
     }
@@ -178,7 +181,22 @@ void setup() {
   calibration[COWBELL][0] = 80;
   calibration[COWBELL][1] = 15;
 
+  /*
+    if (!responsiveCalibration) // hard coded ?
+    {
+    noiseFloor[SNARE] = 470;
+    noiseFloor[HIHAT] = 476;
+    noiseFloor[KICK] = 475;
+    noiseFloor[TOM1] = 477;
+    noiseFloor[TOM2] = 471;
+    noiseFloor[STom1] = 497;
+    noiseFloor[CBELL] = 498;
+    }
+  */
+
+  Serial.println();
   Serial.println("calibration values set as follows:");
+  Serial.println("instr\tthrshld\tcrosses\tnoiseFloor");
   for (int i = 0; i < numInputs; i++)
   {
     Serial.print(names[i]);
@@ -188,8 +206,9 @@ void setup() {
       Serial.print(calibration[i][j]);
       Serial.print("\t");
     }
-    Serial.println();
+    Serial.println(noiseFloor[i]);
   }
+  Serial.println();
 
   // set start notes and rhythms
   note_idx[1] = 0; // C
@@ -314,6 +333,7 @@ void masterClockTimer()
 
 }
 
+
 /* --------------------------------------------------------------------- */
 /* ------------------------------- LOOP -------------------------------- */
 /* --------------------------------------------------------------------- */
@@ -321,8 +341,9 @@ void masterClockTimer()
 void loop()
 {
 
-  // ------------------------- debug area -----------------------------
+  // ------------------------- DEBUG AREA -----------------------------
   printNormalizedValues(printNormalizedValues_);
+
 
   // --------------------- INCOMING SIGNALS FROM PIEZOS ---------------
   // (define what should happen when instruments are hit)
@@ -333,25 +354,26 @@ void loop()
       // ----------------------- perform pin action -------------------
       switch (pinAction[i])
       {
-        case 0: // ------------------ tapTempo ------------------------
+        case 0: // tapTempo
 
           getTapTempo();
           break;
 
-        case 1: // --- monitor: just print what is being played. ------
+        case 1: // monitor: just print what is being played.
           if (printStrokes) printInstrumentLog(i);
           break;
 
-        case 2: // ---------------- toggle beat slot ------------------
-           rhythm_slot[i][current_beat_pos] = !rhythm_slot[i][current_beat_pos];
+        case 2: // toggle beat slot
+          if (printStrokes) printInstrumentLog(i);
+          rhythm_slot[i][current_beat_pos] = (rhythm_slot[i][current_beat_pos] == true) ? false : true;
+          // only looking at eigth notes:
+          //  rhythm_slot[i][current_beat_pos/4] = (rhythm_slot[i][current_beat_pos/4] == true) ? false : true;
           break;
 
         default:
           break;
       }
-
     }
-
   } // end main commands loop -----------------------------------------
 
   // ------------------------------- TIMED ACTIONS --------------------
@@ -368,25 +390,28 @@ void loop()
 
   if (current_beat_pos != last_beat_pos)
   {
-    // ----------------------------- draw time log to console
     if (current_beat_pos % 4 == 0) toggleLED = !toggleLED;
     digitalWrite(LED_BUILTIN, toggleLED);
+
+    // ----------------------------- draw time log to console
+    //for (int i = 0; i < numInputs; i++)
+    //{
+    // looking only at eigth notes:
+    // if (current_beat_pos % 4 == 0)
+    //if (rhythm_slot[i][current_beat_pos] == true)
+    //{
     for (int i = 0; i < numInputs; i++)
     {
-      if (rhythm_slot[i][current_beat_pos] == true)
+      if (rhythm_slot[i][current_beat_pos])
       {
-        for (int i = 0; i<numInputs; i++)
-        {
-          if (rhythm_slot[i][current_beat_pos])
-          {
-            printInstrumentLog(i);
-            MIDI.sendNoteOn(notes_list[i], 127, 2);
-          }
-          else MIDI.sendNoteOff(notes_list[i], 127, 2);
-        }
-        /* perform action, e.g. send MIDI note */
+        printInstrumentLog(i);
+        MIDI.sendNoteOn(notes_list[i], 127, 2);
       }
+      else MIDI.sendNoteOff(notes_list[i], 127, 2);
     }
+    /* perform action, e.g. send MIDI note */
+    //}
+    //}
     Serial.print(millis());
     Serial.print("\t");
     Serial.print(current_beat_pos);
@@ -398,13 +423,16 @@ void loop()
     Serial.println("");
 
     // ---------------------------- vibrate on beat
-
-    if (current_beat_pos % 8 == 0)
+    if (current_beat_pos % 8 == 0) // current_beat_pos holds 32 → %8 makes 4.
     {
       vibration_begin = millis();
       vibration_duration = 50;
       digitalWrite(VIBR, HIGH);
     }
+
+    // ---------------------------- send MIDI-Clock on beat
+    if (current_beat_pos * 3 % 4 == 0) Serial2.write(0xF8);
+
   }
   last_beat_pos = current_beat_pos;
 
@@ -493,7 +521,7 @@ void getTapTempo()
         num_of_taps = 0;
         clock_sum = 0;
         // TODO: RHYTHM RESET???????????
-        puts("TAP RESET!\n");
+        Serial.println("-----------TAP RESET!-----------\n");
       }
       timeSinceFirstTap = millis(); // record time of first hit
       tapState = 2; // next: wait for second hit
@@ -502,15 +530,23 @@ void getTapTempo()
 
     case 2:   // waiting for second hit
 
-      if (timeSinceFirstTap < 2000) // only record tap if interval was not too long
+      if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
       {
         num_of_taps++;
-        clock_sum += timeSinceFirstTap;
+        clock_sum += millis() - timeSinceFirstTap;
         tapInterval = clock_sum / num_of_taps;
+        Serial.print("new tap Tempo is ");
+        Serial.print(60000/tapInterval);
+        Serial.print(" bpm (");
+        Serial.print(tapInterval);
+        Serial.println(" ms interval)");
+
         // bpm = 60000 / tapInterval;
         tapState = 1;
 
         masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // taps are always understood as quarter notes
+        masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+
       }
 
       if (timeSinceFirstTap > 2000) // forget tap if time was too long
@@ -526,17 +562,17 @@ void getTapTempo()
 // ---------- print instrument at String position ---------------------
 void printInstrumentLog(int incoming_i)
 {
-            if (incoming_i == KICK) output_string[incoming_i] += "■\t"; // Kickdrum
-            else if (incoming_i == COWBELL) output_string[incoming_i] += "▲\t"; // Crash
-            else if (incoming_i == STANDTOM1) output_string[incoming_i] += "□\t"; // Standtom
-            else if (incoming_i == STANDTOM2) output_string[incoming_i] += "O\t"; // Standtom
-            else if (incoming_i == HIHAT) output_string[incoming_i] += "x\t"; // Hi-Hat
-            else if (incoming_i == TOM1) output_string[incoming_i] += "°\t"; // Tom 1
-            else if (incoming_i == SNARE) output_string[incoming_i] += "※\t"; // Snaredrum
-            else if (incoming_i == TOM2) output_string[incoming_i] += "o\t"; // Tom 2
-            else if (incoming_i == RIDE) output_string[incoming_i] += "xx\t"; // Ride
-            else if (incoming_i == CRASH1) output_string[incoming_i] += "-X-\t"; // Crash
-            else if (incoming_i == CRASH2) output_string[incoming_i] += "-XX-\t"; // Crash
+  if (incoming_i == KICK) output_string[incoming_i] += "■\t"; // Kickdrum
+  else if (incoming_i == COWBELL) output_string[incoming_i] += "▲\t"; // Crash
+  else if (incoming_i == STANDTOM1) output_string[incoming_i] += "□\t"; // Standtom
+  else if (incoming_i == STANDTOM2) output_string[incoming_i] += "O\t"; // Standtom
+  else if (incoming_i == HIHAT) output_string[incoming_i] += "x\t"; // Hi-Hat
+  else if (incoming_i == TOM1) output_string[incoming_i] += "°\t"; // Tom 1
+  else if (incoming_i == SNARE) output_string[incoming_i] += "※\t"; // Snaredrum
+  else if (incoming_i == TOM2) output_string[incoming_i] += "o\t"; // Tom 2
+  else if (incoming_i == RIDE) output_string[incoming_i] += "xx\t"; // Ride
+  else if (incoming_i == CRASH1) output_string[incoming_i] += "-X-\t"; // Crash
+  else if (incoming_i == CRASH2) output_string[incoming_i] += "-XX-\t"; // Crash
 }
 
 // --------------------------------------------------------------------
