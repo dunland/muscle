@@ -44,7 +44,7 @@ char *names[10];
 // static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN1, LED_BUILTIN2, LED_BUILTIN3}; // array when using SPRESENSE
 static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN};
 #define VIBR 0
-#define FOOTSWITCH 2 
+#define FOOTSWITCH 2
 
 // ------------------------- Debug variables --------------------------
 boolean responsiveCalibration = false;
@@ -75,7 +75,7 @@ int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each inst
 
 /* --------------------------- MUSICAL PARAMETERS ---------------------- */
 
-boolean rhythm_slot[numInputs][8];
+boolean read_rhythm_slot[numInputs][8];
 int notes_list[] = {60, 61, 39, 65, 67, 44, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
 int note_idx[numInputs];                         // instrument-specific pointer for notes
 int pinAction[] = {2, 2, 2, 2, 2, 2, 0, 2};
@@ -221,7 +221,7 @@ void setup()
   {
     for (int j = 0; j < 8; j++)
     {
-      rhythm_slot[i][j] = false;
+      read_rhythm_slot[i][j] = false;
     }
   }
   // ---------------------------------------------------------------------------
@@ -300,11 +300,6 @@ void masterClockTimer_higherPrecision()
     next_beatCount += 8;
   }
 
-  // prepare MIDI clock:
-  //---|---↓32nd-notes------|3/4↓ 32nd note|
-  if (((masterClockCount % 4) * 3) % 4 == 0)
-    sendMidiClock = true;
-
   // ---------------------------------------------------------------------------
 }
 
@@ -342,6 +337,10 @@ void masterClockTimer()
     currentStep = next_beatCount;
     next_beatCount += 4;
   }
+
+  // prepare MIDI clock:
+  sendMidiClock = (((masterClockCount % 4) / 3) % 4 == 0);
+
   // ---------------------------------------------------------------------------
 }
 
@@ -367,33 +366,33 @@ void loop()
       // ----------------------- perform pin action -------------------
       switch (pinAction[i])
       {
-      case 0: // tapTempo
+        case 0: // tapTempo
 
-        getTapTempo();
-        break;
+          getTapTempo();
+          break;
 
-      case 1: // monitor: just print what is being played.
-        if (printStrokes)
-        {
-          if (!rhythm_slot[i][eighthNoteCount])
+        case 1: // monitor: just print what is being played.
+          if (printStrokes)
+          {
+            if (!read_rhythm_slot[i][eighthNoteCount])
+              setInstrumentPrintString(i);
+          }
+          break;
+
+        case 2: // toggle beat slot
+          if (printStrokes)
             setInstrumentPrintString(i);
-        }
-        break;
+          read_rhythm_slot[i][eighthNoteCount] = !read_rhythm_slot[i][eighthNoteCount];
+          break;
 
-      case 2: // toggle beat slot
-        if (printStrokes)
-          setInstrumentPrintString(i);
-        read_rhythm_slot[i][eighthNoteCount] = !read_rhythm_slot[i][eighthNoteCount];
-        break;
+        case 3: // record what is being played for one full bar and set it later
+          if (printStrokes)
+            setInstrumentPrintString(i);
+          set_rhythm_slot[i][eighthNoteCount] = true;
+          break;
 
-      case 3: // record what is being played for one full bar and set it later
-        if (printStrokes)
-          setInstrumentPrintString(i);
-        set_rhythm_slot[i][eighthNoteCount] = true;
-        break;
-
-      default:
-        break;
+        default:
+          break;
       }
     }
   } // end main commands loop -----------------------------------------
@@ -416,13 +415,13 @@ void loop()
   /* MIDI Clock events are sent at a rate of 24 pulses per quarter note
      one tap beat equals one quarter note
      only one midi clock signal should be send per 24th quarter note
-    */
+  */
   if (sendMidiCopy)
   {
     Serial2.write(0xF8); // MIDI-clock has to be sent 24 times per beat
     noInterrupts();
     sendMidiClock = false;
-    interrups();
+    interrupts();
   }
 
   // ------------------------------ FULL NOTES -----------------------
@@ -430,7 +429,7 @@ void loop()
   {
     for (int i = 0; i < numInputs; i++)
     {
-      set_rhythm_slot[i] = false;
+      set_rhythm_slot[i][eighthNoteCount] = false;
     }
   }
 
@@ -473,8 +472,8 @@ void loop()
       //Serial.print(current_beat_pos);
       Serial.print("\t");
       /*Serial.print(current_beat_pos / 4);
-      Serial.print("\t");
-      Serial.print(eighthNoteCount);*/
+        Serial.print("\t");
+        Serial.print(eighthNoteCount);*/
       for (int i = 0; i < numInputs; i++)
       {
         Serial.print(output_string[i]);
@@ -500,7 +499,7 @@ void loop()
   static int switch_state = LOW;
   static int last_switch_state = LOW;
   static unsigned long last_switch_toggle = 0;
-  static boolean lastPinMode[numInputs];
+  static boolean lastPinAction[numInputs];
 
   switch_state = digitalRead(FOOTSWITCH);
   if (switch_state != last_switch_state && millis() > last_switch_toggle + 20)
@@ -510,15 +509,15 @@ void loop()
       // set pinMode of all instruments to 3 (record what is being played)
       for (int i = 0; i < numInputs; i++)
       {
-        lastPinMode[i] = pinMode[i];
-        pinMode[i] = 3; // TODO: not for Cowbell?
+        lastPinAction[i] = pinAction[i];
+        pinAction[i] = 3; // TODO: not for Cowbell?
       }
     }
-    else 
+    else
     {
       for (int i = 0; i < numInputs; i++)
       {
-        pinMode[i] = lastPinMode[i];
+        pinAction[i] = lastPinAction[i];
       }
     }
     last_switch_toggle = millis();
@@ -552,7 +551,7 @@ boolean stroke_detected(int pinDect_pointer_in)
   interrupts();
 
   if (millis() > lastPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke) // get counts only X ms after LAST hit
-  // if (millis() > firstPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke) // get counts only X ms after FIRST hit ??
+    // if (millis() > firstPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke) // get counts only X ms after FIRST hit ??
   {
     noInterrupts();
     countsCopy[pinDect_pointer_in] = counts[pinDect_pointer_in];
@@ -602,44 +601,44 @@ void getTapTempo()
     //      tapState = 1;
     //      break;
 
-  case 1:                                     // waiting for first hit
-    if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
-    {
-      num_of_taps = 0;
-      clock_sum = 0;
-      Serial.println("-----------TAP RESET!-----------\n");
-    }
-    timeSinceFirstTap = millis(); // record time of first hit
-    tapState = 2;                 // next: wait for second hit
+    case 1:                                     // waiting for first hit
+      if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
+      {
+        num_of_taps = 0;
+        clock_sum = 0;
+        Serial.println("-----------TAP RESET!-----------\n");
+      }
+      timeSinceFirstTap = millis(); // record time of first hit
+      tapState = 2;                 // next: wait for second hit
 
-    break;
+      break;
 
-  case 2: // waiting for second hit
+    case 2: // waiting for second hit
 
-    if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
-    {
-      num_of_taps++;
-      clock_sum += millis() - timeSinceFirstTap;
-      tapInterval = clock_sum / num_of_taps;
-      Serial.print("new tap Tempo is ");
-      Serial.print(60000 / tapInterval);
-      Serial.print(" bpm (");
-      Serial.print(tapInterval);
-      Serial.println(" ms interval)");
+      if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
+      {
+        num_of_taps++;
+        clock_sum += millis() - timeSinceFirstTap;
+        tapInterval = clock_sum / num_of_taps;
+        Serial.print("new tap Tempo is ");
+        Serial.print(60000 / tapInterval);
+        Serial.print(" bpm (");
+        Serial.print(tapInterval);
+        Serial.println(" ms interval)");
 
-      // bpm = 60000 / tapInterval;
-      tapState = 1;
+        // bpm = 60000 / tapInterval;
+        tapState = 1;
 
-      masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
-    }
+        masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+      }
 
-    if (timeSinceFirstTap > 2000) // forget tap if time was too long
-    {
-      tapState = 1;
-      // Serial.println("too long...");
-    }
-    // }
-    break;
+      if (timeSinceFirstTap > 2000) // forget tap if time was too long
+      {
+        tapState = 1;
+        // Serial.println("too long...");
+      }
+      // }
+      break;
   }
 }
 
