@@ -104,6 +104,7 @@ void setup()
     counts[i] = 0;
   }
   pinMode(VIBR, OUTPUT);
+  pinMode(FOOTSWITCH, INPUT_PULLUP);
 
   // ---------------------------------------------------------------------------
   // instrument naming for human-readable console outputs
@@ -496,18 +497,18 @@ void loop()
   // ------------------------ end of TIMED ACTIONS ------------------
 
   // check footswitch -------------------------------------------------
-  static int switch_state = LOW;
-  static int last_switch_state = LOW;
+  static int switch_state;
+  static int last_switch_state = HIGH;
   static unsigned long last_switch_toggle = 0;
   static boolean lastPinAction[numInputs];
 
   switch_state = digitalRead(FOOTSWITCH);
   if (switch_state != last_switch_state && millis() > last_switch_toggle + 20)
   {
-    if (switch_state == HIGH)
+    if (switch_state == LOW)
     {
-      // set pinMode of all instruments to 3 (record what is being played)
-      for (int i = 0; i < numInputs; i++)
+      Serial.println("Footswitch pressed.");
+      for (int i = 0; i < numInputs; i++) // set pinMode of all instruments to 3 (record what is being played)
       {
         lastPinAction[i] = pinAction[i];
         pinAction[i] = 3; // TODO: not for Cowbell?
@@ -519,7 +520,9 @@ void loop()
       {
         pinAction[i] = lastPinAction[i];
       }
+      Serial.println("Footswitch released.");
     }
+    last_switch_state = switch_state;
     last_switch_toggle = millis();
   }
 
