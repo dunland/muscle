@@ -263,6 +263,7 @@ volatile unsigned long beatCount = 0;
 // volatile int bar_step; // 0-32
 volatile int currentStep; // 0-32
 int next_beatCount = 0;  // will be reset when timer restarts
+volatile boolean sendMidiClock = false;
 
 void masterClockTimer_higherPrecision()
 {
@@ -299,6 +300,11 @@ void masterClockTimer_higherPrecision()
     currentStep = next_beatCount;
     next_beatCount += 8;
   }
+
+  // prepare MIDI clock: 
+  //---|---↓32nd-notes------|3/4↓ 32nd note|
+  if (((masterClockCount % 4) * 3) % 4 == 0) sendMidiClock = true;
+  
   // ---------------------------------------------------------------------------
 
 }
@@ -351,6 +357,7 @@ void loop()
 {
   static int eighthNoteCount = 0;
   static int last_eighth_count = 0;
+  static boolean set_rhythm_slot[numInputs][8];
 
   // ------------------------- DEBUG AREA -----------------------------
   printNormalizedValues(printNormalizedValues_);
@@ -380,7 +387,12 @@ void loop()
 
         case 2: // toggle beat slot
           if (printStrokes) setInstrumentPrintString(i);
-          rhythm_slot[i][eighthNoteCount] = (rhythm_slot[i][eighthNoteCount] == true) ? false : true;
+          read_rhythm_slot[i][eighthNoteCount] = !read_rhythm_slot[i][eighthNoteCount];
+          break;
+
+        case 3: // record what is being played for one full bar and set it later
+          if (printStrokes) setInstrumentPrintString(i);
+          set_rhythm_slot[i][eighthNoteCount] = true;
           break;
 
         default:
@@ -393,16 +405,42 @@ void loop()
   // (automatically invoke rhythm-linked actions)
   static int last_beat_pos = 0;
   static boolean toggleLED = true;
+  static boolean sendMidiCopy = false;
 
   static unsigned long vibration_begin = 0;
   static int vibration_duration = 0;
 
   noInterrupts();
   current_beat_pos = beatCount % 32; // (beatCount increases infinitely)
+  sendMidiCopy = sendMidiClock;
   interrupts();
+    
+    // ---------------------------- send MIDI-Clock on beat
+    /* MIDI Clock events are sent at a rate of 24 pulses per quarter note
+     one tap beat equals one quarter note
+     only one midi clock signal should be send per 24th quarter note
+    */
+    if (sendMidiCopy)
+      {
+        Serial2.write(0xF8); // MIDI-clock has to be sent 24 times per beat
+        noInterrupts();
+        sendMidiClock = false;
+        interrups();
+      } 
+
+  // ------------------------------ FULL NOTES -----------------------
+  if (current_beat_pos % 32 == 0)
+  {
+    for (int i = 0; i < numInputs; i++)
+    {
+      set_rhythm_slot[i] = false;
+    }
+  }
 
   if (current_beat_pos != last_beat_pos)
   {
+    // ------------------------------ 8th NOTES -----------------------
+    // increase 8th note counter:
     if (current_beat_pos % 4 == 0)
     {
       eighthNoteCount = (eighthNoteCount + 1) % 8;
@@ -410,12 +448,19 @@ void loop()
     }
     digitalWrite(LED_BUILTIN, toggleLED);
 
-    // ----------------------------- draw time log to console
+    // set rhythm slots to play MIDI notes (pinMode 3):
+    for (int i = 0; i < numInputs; i++)
+    {
+      if (pinMode[i] == 3)
+      read_rhythm_slot[i][eighthNoteCount] = set_rhythm_slot[i][eighthNoteCount];
+    }
+
+    // set print String and send MIDI notes ---------------------------
     if (eighthNoteCount != last_eighth_count)
     {
       for (int i = 0; i < numInputs; i++)
       {
-        if (rhythm_slot[i][eighthNoteCount])
+        if (read_rhythm_slot[i][eighthNoteCount])
         {
           setInstrumentPrintString(i);
           MIDI.sendNoteOn(notes_list[i], 127, 2);
@@ -423,6 +468,7 @@ void loop()
         else MIDI.sendNoteOff(notes_list[i], 127, 2);
       }
 
+    // ----------------------------- draw play log to console
       Serial.print(millis());
       Serial.print("\t");
       Serial.print(eighthNoteCount+1);
@@ -446,10 +492,6 @@ void loop()
       vibration_duration = 50;
       digitalWrite(VIBR, HIGH);
     }
-
-    // ---------------------------- send MIDI-Clock on beat
-    if (current_beat_pos * 3 % 4 == 0) Serial2.write(0xF8);
-
   }
   last_beat_pos = current_beat_pos;
   last_eighth_count = eighthNoteCount;
@@ -538,7 +580,6 @@ void getTapTempo()
       {
         num_of_taps = 0;
         clock_sum = 0;
-        // TODO: RHYTHM RESET???????????
         Serial.println("-----------TAP RESET!-----------\n");
       }
       timeSinceFirstTap = millis(); // record time of first hit
@@ -562,9 +603,7 @@ void getTapTempo()
         // bpm = 60000 / tapInterval;
         tapState = 1;
 
-        masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // taps are always understood as quarter notes
         masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
-
       }
 
       if (timeSinceFirstTap > 2000) // forget tap if time was too long
