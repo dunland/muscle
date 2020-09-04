@@ -131,92 +131,92 @@ void printNormalizedValues(boolean printNorm_criterion)
 ///////////////////// SET STRING FOR PLAY LOGGING /////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-// int velocity[numInputs]; // this should be done in the swell section, but is needed in print section already... :/
+// int cc_val[numInputs]; // this should be done in the swell section, but is needed in print section already... :/
 
 void setInstrumentPrintString(int incoming_i, int incoming_pinAction)
 {
   switch (incoming_pinAction)
   {
 
-  case 1: // monitor: just print what is being played
-    if (incoming_i == KICK)
-      output_string[incoming_i] = "■\t"; // Kickdrum
-    else if (incoming_i == COWBELL)
-      output_string[incoming_i] = "▲\t"; // Crash
-    else if (incoming_i == STANDTOM1)
-      output_string[incoming_i] = "□\t"; // Standtom
-    else if (incoming_i == STANDTOM2)
-      output_string[incoming_i] = "O\t"; // Standtom
-    else if (incoming_i == HIHAT)
-      output_string[incoming_i] = "x\t"; // Hi-Hat
-    else if (incoming_i == TOM1)
-      output_string[incoming_i] = "°\t"; // Tom 1
-    else if (incoming_i == SNARE)
-      output_string[incoming_i] = "※\t"; // Snaredrum
-    else if (incoming_i == TOM2)
-      output_string[incoming_i] = "o\t"; // Tom 2
-    else if (incoming_i == RIDE)
-      output_string[incoming_i] = "xx\t"; // Ride
-    else if (incoming_i == CRASH1)
-      output_string[incoming_i] = "-X-\t"; // Crash
-    else if (incoming_i == CRASH2)
-      output_string[incoming_i] = "-XX-\t"; // Crash
-    break;
+    case 1: // monitor: just print what is being played
+      if (incoming_i == KICK)
+        output_string[incoming_i] = "■\t"; // Kickdrum
+      else if (incoming_i == COWBELL)
+        output_string[incoming_i] = "▲\t"; // Crash
+      else if (incoming_i == STANDTOM1)
+        output_string[incoming_i] = "□\t"; // Standtom
+      else if (incoming_i == STANDTOM2)
+        output_string[incoming_i] = "O\t"; // Standtom
+      else if (incoming_i == HIHAT)
+        output_string[incoming_i] = "x\t"; // Hi-Hat
+      else if (incoming_i == TOM1)
+        output_string[incoming_i] = "°\t"; // Tom 1
+      else if (incoming_i == SNARE)
+        output_string[incoming_i] = "※\t"; // Snaredrum
+      else if (incoming_i == TOM2)
+        output_string[incoming_i] = "o\t"; // Tom 2
+      else if (incoming_i == RIDE)
+        output_string[incoming_i] = "xx\t"; // Ride
+      else if (incoming_i == CRASH1)
+        output_string[incoming_i] = "-X-\t"; // Crash
+      else if (incoming_i == CRASH2)
+        output_string[incoming_i] = "-XX-\t"; // Crash
+      break;
 
-  case 2: // toggle beat slot
-    if (incoming_i == KICK)
-      output_string[incoming_i] = "■\t"; // Kickdrum
-    else if (incoming_i == COWBELL)
-      output_string[incoming_i] = "▲\t"; // Crash
-    else if (incoming_i == STANDTOM1)
-      output_string[incoming_i] = "□\t"; // Standtom
-    else if (incoming_i == STANDTOM2)
-      output_string[incoming_i] = "O\t"; // Standtom
-    else if (incoming_i == HIHAT)
-      output_string[incoming_i] = "x\t"; // Hi-Hat
-    else if (incoming_i == TOM1)
-      output_string[incoming_i] = "°\t"; // Tom 1
-    else if (incoming_i == SNARE)
-      output_string[incoming_i] = "※\t"; // Snaredrum
-    else if (incoming_i == TOM2)
-      output_string[incoming_i] = "o\t"; // Tom 2
-    else if (incoming_i == RIDE)
-      output_string[incoming_i] = "xx\t"; // Ride
-    else if (incoming_i == CRASH1)
-      output_string[incoming_i] = "-X-\t"; // Crash
-    else if (incoming_i == CRASH2)
-      output_string[incoming_i] = "-XX-\t"; // Crash
-    break;
+    case 2: // toggle beat slot
+      if (incoming_i == KICK)
+        output_string[incoming_i] = "■\t"; // Kickdrum
+      else if (incoming_i == COWBELL)
+        output_string[incoming_i] = "▲\t"; // Crash
+      else if (incoming_i == STANDTOM1)
+        output_string[incoming_i] = "□\t"; // Standtom
+      else if (incoming_i == STANDTOM2)
+        output_string[incoming_i] = "O\t"; // Standtom
+      else if (incoming_i == HIHAT)
+        output_string[incoming_i] = "x\t"; // Hi-Hat
+      else if (incoming_i == TOM1)
+        output_string[incoming_i] = "°\t"; // Tom 1
+      else if (incoming_i == SNARE)
+        output_string[incoming_i] = "※\t"; // Snaredrum
+      else if (incoming_i == TOM2)
+        output_string[incoming_i] = "o\t"; // Tom 2
+      else if (incoming_i == RIDE)
+        output_string[incoming_i] = "xx\t"; // Ride
+      else if (incoming_i == CRASH1)
+        output_string[incoming_i] = "-X-\t"; // Crash
+      else if (incoming_i == CRASH2)
+        output_string[incoming_i] = "-XX-\t"; // Crash
+      break;
 
-  case 3: // add an ! if pinAction == 3 (replay logged rhythm)
-    if (incoming_i == KICK)
-      output_string[incoming_i] = "!■\t"; // Kickdrum
-    else if (incoming_i == COWBELL)
-      output_string[incoming_i] = "!▲\t"; // Crash
-    else if (incoming_i == STANDTOM1)
-      output_string[incoming_i] = "!□\t"; // Standtom
-    else if (incoming_i == STANDTOM2)
-      output_string[incoming_i] = "!O\t"; // Standtom
-    else if (incoming_i == HIHAT)
-      output_string[incoming_i] = "!x\t"; // Hi-Hat
-    else if (incoming_i == TOM1)
-      output_string[incoming_i] = "!°\t"; // Tom 1
-    else if (incoming_i == SNARE)
-      output_string[incoming_i] = "!※\t"; // Snaredrum
-    else if (incoming_i == TOM2)
-      output_string[incoming_i] = "!o\t"; // Tom 2
-    else if (incoming_i == RIDE)
-      output_string[incoming_i] = "!xx\t"; // Ride
-    else if (incoming_i == CRASH1)
-      output_string[incoming_i] = "!-X-\t"; // Crash
-    else if (incoming_i == CRASH2)
-      output_string[incoming_i] = "!-XX-\t"; // Crash
-    break;
+    case 3: // add an ! if pinAction == 3 (replay logged rhythm)
+      if (incoming_i == KICK)
+        output_string[incoming_i] = "!■\t"; // Kickdrum
+      else if (incoming_i == COWBELL)
+        output_string[incoming_i] = "!▲\t"; // Crash
+      else if (incoming_i == STANDTOM1)
+        output_string[incoming_i] = "!□\t"; // Standtom
+      else if (incoming_i == STANDTOM2)
+        output_string[incoming_i] = "!O\t"; // Standtom
+      else if (incoming_i == HIHAT)
+        output_string[incoming_i] = "!x\t"; // Hi-Hat
+      else if (incoming_i == TOM1)
+        output_string[incoming_i] = "!°\t"; // Tom 1
+      else if (incoming_i == SNARE)
+        output_string[incoming_i] = "!※\t"; // Snaredrum
+      else if (incoming_i == TOM2)
+        output_string[incoming_i] = "!o\t"; // Tom 2
+      else if (incoming_i == RIDE)
+        output_string[incoming_i] = "!xx\t"; // Ride
+      else if (incoming_i == CRASH1)
+        output_string[incoming_i] = "!-X-\t"; // Crash
+      else if (incoming_i == CRASH2)
+        output_string[incoming_i] = "!-XX-\t"; // Crash
+      break;
 
-    // case 5: // print velocity for repeated MIDI notes in "swell" mode
-    //   output_string[incoming_i] = velocity[incoming_i];
-    //   output_string[incoming_i] += "\t";
-    //   break;
+      // case 5: // print cc_val for repeated MIDI notes in "swell" mode
+      //   output_string[incoming_i] = cc_val[incoming_i];
+      //   output_string[incoming_i] += "\t";
+      //   break;
   }
 }
 
@@ -237,8 +237,8 @@ boolean stroke_detected(int pinDect_pointer_in)
   interrupts();
 
   if (millis() > lastPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke) // get counts only X ms after LAST hit
-  //if (millis() > firstPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke)
-  //get counts only X ms after FIRST hit ??
+    //if (millis() > firstPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke)
+    //get counts only X ms after FIRST hit ??
   {
     noInterrupts();
     countsCopy[pinDect_pointer_in] = counts[pinDect_pointer_in];
@@ -263,7 +263,7 @@ boolean stroke_detected(int pinDect_pointer_in)
     }
   }
   else // TODO: timing not ok (obsolete: will always be ok!)
-  {
+  { 
     {
       return false;
     }
@@ -276,35 +276,35 @@ boolean stroke_detected(int pinDect_pointer_in)
 
 /* SOUND SWELL ALGORITHM: ---------------------------------------------
 
-RECORD:
+  RECORD:
 
--------X-------X-------X-------X------- hits
--------|-------|-------|-------|------- 
--------1-------2-------3-------4------- num_of_swell_taps
--------|-------|-------|-------|-------
-------502-----510-----518-----526------ beatCount (beatPos)
--------|-------|-------|-------|-------
--------|-------|------prev----curr-----
--------|-------|-------|-------|-------
--------|-------8-------16------32------ swell_beatPos_sum = sum + (curr - prev)
--------|---8---|---8---|---8---|------- swell_stroke_interval = sum/num
-------v++-----v++-----v++-----v++------ increase velocity
+  -------X-------X-------X-------X------- hits
+  -------|-------|-------|-------|-------
+  -------1-------2-------3-------4------- num_of_swell_taps
+  -------|-------|-------|-------|-------
+  ------502-----510-----518-----526------ beatCount (beatPos)
+  -------|-------|-------|-------|-------
+  -------|-------|------prev----curr-----
+  -------|-------|-------|-------|-------
+  -------|-------8-------16------32------ swell_beatPos_sum = sum + (curr - prev)
+  -------|---8---|---8---|---8---|------- swell_stroke_interval = sum/num
+  ------v++-----v++-----v++-----v++------ increase cc_val
 
 
-PLAY:
+  PLAY:
 
--------|-------|-------|-------|-------
--------0-------1-------2-------3------- beatStep
--------|-------|-------|-------|-------
--------v-----(v↓)----(v↓)----(v↓)------ decrease velocity
--------🎵-------🎵-------🎵------🎵------- play MIDI note
+  -------|-------|-------|-------|-------
+  -------0-------1-------2-------3------- beatStep
+  -------|-------|-------|-------|-------
+  -------v-----(v↓)----(v↓)----(v↓)------ decrease cc_val
+  -------🎵-------🎵-------🎵------🎵------- play MIDI note
 
----------------------------------------------------------------------*/
+  ---------------------------------------------------------------------*/
 
-int num_of_swell_taps[numInputs];     // will be used in both swell_rec() and swell_beat(). serves as velocity for MIDI notes.
+int num_of_swell_taps[numInputs];     // will be used in both swell_rec() and swell_beat(). serves as cc_val for MIDI notes.
 int swell_stroke_interval[numInputs]; // will be needed for timed replay
 int swell_state[numInputs];
-int velocity[numInputs];
+int cc_val[numInputs];
 unsigned long swell_beatPos_sum[numInputs];
 
 void swell_init() // initialize arrays for swell functions (run in setup())
@@ -313,7 +313,7 @@ void swell_init() // initialize arrays for swell functions (run in setup())
   {
     swell_state[i] = 1;
     num_of_swell_taps[i] = 0;
-    velocity[i] = 0;
+    cc_val[i] = 0;
     swell_beatPos_sum[i] = 0;
   }
 }
@@ -326,7 +326,6 @@ void swell_rec(int instr) // remembers beat stroke position
 {
   /* works pretty much just like the tapTempo, but repeats the triggered drums on external MIDI instrument (-> swell_beat() in TIMED INTERVALS) */
   static unsigned long previous_swell_beatPos[numInputs];
-
   if (swell_state[instr] == 1) // first hit
   {
     // grab the current beat counter
@@ -337,8 +336,8 @@ void swell_rec(int instr) // remembers beat stroke position
   }
   else if (swell_state[instr] == 2) // second hit
   {
-    num_of_swell_taps[instr]++; // will define the velocity for replayed MIDI notes
-    velocity[instr] += 2;
+    num_of_swell_taps[instr]++; // will define the cc_val for replayed MIDI notes
+    cc_val[instr] = cc_val[instr] + (cc_val[instr] <= 117) * 10; // TODO: specific increase rates for all different cc_types
     unsigned long current_swell_beatPos;
 
     noInterrupts();
@@ -367,34 +366,42 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
   interrupts();
 
   // ready to play MIDI again?
-  swell_beatStep[instr] = (swell_beatStep[instr] + 1) % swell_stroke_interval[instr];
+  if (swell_state[instr] != 0)
+    swell_beatStep[instr] = (swell_beatStep[instr] + 1) % swell_stroke_interval[instr];
   //Serial.print("swStp");
   //Serial.print(swell_beatStep[instr]);
   //Serial.print("\t");
 
-  //velocity[instr] = (velocity[instr] > 127) ? 127 : velocity[instr]; // max velocity = 127
+  //cc_val[instr] = (cc_val[instr] > 127) ? 127 : cc_val[instr]; // max cc_val = 127
   if (swell_beatStep[instr] == 0) // on swell beat
   {
-    output_string[instr] = String(velocity[instr]);
-    MIDI.sendControlChange(07, velocity[instr], 2); // TODO: set volume/cutoff/.. instead of velocity
-    MIDI.sendNoteOn(notes_list[instr], velocity[instr], 2);
+    output_string[instr] = String(cc_val[instr]);
+    output_string[instr] += "\t";
+    MIDI.sendControlChange(cc_chan[instr], cc_val[instr], 2); //
+    /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
+      finding the right CC# on microKORG: (manual p.61):
+      1. press SHIFT + 5
+      2. choose parameter to find out via EDIT SELECT 1 & 2
+      (3. reset that parameter, if you like) */
+    MIDI.sendNoteOn(notes_list[instr], 127, 2);
 
-    if (velocity[instr] > 0 && swell_state[instr] == 2)
+    if (cc_val[instr] > 0 && swell_state[instr] == 2)
     {
-      velocity[instr]--; // decrease velocity
+      cc_val[instr]--; // decrease cc_val
     }
-    else // reset swell if velocity == 0:
+    /*else // reset swell if cc_val == 0:
     {
-      velocity[instr] = 0;
+      swell_beatStep[instr] = -1;
+      cc_val[instr] = 0;
       num_of_swell_taps[instr] = 0;
-      swell_beatPos_sum[instr] = 0;      
+      swell_beatPos_sum[instr] = 0;
       swell_state[instr] = 1;
-    }
-    // velocity[instr] = (velocity[instr] > 0) * (velocity[instr] - 1); // decrease velocity only if > 0
+    }*/ //TODO: reset!
+    // cc_val[instr] = (cc_val[instr] > 0) * (cc_val[instr] - 1); // decrease cc_val only if > 0
   }
   else // stop MIDI
   {
-    MIDI.sendNoteOff(notes_list[instr], velocity[instr], 2);
+    MIDI.sendNoteOff(notes_list[instr], 127, 2);
   }
 }
 // --------------------------------------------------------------------
@@ -419,44 +426,44 @@ void getTapTempo()
     //      tapState = 1;
     //      break;
 
-  case 1:                                     // first hit
-    if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
-    {
-      num_of_taps = 0;
-      clock_sum = 0;
-      Serial.println("-----------TAP RESET!-----------\n");
-    }
-    timeSinceFirstTap = millis(); // record time of first hit
-    tapState = 2;                 // next: wait for second hit
+    case 1:                                     // first hit
+      if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
+      {
+        num_of_taps = 0;
+        clock_sum = 0;
+        Serial.println("-----------TAP RESET!-----------\n");
+      }
+      timeSinceFirstTap = millis(); // record time of first hit
+      tapState = 2;                 // next: wait for second hit
 
-    break;
+      break;
 
-  case 2: // second hit
+    case 2: // second hit
 
-    if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
-    {
-      num_of_taps++;
-      clock_sum += millis() - timeSinceFirstTap;
-      tapInterval = clock_sum / num_of_taps;
-      Serial.print("new tap Tempo is ");
-      Serial.print(60000 / tapInterval);
-      Serial.print(" bpm (");
-      Serial.print(tapInterval);
-      Serial.println(" ms interval)");
+      if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
+      {
+        num_of_taps++;
+        clock_sum += millis() - timeSinceFirstTap;
+        tapInterval = clock_sum / num_of_taps;
+        Serial.print("new tap Tempo is ");
+        Serial.print(60000 / tapInterval);
+        Serial.print(" bpm (");
+        Serial.print(tapInterval);
+        Serial.println(" ms interval)");
 
-      // bpm = 60000 / tapInterval;
-      tapState = 1;
+        // bpm = 60000 / tapInterval;
+        tapState = 1;
 
-      masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
-    }
+        masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+      }
 
-    if (timeSinceFirstTap > 2000) // forget tap if time was too long
-    {
-      tapState = 1;
-      // Serial.println("too long...");
-    }
-    // }
-    break;
+      if (timeSinceFirstTap > 2000) // forget tap if time was too long
+      {
+        tapState = 1;
+        // Serial.println("too long...");
+      }
+      // }
+      break;
   }
 }
 // --------------------------------------------------------------------

@@ -27,7 +27,7 @@
 #include <MIDI.h>
 
 //MIDI_CREATE_DEFAULT_INSTANCE();
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI); // for Serial-specific usage on SPRESENSE
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI); // for Serial-specific usage
 
 // ----------------------------- pins ---------------------------------
 static const uint8_t numInputs = 7;
@@ -82,7 +82,10 @@ int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each inst
 
 boolean read_rhythm_slot[numInputs][8];
 boolean set_rhythm_slot[numInputs][8];
-int notes_list[] = {60, 61, 39, 65, 67, 44, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
+//int notes_list[] = {60, 61, 39, 65, 67, 44, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
+int notes_list[] = {60, 61, 73, 74, 67, 44, 71};
+int cc_chan[] = {0,0,0,-1,-1,50,0,0}; // channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
+
 int pinAction[] = {1, 1, 1, 1, 1, 5, 4, 1};      // array to be changed within code loop.
 int initialPinAction[numInputs];                 // holds the pinAction array as defined above
 
