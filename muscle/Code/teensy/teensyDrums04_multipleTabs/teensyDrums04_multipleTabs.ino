@@ -78,7 +78,7 @@ int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each inst
 boolean read_rhythm_slot[numInputs][8];
 boolean set_rhythm_slot[numInputs][8];
 int notes_list[] = {60, 61, 39, 65, 67, 44, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
-int pinAction[] = {0, 0, 0, 0, 0, 0, 4, 0};
+int pinAction[] = {1, 1, 1, 1, 1, 1, 4, 1};
 int initialPinAction[numInputs];
 
 /* pinActions:
@@ -248,6 +248,7 @@ void loop()
 {
   static int eighthNoteCount = 0;
   static int last_eighth_count = 0;
+  static unsigned long lastNotePlayed[numInputs];
 
   // ------------------------- DEBUG AREA -----------------------------
   printNormalizedValues(printNormalizedValues_);
@@ -262,25 +263,26 @@ void loop()
       switch (pinAction[i])
       {
         case 0:
+          MIDI.sendNoteOn(notes_list[i], 127, 2);
+          lastNotePlayed[i] = millis();
           break;
 
         case 1: // monitor: just print what is being played.
           if (printStrokes)
           {
-            //if (!read_rhythm_slot[i][eighthNoteCount])
-            setInstrumentPrintString(i);
+            setInstrumentPrintString(i, pinAction[i]);
           }
           break;
 
         case 2: // toggle beat slot
           if (printStrokes)
-            setInstrumentPrintString(i);
+            setInstrumentPrintString(i, pinAction[i]);
           read_rhythm_slot[i][eighthNoteCount] = !read_rhythm_slot[i][eighthNoteCount];
           break;
 
-        case 3: // record what is being played for one full bar and set it later
+        case 3: // record what is being played and replay it later
           if (printStrokes)
-            setInstrumentPrintString(i);
+            setInstrumentPrintString(i, pinAction[i]);
           set_rhythm_slot[i][eighthNoteCount] = true;
           break;
 
@@ -346,7 +348,7 @@ void loop()
       {
         if (read_rhythm_slot[i][eighthNoteCount])
         {
-          setInstrumentPrintString(i);
+          setInstrumentPrintString(i, 3);
           MIDI.sendNoteOn(notes_list[i], 127, 2);
         }
         else
@@ -379,9 +381,10 @@ void loop()
     }
 
     // ATTENTION: Sketch got very slow now after this... (31.08.2020)
-    for (int i = 0; i < numInputs; i++)
-      if (pinAction[i] == 3)
-        set_rhythm_slot[i][eighthNoteCount] = false;
+    // ... really?
+    // for (int i = 0; i < numInputs; i++)
+      // if (pinAction[i] == 3)
+        // set_rhythm_slot[i][eighthNoteCount] = false;
   }
   last_beat_pos = current_beat_pos;
   last_eighth_count = eighthNoteCount;
@@ -394,5 +397,8 @@ void loop()
   // turn off vibration -----------------------------------------------
   if (millis() > vibration_begin + vibration_duration)
     digitalWrite(VIBR, LOW);
+  for (int i = 0; i < numInputs; i++)
+    if (millis() > lastNotePlayed[i] + 200)
+      MIDI.sendNoteOff(notes_list[i], 127, 2);
 }
 // --------------------------------------------------------------------

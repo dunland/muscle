@@ -16,7 +16,8 @@ void calculateNoiseFloor()
     Serial.print(" ..waiting for stroke");
     if (responsiveCalibration)
     {
-      while (analogRead(pins[pinNum]) < 700 + calibration[pinNum][0]); // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
+      while (analogRead(pins[pinNum]) < 700 + calibration[pinNum][0])
+        ; // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
       Serial.print(" .");
       delay(1000); // should be long enough for drum not to oscillate anymore
     }
@@ -49,7 +50,6 @@ void calculateNoiseFloor()
 }
 // --------------------------------------------------------------------
 
-
 // ------------------------------- FOOT SWITCH ------------------------
 // --------------------------------------------------------------------
 void checkFootSwitch()
@@ -69,9 +69,10 @@ void checkFootSwitch()
       // set pinMode of all instruments to 3 (record what is being played)
       for (int i = 0; i < numInputs; i++)
       {
-        lastPinAction[i] = pinAction[i];
-        pinAction[i] = 3; // TODO: not for Cowbell?
-        //for (int j = 0; j < 8; j++) set_rhythm_slot[i][j] = false;
+        lastPinAction[i] = pinAction[i]; // TODO: lastPinAction seems to be overwritten quickly, so it will not be able to return to its former state. fix this!
+        pinAction[i] = 3;                // TODO: not for Cowbell?
+        for (int j = 0; j < 8; j++)
+          set_rhythm_slot[i][j] = false; // reset entire record
       }
     }
     else
@@ -86,7 +87,6 @@ void checkFootSwitch()
   }
 }
 // --------------------------------------------------------------------
-
 
 // ------------------------ general pin reading -----------------------
 // --------------------------------------------------------------------
@@ -128,36 +128,63 @@ void printNormalizedValues(boolean printNorm_criterion)
 }
 // --------------------------------------------------------------------
 
-
 // ------------------ SET STRING FOR PLAY LOGGING ---------------------
 // --------------------------------------------------------------------
-void setInstrumentPrintString(int incoming_i)
+void setInstrumentPrintString(int incoming_i, int incoming_pinAction)
 {
-  if (incoming_i == KICK)
-    output_string[incoming_i] = "■\t"; // Kickdrum
-  else if (incoming_i == COWBELL)
-    output_string[incoming_i] = "▲\t"; // Crash
-  else if (incoming_i == STANDTOM1)
-    output_string[incoming_i] = "□\t"; // Standtom
-  else if (incoming_i == STANDTOM2)
-    output_string[incoming_i] = "O\t"; // Standtom
-  else if (incoming_i == HIHAT)
-    output_string[incoming_i] = "x\t"; // Hi-Hat
-  else if (incoming_i == TOM1)
-    output_string[incoming_i] = "°\t"; // Tom 1
-  else if (incoming_i == SNARE)
-    output_string[incoming_i] = "※\t"; // Snaredrum
-  else if (incoming_i == TOM2)
-    output_string[incoming_i] = "o\t"; // Tom 2
-  else if (incoming_i == RIDE)
-    output_string[incoming_i] = "xx\t"; // Ride
-  else if (incoming_i == CRASH1)
-    output_string[incoming_i] = "-X-\t"; // Crash
-  else if (incoming_i == CRASH2)
-    output_string[incoming_i] = "-XX-\t"; // Crash
+  if (incoming_pinAction != 3)
+  {
+    if (incoming_i == KICK)
+      output_string[incoming_i] = "■\t"; // Kickdrum
+    else if (incoming_i == COWBELL)
+      output_string[incoming_i] = "▲\t"; // Crash
+    else if (incoming_i == STANDTOM1)
+      output_string[incoming_i] = "□\t"; // Standtom
+    else if (incoming_i == STANDTOM2)
+      output_string[incoming_i] = "O\t"; // Standtom
+    else if (incoming_i == HIHAT)
+      output_string[incoming_i] = "x\t"; // Hi-Hat
+    else if (incoming_i == TOM1)
+      output_string[incoming_i] = "°\t"; // Tom 1
+    else if (incoming_i == SNARE)
+      output_string[incoming_i] = "※\t"; // Snaredrum
+    else if (incoming_i == TOM2)
+      output_string[incoming_i] = "o\t"; // Tom 2
+    else if (incoming_i == RIDE)
+      output_string[incoming_i] = "xx\t"; // Ride
+    else if (incoming_i == CRASH1)
+      output_string[incoming_i] = "-X-\t"; // Crash
+    else if (incoming_i == CRASH2)
+      output_string[incoming_i] = "-XX-\t"; // Crash
+  }
+  else // add an ! if pinAction == 3
+  {
+    if (incoming_i == KICK)
+      output_string[incoming_i] = "!■\t"; // Kickdrum
+    else if (incoming_i == COWBELL)
+      output_string[incoming_i] = "!▲\t"; // Crash
+    else if (incoming_i == STANDTOM1)
+      output_string[incoming_i] = "!□\t"; // Standtom
+    else if (incoming_i == STANDTOM2)
+      output_string[incoming_i] = "!O\t"; // Standtom
+    else if (incoming_i == HIHAT)
+      output_string[incoming_i] = "!x\t"; // Hi-Hat
+    else if (incoming_i == TOM1)
+      output_string[incoming_i] = "!°\t"; // Tom 1
+    else if (incoming_i == SNARE)
+      output_string[incoming_i] = "!※\t"; // Snaredrum
+    else if (incoming_i == TOM2)
+      output_string[incoming_i] = "!o\t"; // Tom 2
+    else if (incoming_i == RIDE)
+      output_string[incoming_i] = "!xx\t"; // Ride
+    else if (incoming_i == CRASH1)
+      output_string[incoming_i] = "!-X-\t"; // Crash
+    else if (incoming_i == CRASH2)
+      output_string[incoming_i] = "!-XX-\t"; // Crash
+  }
 }
-// --------------------------------------------------------------------
 
+// --------------------------------------------------------------------
 
 // ------------------------- STROKE DETECTION -------------------------
 // --------------------------------------------------------------------
@@ -174,7 +201,8 @@ boolean stroke_detected(int pinDect_pointer_in)
   interrupts();
 
   if (millis() > lastPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke) // get counts only X ms after LAST hit
-    // if (millis() > firstPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke) // get counts only X ms after FIRST hit ??
+  //if (millis() > firstPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke)
+  //get counts only X ms after FIRST hit ??
   {
     noInterrupts();
     countsCopy[pinDect_pointer_in] = counts[pinDect_pointer_in];
@@ -207,7 +235,6 @@ boolean stroke_detected(int pinDect_pointer_in)
 }
 // --------------------------------------------------------------------
 
-
 // ------------------------------ TAP TEMPO ---------------------------
 // --------------------------------------------------------------------
 
@@ -228,44 +255,44 @@ void getTapTempo()
     //      tapState = 1;
     //      break;
 
-    case 1:                                     // waiting for first hit
-      if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
-      {
-        num_of_taps = 0;
-        clock_sum = 0;
-        Serial.println("-----------TAP RESET!-----------\n");
-      }
-      timeSinceFirstTap = millis(); // record time of first hit
-      tapState = 2;                 // next: wait for second hit
+  case 1:                                     // waiting for first hit
+    if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
+    {
+      num_of_taps = 0;
+      clock_sum = 0;
+      Serial.println("-----------TAP RESET!-----------\n");
+    }
+    timeSinceFirstTap = millis(); // record time of first hit
+    tapState = 2;                 // next: wait for second hit
 
-      break;
+    break;
 
-    case 2: // waiting for second hit
+  case 2: // waiting for second hit
 
-      if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
-      {
-        num_of_taps++;
-        clock_sum += millis() - timeSinceFirstTap;
-        tapInterval = clock_sum / num_of_taps;
-        Serial.print("new tap Tempo is ");
-        Serial.print(60000 / tapInterval);
-        Serial.print(" bpm (");
-        Serial.print(tapInterval);
-        Serial.println(" ms interval)");
+    if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
+    {
+      num_of_taps++;
+      clock_sum += millis() - timeSinceFirstTap;
+      tapInterval = clock_sum / num_of_taps;
+      Serial.print("new tap Tempo is ");
+      Serial.print(60000 / tapInterval);
+      Serial.print(" bpm (");
+      Serial.print(tapInterval);
+      Serial.println(" ms interval)");
 
-        // bpm = 60000 / tapInterval;
-        tapState = 1;
+      // bpm = 60000 / tapInterval;
+      tapState = 1;
 
-        masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
-      }
+      masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+    }
 
-      if (timeSinceFirstTap > 2000) // forget tap if time was too long
-      {
-        tapState = 1;
-        // Serial.println("too long...");
-      }
-      // }
-      break;
+    if (timeSinceFirstTap > 2000) // forget tap if time was too long
+    {
+      tapState = 1;
+      // Serial.println("too long...");
+    }
+    // }
+    break;
   }
 }
 // --------------------------------------------------------------------
