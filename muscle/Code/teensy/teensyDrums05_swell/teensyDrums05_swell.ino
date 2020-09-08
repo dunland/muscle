@@ -84,10 +84,17 @@ boolean read_rhythm_slot[numInputs][8];
 boolean set_rhythm_slot[numInputs][8];
 //int notes_list[] = {60, 61, 39, 65, 67, 44, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
 int notes_list[] = {60, 61, 73, 74, 67, 44, 71};
-int cc_chan[] = {0,0,0,-1,-1,50,0,0}; // channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
-
-int pinAction[] = {1, 1, 1, 1, 1, 5, 4, 1};      // array to be changed within code loop.
-int initialPinAction[numInputs];                 // holds the pinAction array as defined above
+int cc_chan[] = {0, 0, 0, 25, 71, 50, 0, 0}; 
+/* channels on mKORG: 
+ * 44=cutoff 
+ * 71=resonance
+ * 50=amplevel
+ * 23=attack
+ * 25=sustain
+ * 26=release
+ */
+int pinAction[] = {1, 1, 1, 5, 5, 5, 4, 1}; // array to be changed within code loop.
+int initialPinAction[numInputs];            // holds the pinAction array as defined above
 
 /* pinActions:
     0 = tapTempo
@@ -240,11 +247,12 @@ void masterClockTimer()
   }
 
   // evaluate current position of beat in bar for stroke precision
-  if ((masterClockCount % 4) >= next_beatCount - 2)
-  {
-    currentStep = next_beatCount;
-    next_beatCount += 4;
-  }
+  // 2020-09-07: this doesn't help and it's also not working...
+  // if ((masterClockCount % 4) >= next_beatCount - 2)
+  // {
+  //   currentStep = next_beatCount;
+  //   next_beatCount += 4;
+  // }
 
   // prepare MIDI clock:
   sendMidiClock = (((masterClockCount % 4) / 3) % 4 == 0);
@@ -324,7 +332,7 @@ void loop()
 
   noInterrupts();
   current_beat_pos = beatCount % 32; // (beatCount increases infinitely)
-  sendMidiCopy = sendMidiClock;
+  sendMidiCopy = sendMidiClock;      // MIDI flag for Clock to be sent
   interrupts();
 
   // ---------------------------- send MIDI-Clock on beat
@@ -334,15 +342,16 @@ void loop()
   */
   if (sendMidiCopy)
   {
-    Serial2.write(0xF8); // MIDI-clock has to be sent 24 times per beat
+    Serial2.write(0xF8); // MIDI-clock has to be sent 24 times per quarter note
     noInterrupts();
     sendMidiClock = false;
     interrupts();
   }
 
+  // DO THINGS ONCE PER 32nd-STEP: ------------------------------------
+  // ------------------------------------------------------------------
   if (current_beat_pos != last_beat_pos)
   {
-    // ------------------------------ 8th NOTES -----------------------
     // increase 8th note counter:
     if (current_beat_pos % 4 == 0)
     {
@@ -351,31 +360,36 @@ void loop()
     }
     digitalWrite(LED_BUILTIN, toggleLED);
 
-    // set rhythm slots to play MIDI notes (pinMode 3): ----------------
+    // set rhythm slots to play MIDI notes (pinMode 3):
     for (int i = 0; i < numInputs; i++)
     {
       if (pinAction[i] == 3)
         read_rhythm_slot[i][eighthNoteCount] = set_rhythm_slot[i][eighthNoteCount];
     }
 
-    // set print String and send MIDI notes ---------------------------
-    if (eighthNoteCount != last_eighth_count)
+    // -------------------------- PIN ACTIONS: ------------------------
+    for (int i = 0; i < numInputs; i++)
     {
-      for (int i = 0; i < numInputs; i++)
+      if (pinAction[i] == 5)
+        swell_beat(i); // ...updates once a 32nd-beat-step
+
+      else if (pinAction[i] == 2 || pinAction[i] == 3) // send MIDI notes (pinActions 2 and 3):
       {
-        if (read_rhythm_slot[i][eighthNoteCount])
+        if (eighthNoteCount != last_eighth_count) // in 8th-interval
         {
-          setInstrumentPrintString(i, 3);
-          MIDI.sendNoteOn(notes_list[i], 127, 2);
+          if (read_rhythm_slot[i][eighthNoteCount])
+          {
+            setInstrumentPrintString(i, 3);
+            MIDI.sendNoteOn(notes_list[i], 127, 2);
+          }
+          else
+            MIDI.sendNoteOff(notes_list[i], 127, 2);
         }
-        else
-          MIDI.sendNoteOff(notes_list[i], 127, 2);
       }
+    }
+    // ----------------------------------------------------------------
 
-    } /* eighth-note end. if stuff shall be printed in 8th-interval only,
-     include print section below in here */
-
-    // ---------------------------- vibrate on beat
+    // ---------------------------- vibrate on beat:
     if (current_beat_pos % 8 == 0) // current_beat_pos holds 32 → %8 makes 4.
     {
       vibration_begin = millis();
@@ -389,11 +403,6 @@ void loop()
     // if (pinAction[i] == 3)
     // set_rhythm_slot[i][eighthNoteCount] = false;
 
-    for (int i = 0; i < numInputs; i++)
-    {
-      if (pinAction[i] == 5)
-        swell_beat(i); // updates once a 32nd-beat-step
-    }
     // ----------------------------- draw play log to console
     Serial.print(millis());
     Serial.print("\t");
@@ -410,7 +419,13 @@ void loop()
     }
     Serial.println("");
 
-  } // -------------------- end of TIMED ACTIONS --------------------
+//    if (current_beat_pos % 8 == 0)
+//    MIDI.sendNoteOn(57, 127, 2);
+//    else
+//    MIDI.sendNoteOff(57, 127, 2);
+
+  } // --------------- end of (32nd-step) TIMED ACTIONS ---------------
+  // ------------------------------------------------------------------
 
   last_beat_pos = current_beat_pos;
   last_eighth_count = eighthNoteCount;
@@ -424,5 +439,6 @@ void loop()
   for (int i = 0; i < numInputs; i++)
     if (millis() > lastNotePlayed[i] + 200 && pinAction[i] != 5) // pinAction 5 turns notes off in swell_beat()
       MIDI.sendNoteOff(notes_list[i], 127, 2);
+      
 }
 // --------------------------------------------------------------------
