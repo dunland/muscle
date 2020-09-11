@@ -1,6 +1,9 @@
 import processing.serial.*;
+
 Serial myPort;
-int[] serialInArray = new int[2];    // Where we'll put what we receive
+int serialVal;
+
+//int[] serialInArray = new int[2];    // Where we'll put what we receive
 int serialCount = 0;                 // A count of how many bytes we receive
 
 //SIGNAL VARIABLES
@@ -15,8 +18,10 @@ int globalThreshold = 30;
 void setup()
 {
   size(500, 500);
+  printArray(Serial.list());
+  String portName = Serial.list()[0]; // find right Serial port from list
+  myPort = new Serial(this, portName, 115200);
 }
-
 
 int a = 100, b= 220, c = 200, g = 0;
 
@@ -26,11 +31,11 @@ void draw()
   // ---------------------- DEBUG CODE ------------------------
   /*
   background(a%255, b%100, c%50);
-  fill(255-c, 255-a, 255-b, ((a+b+c)/30)%100);
-  ellipse(height/2, width/2, g++%width, g%height);
-  //println(b);
-  */
-  
+   fill(255-c, 255-a, 255-b, ((a+b+c)/30)%100);
+   ellipse(height/2, width/2, g++%width, g%height);
+   //println(b);
+   */
+
   objectsFromSerial();
   //----------------------- DRAW CIRCLES ---------------------
   if (list_of_circles.size() > 0) {
@@ -52,8 +57,8 @@ void draw()
       }
     }
   }
-  
-    //----------------------- DRAW LINES ---------------------
+
+  //----------------------- DRAW LINES ---------------------
   if (list_of_lines.size() > 0) {
     // draw signals
     for (Line line : list_of_lines) {
@@ -73,10 +78,13 @@ void draw()
 
   textAlign(RIGHT, BOTTOM);
   text(list_of_circles.size() + "\n" + mouseX + " " + mouseY, width, height);
-  
-  
+
+
+  // ------------------------ Read Serial ---------------------------
+  serialEvent(myPort);
 }
 
+// ------------------------ KEYS ---------------------------
 void keyPressed()
 {
   switch (key) {
@@ -112,6 +120,8 @@ void keyPressed()
 
 void objectsFromSerial()
 {
+
+
   //if (serialInArray[0] > globalThreshold)
   //{
   //  list_of_circles.add(new Circle(width*2/3, height*1/5));
@@ -131,6 +141,13 @@ void objectsFromSerial()
 
 void serialEvent(Serial myPort)
 {
+  if (myPort.available() > 0)
+  {
+    int serialVal = myPort.read();
+    print(millis() + "\t");
+    println(serialVal);
+  }
+  //println();
   //int inByte = myPort.read();
   //serialInArray[serialCount] = inByte;
   //serialCount++;

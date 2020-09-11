@@ -52,9 +52,11 @@ static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTI
 #define FOOTSWITCH 2
 
 // ------------------------- Debug variables --------------------------
-boolean responsiveCalibration = false;
+boolean use_responsiveCalibration = false;
 boolean printStrokes = true;
 boolean printNormalizedValues_ = false;
+boolean do_print_to_console = true;
+boolean do_send_to_processing = false;
 String output_string[numInputs];
 
 // ------------------ variables for interrupt timers ------------------
@@ -70,19 +72,21 @@ int countsCopy[numInputs];
 int current_beat_pos = 0; // always stores the current position in the beat
 
 int tapInterval = 500; // 0.5 s per beat for 120 BPM
-// int tapState = 1; // 0 = none; 1 = waiting for first hit; 2 = waiting for second hit
 
 // ------------- sensitivity and instrument calibration -----------------
-
 int calibration[numInputs][2]; // [instrument][0:threshold, 1:min_counts_for_signature], will be set in setup()
 int noiseFloor[numInputs];
 int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each instrument
 
-/* --------------------------- MUSICAL PARAMETERS ---------------------- */
+// ----------------- MUSICAL AND PERFORMATIVE PARAMETERS --------------
 
 boolean read_rhythm_slot[numInputs][8];
 boolean set_rhythm_slot[numInputs][8];
 //int notes_list[] = {60, 61, 39, 65, 67, 44, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
+const int LOG_BEATS = 0;
+const int HOLD_CC = 1; 
+const int FOOTSWITCH_MODE = 1;
+
 int notes_list[] = {60, 61, 73, 74, 67, 44, 71};
 int cc_chan[] = {0, 0, 0, 25, 71, 50, 0, 0}; // needed in pinAction 5 and 6
 /* channels on mKORG: 
@@ -318,6 +322,9 @@ void loop()
       default:
         break;
       }
+      
+      // send instrument stroke to processing:
+      send_to_processing(i);
     }
   } // end main commands loop -----------------------------------------
 
@@ -404,20 +411,20 @@ void loop()
     // set_rhythm_slot[i][eighthNoteCount] = false;
 
     // ----------------------------- draw play log to console
-    Serial.print(millis());
-    Serial.print("\t");
+    print_to_console(String(millis()));
+    print_to_console("\t");
     // Serial.print(eighthNoteCount + 1); // if you want to print 8th-steps only
-    Serial.print(current_beat_pos);
-    Serial.print("\t");
+    print_to_console(current_beat_pos);
+    print_to_console("\t");
     /*Serial.print(current_beat_pos / 4);
         Serial.print("\t");
         Serial.print(eighthNoteCount);*/
     for (int i = 0; i < numInputs; i++)
     {
-      Serial.print(output_string[i]);
+      print_to_console(output_string[i]);
       output_string[i] = "\t";
     }
-    Serial.println("");
+    println_to_console("");
 
     //    if (current_beat_pos % 8 == 0)
     //    MIDI.sendNoteOn(57, 127, 2);

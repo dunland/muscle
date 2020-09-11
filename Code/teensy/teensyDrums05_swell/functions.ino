@@ -14,7 +14,7 @@ void calculateNoiseFloor()
     Serial.print("calculating noiseFloor for ");
     Serial.print(names[pinNum]);
     Serial.print(" ..waiting for stroke");
-    if (responsiveCalibration)
+    if (use_responsiveCalibration)
     {
       while (analogRead(pins[pinNum]) < 700 + calibration[pinNum][0])
         ; // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
@@ -26,7 +26,6 @@ void calculateNoiseFloor()
     boolean toggleState = false;
     for (int n = 0; n < 400; n++)
     {
-      //Serial.print(".");
       if (n % 100 == 0)
       {
         Serial.print(" . ");
@@ -52,34 +51,27 @@ void calculateNoiseFloor()
 
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
+boolean lastPinAction[numInputs];
+
 void checkFootSwitch()
 {
 
   static int switch_state;
   static int last_switch_state = HIGH;
   static unsigned long last_switch_toggle = 1000; // some pre-delay to prevent initial misdetection
-  static boolean lastPinAction[numInputs];
+  //static boolean lastPinAction[numInputs];
 
   switch_state = digitalRead(FOOTSWITCH);
   if (switch_state != last_switch_state && millis() > last_switch_toggle + 20)
   {
     if (switch_state == LOW)
     {
+      footswitch_pressed();
       Serial.println("Footswitch pressed.");
-      // set pinMode of all instruments to 3 (record what is being played)
-      for (int i = 0; i < numInputs; i++)
-      {
-        lastPinAction[i] = pinAction[i]; // TODO: lastPinAction seems to be overwritten quickly, so it will not be able to return to its former state. fix this!
-        pinAction[i] = 3;                // TODO: not for Cowbell?
-        for (int j = 0; j < 8; j++)
-          set_rhythm_slot[i][j] = false; // reset entire record
-      }
     }
     else
     {
-      for (int i = 0; i < numInputs; i++)
-        pinAction[i] = initialPinAction[i];
-
+      footswitch_released();
       Serial.println("Footswitch released.");
     }
     last_switch_state = switch_state;
@@ -88,6 +80,52 @@ void checkFootSwitch()
 }
 // --------------------------------------------------------------------
 
+int cc_val[numInputs];
+boolean footswitch_is_pressed = false;
+
+void footswitch_pressed()
+{
+  switch (FOOTSWITCH_MODE)
+  {
+  case (LOG_BEATS):
+    // set pinMode of all instruments to 3 (record what is being played)
+    for (int i = 0; i < numInputs; i++)
+    {
+      lastPinAction[i] = pinAction[i]; // TODO: lastPinAction seems to be overwritten quickly, so it will not be able to return to its former state. fix this!
+      pinAction[i] = 3;                // TODO: not for Cowbell?
+      for (int j = 0; j < 8; j++)
+        set_rhythm_slot[i][j] = false; // reset entire record
+    }
+    break;
+
+  case (HOLD_CC): // prevents cc_vals to be changed in swell_beat()
+    footswitch_is_pressed = true;
+    break;
+
+  default:
+    Serial.println("Footswitch mode not defined!");
+    break;
+  }
+}
+// --------------------------------------------------------------------
+
+void footswitch_released()
+{
+  switch (FOOTSWITCH_MODE)
+  {
+  case (LOG_BEATS):
+    for (int i = 0; i < numInputs; i++)
+      pinAction[i] = initialPinAction[i];
+    break;
+
+  case (HOLD_CC):
+    footswitch_is_pressed = false;
+    break;
+
+  default:
+    break;
+  }
+}
 /////////////////////////// general pin reading ///////////////////////
 ///////////////////////////////////////////////////////////////////////
 
@@ -237,8 +275,9 @@ boolean stroke_detected(int pinDect_pointer_in)
   interrupts();
 
   if (millis() > lastPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke) // get counts only X ms after LAST hit
-      //if (millis() > firstPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke)
-      //get counts only X ms after FIRST hit ??
+
+  //if (millis() > firstPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke)
+  //get counts only X ms after FIRST hit ??
   {
     noInterrupts();
     countsCopy[pinDect_pointer_in] = counts[pinDect_pointer_in];
@@ -304,7 +343,6 @@ boolean stroke_detected(int pinDect_pointer_in)
 int num_of_swell_taps[numInputs];     // will be used in both swell_rec() and swell_beat(). serves as cc_val for MIDI notes.
 int swell_stroke_interval[numInputs]; // will be needed for timed replay
 int swell_state[numInputs];
-int cc_val[numInputs];
 unsigned long swell_beatPos_sum[numInputs];
 int swell_beatStep[numInputs]; // increases with beatCount and initiates action.
 
@@ -344,6 +382,8 @@ void swell_rec(int instr) // remembers beat stroke position
     noInterrupts();
     previous_swell_beatPos[instr] = beatCount;
     interrupts();
+
+    // start MIDI note and proceed to next state
     swell_state[instr] = 2;
     MIDI.sendNoteOn(notes_list[instr], 127, 2);
 
@@ -352,10 +392,12 @@ void swell_rec(int instr) // remembers beat stroke position
 
   else if (swell_state[instr] == 2) // second hit
   {
-    num_of_swell_taps[instr]++; // will define the cc_val for replayed MIDI notes
-
-    cc_val[instr] += 2;                                          // ATTENTION: must rise faster than it decreases! otherwise swell resets right away.
-    cc_val[instr] = (cc_val[instr] > 127) ? 127 : cc_val[instr]; // max cc_val = 127
+    if (!footswitch_is_pressed)
+    {
+      num_of_swell_taps[instr]++;
+      cc_val[instr] += 2;                                          // ATTENTION: must rise faster than it decreases! otherwise swell resets right away.
+      cc_val[instr] = (cc_val[instr] > 127) ? 127 : cc_val[instr]; // max cc_val = 127
+    }
 
     unsigned long current_swell_beatPos;
 
@@ -363,15 +405,15 @@ void swell_rec(int instr) // remembers beat stroke position
     current_swell_beatPos = beatCount;
     interrupts();
 
+    // calculate diff and interval:
     if ((current_swell_beatPos - previous_swell_beatPos[instr]) <= 32) // only do this if interval was not too long
     {
       // get diff to first (how many beats were in between?):
       swell_beatPos_sum[instr] += (current_swell_beatPos - previous_swell_beatPos[instr]);
       // average all hits and repeat at that rate:
-      // swell_stroke_interval[instr] = swell_beatPos_sum[instr] / num_of_swell_taps[instr];
-      float a = float(swell_beatPos_sum[instr]) / float(num_of_swell_taps[instr]); //rounds up or down
-      a += 0.5;
-      swell_stroke_interval[instr] = int(a);
+      float a = float(swell_beatPos_sum[instr]) / float(num_of_swell_taps[instr]);
+      a += 0.5;                              //rounds up or down
+      swell_stroke_interval[instr] = int(a); // round down
       previous_swell_beatPos[instr] = current_swell_beatPos;
     }
   }
@@ -393,9 +435,6 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
     // ready to play MIDI again?
     // increase swell_beatStep and modulo interval
     swell_beatStep[instr] = (swell_beatStep[instr] + 1) % swell_stroke_interval[instr];
-    //Serial.print("swStp");
-    //Serial.print(swell_beatStep[instr]);
-    //Serial.print("\t");
 
     if (swell_beatStep[instr] == 0) // on swell beat
     {
@@ -410,7 +449,8 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
       output_string[instr] = String(cc_val[instr]);
       //      output_string[instr] += ") ";
       output_string[instr] += "\t";
-      MIDI.sendControlChange(cc_chan[instr], cc_val[instr], 2); //
+      if (!footswitch_is_pressed)
+        MIDI.sendControlChange(cc_chan[instr], cc_val[instr], 2); //
       /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
         finding the right CC# on microKORG: (manual p.61):
         1. press SHIFT + 5
@@ -421,12 +461,13 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
       // decrease cc_val:
       if (cc_val[instr] > 0)
       {
-        static boolean cc_val_decreaser = true;
-        if (cc_val_decreaser)
-        {
+        //static boolean cc_val_decreaser = true;
+        //if (cc_val_decreaser)
+        //{
+        if (!footswitch_is_pressed)
           cc_val[instr]--;
-        }
-        cc_val_decreaser = !cc_val_decreaser; // decrease only every other time
+        //}
+        //cc_val_decreaser = !cc_val_decreaser; // decrease only every other time
       }
       else // reset swell if cc_val == 0:
       {
@@ -438,10 +479,6 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
         MIDI.sendNoteOff(notes_list[instr], 127, 2);
       } //TODO: reset!
       // cc_val[instr] = (cc_val[instr] > 0) * (cc_val[instr] - 1); // decrease cc_val only if > 0
-    }
-    else // stop MIDI
-    {
-      // MIDI.sendNoteOff(notes_list[instr], 127, 2);
     }
   }
 }
@@ -460,10 +497,6 @@ void getTapTempo()
   switch (tapState)
   {
     //    case 0: // this is for activation of tap tempo listen
-    //      // for (int i = 0; i < numInputs; i++)
-    //      // {
-    //      // }
-    //      // Serial.print("\n");
     //      tapState = 1;
     //      break;
 
@@ -508,3 +541,26 @@ void getTapTempo()
   }
 }
 // --------------------------------------------------------------------
+
+/////////////////////////// DEBUG FUNCTIONS ///////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+// print the play log to Arduino console:
+void print_to_console(String message_to_print)
+{
+  if (do_print_to_console)
+    Serial.print(message_to_print);
+}
+
+void println_to_console(String message_to_print)
+{
+  if (do_print_to_console)
+    Serial.println(message_to_print);
+}
+
+// or send stuff to processing:
+void send_to_processing(int message_to_send)
+{
+  if (do_send_to_processing)
+    Serial.write(message_to_send);
+}
