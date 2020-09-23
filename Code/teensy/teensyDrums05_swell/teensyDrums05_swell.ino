@@ -117,8 +117,7 @@ void setup()
 {
 
   Serial.begin(115200);
-  while (!Serial)
-    ;
+  while (!Serial); // start Serial correctly, but unfortunately prevents external powering.
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
   //------------------------ initialize pins and arrays ------------------------
@@ -426,6 +425,7 @@ void loop()
     }
     println_to_console("");
 
+    // MIDI Debug:
     //    if (current_beat_pos % 8 == 0)
     //    MIDI.sendNoteOn(57, 127, 2);
     //    else

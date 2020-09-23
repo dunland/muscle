@@ -427,7 +427,7 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
 {
   if (swell_state[instr] == 2)
   {
-    // remember update moment in beat:
+    // remember moment of update in beat:
     noInterrupts();
     unsigned long updateMoment = beatCount;
     interrupts();
@@ -438,36 +438,34 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
 
     if (swell_beatStep[instr] == 0) // on swell beat
     {
-      //output_string[instr] = String(cc_val[instr]);
-      //      output_string[instr] = "[";
-      //      output_string[instr] += String(swell_stroke_interval[instr]);
-      //      output_string[instr] += "] ";
-      //      output_string[instr] += num_of_swell_taps[instr];
-      //      output_string[instr] += "/";
-      //      output_string[instr] += swell_beatPos_sum[instr];
-      //      output_string[instr] += " (";
+      // debug strings:
+      // output_string[instr] = String(cc_val[instr]);
+      // output_string[instr] = "[";
+      // output_string[instr] += String(swell_stroke_interval[instr]);
+      // output_string[instr] += "] ";
+      // output_string[instr] += num_of_swell_taps[instr];
+      // output_string[instr] += "/";
+      // output_string[instr] += swell_beatPos_sum[instr];
+      // output_string[instr] += " (";
       output_string[instr] = String(cc_val[instr]);
       //      output_string[instr] += ") ";
       output_string[instr] += "\t";
+      
       if (!footswitch_is_pressed)
-        MIDI.sendControlChange(cc_chan[instr], cc_val[instr], 2); //
+        MIDI.sendControlChange(cc_chan[instr], cc_val[instr], 2);
       /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
         finding the right CC# on microKORG: (manual p.61):
         1. press SHIFT + 5
         2. choose parameter to find out via EDIT SELECT 1 & 2
         (3. reset that parameter, if you like) */
+
       // MIDI.sendNoteOn(notes_list[instr], 127, 2);
 
       // decrease cc_val:
       if (cc_val[instr] > 0)
       {
-        //static boolean cc_val_decreaser = true;
-        //if (cc_val_decreaser)
-        //{
         if (!footswitch_is_pressed)
           cc_val[instr]--;
-        //}
-        //cc_val_decreaser = !cc_val_decreaser; // decrease only every other time
       }
       else // reset swell if cc_val == 0:
       {
@@ -477,8 +475,7 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
         swell_beatPos_sum[instr] = 0;
         swell_beatStep[instr] = 0;
         MIDI.sendNoteOff(notes_list[instr], 127, 2);
-      } //TODO: reset!
-      // cc_val[instr] = (cc_val[instr] > 0) * (cc_val[instr] - 1); // decrease cc_val only if > 0
+      } 
     }
   }
 }
