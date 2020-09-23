@@ -367,17 +367,9 @@ void swell_rec(int instr) // remembers beat stroke position
   /* works pretty much just like the tapTempo, but repeats the triggered drums on external MIDI instrument (-> swell_beat() in TIMED INTERVALS) */
   static unsigned long previous_swell_beatPos[numInputs];
   static unsigned long lastSwellRec = 0;
+
   if (swell_state[instr] == 1) // first hit
   {
-    //    if (millis() > lastSwellRec + 6000) // reset if tap was too long
-    //    {
-    //      swell_state[instr] = 1; // waits for first tap
-    //      num_of_swell_taps[instr] = 0;
-    //      cc_val[instr] = 10;
-    //      swell_beatPos_sum[instr] = 0;
-    //      swell_beatStep[instr] = 0;
-    //    }
-
     // grab the current beat counter
     noInterrupts();
     previous_swell_beatPos[instr] = beatCount;
@@ -541,6 +533,81 @@ void getTapTempo()
   }
 }
 // --------------------------------------------------------------------
+
+//////////////////// TSUNAMI BEAT-LINKED PLAYBACK /////////////////////
+///////////////////////////////////////////////////////////////////////
+
+/* ------------- Tsunami Beat-linked Playback algorithm: --------------
+
+
+ X-----------X---X--------------- 32nd Beat
+[1,  0,  0,  1,  1,  0,  0,  0  ] 1. iteration
+ |-----------|---|---------------
++1, +0, +0, +1, +1, +0, +0, +0    changes between iterations
+ |-----------|---|---------------
+[2,  0,  0,  2,  2,  0,  0,  0  ] 2. iteration
+ |-----------|---|---------------
++0. +1, +0, +1, +1, +0, +0, +0    changes, unprecisely played
+ |-----------|---|---------------
+[2,  1,  0,  3,  3,  0,  0,  0  ] 3. iteration
+ |-----------|---|---------------
+ 4 + 1 + 0 + 9 + 9 + 0 + 0 + 0 = 23 beat_topo_squared_sum
+ |-----------|---|---------------
+
+4/23 = 0.174
+          ratio = 4:1 = 0.25
+1/23 = 0.043
+          ratio = 9:1 = 0.111 --> beat_topo_entries -= 1
+9/23 = 0.391
+
+beat_topo_regular_sum = 2 + 1 + 3 + 3 = 9
+beat_topo_entries = 4 - 1 = 3
+beat_topo_average = int(9/3 + 0.5) = 3
+
+---------------------------------------------------------------------*/
+
+void tsunami_beat_playback(int instr)
+{
+  int beat_topo_entries = 0;
+  int beat_topo_squared_sum = 0;
+
+  // count entries and create squared sum:
+  for (int j = 0; j < 8; j++)
+  {
+    if (beat_topography[instr][j] > 0)
+    {
+      beat_topo_entries++;
+      beat_topo_squared_sum += beat_topography[instr][j] * beat_topography[instr][j];
+    }
+  }
+
+  // calculate site-specific fractions (squared):
+  float beat_topo_squared_frac[8];
+  for (int j = 0; j < 8; j++)
+    beat_topo_squared_frac[j] =
+        float(beat_topography[instr][j]) / float(beat_topo_squared_sum);
+
+  // get highest frac:
+  float highest_frac = 0;
+  for (int j = 0; j < 8; j++)
+    highest_frac = (beat_topo_squared_frac[j] > highest_frac) ? beat_topo_squared_frac[j] : highest_frac;
+
+  // get "topography height":
+  // divide highest with other entries and omit entries if ratio > 3:
+  for (int j = 0; j < 8; j++)
+    if (highest_frac / beat_topo_squared_frac[j] > 3 || beat_topo_squared_frac[j] / highest_frac > 3)
+      beat_topo_entries -= 1;
+
+  // assess average topo sum for loudness
+  int beat_topo_regular_sum = 0;
+  for (int j = 0; j < 8; j++)
+    beat_topo_regular_sum += beat_topography[instr][j];
+  int beat_topo_average = int(float(beat_topo_regular_sum) / float(beat_topo_entries) + 0.5);
+
+  // TODO:
+  // loudness will be linked to the beat_topo_average
+  // set gain and play track from tsunami
+}
 
 /////////////////////////// DEBUG FUNCTIONS ///////////////////////////
 ///////////////////////////////////////////////////////////////////////

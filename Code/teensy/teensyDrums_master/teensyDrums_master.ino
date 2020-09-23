@@ -1,10 +1,6 @@
 /*
-  SWELL:
-  repeats strokes for each drum on a midi instrument
-  kinda like a delay effekt
-  start with the effect only after a certain hit "density"
    ------------------------------------
-   August 2020
+   September 2020
    by David Unland david[at]unland[dot]eu
    ------------------------------------
    ------------------------------------
@@ -12,13 +8,16 @@
   1. set calibration[instrument][0/1] values. (in setup())
     0:threshold, 1:min num of threshold crossings
   2. set mode for instruments:
+
     pinActions:
+    -----------
     0 = tapTempo
     1 = binary beat logger (print beat)
     2 = toggle rhythm_slot
     3 = footswitch looper: records what is being played for one bar while footswitch is pressed and repeats it after release.
     4 = tapTempo: a standard tapTempo to change the overall pace. to be used on one instrument only.
-    5 = "swell" effect: all instruments have a tap tempo that will retrigger MIDI notes accordingly
+    5 = "swell" effect: all instruments have a tap tempo that will change MIDI CC values when played a lot (values decrease automatically)
+    6 = Tsunami beat-linked playback: finds patterns within 1 bar for each instrument and plays an according rhythmic sample from tsunami database
 */
 
 /* --------------------------------------------------------------------- */
@@ -82,9 +81,11 @@ int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each inst
 
 boolean read_rhythm_slot[numInputs][8];
 boolean set_rhythm_slot[numInputs][8];
+int beat_topography[numInputs][8];
+
 //int notes_list[] = {60, 61, 39, 65, 67, 44, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
 const int LOG_BEATS = 0;
-const int HOLD_CC = 1; 
+const int HOLD_CC = 1;
 const int FOOTSWITCH_MODE = 1;
 
 int notes_list[] = {60, 61, 73, 74, 67, 44, 71};
@@ -130,6 +131,7 @@ void setup()
     {
       read_rhythm_slot[i][j] = false;
       set_rhythm_slot[i][j] = false;
+      beat_topography[i][j] = 0;
     }
     initialPinAction[i] = pinAction[i];
   }
@@ -151,6 +153,7 @@ void setup()
   names[RIDE] = "RIDE0";
   names[COWBELL] = "CBELL";
 
+  // calculate noise floor:
   calculateNoiseFloor();
 
   // setup initial values ---------------------------------------------
@@ -270,8 +273,8 @@ void masterClockTimer()
 
 void loop()
 {
-  static int eighthNoteCount = 0;
-  static int last_eighth_count = 0;
+  static int eighthNoteCount = 0;   // overflows at % 8
+  static int last_eighth_count = 0; // stores last eightNoteCount for comparison
   static unsigned long lastNotePlayed[numInputs];
 
   // ------------------------- DEBUG AREA -----------------------------
@@ -319,10 +322,15 @@ void loop()
         swell_rec(i);
         break;
 
+      case 6: // Tsunami beat-linked pattern
+        setInstrumentPrintString(i, pinAction[i]);
+        if (eighthNoteCount != last_eighth_count) beat_topography[i][eighthNoteCount]++;
+        break;
+
       default:
         break;
       }
-      
+
       // send instrument stroke to processing:
       send_to_processing(i);
     }
@@ -367,20 +375,16 @@ void loop()
     }
     digitalWrite(LED_BUILTIN, toggleLED);
 
-    // set rhythm slots to play MIDI notes (pinMode 3):
-    for (int i = 0; i < numInputs; i++)
-    {
-      if (pinAction[i] == 3)
-        read_rhythm_slot[i][eighthNoteCount] = set_rhythm_slot[i][eighthNoteCount];
-    }
-
     // -------------------------- PIN ACTIONS: ------------------------
     for (int i = 0; i < numInputs; i++)
     {
       if (pinAction[i] == 5)
         swell_beat(i); // ...updates once a 32nd-beat-step
 
-      else if (pinAction[i] == 2 || pinAction[i] == 3) // send MIDI notes (pinActions 2 and 3):
+      else if (pinAction[i] == 3) // set rhythm slots to play MIDI notes:
+        read_rhythm_slot[i][eighthNoteCount] = set_rhythm_slot[i][eighthNoteCount];
+
+      if (pinAction[i] == 2 || pinAction[i] == 3) // send MIDI notes (pinActions 2 and 3):
       {
         if (eighthNoteCount != last_eighth_count) // in 8th-interval
         {
@@ -392,6 +396,11 @@ void loop()
           else
             MIDI.sendNoteOff(notes_list[i], 127, 2);
         }
+      }
+      
+      else if (pinAction[i] == 6)
+      {
+        tsunami_beat_playback(i);
       }
     }
     // ----------------------------------------------------------------
@@ -426,6 +435,7 @@ void loop()
     }
     println_to_console("");
 
+    // Debug: play MIDI note on quarter notes
     //    if (current_beat_pos % 8 == 0)
     //    MIDI.sendNoteOn(57, 127, 2);
     //    else
@@ -440,9 +450,10 @@ void loop()
   // check footswitch -------------------------------------------------
   checkFootSwitch();
 
-  // turn off vibration -----------------------------------------------
+  // turn off vibration and MIDI notes --------------------------------
   if (millis() > vibration_begin + vibration_duration)
     digitalWrite(VIBR, LOW);
+
   for (int i = 0; i < numInputs; i++)
     if (millis() > lastNotePlayed[i] + 200 && pinAction[i] != 5) // pinAction 5 turns notes off in swell_beat()
       MIDI.sendNoteOff(notes_list[i], 127, 2);
