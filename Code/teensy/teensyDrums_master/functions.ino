@@ -135,37 +135,6 @@ int pinValue(int pinVal_pointer_in)
 }
 // --------------------------------------------------------------------
 
-// ///////////////////////// PRINT NORMALIZED VALUES //////////////////
-///////////////////////////////////////////////////////////////////////
-void printNormalizedValues(boolean printNorm_criterion)
-{
-  // useful debugger for column-wise output of raw/normalised values:
-
-  if (printNorm_criterion == true)
-  {
-    static unsigned long lastMillis;
-    if (millis() != lastMillis)
-    {
-      for (int i = 0; i < numInputs; i++)
-      {
-        static int countsCopy[numInputs];
-        //noInterrupts();
-        //countsCopy[i] = counts[i];
-        //interrupts();
-        Serial.print(pins[i]);
-        Serial.print("\t");
-        Serial.print(pinValue(i));
-        Serial.print("\t");
-        //Serial.print(", ");
-        //Serial.print(countsCopy[i]);
-      }
-      Serial.println("");
-    }
-    lastMillis = millis();
-  }
-}
-// --------------------------------------------------------------------
-
 ///////////////////// SET STRING FOR PLAY LOGGING /////////////////////
 ///////////////////////////////////////////////////////////////////////
 
@@ -387,8 +356,8 @@ void swell_rec(int instr) // remembers beat stroke position
     if (!footswitch_is_pressed)
     {
       num_of_swell_taps[instr]++;
-      cc_val[instr] += 2;                                          // ATTENTION: must rise faster than it decreases! otherwise swell resets right away.
-      cc_val[instr] = (cc_val[instr] > 127) ? 127 : cc_val[instr]; // max cc_val = 127
+      cc_val[instr] += 2;                      // ATTENTION: must rise faster than it decreases! otherwise swell resets right away.
+      cc_val[instr] = min(cc_val[instr], 127); // max cc_val = 127
     }
 
     unsigned long current_swell_beatPos;
@@ -404,7 +373,7 @@ void swell_rec(int instr) // remembers beat stroke position
       swell_beatPos_sum[instr] += (current_swell_beatPos - previous_swell_beatPos[instr]);
       // average all hits and repeat at that rate:
       float a = float(swell_beatPos_sum[instr]) / float(num_of_swell_taps[instr]);
-      a += 0.5;                              //rounds up or down
+      a += 0.5;                              // rounds up or down
       swell_stroke_interval[instr] = int(a); // round down
       previous_swell_beatPos[instr] = current_swell_beatPos;
     }
@@ -430,6 +399,7 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
 
     if (swell_beatStep[instr] == 0) // on swell beat
     {
+      // Debug print:
       //output_string[instr] = String(cc_val[instr]);
       //      output_string[instr] = "[";
       //      output_string[instr] += String(swell_stroke_interval[instr]);
@@ -441,14 +411,16 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
       output_string[instr] = String(cc_val[instr]);
       //      output_string[instr] += ") ";
       output_string[instr] += "\t";
+
       if (!footswitch_is_pressed)
-        MIDI.sendControlChange(cc_chan[instr], cc_val[instr], 2); //
+        MIDI.sendControlChange(cc_chan[instr], cc_val[instr], 2);
       /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
         finding the right CC# on microKORG: (manual p.61):
         1. press SHIFT + 5
         2. choose parameter to find out via EDIT SELECT 1 & 2
         (3. reset that parameter, if you like) */
-      // MIDI.sendNoteOn(notes_list[instr], 127, 2);
+
+      // MIDI.sendNoteOn(notes_list[instr], 127, 2); // also play a note on each hit?
 
       // decrease cc_val:
       if (cc_val[instr] > 0)
@@ -517,7 +489,7 @@ void getTapTempo()
       Serial.print(tapInterval);
       Serial.println(" ms interval)");
 
-      // bpm = 60000 / tapInterval;
+      current_BPM = 60000 / tapInterval;
       tapState = 1;
 
       masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
@@ -548,7 +520,7 @@ void getTapTempo()
 [2,  0,  0,  2,  2,  0,  0,  0  ] 2. iteration
  |-----------|---|---------------
 +0. +1, +0, +1, +1, +0, +0, +0    changes, unprecisely played
- |-----------|---|---------------
+ ----|-------|---|---------------
 [2,  1,  0,  3,  3,  0,  0,  0  ] 3. iteration
  |-----------|---|---------------
  4 + 1 + 0 + 9 + 9 + 0 + 0 + 0 = 23 beat_topo_squared_sum
@@ -557,7 +529,7 @@ void getTapTempo()
 4/23 = 0.174
           ratio = 4:1 = 0.25
 1/23 = 0.043
-          ratio = 9:1 = 0.111 --> beat_topo_entries -= 1
+          ratio = 9:1 = 0.111 --> beat_topo_entries -= 1; beat_topo[i] = 0
 9/23 = 0.391
 
 beat_topo_regular_sum = 2 + 1 + 3 + 3 = 9
@@ -566,10 +538,12 @@ beat_topo_average = int(9/3 + 0.5) = 3
 
 ---------------------------------------------------------------------*/
 
-void tsunami_beat_playback(int instr)
+void tsunami_beat_playback(int instr, int current_beat_in)
 {
   int beat_topo_entries = 0;
   int beat_topo_squared_sum = 0;
+  int beat_topo_regular_sum = 0;
+  int beat_topo_average = 0;
 
   // count entries and create squared sum:
   for (int j = 0; j < 8; j++)
@@ -578,8 +552,11 @@ void tsunami_beat_playback(int instr)
     {
       beat_topo_entries++;
       beat_topo_squared_sum += beat_topography[instr][j] * beat_topography[instr][j];
+      beat_topo_regular_sum += beat_topography[instr][j];
     }
   }
+
+  beat_topo_regular_sum = beat_topo_regular_sum / beat_topo_entries;
 
   // calculate site-specific fractions (squared):
   float beat_topo_squared_frac[8];
@@ -595,21 +572,98 @@ void tsunami_beat_playback(int instr)
   // get "topography height":
   // divide highest with other entries and omit entries if ratio > 3:
   for (int j = 0; j < 8; j++)
-    if (highest_frac / beat_topo_squared_frac[j] > 3 || beat_topo_squared_frac[j] / highest_frac > 3)
-      beat_topo_entries -= 1;
+    if (beat_topo_squared_frac[j] > 0)
+      if (highest_frac / beat_topo_squared_frac[j] > 3 || beat_topo_squared_frac[j] / highest_frac > 3)
+      {
+        beat_topography[instr][j] = 0;
+        beat_topo_entries -= 1;
+        Serial.print("REDUCED VAL AT POS ");
+        Serial.println(j);
+      }
 
   // assess average topo sum for loudness
-  int beat_topo_regular_sum = 0;
   for (int j = 0; j < 8; j++)
     beat_topo_regular_sum += beat_topography[instr][j];
-  int beat_topo_average = int(float(beat_topo_regular_sum) / float(beat_topo_entries) + 0.5);
+  beat_topo_average = int((float(beat_topo_regular_sum) / float(beat_topo_entries)) + 0.5);
 
-  // TODO:
-  // loudness will be linked to the beat_topo_average
-  // set gain and play track from tsunami
+  // TODO: reduce all params if not played for long.
+
+  // set loudness and fade:
+  int trackLevel = min(-70 + (beat_topo_average * 5), 0);
+  tsunami.trackFade(tracknum, trackLevel, tapInterval, false); // fade smoothly within length of a quarter note
+
+  if (beat_topo_regular_sum >= 3) // only initiate playback if average of entries > certain threshold.
+  {
+
+    // find right track from database:
+    int tracknum = 0;
+    for (int j = 0; j < 8; j++)
+    {
+      if (beat_topography[instr][j] > 0)
+      {
+        if (j == 0)
+          tracknum += 128;
+        if (j == 1)
+          tracknum += 64;
+        if (j == 2)
+          tracknum += 32;
+        if (j == 3)
+          tracknum += 16;
+        if (j == 4)
+          tracknum += 8;
+        if (j == 5)
+          tracknum += 4;
+        if (j == 6)
+          tracknum += 2;
+        if (j == 7)
+          tracknum += 1;
+      }
+    }
+
+    if (!tsunami.isTrackPlaying(tracknum) && current_beat_in == 0)
+    {
+      // set playback speed according to current_BPM:
+      int sr_offset;
+      float r = current_BPM / BPM_OF_TRACK;
+      if (!(r > 2) && !(r < 0.5))
+      {
+        // samplerateOffset scales playback speeds from 0.5 to 1 to 2
+        // and maps to -32768 to 0 to 32767
+        sr_offset = (r >= 1) ? 32767 * (r - 1) : -32768 + 32768 * 2 * (r - 0.5);
+      }
+
+      tsunami.samplerateOffset(CHANNEL, sr_offset); // link channels to instruments
+      tsunami.trackGain(CHANNEL, trackLevel);
+      tsunami.trackPlayPoly(tracknum, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
+    }
+  }
+
+  // Debug:
+  Serial.print("[");
+  for (int i = 0; i < 8; i++)
+  {
+    Serial.print(beat_topography[instr][i]);
+    if (i < 7)
+      Serial.print(", ");
+  }
+  Serial.print("]\t");
+  Serial.print(beat_topo_entries);
+  Serial.print("\t");
+  Serial.print(beat_topo_squared_sum);
+  Serial.print("\t");
+  Serial.print(beat_topo_regular_sum);
+  Serial.print("\t");
+  Serial.print(beat_topo_average);
+  Serial.print("\t");
+  int trackLevel = min(-70 + (beat_topo_average * 5), 0);
+  Serial.println(trackLevel);
 }
+// --------------------------------------------------------------------
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 /////////////////////////// DEBUG FUNCTIONS ///////////////////////////
+///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
 // print the play log to Arduino console:
@@ -631,3 +685,36 @@ void send_to_processing(int message_to_send)
   if (do_send_to_processing)
     Serial.write(message_to_send);
 }
+
+// --------------------------------------------------------------------
+
+//////////////////////////// PRINT NORMALIZED VALUES //////////////////
+///////////////////////////////////////////////////////////////////////
+void printNormalizedValues(boolean printNorm_criterion)
+{
+  // useful debugger for column-wise output of raw/normalised values:
+
+  if (printNorm_criterion == true)
+  {
+    static unsigned long lastMillis;
+    if (millis() != lastMillis)
+    {
+      for (int i = 0; i < numInputs; i++)
+      {
+        static int countsCopy[numInputs];
+        //noInterrupts();
+        //countsCopy[i] = counts[i];
+        //interrupts();
+        //Serial.print(pins[i]);
+        //Serial.print(":\t");
+        Serial.print(pinValue(i));
+        Serial.print("\t");
+        //Serial.print(", ");
+        //Serial.print(countsCopy[i]);
+      }
+      Serial.println("");
+    }
+    lastMillis = millis();
+  }
+}
+// --------------------------------------------------------------------
