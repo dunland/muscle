@@ -74,7 +74,7 @@ int countsCopy[numInputs];
 int current_beat_pos = 0; // always stores the current position in the beat
 
 int tapInterval = 500; // 0.5 s per beat for 120 BPM
-int current_BPM;
+int current_BPM = 120;
 
 // ------------- sensitivity and instrument calibration -----------------
 int calibration[numInputs][2]; // [instrument][0:threshold, 1:min_counts_for_signature], will be set in setup()
@@ -123,13 +123,14 @@ void setup()
 {
 
   Serial.begin(115200);
-  while (!Serial); // prevents Serial flow from just stopping at some (early) point.
+  while (!Serial)
+    ; // prevents Serial flow from just stopping at some (early) point.
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
   // delay(1000);     // wait for Tsunami to finish reset // redundant?
-  tsunami.start(); // Tsunami startup at 57600
+  tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
   delay(100);
   tsunami.stopAllTracks(); // in case Tsunami was already playing.
   tsunami.samplerateOffset(0, 0);
@@ -339,7 +340,7 @@ void loop()
         break;
 
       case 6: // Tsunami beat-linked pattern
-        setInstrumentPrintString(i, pinAction[i]);
+        setInstrumentPrintString(i, 1);
         beat_topography[i][current_eighth_count]++;
         break;
 
@@ -439,17 +440,17 @@ void loop()
     print_to_console(String(millis()));
     print_to_console("\t");
     // Serial.print(current_eighth_count + 1); // if you want to print 8th-steps only
-//    print_to_console(current_beat_pos);
-//    print_to_console("\t");
-    /*Serial.print(current_beat_pos / 4);
-       Serial.print("\t");
-       Serial.print(current_eighth_count);*/
-//    for (int i = 0; i < numInputs; i++)
-//    {
-//      print_to_console(output_string[i]);
-//      output_string[i] = "\t";
-//    }
-//    println_to_console("");
+    print_to_console(current_beat_pos);
+    print_to_console("\t");
+    // Serial.print(current_beat_pos / 4);
+    // Serial.print("\t");
+    // Serial.print(current_eighth_count);
+    for (int i = 0; i < numInputs; i++)
+    {
+      print_to_console(output_string[i]);
+      output_string[i] = "\t";
+    }
+    println_to_console("");
 
     // Debug: play MIDI note on quarter notes
     //    if (current_beat_pos % 8 == 0)
@@ -457,7 +458,7 @@ void loop()
     //    else
     //    MIDI.sendNoteOff(57, 127, 2);
 
-  } // --------------- end of (32nd-step) TIMED ACTIONS ---------------
+  } // end of (32nd-step) TIMED ACTIONS
   // ------------------------------------------------------------------
 
   last_beat_pos = current_beat_pos;

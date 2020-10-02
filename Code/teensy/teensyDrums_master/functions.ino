@@ -537,6 +537,36 @@ beat_topo_entries = 4 - 1 = 3
 beat_topo_average = int(9/3 + 0.5) = 3
 
 ---------------------------------------------------------------------*/
+// hard-coded list of BPMs of tracks stored on Tsunami's SD card.
+// TODO: somehow do this better.
+float track_bpm[256] =
+    {
+        114, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 100,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1};
 
 void tsunami_beat_playback(int instr, int current_beat_in)
 {
@@ -588,15 +618,12 @@ void tsunami_beat_playback(int instr, int current_beat_in)
 
   // TODO: reduce all params if not played for long.
 
-  // set loudness and fade:
-  int trackLevel = min(-70 + (beat_topo_average * 5), 0);
-  tsunami.trackFade(tracknum, trackLevel, tapInterval, false); // fade smoothly within length of a quarter note
-
+  int tracknum = 0;               // Debug
   if (beat_topo_regular_sum >= 3) // only initiate playback if average of entries > certain threshold.
   {
 
     // find right track from database:
-    int tracknum = 0;
+    //int tracknum = 0;
     for (int j = 0; j < 8; j++)
     {
       if (beat_topography[instr][j] > 0)
@@ -620,23 +647,40 @@ void tsunami_beat_playback(int instr, int current_beat_in)
       }
     }
 
+    // set loudness and fade:
+    int trackLevel = min(-40 + (beat_topo_average * 5), 0);
+    tsunami.trackFade(tracknum, trackLevel, tapInterval, false); // fade smoothly within length of a quarter note
+
+    // TODO: set track channels for each instrument according to output
+    // output A: speaker on drumset
+    // output B: speaker in room (PA)
+    // cool effects: let sounds walk through room from drumset to PA
+
     if (!tsunami.isTrackPlaying(tracknum) && current_beat_in == 0)
     {
       // set playback speed according to current_BPM:
       int sr_offset;
-      float r = current_BPM / BPM_OF_TRACK;
+      float r = current_BPM / float(track_bpm[tracknum - 1]);
+      Serial.print("r = ");
+      Serial.println(r);
       if (!(r > 2) && !(r < 0.5))
       {
         // samplerateOffset scales playback speeds from 0.5 to 1 to 2
         // and maps to -32768 to 0 to 32767
         sr_offset = (r >= 1) ? 32767 * (r - 1) : -32768 + 32768 * 2 * (r - 0.5);
+        sr_offset = int(sr_offset);
+        Serial.print("sr_offset = ");
+        Serial.println(sr_offset);
       }
 
-      tsunami.samplerateOffset(CHANNEL, sr_offset); // link channels to instruments
-      tsunami.trackGain(CHANNEL, trackLevel);
-      tsunami.trackPlayPoly(tracknum, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
-    }
-  }
+      int channel = 0;                              // Debug
+      tsunami.samplerateOffset(channel, sr_offset); // TODO: link channels to instruments
+      tsunami.trackGain(tracknum, trackLevel);
+      tsunami.trackPlayPoly(tracknum, channel, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
+      Serial.print("starting to play track ");
+      Serial.println(tracknum);
+    } // track playing end
+  }   // threshold end
 
   // Debug:
   Serial.print("[");
@@ -655,8 +699,10 @@ void tsunami_beat_playback(int instr, int current_beat_in)
   Serial.print("\t");
   Serial.print(beat_topo_average);
   Serial.print("\t");
-  int trackLevel = min(-70 + (beat_topo_average * 5), 0);
-  Serial.println(trackLevel);
+  int trackLevel = min(-40 + (beat_topo_average * 5), 0);
+  Serial.print(trackLevel);
+  Serial.print("\t->");
+  Serial.println(tracknum);
 }
 // --------------------------------------------------------------------
 
