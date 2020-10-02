@@ -1,10 +1,6 @@
 /*
-  SWELL:
-  repeats strokes for each drum on a midi instrument
-  kinda like a delay effekt
-  start with the effect only after a certain hit "density"
    ------------------------------------
-   August 2020
+   September 2020
    by David Unland david[at]unland[dot]eu
    ------------------------------------
    ------------------------------------
@@ -12,19 +8,25 @@
   1. set calibration[instrument][0/1] values. (in setup())
     0:threshold, 1:min num of threshold crossings
   2. set mode for instruments:
+
     pinActions:
+    -----------
     0 = tapTempo
     1 = binary beat logger (print beat)
     2 = toggle rhythm_slot
     3 = footswitch looper: records what is being played for one bar while footswitch is pressed and repeats it after release.
     4 = tapTempo: a standard tapTempo to change the overall pace. to be used on one instrument only.
-    5 = "swell" effect: all instruments have a tap tempo that will retrigger MIDI notes accordingly
+    5 = "swell" effect: all instruments have a tap tempo that will change MIDI CC values when played a lot (values decrease automatically)
+    6 = Tsunami beat-linked playback: finds patterns within 1 bar for each instrument and plays an according rhythmic sample from tsunami database
 */
 
 /* --------------------------------------------------------------------- */
 /* ------------------------------- GLOBAL ------------------------------ */
 /* --------------------------------------------------------------------- */
 #include <MIDI.h>
+#include <Tsunami.h>
+
+Tsunami tsunami;
 
 //MIDI_CREATE_DEFAULT_INSTANCE();
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI); // for Serial-specific usage
@@ -72,6 +74,7 @@ int countsCopy[numInputs];
 int current_beat_pos = 0; // always stores the current position in the beat
 
 int tapInterval = 500; // 0.5 s per beat for 120 BPM
+int current_BPM = 120;
 
 // ------------- sensitivity and instrument calibration -----------------
 int calibration[numInputs][2]; // [instrument][0:threshold, 1:min_counts_for_signature], will be set in setup()
@@ -82,9 +85,11 @@ int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each inst
 
 boolean read_rhythm_slot[numInputs][8];
 boolean set_rhythm_slot[numInputs][8];
+int beat_topography[numInputs][8];
+
 //int notes_list[] = {60, 61, 39, 65, 67, 44, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
 const int LOG_BEATS = 0;
-const int HOLD_CC = 1; 
+const int HOLD_CC = 1;
 const int FOOTSWITCH_MODE = 1;
 
 int notes_list[] = {60, 61, 73, 74, 67, 44, 71};
@@ -97,16 +102,17 @@ int cc_chan[] = {0, 0, 0, 25, 71, 50, 0, 0}; // needed in pinAction 5 and 6
  * 25=sustain
  * 26=release
  */
-int pinAction[] = {1, 4, 1, 5, 5, 5, 1, 1}; // array to be changed within code loop.
+int pinAction[] = {1, 4, 6, 5, 5, 5, 1, 1}; // array to be changed within code loop.
 int initialPinAction[numInputs];            // holds the pinAction array as defined above
 
 /* pinActions:
-    0 = tapTempo
+    0 = send MIDI note
     1 = binary beat logger (print beat)
     2 = toggle rhythm_slot
     3 = footswitch looper: records what is being played for one bar while footswitch is pressed and repeats it after release.
     4 = tapTempo: a standard tapTempo to change the overall pace. to be used on one instrument only.
     5 = "swell" effect: all instruments have a tap tempo that will retrigger MIDI notes accordingly
+    6 = play beat-linked samples
 */
 
 /* --------------------------------------------------------------------- */
@@ -117,8 +123,23 @@ void setup()
 {
 
   Serial.begin(115200);
+<<<<<<< HEAD:Code/teensy/teensyDrums05_swell/teensyDrums05_swell.ino
   while (!Serial); // start Serial correctly, but unfortunately prevents external powering.
+=======
+  while (!Serial)
+    ; // prevents Serial flow from just stopping at some (early) point.
+  // delay(1000); // alternative to line above, if run with external power (no computer)
+
+>>>>>>> 1774313c083afeed43225c09f3dcf3cee9925dcb:Code/teensy/teensyDrums_master/teensyDrums_master.ino
   MIDI.begin(MIDI_CHANNEL_OMNI);
+
+  // delay(1000);     // wait for Tsunami to finish reset // redundant?
+  tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
+  delay(100);
+  tsunami.stopAllTracks(); // in case Tsunami was already playing.
+  tsunami.samplerateOffset(0, 0);
+  tsunami.setReporting(true); // Enable track reporting from the Tsunami
+  delay(100);                 // some time for Tsunami to respond with version string
 
   //------------------------ initialize pins and arrays ------------------------
   for (int i = 0; i < numInputs; i++)
@@ -129,6 +150,7 @@ void setup()
     {
       read_rhythm_slot[i][j] = false;
       set_rhythm_slot[i][j] = false;
+      beat_topography[i][j] = 0;
     }
     initialPinAction[i] = pinAction[i];
   }
@@ -150,6 +172,7 @@ void setup()
   names[RIDE] = "RIDE0";
   names[COWBELL] = "CBELL";
 
+  // calculate noise floor:
   calculateNoiseFloor();
 
   // setup initial values ---------------------------------------------
@@ -158,8 +181,8 @@ void setup()
   // values as of 2020-08-27:
   calibration[SNARE][0] = 180;
   calibration[SNARE][1] = 12;
-  calibration[HIHAT][0] = 60;
-  calibration[HIHAT][1] = 20;
+  calibration[HIHAT][0] = 70; // 60
+  calibration[HIHAT][1] = 30; // 20
   calibration[KICK][0] = 100;
   calibration[KICK][1] = 16;
   calibration[TOM1][0] = 200;
@@ -269,9 +292,11 @@ void masterClockTimer()
 
 void loop()
 {
-  static int eighthNoteCount = 0;
-  static int last_eighth_count = 0;
+  static int current_eighth_count = 0; // overflows at % 8
+  static int last_eighth_count = 0;    // stores last eightNoteCount for comparison
   static unsigned long lastNotePlayed[numInputs];
+
+  tsunami.update();
 
   // ------------------------- DEBUG AREA -----------------------------
   printNormalizedValues(printNormalizedValues_);
@@ -300,13 +325,13 @@ void loop()
       case 2: // toggle beat slot
         if (printStrokes)
           setInstrumentPrintString(i, pinAction[i]);
-        read_rhythm_slot[i][eighthNoteCount] = !read_rhythm_slot[i][eighthNoteCount];
+        read_rhythm_slot[i][current_eighth_count] = !read_rhythm_slot[i][current_eighth_count];
         break;
 
       case 3: // record what is being played and replay it later
         if (printStrokes)
           setInstrumentPrintString(i, pinAction[i]);
-        set_rhythm_slot[i][eighthNoteCount] = true;
+        set_rhythm_slot[i][current_eighth_count] = true;
         break;
 
       case 4: // tapTempo
@@ -318,12 +343,17 @@ void loop()
         swell_rec(i);
         break;
 
+      case 6: // Tsunami beat-linked pattern
+        setInstrumentPrintString(i, 1);
+        beat_topography[i][current_eighth_count]++;
+        break;
+
       default:
         break;
       }
-      
+
       // send instrument stroke to processing:
-      send_to_processing(i);
+      // send_to_processing(i);
     }
   } // end main commands loop -----------------------------------------
 
@@ -361,17 +391,10 @@ void loop()
     // increase 8th note counter:
     if (current_beat_pos % 4 == 0)
     {
-      eighthNoteCount = (eighthNoteCount + 1) % 8;
+      current_eighth_count = (current_eighth_count + 1) % 8;
       toggleLED = !toggleLED;
     }
     digitalWrite(LED_BUILTIN, toggleLED);
-
-    // set rhythm slots to play MIDI notes (pinMode 3):
-    for (int i = 0; i < numInputs; i++)
-    {
-      if (pinAction[i] == 3)
-        read_rhythm_slot[i][eighthNoteCount] = set_rhythm_slot[i][eighthNoteCount];
-    }
 
     // -------------------------- PIN ACTIONS: ------------------------
     for (int i = 0; i < numInputs; i++)
@@ -379,11 +402,14 @@ void loop()
       if (pinAction[i] == 5)
         swell_beat(i); // ...updates once a 32nd-beat-step
 
-      else if (pinAction[i] == 2 || pinAction[i] == 3) // send MIDI notes (pinActions 2 and 3):
+      else if (pinAction[i] == 3) // set rhythm slots to play MIDI notes:
+        read_rhythm_slot[i][current_eighth_count] = set_rhythm_slot[i][current_eighth_count];
+
+      if (pinAction[i] == 2 || pinAction[i] == 3) // send MIDI notes (pinActions 2 and 3):
       {
-        if (eighthNoteCount != last_eighth_count) // in 8th-interval
+        if (current_eighth_count != last_eighth_count) // in 8th-interval
         {
-          if (read_rhythm_slot[i][eighthNoteCount])
+          if (read_rhythm_slot[i][current_eighth_count])
           {
             setInstrumentPrintString(i, 3);
             MIDI.sendNoteOn(notes_list[i], 127, 2);
@@ -391,6 +417,11 @@ void loop()
           else
             MIDI.sendNoteOff(notes_list[i], 127, 2);
         }
+      }
+
+      else if (pinAction[i] == 6)
+      {
+        tsunami_beat_playback(i, current_eighth_count);
       }
     }
     // ----------------------------------------------------------------
@@ -407,17 +438,17 @@ void loop()
     // ... really?
     // for (int i = 0; i < numInputs; i++)
     // if (pinAction[i] == 3)
-    // set_rhythm_slot[i][eighthNoteCount] = false;
+    // set_rhythm_slot[i][current_eighth_count] = false;
 
     // ----------------------------- draw play log to console
     print_to_console(String(millis()));
     print_to_console("\t");
-    // Serial.print(eighthNoteCount + 1); // if you want to print 8th-steps only
+    // Serial.print(current_eighth_count + 1); // if you want to print 8th-steps only
     print_to_console(current_beat_pos);
     print_to_console("\t");
-    /*Serial.print(current_beat_pos / 4);
-        Serial.print("\t");
-        Serial.print(eighthNoteCount);*/
+    // Serial.print(current_beat_pos / 4);
+    // Serial.print("\t");
+    // Serial.print(current_eighth_count);
     for (int i = 0; i < numInputs; i++)
     {
       print_to_console(output_string[i]);
@@ -425,24 +456,29 @@ void loop()
     }
     println_to_console("");
 
+<<<<<<< HEAD:Code/teensy/teensyDrums05_swell/teensyDrums05_swell.ino
     // MIDI Debug:
+=======
+    // Debug: play MIDI note on quarter notes
+>>>>>>> 1774313c083afeed43225c09f3dcf3cee9925dcb:Code/teensy/teensyDrums_master/teensyDrums_master.ino
     //    if (current_beat_pos % 8 == 0)
     //    MIDI.sendNoteOn(57, 127, 2);
     //    else
     //    MIDI.sendNoteOff(57, 127, 2);
 
-  } // --------------- end of (32nd-step) TIMED ACTIONS ---------------
+  } // end of (32nd-step) TIMED ACTIONS
   // ------------------------------------------------------------------
 
   last_beat_pos = current_beat_pos;
-  last_eighth_count = eighthNoteCount;
+  last_eighth_count = current_eighth_count;
 
   // check footswitch -------------------------------------------------
   checkFootSwitch();
 
-  // turn off vibration -----------------------------------------------
+  // turn off vibration and MIDI notes --------------------------------
   if (millis() > vibration_begin + vibration_duration)
     digitalWrite(VIBR, LOW);
+
   for (int i = 0; i < numInputs; i++)
     if (millis() > lastNotePlayed[i] + 200 && pinAction[i] != 5) // pinAction 5 turns notes off in swell_beat()
       MIDI.sendNoteOff(notes_list[i], 127, 2);
