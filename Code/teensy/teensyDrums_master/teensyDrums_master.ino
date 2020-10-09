@@ -11,13 +11,15 @@
 
     pinActions:
     -----------
-    0 = tapTempo
+    0 = play MIDI note upon stroke
     1 = binary beat logger (print beat)
     2 = toggle rhythm_slot
     3 = footswitch looper: records what is being played for one bar while footswitch is pressed and repeats it after release.
     4 = tapTempo: a standard tapTempo to change the overall pace. to be used on one instrument only.
     5 = "swell" effect: all instruments have a tap tempo that will change MIDI CC values when played a lot (values decrease automatically)
     6 = Tsunami beat-linked playback: finds patterns within 1 bar for each instrument and plays an according rhythmic sample from tsunami database
+    7 = using swell effect for tsunami playback loudness (arhythmic field recordings for cymbals)
+    8 = 16th-note-topography with MIDI playback and volume change
 */
 
 /* --------------------------------------------------------------------- */
@@ -85,35 +87,60 @@ int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each inst
 
 boolean read_rhythm_slot[numInputs][8];
 boolean set_rhythm_slot[numInputs][8];
-int beat_topography[numInputs][8];
+int beat_topography_8[numInputs][8];
+int beat_topography_16[numInputs][16];
 
-//int notes_list[] = {60, 61, 39, 65, 67, 44, 71}; // phrygian mode: {C, Des, Es, F, G, As, B}
 const int LOG_BEATS = 0;
 const int HOLD_CC = 1;
-const int FOOTSWITCH_MODE = 1;
+const int RESET_TOPO = 2; // resets beat_topography (of all instruments)
+const int FOOTSWITCH_MODE = 2;
 
-int notes_list[] = {60, 61, 73, 74, 67, 44, 71};
-int cc_chan[] = {0, 0, 0, 25, 71, 50, 0, 0}; // needed in pinAction 5 and 6
-/* channels on mKORG: 
- * 44=cutoff 
- * 71=resonance
- * 50=amplevel
- * 23=attack
- * 25=sustain
- * 26=release
- */
-int pinAction[] = {1, 4, 6, 5, 5, 5, 1, 1}; // array to be changed within code loop.
-int initialPinAction[numInputs];            // holds the pinAction array as defined above
-
-/* pinActions:
-    0 = send MIDI note
-    1 = binary beat logger (print beat)
-    2 = toggle rhythm_slot
-    3 = footswitch looper: records what is being played for one bar while footswitch is pressed and repeats it after release.
-    4 = tapTempo: a standard tapTempo to change the overall pace. to be used on one instrument only.
-    5 = "swell" effect: all instruments have a tap tempo that will retrigger MIDI notes accordingly
-    6 = play beat-linked samples
+int notes_list[] = {60, 61, 45, 74, 67, 44, 71};
+int cc_chan[] = {50, 0, 0, 25, 71, 50, 0, 0}; // needed in pinAction 5 and 6
+/* channels on mKORG:
+   44=cutoff
+   71=resonance
+   50=amplevel
+   23=attack
+   25=sustain
+   26=release
 */
+int pinAction[] = {8, 4, 8, 1, 1, 1, 1, 1};       // array to be changed within code loop.
+int initialPinAction[numInputs];                  // holds the pinAction array as defined above
+int allocated_track[numInputs];                   // tracks will be allocated in tsunami_beat_playback
+int allocated_channels[] = {0, 0, 0, 0, 0, 0, 0}; // channels to send audio from tsunami to
+
+// hard-coded list of BPMs of tracks stored on Tsunami's SD card.
+// TODO: somehow make BPM accessible from file title
+float track_bpm[256] =
+{
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
+  1, 1, 90, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 73, 1, 1, 1,
+  100, 1, 1, 1, 200, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 41, 1, 1,
+  103, 1, 1, 1, 1, 1, 1, 93, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 78, 1, 100, 100, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 100, 1, 1, 1, 1,
+  1, 1, 1, 1, 100, 60
+};
 
 /* --------------------------------------------------------------------- */
 /* ---------------------------------- SETUP ---------------------------- */
@@ -123,17 +150,14 @@ void setup()
 {
 
   Serial.begin(115200);
-<<<<<<< HEAD:Code/teensy/teensyDrums05_swell/teensyDrums05_swell.ino
-  while (!Serial); // start Serial correctly, but unfortunately prevents external powering.
-=======
+  // Serial3.begin(57600); // contained in tsunami.begin()
   while (!Serial)
     ; // prevents Serial flow from just stopping at some (early) point.
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
->>>>>>> 1774313c083afeed43225c09f3dcf3cee9925dcb:Code/teensy/teensyDrums_master/teensyDrums_master.ino
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
-  // delay(1000);     // wait for Tsunami to finish reset // redundant?
+  delay(1000);     // wait for Tsunami to finish reset // redundant?
   tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
   delay(100);
   tsunami.stopAllTracks(); // in case Tsunami was already playing.
@@ -150,7 +174,8 @@ void setup()
     {
       read_rhythm_slot[i][j] = false;
       set_rhythm_slot[i][j] = false;
-      beat_topography[i][j] = 0;
+      beat_topography_8[i][j] = 0;
+      beat_topography_16[i][j] = 0;
     }
     initialPinAction[i] = pinAction[i];
   }
@@ -214,6 +239,10 @@ void setup()
 
   pinMonitor.begin(samplePins, 1000);                                // sample pin every 1 millisecond
   masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+
+  // Debug:
+  // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
+  // tracknum, channel
 }
 
 /* --------------------------------------------------------------------- */
@@ -292,8 +321,10 @@ void masterClockTimer()
 
 void loop()
 {
-  static int current_eighth_count = 0; // overflows at % 8
+  static int current_eighth_count = 0; // overflows at current_beat_pos % 8
+  static int current_16th_count = 0;   // overflows at current_beat_pos % 2
   static int last_eighth_count = 0;    // stores last eightNoteCount for comparison
+  static int last_16th_count = 0;    // stores last eightNoteCount for comparison
   static unsigned long lastNotePlayed[numInputs];
 
   tsunami.update();
@@ -310,46 +341,57 @@ void loop()
       // ----------------------- perform pin action -------------------
       switch (pinAction[i])
       {
-      case 0:
-        MIDI.sendNoteOn(notes_list[i], 127, 2);
-        lastNotePlayed[i] = millis();
-        break;
+        case 0:
+          MIDI.sendNoteOn(notes_list[i], 127, 2);
+          lastNotePlayed[i] = millis();
+          break;
 
-      case 1: // monitor: just print what is being played.
-        if (printStrokes)
-        {
+        case 1: // monitor: just print what is being played.
+          if (printStrokes)
+          {
+            setInstrumentPrintString(i, pinAction[i]);
+          }
+          break;
+
+        case 2: // toggle beat slot
+          if (printStrokes)
+            setInstrumentPrintString(i, pinAction[i]);
+          read_rhythm_slot[i][current_eighth_count] = !read_rhythm_slot[i][current_eighth_count];
+          break;
+
+        case 3: // record what is being played and replay it later
+          if (printStrokes)
+            setInstrumentPrintString(i, pinAction[i]);
+          set_rhythm_slot[i][current_eighth_count] = true;
+          break;
+
+        case 4: // tapTempo
+          getTapTempo();
+          break;
+
+        case 5: // "swell"
           setInstrumentPrintString(i, pinAction[i]);
-        }
-        break;
+          swell_rec(i);
+          break;
 
-      case 2: // toggle beat slot
-        if (printStrokes)
+        case 6: // Tsunami beat-linked pattern
+          setInstrumentPrintString(i, 1);
+          beat_topography_8[i][current_eighth_count]++;
+          break;
+
+        case 7: // swell-effect for loudness on field recordings (use on cymbals e.g.)
+          // TODO: UNTESTED! (2020-10-09)
           setInstrumentPrintString(i, pinAction[i]);
-        read_rhythm_slot[i][current_eighth_count] = !read_rhythm_slot[i][current_eighth_count];
-        break;
+          swell_rec(i);
+          break;
 
-      case 3: // record what is being played and replay it later
-        if (printStrokes)
-          setInstrumentPrintString(i, pinAction[i]);
-        set_rhythm_slot[i][current_eighth_count] = true;
-        break;
+        case 8: // create beat-topography in 16-th
+          setInstrumentPrintString(i, 1);
+          beat_topography_16[i][current_16th_count]++;
+          break;
 
-      case 4: // tapTempo
-        getTapTempo();
-        break;
-
-      case 5: // "swell"
-        setInstrumentPrintString(i, pinAction[i]);
-        swell_rec(i);
-        break;
-
-      case 6: // Tsunami beat-linked pattern
-        setInstrumentPrintString(i, 1);
-        beat_topography[i][current_eighth_count]++;
-        break;
-
-      default:
-        break;
+        default:
+          break;
       }
 
       // send instrument stroke to processing:
@@ -357,7 +399,8 @@ void loop()
     }
   } // end main commands loop -----------------------------------------
 
-  // ------------------------------- TIMED ACTIONS --------------------
+  /////////////////////////// TIMED ACTIONS ///////////////////////////
+  /////////////////////////////////////////////////////////////////////
   // (automatically invoke rhythm-linked actions)
   static int last_beat_pos = 0;
   static boolean toggleLED = true;
@@ -396,16 +439,25 @@ void loop()
     }
     digitalWrite(LED_BUILTIN, toggleLED);
 
+    // increase 16th note counter:
+    if (current_beat_pos % 2 == 0)
+    {
+      current_16th_count = (current_16th_count + 1) % 16;
+    }
+
     // -------------------------- PIN ACTIONS: ------------------------
+    // ----------------------------------------------------------------
     for (int i = 0; i < numInputs; i++)
     {
-      if (pinAction[i] == 5)
-        swell_beat(i); // ...updates once a 32nd-beat-step
+      // --------------------------- SWELL: ---------------------------
+      if (pinAction[i] == 5 || pinAction[i] == 7)
+        swell_perform(i, pinAction[i]); // ...updates once a 32nd-beat-step
 
       else if (pinAction[i] == 3) // set rhythm slots to play MIDI notes:
         read_rhythm_slot[i][current_eighth_count] = set_rhythm_slot[i][current_eighth_count];
 
-      if (pinAction[i] == 2 || pinAction[i] == 3) // send MIDI notes (pinActions 2 and 3):
+      // ----------- (pinActions 2 and 3): send MIDI notes ------------
+      else if (pinAction[i] == 2 || pinAction[i] == 3)
       {
         if (current_eighth_count != last_eighth_count) // in 8th-interval
         {
@@ -419,13 +471,68 @@ void loop()
         }
       }
 
+      // ----------------------- TSUNAMI PLAYBACK: --------------------
       else if (pinAction[i] == 6)
       {
-        tsunami_beat_playback(i, current_eighth_count);
+        tsunami_beat_playback(i, current_beat_pos);
       }
-    }
+
+      // ---------- MIDI playback according to beat_topography --------
+      else if (pinAction[i] == 8)
+      {
+        if (current_16th_count != last_16th_count) // do this only once per 16th step
+        {
+
+          // create overall volume topography of all instrument layers:
+          int total_vol[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+          for (int idx = 0; idx < 16; idx++)
+          {
+            for (int instr = 0; instr < numInputs; instr++)
+            {
+              if (pinAction[instr] == 8)
+                total_vol[idx] += beat_topography_16[instr][idx];
+            }
+          }
+          // print volume layer:
+          Serial.print("vol:\t[");
+          for (int j = 0; j < 16; j++)
+          {
+            Serial.print(total_vol[j]);
+            if (j < 15)
+              Serial.print(",");
+          }
+          Serial.println("]");
+
+          int vol = min(total_vol[current_16th_count] * 25, 255);
+
+          // change volume and play MIDI:
+          if (beat_topography_16[i][current_16th_count] > 0)
+          {
+            MIDI.sendControlChange(cc_chan[i], vol, 2);
+            MIDI.sendNoteOn(notes_list[i], 127, 2);
+          }
+          else
+          {
+            MIDI.sendNoteOff(notes_list[i], 127, 2);
+          }
+
+
+          // Debug:
+          Serial.print(names[i]);
+          Serial.print(":\t[");
+          for (int j = 0; j < 16; j++)
+          {
+            Serial.print(beat_topography_16[i][j]);
+            if (j < 15)
+              Serial.print(",");
+          }
+          Serial.println("]");
+        }
+      }
+    } // end pin Actions
     // ----------------------------------------------------------------
 
+    /////////////////////// AUXILIARY FUNCTIONS ///////////////////////
     // ---------------------------- vibrate on beat:
     if (current_beat_pos % 8 == 0) // current_beat_pos holds 32 → %8 makes 4.
     {
@@ -433,12 +540,6 @@ void loop()
       vibration_duration = 50;
       digitalWrite(VIBR, HIGH);
     }
-
-    // ATTENTION: Sketch got very slow now after this... (31.08.2020)
-    // ... really?
-    // for (int i = 0; i < numInputs; i++)
-    // if (pinAction[i] == 3)
-    // set_rhythm_slot[i][current_eighth_count] = false;
 
     // ----------------------------- draw play log to console
     print_to_console(String(millis()));
@@ -456,11 +557,7 @@ void loop()
     }
     println_to_console("");
 
-<<<<<<< HEAD:Code/teensy/teensyDrums05_swell/teensyDrums05_swell.ino
-    // MIDI Debug:
-=======
     // Debug: play MIDI note on quarter notes
->>>>>>> 1774313c083afeed43225c09f3dcf3cee9925dcb:Code/teensy/teensyDrums_master/teensyDrums_master.ino
     //    if (current_beat_pos % 8 == 0)
     //    MIDI.sendNoteOn(57, 127, 2);
     //    else
@@ -471,6 +568,7 @@ void loop()
 
   last_beat_pos = current_beat_pos;
   last_eighth_count = current_eighth_count;
+  last_16th_count = current_16th_count;
 
   // check footswitch -------------------------------------------------
   checkFootSwitch();

@@ -80,31 +80,49 @@ void checkFootSwitch()
 }
 // --------------------------------------------------------------------
 
-int cc_val[numInputs];
+int swell_val[numInputs];
 boolean footswitch_is_pressed = false;
 
 void footswitch_pressed()
 {
   switch (FOOTSWITCH_MODE)
   {
-  case (LOG_BEATS):
-    // set pinMode of all instruments to 3 (record what is being played)
-    for (int i = 0; i < numInputs; i++)
-    {
-      lastPinAction[i] = pinAction[i]; // TODO: lastPinAction seems to be overwritten quickly, so it will not be able to return to its former state. fix this!
-      pinAction[i] = 3;                // TODO: not for Cowbell?
-      for (int j = 0; j < 8; j++)
-        set_rhythm_slot[i][j] = false; // reset entire record
-    }
-    break;
+    case (LOG_BEATS):
+      // set pinMode of all instruments to 3 (record what is being played)
+      for (int i = 0; i < numInputs; i++)
+      {
+        lastPinAction[i] = pinAction[i]; // TODO: lastPinAction seems to be overwritten quickly, so it will not be able to return to its former state. fix this!
+        pinAction[i] = 3;                // TODO: not for Cowbell?
+        for (int j = 0; j < 8; j++)
+          set_rhythm_slot[i][j] = false; // reset entire record
+      }
+      break;
 
-  case (HOLD_CC): // prevents cc_vals to be changed in swell_beat()
-    footswitch_is_pressed = true;
-    break;
+    case (HOLD_CC): // prevents swell_vals to be changed in swell_beat()
+      footswitch_is_pressed = true;
+      break;
 
-  default:
-    Serial.println("Footswitch mode not defined!");
-    break;
+    case (RESET_TOPO): // resets beat_topography (for all instruments)
+      for (int i = 0; i < numInputs; i++)
+      {
+        // reset 8th-note-topography:
+        for (int j = 0; j < 8; j++)
+        {
+          beat_topography_8[i][j] = 0;
+        }
+        
+        // reset 16th-note-topography:
+        for (int j = 0; j < 16; j++)
+        {
+          beat_topography_16[i][j] = 0;
+        }
+      }
+
+      break;
+
+    default:
+      Serial.println("Footswitch mode not defined!");
+      break;
   }
 }
 // --------------------------------------------------------------------
@@ -113,17 +131,17 @@ void footswitch_released()
 {
   switch (FOOTSWITCH_MODE)
   {
-  case (LOG_BEATS):
-    for (int i = 0; i < numInputs; i++)
-      pinAction[i] = initialPinAction[i];
-    break;
+    case (LOG_BEATS):
+      for (int i = 0; i < numInputs; i++)
+        pinAction[i] = initialPinAction[i];
+      break;
 
-  case (HOLD_CC):
-    footswitch_is_pressed = false;
-    break;
+    case (HOLD_CC):
+      footswitch_is_pressed = false;
+      break;
 
-  default:
-    break;
+    default:
+      break;
   }
 }
 /////////////////////////// general pin reading ///////////////////////
@@ -138,92 +156,92 @@ int pinValue(int pinVal_pointer_in)
 ///////////////////// SET STRING FOR PLAY LOGGING /////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-// int cc_val[numInputs]; // this should be done in the swell section, but is needed in print section already... :/
+// int swell_val[numInputs]; // this should be done in the swell section, but is needed in print section already... :/
 
 void setInstrumentPrintString(int incoming_i, int incoming_pinAction)
 {
   switch (incoming_pinAction)
   {
 
-  case 1: // monitor: just print what is being played
-    if (incoming_i == KICK)
-      output_string[incoming_i] = "■\t"; // Kickdrum
-    else if (incoming_i == COWBELL)
-      output_string[incoming_i] = "▲\t"; // Crash
-    else if (incoming_i == STANDTOM1)
-      output_string[incoming_i] = "□\t"; // Standtom
-    else if (incoming_i == STANDTOM2)
-      output_string[incoming_i] = "O\t"; // Standtom
-    else if (incoming_i == HIHAT)
-      output_string[incoming_i] = "x\t"; // Hi-Hat
-    else if (incoming_i == TOM1)
-      output_string[incoming_i] = "°\t"; // Tom 1
-    else if (incoming_i == SNARE)
-      output_string[incoming_i] = "※\t"; // Snaredrum
-    else if (incoming_i == TOM2)
-      output_string[incoming_i] = "o\t"; // Tom 2
-    else if (incoming_i == RIDE)
-      output_string[incoming_i] = "xx\t"; // Ride
-    else if (incoming_i == CRASH1)
-      output_string[incoming_i] = "-X-\t"; // Crash
-    else if (incoming_i == CRASH2)
-      output_string[incoming_i] = "-XX-\t"; // Crash
-    break;
+    case 1: // monitor: just print what is being played
+      if (incoming_i == KICK)
+        output_string[incoming_i] = "■\t"; // Kickdrum
+      else if (incoming_i == COWBELL)
+        output_string[incoming_i] = "▲\t"; // Crash
+      else if (incoming_i == STANDTOM1)
+        output_string[incoming_i] = "□\t"; // Standtom
+      else if (incoming_i == STANDTOM2)
+        output_string[incoming_i] = "O\t"; // Standtom
+      else if (incoming_i == HIHAT)
+        output_string[incoming_i] = "x\t"; // Hi-Hat
+      else if (incoming_i == TOM1)
+        output_string[incoming_i] = "°\t"; // Tom 1
+      else if (incoming_i == SNARE)
+        output_string[incoming_i] = "※\t"; // Snaredrum
+      else if (incoming_i == TOM2)
+        output_string[incoming_i] = "o\t"; // Tom 2
+      else if (incoming_i == RIDE)
+        output_string[incoming_i] = "xx\t"; // Ride
+      else if (incoming_i == CRASH1)
+        output_string[incoming_i] = "-X-\t"; // Crash
+      else if (incoming_i == CRASH2)
+        output_string[incoming_i] = "-XX-\t"; // Crash
+      break;
 
-  case 2: // toggle beat slot
-    if (incoming_i == KICK)
-      output_string[incoming_i] = "■\t"; // Kickdrum
-    else if (incoming_i == COWBELL)
-      output_string[incoming_i] = "▲\t"; // Crash
-    else if (incoming_i == STANDTOM1)
-      output_string[incoming_i] = "□\t"; // Standtom
-    else if (incoming_i == STANDTOM2)
-      output_string[incoming_i] = "O\t"; // Standtom
-    else if (incoming_i == HIHAT)
-      output_string[incoming_i] = "x\t"; // Hi-Hat
-    else if (incoming_i == TOM1)
-      output_string[incoming_i] = "°\t"; // Tom 1
-    else if (incoming_i == SNARE)
-      output_string[incoming_i] = "※\t"; // Snaredrum
-    else if (incoming_i == TOM2)
-      output_string[incoming_i] = "o\t"; // Tom 2
-    else if (incoming_i == RIDE)
-      output_string[incoming_i] = "xx\t"; // Ride
-    else if (incoming_i == CRASH1)
-      output_string[incoming_i] = "-X-\t"; // Crash
-    else if (incoming_i == CRASH2)
-      output_string[incoming_i] = "-XX-\t"; // Crash
-    break;
+    case 2: // toggle beat slot
+      if (incoming_i == KICK)
+        output_string[incoming_i] = "■\t"; // Kickdrum
+      else if (incoming_i == COWBELL)
+        output_string[incoming_i] = "▲\t"; // Crash
+      else if (incoming_i == STANDTOM1)
+        output_string[incoming_i] = "□\t"; // Standtom
+      else if (incoming_i == STANDTOM2)
+        output_string[incoming_i] = "O\t"; // Standtom
+      else if (incoming_i == HIHAT)
+        output_string[incoming_i] = "x\t"; // Hi-Hat
+      else if (incoming_i == TOM1)
+        output_string[incoming_i] = "°\t"; // Tom 1
+      else if (incoming_i == SNARE)
+        output_string[incoming_i] = "※\t"; // Snaredrum
+      else if (incoming_i == TOM2)
+        output_string[incoming_i] = "o\t"; // Tom 2
+      else if (incoming_i == RIDE)
+        output_string[incoming_i] = "xx\t"; // Ride
+      else if (incoming_i == CRASH1)
+        output_string[incoming_i] = "-X-\t"; // Crash
+      else if (incoming_i == CRASH2)
+        output_string[incoming_i] = "-XX-\t"; // Crash
+      break;
 
-  case 3: // add an ! if pinAction == 3 (replay logged rhythm)
-    if (incoming_i == KICK)
-      output_string[incoming_i] = "!■\t"; // Kickdrum
-    else if (incoming_i == COWBELL)
-      output_string[incoming_i] = "!▲\t"; // Crash
-    else if (incoming_i == STANDTOM1)
-      output_string[incoming_i] = "!□\t"; // Standtom
-    else if (incoming_i == STANDTOM2)
-      output_string[incoming_i] = "!O\t"; // Standtom
-    else if (incoming_i == HIHAT)
-      output_string[incoming_i] = "!x\t"; // Hi-Hat
-    else if (incoming_i == TOM1)
-      output_string[incoming_i] = "!°\t"; // Tom 1
-    else if (incoming_i == SNARE)
-      output_string[incoming_i] = "!※\t"; // Snaredrum
-    else if (incoming_i == TOM2)
-      output_string[incoming_i] = "!o\t"; // Tom 2
-    else if (incoming_i == RIDE)
-      output_string[incoming_i] = "!xx\t"; // Ride
-    else if (incoming_i == CRASH1)
-      output_string[incoming_i] = "!-X-\t"; // Crash
-    else if (incoming_i == CRASH2)
-      output_string[incoming_i] = "!-XX-\t"; // Crash
-    break;
+    case 3: // add an ! if pinAction == 3 (replay logged rhythm)
+      if (incoming_i == KICK)
+        output_string[incoming_i] = "!■\t"; // Kickdrum
+      else if (incoming_i == COWBELL)
+        output_string[incoming_i] = "!▲\t"; // Crash
+      else if (incoming_i == STANDTOM1)
+        output_string[incoming_i] = "!□\t"; // Standtom
+      else if (incoming_i == STANDTOM2)
+        output_string[incoming_i] = "!O\t"; // Standtom
+      else if (incoming_i == HIHAT)
+        output_string[incoming_i] = "!x\t"; // Hi-Hat
+      else if (incoming_i == TOM1)
+        output_string[incoming_i] = "!°\t"; // Tom 1
+      else if (incoming_i == SNARE)
+        output_string[incoming_i] = "!※\t"; // Snaredrum
+      else if (incoming_i == TOM2)
+        output_string[incoming_i] = "!o\t"; // Tom 2
+      else if (incoming_i == RIDE)
+        output_string[incoming_i] = "!xx\t"; // Ride
+      else if (incoming_i == CRASH1)
+        output_string[incoming_i] = "!-X-\t"; // Crash
+      else if (incoming_i == CRASH2)
+        output_string[incoming_i] = "!-XX-\t"; // Crash
+      break;
 
-    // case 5: // print cc_val for repeated MIDI notes in "swell" mode
-    //   output_string[incoming_i] = cc_val[incoming_i];
-    //   output_string[incoming_i] += "\t";
-    //   break;
+      // case 5: // print swell_val for repeated MIDI notes in "swell" mode
+      //   output_string[incoming_i] = swell_val[incoming_i];
+      //   output_string[incoming_i] += "\t";
+      //   break;
   }
 }
 
@@ -245,8 +263,8 @@ boolean stroke_detected(int pinDect_pointer_in)
 
   if (millis() > lastPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke) // get counts only X ms after LAST hit
 
-  //if (millis() > firstPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke)
-  //get counts only X ms after FIRST hit ??
+    //if (millis() > firstPinActiveTimeCopy[pinDect_pointer_in] + globalDelayAfterStroke)
+    //get counts only X ms after FIRST hit ??
   {
     noInterrupts();
     countsCopy[pinDect_pointer_in] = counts[pinDect_pointer_in];
@@ -296,7 +314,7 @@ boolean stroke_detected(int pinDect_pointer_in)
   -------|-------|-------|-------|-------
   -------|-------8-------16------32------ swell_beatPos_sum = sum + (curr - prev)
   -------|---8---|---8---|---8---|------- swell_stroke_interval = sum/num
-  ------v++-----v++-----v++-----v++------ increase cc_val
+  ------v++-----v++-----v++-----v++------ increase swell_val
 
 
   PLAY:
@@ -304,12 +322,12 @@ boolean stroke_detected(int pinDect_pointer_in)
   -------|-------|-------|-------|-------
   -------0-------1-------2-------3------- beatStep
   -------|-------|-------|-------|-------
-  -------v-----(v↓)----(v↓)----(v↓)------ decrease cc_val
+  -------v-----(v↓)----(v↓)----(v↓)------ decrease swell_val
   -------🎵-------🎵-------🎵------🎵------- play MIDI note
 
   ---------------------------------------------------------------------*/
 
-int num_of_swell_taps[numInputs];     // will be used in both swell_rec() and swell_beat(). serves as cc_val for MIDI notes.
+int num_of_swell_taps[numInputs];     // will be used in both swell_rec() and swell_beat(). serves as swell_val for MIDI notes.
 int swell_stroke_interval[numInputs]; // will be needed for timed replay
 int swell_state[numInputs];
 unsigned long swell_beatPos_sum[numInputs];
@@ -321,7 +339,7 @@ void swell_init() // initialize arrays for swell functions (run in setup())
   {
     swell_state[i] = 1; // waits for first tap
     num_of_swell_taps[i] = 0;
-    cc_val[i] = 10;
+    swell_val[i] = 10;
     swell_beatPos_sum[i] = 0;
     swell_beatStep[i] = 0;
   }
@@ -356,8 +374,8 @@ void swell_rec(int instr) // remembers beat stroke position
     if (!footswitch_is_pressed)
     {
       num_of_swell_taps[instr]++;
-      cc_val[instr] += 2;                      // ATTENTION: must rise faster than it decreases! otherwise swell resets right away.
-      cc_val[instr] = min(cc_val[instr], 127); // max cc_val = 127
+      swell_val[instr] += 2;                         // ATTENTION: must rise faster than it decreases! otherwise swell resets right away.
+      swell_val[instr] = min(swell_val[instr], 127); // max swell_val = 127
     }
 
     unsigned long current_swell_beatPos;
@@ -384,7 +402,7 @@ void swell_rec(int instr) // remembers beat stroke position
 // -------------------- SOUND SWELL: REPLAY STROKES -------------------
 // --------------------------------------------------------------------
 
-void swell_beat(int instr) // updates once a 32nd-beat-step
+void swell_perform(int instr, int perform_action) // updates once a 32nd-beat-step
 {
   if (swell_state[instr] == 2)
   {
@@ -399,23 +417,9 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
 
     if (swell_beatStep[instr] == 0) // on swell beat
     {
-<<<<<<< HEAD:Code/teensy/teensyDrums05_swell/functions.ino
-      // debug strings:
-      // output_string[instr] = String(cc_val[instr]);
-      // output_string[instr] = "[";
-      // output_string[instr] += String(swell_stroke_interval[instr]);
-      // output_string[instr] += "] ";
-      // output_string[instr] += num_of_swell_taps[instr];
-      // output_string[instr] += "/";
-      // output_string[instr] += swell_beatPos_sum[instr];
-      // output_string[instr] += " (";
-      output_string[instr] = String(cc_val[instr]);
-      //      output_string[instr] += ") ";
-      output_string[instr] += "\t";
-      
-=======
+
       // Debug print:
-      //output_string[instr] = String(cc_val[instr]);
+      //output_string[instr] = String(swell_val[instr]);
       //      output_string[instr] = "[";
       //      output_string[instr] += String(swell_stroke_interval[instr]);
       //      output_string[instr] += "] ";
@@ -423,40 +427,49 @@ void swell_beat(int instr) // updates once a 32nd-beat-step
       //      output_string[instr] += "/";
       //      output_string[instr] += swell_beatPos_sum[instr];
       //      output_string[instr] += " (";
-      output_string[instr] = String(cc_val[instr]);
+      output_string[instr] = String(swell_val[instr]);
       //      output_string[instr] += ") ";
       output_string[instr] += "\t";
 
->>>>>>> 1774313c083afeed43225c09f3dcf3cee9925dcb:Code/teensy/teensyDrums_master/functions.ino
-      if (!footswitch_is_pressed)
-        MIDI.sendControlChange(cc_chan[instr], cc_val[instr], 2);
+      if (perform_action == 5)
+      {
+        if (!footswitch_is_pressed)
+          MIDI.sendControlChange(cc_chan[instr], swell_val[instr], 2);
+      }
       /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
         finding the right CC# on microKORG: (manual p.61):
         1. press SHIFT + 5
         2. choose parameter to find out via EDIT SELECT 1 & 2
         (3. reset that parameter, if you like) */
 
-<<<<<<< HEAD:Code/teensy/teensyDrums05_swell/functions.ino
-      // MIDI.sendNoteOn(notes_list[instr], 127, 2);
-=======
       // MIDI.sendNoteOn(notes_list[instr], 127, 2); // also play a note on each hit?
->>>>>>> 1774313c083afeed43225c09f3dcf3cee9925dcb:Code/teensy/teensyDrums_master/functions.ino
-
-      // decrease cc_val:
-      if (cc_val[instr] > 0)
+      else if (perform_action == 7)
+      {
+        if (tsunami.isTrackPlaying(allocated_track[instr]))
+        {
+          static int trackLevel = 0;
+          static int previousTracklevel = 0;
+          trackLevel = min(-40 + swell_val[instr], 0);
+          if (trackLevel != previousTracklevel)
+            tsunami.trackFade(allocated_track[instr], trackLevel, 100, false); // fade smoothly within 100 ms
+          previousTracklevel = trackLevel;
+        }
+      }
+      // decrease swell_val:
+      if (swell_val[instr] > 0)
       {
         if (!footswitch_is_pressed)
-          cc_val[instr]--;
+          swell_val[instr]--;
       }
-      else // reset swell if cc_val == 0:
+      else // reset swell if swell_val == 0:
       {
         swell_state[instr] = 1; // waits for first tap
         num_of_swell_taps[instr] = 0;
-        cc_val[instr] = 10;
+        swell_val[instr] = 10;
         swell_beatPos_sum[instr] = 0;
         swell_beatStep[instr] = 0;
         MIDI.sendNoteOff(notes_list[instr], 127, 2);
-      } 
+      }
     }
   }
 }
@@ -478,44 +491,44 @@ void getTapTempo()
     //      tapState = 1;
     //      break;
 
-  case 1:                                     // first hit
-    if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
-    {
-      num_of_taps = 0;
-      clock_sum = 0;
-      Serial.println("-----------TAP RESET!-----------\n");
-    }
-    timeSinceFirstTap = millis(); // record time of first hit
-    tapState = 2;                 // next: wait for second hit
+    case 1:                                     // first hit
+      if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
+      {
+        num_of_taps = 0;
+        clock_sum = 0;
+        Serial.println("-----------TAP RESET!-----------\n");
+      }
+      timeSinceFirstTap = millis(); // record time of first hit
+      tapState = 2;                 // next: wait for second hit
 
-    break;
+      break;
 
-  case 2: // second hit
+    case 2: // second hit
 
-    if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
-    {
-      num_of_taps++;
-      clock_sum += millis() - timeSinceFirstTap;
-      tapInterval = clock_sum / num_of_taps;
-      Serial.print("new tap Tempo is ");
-      Serial.print(60000 / tapInterval);
-      Serial.print(" bpm (");
-      Serial.print(tapInterval);
-      Serial.println(" ms interval)");
+      if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
+      {
+        num_of_taps++;
+        clock_sum += millis() - timeSinceFirstTap;
+        tapInterval = clock_sum / num_of_taps;
+        Serial.print("new tap Tempo is ");
+        Serial.print(60000 / tapInterval);
+        Serial.print(" bpm (");
+        Serial.print(tapInterval);
+        Serial.println(" ms interval)");
 
-      current_BPM = 60000 / tapInterval;
-      tapState = 1;
+        current_BPM = 60000 / tapInterval;
+        tapState = 1;
 
-      masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
-    }
+        masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+      }
 
-    if (timeSinceFirstTap > 2000) // forget tap if time was too long
-    {
-      tapState = 1;
-      // Serial.println("too long...");
-    }
-    // }
-    break;
+      if (timeSinceFirstTap > 2000) // forget tap if time was too long
+      {
+        tapState = 1;
+        // Serial.println("too long...");
+      }
+      // }
+      break;
   }
 }
 // --------------------------------------------------------------------
@@ -526,61 +539,31 @@ void getTapTempo()
 /* ------------- Tsunami Beat-linked Playback algorithm: --------------
 
 
- X-----------X---X--------------- 32nd Beat
-[1,  0,  0,  1,  1,  0,  0,  0  ] 1. iteration
- |-----------|---|---------------
-+1, +0, +0, +1, +1, +0, +0, +0    changes between iterations
- |-----------|---|---------------
-[2,  0,  0,  2,  2,  0,  0,  0  ] 2. iteration
- |-----------|---|---------------
-+0. +1, +0, +1, +1, +0, +0, +0    changes, unprecisely played
- ----|-------|---|---------------
-[2,  1,  0,  3,  3,  0,  0,  0  ] 3. iteration
- |-----------|---|---------------
- 4 + 1 + 0 + 9 + 9 + 0 + 0 + 0 = 23 beat_topo_squared_sum
- |-----------|---|---------------
+  X-----------X---X--------------- 32nd Beat
+  [1,  0,  0,  1,  1,  0,  0,  0  ] 1. iteration
+  |-----------|---|---------------
+  +1, +0, +0, +1, +1, +0, +0, +0    changes between iterations
+  |-----------|---|---------------
+  [2,  0,  0,  2,  2,  0,  0,  0  ] 2. iteration
+  |-----------|---|---------------
+  +0. +1, +0, +1, +1, +0, +0, +0    changes, unprecisely played
+  ----|-------|---|---------------
+  [2,  1,  0,  3,  3,  0,  0,  0  ] 3. iteration
+  |-----------|---|---------------
+  4 + 1 + 0 + 9 + 9 + 0 + 0 + 0 = 23 beat_topo_squared_sum
+  |-----------|---|---------------
 
-4/23 = 0.174
+  4/23 = 0.174
           ratio = 4:1 = 0.25
-1/23 = 0.043
+  1/23 = 0.043
           ratio = 9:1 = 0.111 --> beat_topo_entries -= 1; beat_topo[i] = 0
-9/23 = 0.391
+  9/23 = 0.391
 
-beat_topo_regular_sum = 2 + 1 + 3 + 3 = 9
-beat_topo_entries = 4 - 1 = 3
-beat_topo_average = int(9/3 + 0.5) = 3
+  beat_topo_regular_sum = 2 + 1 + 3 + 3 = 9
+  beat_topo_entries = 4 - 1 = 3
+  beat_topo_average = int(9/3 + 0.5) = 3
 
----------------------------------------------------------------------*/
-// hard-coded list of BPMs of tracks stored on Tsunami's SD card.
-// TODO: somehow do this better.
-float track_bpm[256] =
-    {
-        114, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 100,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1};
+  ---------------------------------------------------------------------*/
 
 void tsunami_beat_playback(int instr, int current_beat_in)
 {
@@ -592,11 +575,11 @@ void tsunami_beat_playback(int instr, int current_beat_in)
   // count entries and create squared sum:
   for (int j = 0; j < 8; j++)
   {
-    if (beat_topography[instr][j] > 0)
+    if (beat_topography_8[instr][j] > 0)
     {
       beat_topo_entries++;
-      beat_topo_squared_sum += beat_topography[instr][j] * beat_topography[instr][j];
-      beat_topo_regular_sum += beat_topography[instr][j];
+      beat_topo_squared_sum += beat_topography_8[instr][j] * beat_topography_8[instr][j];
+      beat_topo_regular_sum += beat_topography_8[instr][j];
     }
   }
 
@@ -606,7 +589,7 @@ void tsunami_beat_playback(int instr, int current_beat_in)
   float beat_topo_squared_frac[8];
   for (int j = 0; j < 8; j++)
     beat_topo_squared_frac[j] =
-        float(beat_topography[instr][j]) / float(beat_topo_squared_sum);
+      float(beat_topography_8[instr][j]) / float(beat_topo_squared_sum);
 
   // get highest frac:
   float highest_frac = 0;
@@ -619,7 +602,7 @@ void tsunami_beat_playback(int instr, int current_beat_in)
     if (beat_topo_squared_frac[j] > 0)
       if (highest_frac / beat_topo_squared_frac[j] > 3 || beat_topo_squared_frac[j] / highest_frac > 3)
       {
-        beat_topography[instr][j] = 0;
+        beat_topography_8[instr][j] = 0;
         beat_topo_entries -= 1;
         Serial.print("REDUCED VAL AT POS ");
         Serial.println(j);
@@ -627,7 +610,7 @@ void tsunami_beat_playback(int instr, int current_beat_in)
 
   // assess average topo sum for loudness
   for (int j = 0; j < 8; j++)
-    beat_topo_regular_sum += beat_topography[instr][j];
+    beat_topo_regular_sum += beat_topography_8[instr][j];
   beat_topo_average = int((float(beat_topo_regular_sum) / float(beat_topo_entries)) + 0.5);
 
   // TODO: reduce all params if not played for long.
@@ -640,7 +623,7 @@ void tsunami_beat_playback(int instr, int current_beat_in)
     //int tracknum = 0;
     for (int j = 0; j < 8; j++)
     {
-      if (beat_topography[instr][j] > 0)
+      if (beat_topography_8[instr][j] > 0)
       {
         if (j == 0)
           tracknum += 128;
@@ -660,9 +643,11 @@ void tsunami_beat_playback(int instr, int current_beat_in)
           tracknum += 1;
       }
     }
+    allocated_track[instr] = tracknum; // save for use in other functions
 
     // set loudness and fade:
-    int trackLevel = min(-40 + (beat_topo_average * 5), 0);
+    //int trackLevel = min(-40 + (beat_topo_average * 5), 0);
+    int trackLevel = 0;                                          // Debug
     tsunami.trackFade(tracknum, trackLevel, tapInterval, false); // fade smoothly within length of a quarter note
 
     // TODO: set track channels for each instrument according to output
@@ -674,7 +659,7 @@ void tsunami_beat_playback(int instr, int current_beat_in)
     {
       // set playback speed according to current_BPM:
       int sr_offset;
-      float r = current_BPM / float(track_bpm[tracknum - 1]);
+      float r = current_BPM / float(track_bpm[tracknum]);
       Serial.print("r = ");
       Serial.println(r);
       if (!(r > 2) && !(r < 0.5))
@@ -686,11 +671,15 @@ void tsunami_beat_playback(int instr, int current_beat_in)
         Serial.print("sr_offset = ");
         Serial.println(sr_offset);
       }
+      else
+      {
+        sr_offset = 0;
+      }
 
-      int channel = 0;                              // Debug
-      tsunami.samplerateOffset(channel, sr_offset); // TODO: link channels to instruments
+      //int channel = 0;                              // Debug
+      tsunami.samplerateOffset(allocated_channels[instr], sr_offset); // TODO: link channels to instruments
       tsunami.trackGain(tracknum, trackLevel);
-      tsunami.trackPlayPoly(tracknum, channel, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
+      tsunami.trackPlayPoly(tracknum, allocated_channels[instr], true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
       Serial.print("starting to play track ");
       Serial.println(tracknum);
     } // track playing end
@@ -700,22 +689,22 @@ void tsunami_beat_playback(int instr, int current_beat_in)
   Serial.print("[");
   for (int i = 0; i < 8; i++)
   {
-    Serial.print(beat_topography[instr][i]);
+    Serial.print(beat_topography_8[instr][i]);
     if (i < 7)
       Serial.print(", ");
   }
   Serial.print("]\t");
-  Serial.print(beat_topo_entries);
-  Serial.print("\t");
-  Serial.print(beat_topo_squared_sum);
-  Serial.print("\t");
-  Serial.print(beat_topo_regular_sum);
-  Serial.print("\t");
-  Serial.print(beat_topo_average);
+  //  Serial.print(beat_topo_entries);
+  //  Serial.print("\t");
+  //  Serial.print(beat_topo_squared_sum);
+  //  Serial.print("\t");
+  //  Serial.print(beat_topo_regular_sum);
+  //  Serial.print("\t");
+  //  Serial.print(beat_topo_average);
   Serial.print("\t");
   int trackLevel = min(-40 + (beat_topo_average * 5), 0);
   Serial.print(trackLevel);
-  Serial.print("\t->");
+  Serial.print("dB\t->");
   Serial.println(tracknum);
 }
 // --------------------------------------------------------------------
