@@ -1,4 +1,22 @@
-import processing.serial.*;
+import processing.core.*; 
+import processing.data.*; 
+import processing.event.*; 
+import processing.opengl.*; 
+
+import processing.serial.*; 
+
+import java.util.HashMap; 
+import java.util.ArrayList; 
+import java.io.File; 
+import java.io.BufferedReader; 
+import java.io.PrintWriter; 
+import java.io.InputStream; 
+import java.io.OutputStream; 
+import java.io.IOException; 
+
+public class piezoDrums_baseProgram extends PApplet {
+
+
 
 Serial myPort;
 int serialVal;
@@ -17,7 +35,7 @@ int globalThreshold = 30;
 
 boolean serial_available = true;
 
-void setup()
+public void setup()
 {
         size(500, 500);
         printArray(Serial.list());
@@ -32,7 +50,7 @@ void setup()
 
 int a = 100, b= 220, c = 200, g = 0;
 
-void draw()
+public void draw()
 {
         background(0);
         // ---------------------- DEBUG CODE ------------------------
@@ -92,7 +110,7 @@ void draw()
 }
 
 // ------------------------ KEYS ---------------------------
-void keyPressed()
+public void keyPressed()
 {
         switch (key) {
         case 'a':
@@ -125,7 +143,7 @@ void keyPressed()
         }
 }
 
-void objectsFromSerial()
+public void objectsFromSerial()
 {
 
 
@@ -146,7 +164,7 @@ void objectsFromSerial()
 }
 
 
-void serialEvent(Serial myPort)
+public void serialEvent(Serial myPort)
 {
         if (serial_available)
         {
@@ -169,4 +187,82 @@ void serialEvent(Serial myPort)
         //  print(millis() + " ");
         //  printArray(serialInArray);
         //}
+}
+int countIntersections = 0;
+
+class Circle
+{
+  // int pointCounter = 0; // increments for each intersected point; makes sure that the signal does not grow beyond that.
+
+  int signal_magnitude = 0;
+  PVector position;
+  boolean stopped = false;
+
+  int xPos, yPos;
+  Circle(int x_in, int y_in)
+  {
+    xPos = x_in;
+    yPos = y_in;
+    position = new PVector(xPos, yPos);
+  }
+
+  public void propagateSignal()
+  {
+    // if (pointCounter < selectedDatapoints.size())
+    signal_magnitude += signalGrowthSpeed;
+  }
+
+  public void drawSignal()
+  {
+    noFill();
+    stroke(255);
+    ellipse(xPos, yPos, signal_magnitude, signal_magnitude);
+  }
+
+  public void checkIntersection()
+  {
+    //for (Datapoint dp : selectedDatapoints) {
+
+    //        if (abs(PVector.dist(this.position, dp.position)) - 3 <= signal_magnitude / 2
+    //            && abs(PVector.dist(this.position, dp.position)) + 3 >= signal_magnitude / 2 && !activeDataPoints.contains(dp))
+    //        {
+    //                // dp.alreadyIntersected = true;
+    //                activeDataPoints.add(dp);
+    //                countIntersections = activeDataPoints.size();
+    //                println("active intersections: " + countIntersections);
+    //                dp.intersectionTime = millis();
+    //                dp.sound.amp(0.8 / float(countIntersections));
+    //                dp.env.play(dp.sound, globalAttackTime, globalSustainTime, globalSustainLevel, globalReleaseTime);
+    //                println(millis() + " " + dp.value + " intersect!");
+    //                // dp.sound.play(dp.value * data_to_freq_ratio, loudness);
+    //                println("loduness = " + 0.8/float(countIntersections));
+    //                // pointCounter++;
+    //        }
+
+
+    //}
+  }
+}
+
+class Line {
+  int xPos;
+  Line(int x_in)
+  {
+    xPos = x_in;
+  }
+
+  public void draw()
+  {
+    stroke(255);
+    line(xPos, 0, xPos, height);
+  }
+}
+  static public void main(String[] passedArgs) {
+    String[] appletArgs = new String[] { "piezoDrums_baseProgram" };
+    if (passedArgs != null) {
+      PApplet.main(concat(appletArgs, passedArgs));
+    } else {
+      PApplet.main(appletArgs);
+    }
+  }
 }
