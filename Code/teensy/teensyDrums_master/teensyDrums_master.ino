@@ -95,7 +95,7 @@ const int HOLD_CC = 1;
 const int RESET_TOPO = 2; // resets beat_topography (of all instruments)
 const int FOOTSWITCH_MODE = 2;
 
-int notes_list[] = {60, 61, 45, 74, 67, 44, 71};
+int notes_list[] = {60, 61, 45, 74, 72, 44, 71};
 int cc_chan[] = {50, 0, 0, 25, 71, 50, 0, 0}; // needed in pinAction 5 and 6
 /* channels on mKORG:
    44=cutoff
@@ -105,42 +105,52 @@ int cc_chan[] = {50, 0, 0, 25, 71, 50, 0, 0}; // needed in pinAction 5 and 6
    25=sustain
    26=release
 */
-int pinAction[] = {8, 4, 8, 1, 1, 1, 1, 1};       // array to be changed within code loop.
+int pinAction[] = {8, 4, 8, 8, 8, 8, 1, 0}; // array to be changed within code loop.
+/*
+    0 = play MIDI note upon stroke
+    1 = binary beat logger (print beat)
+    2 = toggle rhythm_slot
+    3 = footswitch looper: records what is being played for one bar while footswitch is pressed and repeats it after release.
+    4 = tapTempo: a standard tapTempo to change the overall pace. to be used on one instrument only.
+    5 = "swell" effect: all instruments have a tap tempo that will change MIDI CC values when played a lot (values decrease automatically)
+    6 = Tsunami beat-linked playback: finds patterns within 1 bar for each instrument and plays an according rhythmic sample from tsunami database
+    7 = using swell effect for tsunami playback loudness (arhythmic field recordings for cymbals)
+    8 = 16th-note-topography with MIDI playback and volume changet
+*/
 int initialPinAction[numInputs];                  // holds the pinAction array as defined above
 int allocated_track[numInputs];                   // tracks will be allocated in tsunami_beat_playback
 int allocated_channels[] = {0, 0, 0, 0, 0, 0, 0}; // channels to send audio from tsunami to
 
 // hard-coded list of BPMs of tracks stored on Tsunami's SD card.
 // TODO: somehow make BPM accessible from file title
-float track_bpm[256] =
-{
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
-  1, 1, 90, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 73, 1, 1, 1,
-  100, 1, 1, 1, 200, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 41, 1, 1,
-  103, 1, 1, 1, 1, 1, 1, 93, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 78, 1, 100, 100, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 100, 1, 1, 1, 1,
-  1, 1, 1, 1, 100, 60
-};
+const float track_bpm[256] =
+    {
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
+        1, 1, 90, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 73, 1, 1, 1,
+        100, 1, 1, 1, 200, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 41, 1, 1,
+        103, 1, 1, 1, 1, 1, 1, 93, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 78, 1, 100, 100, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 100, 1, 1, 1, 1,
+        1, 1, 1, 1, 100, 60};
 
 /* --------------------------------------------------------------------- */
 /* ---------------------------------- SETUP ---------------------------- */
@@ -324,7 +334,7 @@ void loop()
   static int current_eighth_count = 0; // overflows at current_beat_pos % 8
   static int current_16th_count = 0;   // overflows at current_beat_pos % 2
   static int last_eighth_count = 0;    // stores last eightNoteCount for comparison
-  static int last_16th_count = 0;    // stores last eightNoteCount for comparison
+  static int last_16th_count = 0;      // stores last eightNoteCount for comparison
   static unsigned long lastNotePlayed[numInputs];
 
   tsunami.update();
@@ -341,57 +351,57 @@ void loop()
       // ----------------------- perform pin action -------------------
       switch (pinAction[i])
       {
-        case 0:
-          MIDI.sendNoteOn(notes_list[i], 127, 2);
-          lastNotePlayed[i] = millis();
-          break;
+      case 0:
+        MIDI.sendNoteOn(notes_list[i], 127, 2);
+        lastNotePlayed[i] = millis();
+        break;
 
-        case 1: // monitor: just print what is being played.
-          if (printStrokes)
-          {
-            setInstrumentPrintString(i, pinAction[i]);
-          }
-          break;
-
-        case 2: // toggle beat slot
-          if (printStrokes)
-            setInstrumentPrintString(i, pinAction[i]);
-          read_rhythm_slot[i][current_eighth_count] = !read_rhythm_slot[i][current_eighth_count];
-          break;
-
-        case 3: // record what is being played and replay it later
-          if (printStrokes)
-            setInstrumentPrintString(i, pinAction[i]);
-          set_rhythm_slot[i][current_eighth_count] = true;
-          break;
-
-        case 4: // tapTempo
-          getTapTempo();
-          break;
-
-        case 5: // "swell"
+      case 1: // monitor: just print what is being played.
+        if (printStrokes)
+        {
           setInstrumentPrintString(i, pinAction[i]);
-          swell_rec(i);
-          break;
+        }
+        break;
 
-        case 6: // Tsunami beat-linked pattern
-          setInstrumentPrintString(i, 1);
-          beat_topography_8[i][current_eighth_count]++;
-          break;
-
-        case 7: // swell-effect for loudness on field recordings (use on cymbals e.g.)
-          // TODO: UNTESTED! (2020-10-09)
+      case 2: // toggle beat slot
+        if (printStrokes)
           setInstrumentPrintString(i, pinAction[i]);
-          swell_rec(i);
-          break;
+        read_rhythm_slot[i][current_eighth_count] = !read_rhythm_slot[i][current_eighth_count];
+        break;
 
-        case 8: // create beat-topography in 16-th
-          setInstrumentPrintString(i, 1);
-          beat_topography_16[i][current_16th_count]++;
-          break;
+      case 3: // record what is being played and replay it later
+        if (printStrokes)
+          setInstrumentPrintString(i, pinAction[i]);
+        set_rhythm_slot[i][current_eighth_count] = true;
+        break;
 
-        default:
-          break;
+      case 4: // tapTempo
+        getTapTempo();
+        break;
+
+      case 5: // "swell"
+        setInstrumentPrintString(i, pinAction[i]);
+        swell_rec(i);
+        break;
+
+      case 6: // Tsunami beat-linked pattern
+        setInstrumentPrintString(i, 1);
+        beat_topography_8[i][current_eighth_count]++;
+        break;
+
+      case 7: // swell-effect for loudness on field recordings (use on cymbals e.g.)
+        // TODO: UNTESTED! (2020-10-09)
+        setInstrumentPrintString(i, pinAction[i]);
+        swell_rec(i);
+        break;
+
+      case 8: // create beat-topography in 16-th
+        setInstrumentPrintString(i, 1);
+        beat_topography_16[i][current_16th_count]++;
+        break;
+
+      default:
+        break;
       }
 
       // send instrument stroke to processing:
@@ -408,6 +418,8 @@ void loop()
 
   static unsigned long vibration_begin = 0;
   static int vibration_duration = 0;
+
+  static boolean already_printed = false;
 
   noInterrupts();
   current_beat_pos = beatCount % 32; // (beatCount increases infinitely)
@@ -478,13 +490,14 @@ void loop()
       }
 
       // ---------- MIDI playback according to beat_topography --------
-      else if (pinAction[i] == 8)
+      if (pinAction[i] == 8)
       {
         if (current_16th_count != last_16th_count) // do this only once per 16th step
         {
 
           // create overall volume topography of all instrument layers:
           int total_vol[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
           for (int idx = 0; idx < 16; idx++)
           {
             for (int instr = 0; instr < numInputs; instr++)
@@ -493,29 +506,40 @@ void loop()
                 total_vol[idx] += beat_topography_16[instr][idx];
             }
           }
+
+          // smoothen array:
+          // ------------------ create topography and smoothen it -------------
+          smoothen_dataArray(total_vol, 3);
+
           // print volume layer:
-          Serial.print("vol:\t[");
-          for (int j = 0; j < 16; j++)
+          if (!already_printed)
           {
-            Serial.print(total_vol[j]);
-            if (j < 15)
-              Serial.print(",");
+            Serial.print("vol:\t[");
+
+            for (int j = 0; j < 16; j++)
+            {
+              Serial.print(total_vol[j]);
+              if (j < 15)
+                Serial.print(",");
+            }
+            Serial.println("]");
+            already_printed = true;
           }
-          Serial.println("]");
 
-          int vol = min(total_vol[current_16th_count] * 25, 255);
 
-          // change volume and play MIDI:
+          // ------------ result: change volume and play MIDI ---------
+          // ----------------------------------------------------------
+          int vol = min(40 + total_vol[current_16th_count] * 15, 255);
+
           if (beat_topography_16[i][current_16th_count] > 0)
           {
-            MIDI.sendControlChange(cc_chan[i], vol, 2);
+            MIDI.sendControlChange(50, vol, 2);
             MIDI.sendNoteOn(notes_list[i], 127, 2);
           }
           else
           {
             MIDI.sendNoteOff(notes_list[i], 127, 2);
           }
-
 
           // Debug:
           Serial.print(names[i]);
@@ -527,8 +551,8 @@ void loop()
               Serial.print(",");
           }
           Serial.println("]");
-        }
-      }
+        } // end only once per 16th-step
+      } // end pinAction[8]
     } // end pin Actions
     // ----------------------------------------------------------------
 
@@ -566,9 +590,11 @@ void loop()
   } // end of (32nd-step) TIMED ACTIONS
   // ------------------------------------------------------------------
 
+  ///////////////////////////// tidy up ///////////////////////////////
   last_beat_pos = current_beat_pos;
   last_eighth_count = current_eighth_count;
   last_16th_count = current_16th_count;
+  already_printed = false;
 
   // check footswitch -------------------------------------------------
   checkFootSwitch();

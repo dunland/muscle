@@ -374,7 +374,7 @@ void swell_rec(int instr) // remembers beat stroke position
     if (!footswitch_is_pressed)
     {
       num_of_swell_taps[instr]++;
-      swell_val[instr] += 2;                         // ATTENTION: must rise faster than it decreases! otherwise swell resets right away.
+      swell_val[instr] += 4;                         // ATTENTION: must rise faster than it decreases! otherwise swell resets right away.
       swell_val[instr] = min(swell_val[instr], 127); // max swell_val = 127
     }
 
@@ -560,17 +560,18 @@ void getTapTempo()
   9/23 = 0.391
 
   beat_topo_regular_sum = 2 + 1 + 3 + 3 = 9
-  beat_topo_entries = 4 - 1 = 3
-  beat_topo_average = int(9/3 + 0.5) = 3
+  smoothing: beat_topo_entries = 4 - 1 = 3
+  beat_topo_average_smooth = int(9/3 + 0.5) = 3
 
   ---------------------------------------------------------------------*/
 
 void tsunami_beat_playback(int instr, int current_beat_in)
 {
+  // ------------------ create topography and smoothen it -------------
+  // smoothen_dataArray(beat_topography_8, instr, 3)
   int beat_topo_entries = 0;
   int beat_topo_squared_sum = 0;
   int beat_topo_regular_sum = 0;
-  int beat_topo_average = 0;
 
   // count entries and create squared sum:
   for (int j = 0; j < 8; j++)
@@ -604,14 +605,16 @@ void tsunami_beat_playback(int instr, int current_beat_in)
       {
         beat_topography_8[instr][j] = 0;
         beat_topo_entries -= 1;
-        Serial.print("REDUCED VAL AT POS ");
+        Serial.print(names[instr]);
+        Serial.print(": REDUCED VAL AT POS ");
         Serial.println(j);
       }
 
+  int beat_topo_average_smooth = 0;
   // assess average topo sum for loudness
   for (int j = 0; j < 8; j++)
     beat_topo_regular_sum += beat_topography_8[instr][j];
-  beat_topo_average = int((float(beat_topo_regular_sum) / float(beat_topo_entries)) + 0.5);
+  beat_topo_average_smooth = int((float(beat_topo_regular_sum) / float(beat_topo_entries)) + 0.5);
 
   // TODO: reduce all params if not played for long.
 
@@ -646,7 +649,7 @@ void tsunami_beat_playback(int instr, int current_beat_in)
     allocated_track[instr] = tracknum; // save for use in other functions
 
     // set loudness and fade:
-    //int trackLevel = min(-40 + (beat_topo_average * 5), 0);
+    //int trackLevel = min(-40 + (beat_topo_average_smooth * 5), 0);
     int trackLevel = 0;                                          // Debug
     tsunami.trackFade(tracknum, trackLevel, tapInterval, false); // fade smoothly within length of a quarter note
 
@@ -655,6 +658,7 @@ void tsunami_beat_playback(int instr, int current_beat_in)
     // output B: speaker in room (PA)
     // cool effects: let sounds walk through room from drumset to PA
 
+    // --------------------------- play track -------------------------
     if (!tsunami.isTrackPlaying(tracknum) && current_beat_in == 0)
     {
       // set playback speed according to current_BPM:
@@ -700,9 +704,9 @@ void tsunami_beat_playback(int instr, int current_beat_in)
   //  Serial.print("\t");
   //  Serial.print(beat_topo_regular_sum);
   //  Serial.print("\t");
-  //  Serial.print(beat_topo_average);
+  //  Serial.print(beat_topo_average_smooth);
   Serial.print("\t");
-  int trackLevel = min(-40 + (beat_topo_average * 5), 0);
+  int trackLevel = min(-40 + (beat_topo_average_smooth * 5), 0);
   Serial.print(trackLevel);
   Serial.print("dB\t->");
   Serial.println(tracknum);
@@ -767,3 +771,90 @@ void printNormalizedValues(boolean printNorm_criterion)
   }
 }
 // --------------------------------------------------------------------
+
+//////////////////////// SMOOTHEN TOPOGRAPHY ARRAYS ///////////////////
+///////////////////////////////////////////////////////////////////////
+// --------------- smoothen 8-bit array holding instrument ------------
+void smoothen_dataArray(int input_array[numInputs][8], int instr_in, int threshold_to_omit_entry)
+{
+  int entries = 0;
+  int squared_sum = 0;
+  int regular_sum = 0;
+
+  // count entries and create squared sum:
+  for (int j = 0; j < 8; j++)
+  {
+    if (input_array[instr_in][j] > 0)
+    {
+      entries++;
+      squared_sum += input_array[instr_in][j] * input_array[instr_in][j];
+      regular_sum += input_array[instr_in][j];
+    }
+  }
+
+  regular_sum = regular_sum / entries;
+
+  // calculate site-specific (squared) fractions of total:
+  float squared_frac[8];
+  for (int j = 0; j < 8; j++)
+    squared_frac[j] =
+        float(input_array[instr_in][j]) / float(squared_sum);
+
+  // get highest frac:
+  float highest_squared_frac = 0;
+  for (int j = 0; j < 8; j++)
+    highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
+
+  // get "topography height":
+  // divide highest with other entries and reset entries if ratio > 3:
+  for (int j = 0; j < 8; j++)
+    if (squared_frac[j] > 0)
+      if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > threshold_to_omit_entry)
+      {
+        input_array[instr_in][j] = 0;
+        entries -= 1;
+      }
+}
+
+
+// ------------------------ smoothen 16-bit array ---------------------
+void smoothen_dataArray(int input_array[16], int threshold_to_omit_entry)
+{
+  int entries = 0;
+  int squared_sum = 0;
+  int regular_sum = 0;
+
+  // count entries and create squared sum:
+  for (int j = 0; j < 16; j++)
+  {
+    if (input_array[j] > 0)
+    {
+      entries++;
+      squared_sum += input_array[j] * input_array[j];
+      regular_sum += input_array[j];
+    }
+  }
+
+  regular_sum = regular_sum / entries;
+
+  // calculate site-specific (squared) fractions of total:
+  float squared_frac[16];
+  for (int j = 0; j < 16; j++)
+    squared_frac[j] =
+        float(input_array[j]) / float(squared_sum);
+
+  // get highest frac:
+  float highest_squared_frac = 0;
+  for (int j = 0; j < 16; j++)
+    highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
+
+  // get "topography height":
+  // divide highest with other entries and reset entries if ratio > 3:
+  for (int j = 0; j < 16; j++)
+    if (squared_frac[j] > 0)
+      if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > threshold_to_omit_entry)
+      {
+        input_array[j] = 0;
+        entries -= 1;
+      }
+}
