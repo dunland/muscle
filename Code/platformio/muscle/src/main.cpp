@@ -31,11 +31,13 @@
 #include <Tsunami.h>
 #include <Globals.h>
 #include <Instruments.h>
+#include <Effects.h>
 
 Tsunami tsunami;
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI); // for Serial-specific usage
+// MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI); // for Serial-specific usage
+midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial&)Serial2); // same as // MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
-#include <Effects.h>
+
 
 // ----------------------------- pins ---------------------------------
 static const uint8_t numInputs = 7;
@@ -1268,7 +1270,7 @@ void loop()
     if (stroke_detected(i)) // evaluates pins for activity repeatedly
     {
       // ----------------------- perform pin action -------------------
-      instruments[i]->trigger(instruments[i]);
+      instruments[i]->trigger(instruments[i], MIDI); // runs trigger function according to instrument's EffectType
       switch (instruments[i]->effect)
       {
         // case 0:
@@ -1276,12 +1278,12 @@ void loop()
         //   lastNotePlayed[i] = millis();
         //   break;
 
-      case 1: // monitor: just print what is being played.
-        if (printStrokes)
-        {
-          setInstrumentPrintString(i, instruments[i]->effect);
-        }
-        break;
+      // case 1: // monitor: just print what is being played.
+      //   if (printStrokes)
+      //   {
+      //     setInstrumentPrintString(i, instruments[i]->effect);
+      //   }
+      //   break;
 
       case 2: // toggle beat slot
         if (printStrokes)

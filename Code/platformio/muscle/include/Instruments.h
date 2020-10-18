@@ -2,8 +2,6 @@
 
 #include <Arduino.h>
 #include <vector>
-// #include <Tsunami.h>
-// #include <MIDI.h>
 #include <Globals.h>
 #include <Effects.h>
 
@@ -37,7 +35,7 @@ public:
 
     TOPOGRAPHY topography;
 
-    void trigger(Instrument *instrument);   
+    void trigger(Instrument*, midi::MidiInterface<HardwareSerial>);   
 
     void perform(EffectsType effect);
 

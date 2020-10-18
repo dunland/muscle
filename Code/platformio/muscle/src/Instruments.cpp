@@ -1,17 +1,16 @@
 #include <Instruments.h>
-// #include <Globals.h>
-// #include <Effects.h>
+#include <MIDI.h>
 
-void Instrument::trigger(Instrument *instrument)
+void Instrument::trigger(Instrument* instrument, midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (effect)
     {
     case PlayMidi:
-        // Effect::playMidi(instrument);
+        Effect::playMidi(instrument, MIDI);
         break;
 
     case Monitor:
-
+        Effect::monitor(instrument);
         break;
 
     case ToggleRhythmSlot:

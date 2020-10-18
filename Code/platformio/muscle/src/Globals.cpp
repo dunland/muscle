@@ -1,13 +1,12 @@
 #include <Globals.h>
-// boolean Globals::printStrokes = true;
+// #include <MIDI.h>
+boolean Globals::printStrokes = true;
 String Globals::output_string[Globals::numInputs];
-
-
-///////////////////// SET STRING FOR PLAY LOGGING /////////////////////
-///////////////////////////////////////////////////////////////////////
 
 // int swell_val[numInputs]; // this should be done in the swell section, but is needed in print section already... :/
 
+///////////////////// SET STRING FOR PLAY LOGGING /////////////////////
+///////////////////////////////////////////////////////////////////////
 void Globals::setInstrumentPrintString(DrumType drum, EffectsType effect)
 {
     switch (effect)

@@ -75,7 +75,7 @@ public:
     return "";
   }
 
-  // static boolean printStrokes;
+  static boolean printStrokes;
   static String output_string[numInputs];
 
   static void setInstrumentPrintString(DrumType drum, EffectsType effect);
