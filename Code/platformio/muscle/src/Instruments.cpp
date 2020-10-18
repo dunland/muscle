@@ -14,11 +14,11 @@ void Instrument::trigger(Instrument* instrument, midi::MidiInterface<HardwareSer
         break;
 
     case ToggleRhythmSlot:
-
+        Effect::toggleRhythmSlot(instrument);
         break;
 
     case FootSwitchLooper:
-
+        Effect::footswitch_recordSlots(instrument);
         break;
 
     case TapTempo:

@@ -79,8 +79,8 @@ volatile boolean sendMidiClock = false;
 
 // ----------------- MUSICAL AND PERFORMATIVE PARAMETERS --------------
 
-boolean read_rhythm_slot[numInputs][8];
-boolean set_rhythm_slot[numInputs][8];
+// boolean read_rhythm_slot[numInputs][8];
+// boolean set_rhythm_slot[numInputs][8];
 // int beat_topography_8[numInputs][8];
 // int beat_topography_16[numInputs][16];
 
@@ -294,7 +294,7 @@ void footswitch_pressed()
       lastEffect[i] = instruments[i]->effect; // TODO: lastPinAction seems to be overwritten quickly, so it will not be able to return to its former state. fix this!
       instruments[i]->effect = FootSwitchLooper;                // TODO: not for Cowbell?
       for (int j = 0; j < 8; j++)
-        set_rhythm_slot[i][j] = false; // reset entire record
+        instruments[i]->score.set_rhythm_slot[j] = false; // reset entire record
     }
     break;
 
@@ -1166,8 +1166,8 @@ void setup()
     counts[i] = 0;
     for (int j = 0; j < 8; j++)
     {
-      read_rhythm_slot[i][j] = false;
-      set_rhythm_slot[i][j] = false;
+      instruments[i]->score.read_rhythm_slot[j] = false;
+      instruments[i]->score.set_rhythm_slot[j] = false;
       instruments[i]->topography.a_8[j] = 0;
       instruments[i]->topography.a_16[j] = 0;
     }
@@ -1252,11 +1252,11 @@ void setup()
 
 void loop()
 {
-  static int current_eighth_count = 0; // overflows at current_beat_pos % 8
-  static int current_16th_count = 0;   // overflows at current_beat_pos % 2
-  static int last_eighth_count = 0;    // stores last eightNoteCount for comparison
-  static int last_16th_count = 0;      // stores last eightNoteCount for comparison
-  static unsigned long lastNotePlayed[numInputs];
+  // static int current_eighth_count = 0; // overflows at current_beat_pos % 8
+  // static int current_16th_count = 0;   // overflows at current_beat_pos % 2
+  // static int last_eighth_count = 0;    // stores last eightNoteCount for comparison
+  // static int last_16th_count = 0;      // stores last eightNoteCount for comparison
+  // static unsigned long lastNotePlayed[numInputs];
 
   tsunami.update();
 
@@ -1285,17 +1285,17 @@ void loop()
       //   }
       //   break;
 
-      case 2: // toggle beat slot
-        if (printStrokes)
-          setInstrumentPrintString(i, instruments[i]->effect);
-        read_rhythm_slot[i][current_eighth_count] = !read_rhythm_slot[i][current_eighth_count];
-        break;
+      // case 2: // toggle beat slot
+      //   if (printStrokes)
+      //     setInstrumentPrintString(i, instruments[i]->effect);
+      //   read_rhythm_slot[i][Globals::current_eighth_count] = !read_rhythm_slot[i][Globals::current_eighth_count];
+      //   break;
 
-      case 3: // record what is being played and replay it later
-        if (printStrokes)
-          setInstrumentPrintString(i, instruments[i]->effect);
-        set_rhythm_slot[i][current_eighth_count] = true;
-        break;
+      // case 3: // record what is being played and replay it later
+      //   if (printStrokes)
+      //     setInstrumentPrintString(i, instruments[i]->effect);
+      //   set_rhythm_slot[i][Globals::current_eighth_count] = true;
+      //   break;
 
       case 4: // tapTempo
         getTapTempo();
@@ -1308,7 +1308,7 @@ void loop()
 
       case 6: // Tsunami beat-linked pattern
         setInstrumentPrintString(i, 1);
-        instruments[i]->topography.a_8[current_eighth_count]++;
+        instruments[i]->topography.a_8[Globals::current_eighth_count]++;
         break;
 
       case 7: // swell-effect for loudness on field recordings (use on cymbals e.g.)
@@ -1319,7 +1319,7 @@ void loop()
 
       case 8: // create beat-topography in 16-th
         setInstrumentPrintString(i, 1);
-        instruments[i]->topography.a_16[current_16th_count]++;
+        instruments[i]->topography.a_16[Globals::current_16th_count]++;
         break;
 
       default:
@@ -1368,7 +1368,7 @@ void loop()
     // increase 8th note counter:
     if (current_beat_pos % 4 == 0)
     {
-      current_eighth_count = (current_eighth_count + 1) % 8;
+      Globals::current_eighth_count = (Globals::current_eighth_count + 1) % 8;
       toggleLED = !toggleLED;
     }
     digitalWrite(LED_BUILTIN, toggleLED);
@@ -1376,26 +1376,27 @@ void loop()
     // increase 16th note counter:
     if (current_beat_pos % 2 == 0)
     {
-      current_16th_count = (current_16th_count + 1) % 16;
+      Globals::current_16th_count = (Globals::current_16th_count + 1) % 16;
     }
 
     // -------------------------- PIN ACTIONS: ------------------------
     // ----------------------------------------------------------------
     for (int i = 0; i < numInputs; i++)
     {
+      // instruments[i]->perform(instruments[i]->effect);
       // --------------------------- SWELL: ---------------------------
       if (instruments[i]->effect == Swell || instruments[i]->effect == CymbalSwell)
         swell_perform(i, instruments[i]->effect); // ...updates once a 32nd-beat-step
 
       else if (instruments[i]->effect == FootSwitchLooper) // set rhythm slots to play MIDI notes:
-        read_rhythm_slot[i][current_eighth_count] = set_rhythm_slot[i][current_eighth_count];
+        instruments[i]->score.read_rhythm_slot[Globals::current_eighth_count] =  instruments[i]->score.set_rhythm_slot[Globals::current_eighth_count];
 
       // ----------- (pinActions 2 and 3): send MIDI notes ------------
       else if (instruments[i]->effect == ToggleRhythmSlot || instruments[i]->effect == FootSwitchLooper)
       {
-        if (current_eighth_count != last_eighth_count) // in 8th-interval
+        if (Globals::current_eighth_count != Globals::last_eighth_count) // in 8th-interval
         {
-          if (read_rhythm_slot[i][current_eighth_count])
+          if ( instruments[i]->score.read_rhythm_slot[Globals::current_eighth_count])
           {
             setInstrumentPrintString(i, 3);
             MIDI.sendNoteOn(instruments[i]->score.active_note, 127, 2);
@@ -1414,7 +1415,7 @@ void loop()
       // ---------- MIDI playback according to beat_topography --------
       if (instruments[i]->effect == 8)
       {
-        if (current_16th_count != last_16th_count) // do this only once per 16th step
+        if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
         {
 
           // create overall volume topography of all instrument layers:
@@ -1450,9 +1451,9 @@ void loop()
 
           // ------------ result: change volume and play MIDI ---------
           // ----------------------------------------------------------
-          int vol = min(40 + total_vol[current_16th_count] * 15, 255);
+          int vol = min(40 + total_vol[Globals::current_16th_count] * 15, 255);
 
-          if (instruments[i]->topography.a_16[current_16th_count] > 0)
+          if (instruments[i]->topography.a_16[Globals::current_16th_count] > 0)
           {
             MIDI.sendControlChange(50, vol, 2);
             MIDI.sendNoteOn(instruments[i]->score.active_note, 127, 2);
@@ -1549,12 +1550,12 @@ void loop()
     // ----------------------------- draw play log to console
     print_to_console(String(millis()));
     print_to_console("\t");
-    // Serial.print(current_eighth_count + 1); // if you want to print 8th-steps only
+    // Serial.print(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
     print_to_console(current_beat_pos);
     print_to_console("\t");
     // Serial.print(current_beat_pos / 4);
     // Serial.print("\t");
-    // Serial.print(current_eighth_count);
+    // Serial.print(Globals::current_eighth_count);
     for (int i = 0; i < numInputs; i++)
     {
       print_to_console(output_string[i]);
@@ -1573,8 +1574,8 @@ void loop()
 
   ///////////////////////////// tidy up ///////////////////////////////
   last_beat_pos = current_beat_pos;
-  last_eighth_count = current_eighth_count;
-  last_16th_count = current_16th_count;
+  Globals::last_eighth_count = Globals::current_eighth_count;
+  Globals::last_16th_count = Globals::current_16th_count;
   already_printed = false;
 
   // check footswitch -------------------------------------------------
@@ -1585,7 +1586,7 @@ void loop()
     digitalWrite(VIBR, LOW);
 
   for (int i = 0; i < numInputs; i++)
-    if (millis() > lastNotePlayed[i] + 200 && instruments[i]->effect != Swell) // pinAction 5 turns notes off in swell_beat()
+    if (millis() > instruments[i]->score.last_notePlayed + 200 && instruments[i]->effect != Swell) // pinAction 5 turns notes off in swell_beat()
       MIDI.sendNoteOff(instruments[i]->score.active_note, 127, 2);
 }
 // --------------------------------------------------------------------

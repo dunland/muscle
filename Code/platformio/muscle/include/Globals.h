@@ -45,6 +45,11 @@ class Globals
 public:
   static const uint8_t numInputs = 7;
 
+  static int current_eighth_count; // overflows at current_beat_pos % 8
+  static int current_16th_count;   // overflows at current_beat_pos % 2
+  static int last_eighth_count;    // stores last eightNoteCount for comparison
+  static int last_16th_count;      // stores last eightNoteCount for comparison
+
   static String DrumtypeToHumanreadable(DrumType type)
   {
     switch (type)

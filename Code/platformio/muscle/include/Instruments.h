@@ -31,17 +31,19 @@ public:
         std::vector<int> notes;
         int active_note;
         unsigned long last_notePlayed;
+        boolean read_rhythm_slot[8];
+        boolean set_rhythm_slot[8];
     } score;
 
     TOPOGRAPHY topography;
 
-    void trigger(Instrument*, midi::MidiInterface<HardwareSerial>);   
+    void trigger(Instrument *, midi::MidiInterface<HardwareSerial>);
 
     void perform(EffectsType effect);
 
     void setup_notes(std::vector<int> list)
     {
-        for (int i = 0; i<list.size(); i++)
+        for (int i = 0; i < list.size(); i++)
         {
             score.notes[i] = list[i];
         }

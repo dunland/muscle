@@ -5,13 +5,17 @@ String Globals::output_string[Globals::numInputs];
 
 // int swell_val[numInputs]; // this should be done in the swell section, but is needed in print section already... :/
 
+int Globals::current_eighth_count = 0; // overflows at current_beat_pos % 8
+int Globals::current_16th_count = 0;   // overflows at current_beat_pos % 2
+int Globals::last_eighth_count = 0;    // stores last eightNoteCount for comparison
+int Globals::last_16th_count = 0;      // stores last eightNoteCount for comparison
+
 ///////////////////// SET STRING FOR PLAY LOGGING /////////////////////
 ///////////////////////////////////////////////////////////////////////
 void Globals::setInstrumentPrintString(DrumType drum, EffectsType effect)
 {
     switch (effect)
     {
-
     case Monitor: // monitor: just print what is being played
         if (drum == Kick)
             Globals::output_string[drum] = "■\t"; // Kickdrum
