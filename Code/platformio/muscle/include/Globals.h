@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <Tsunami.h> // in cpp
 // #include <MIDI.h> // in cpp
+#include <vector>
 
 //MIDI_CREATE_DEFAULT_INSTANCE();
 // MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI); // for Serial-specific usage
@@ -44,6 +45,26 @@ class Globals
 {
 public:
   static const uint8_t numInputs = 7;
+  static std::vector<int> pins;
+
+  static int tapInterval;
+  static int current_BPM;
+
+  // ------------------ variables for interrupt timers ------------------
+  // static IntervalTimer pinMonitor;  // reads pins every 1 ms
+  static IntervalTimer masterClock; // 1 bar
+
+  // ----------------------------- timer counter ---------------------------------
+  static volatile unsigned long masterClockCount; // 4*32 = 128 masterClockCount per cycle
+  static volatile unsigned long beatCount;
+  // static volatile int currentStep; // 0-32
+  static int next_beatCount; // will be reset when timer restarts
+  static volatile boolean sendMidiClock;
+
+  // static int pinValue(Instrument *instrument); // general pin reading
+
+  // static void samplePins();
+  static void masterClockTimer();
 
   static int current_eighth_count; // overflows at current_beat_pos % 8
   static int current_16th_count;   // overflows at current_beat_pos % 2

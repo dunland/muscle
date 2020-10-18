@@ -13,6 +13,8 @@ public:
     {
     }
 
+    int pin;
+
     EffectsType effect;
     EffectsType initialEffect; // holds the pinAction array as defined above
     DrumType drumtype;
@@ -34,6 +36,13 @@ public:
         boolean read_rhythm_slot[8];
         boolean set_rhythm_slot[8];
     } score;
+
+    struct TIMING
+    {
+        volatile unsigned long lastPinActiveTime;
+        volatile unsigned long firstPinActiveTime;
+        volatile int counts;
+    } timing;
 
     TOPOGRAPHY topography;
 

@@ -19,6 +19,8 @@ public:
 
     static void footswitch_recordSlots(Instrument* instrument);
 
+    static void getTapTempo();
+
     // timed events: --------------------------------------------------
 
     // static void swell_perform(i, instruments[i]->effect); // ...updates once a 32nd-beat-step

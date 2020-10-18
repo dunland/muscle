@@ -41,7 +41,7 @@ midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial&)Serial2); // same as /
 
 // ----------------------------- pins ---------------------------------
 static const uint8_t numInputs = 7;
-static const uint8_t pins[] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};
+// static const uint8_t pins[] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};
 Instrument *instruments[numInputs];
 
 // static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN1, LED_BUILTIN2, LED_BUILTIN3}; // array when using SPRESENSE
@@ -57,25 +57,25 @@ String output_string[numInputs];
 
 // ------------------ variables for interrupt timers ------------------
 IntervalTimer pinMonitor;  // reads pins every 1 ms
-IntervalTimer masterClock; // 1 bar
-volatile int counts[numInputs];
-volatile unsigned long lastPinActiveTime[numInputs];
-volatile unsigned long firstPinActiveTime[numInputs];
+// IntervalTimer masterClock; // 1 bar
+// volatile int counts[numInputs];
+// volatile unsigned long lastPinActiveTime[numInputs];
+// volatile unsigned long firstPinActiveTime[numInputs];
 
 // ------------------ timing and rhythm tracking ------------------
 int countsCopy[numInputs];
 int current_beat_pos = 0; // always stores the current position in the beat
 
-int tapInterval = 500; // 0.5 s per beat for 120 BPM
-int current_BPM = 120;
+// int tapInterval = 500; // 0.5 s per beat for 120 BPM
+// int current_BPM = 120;
 
-// ----------------------------- timer counter ---------------------------------
-volatile unsigned long masterClockCount = 0; // 4*32 = 128 masterClockCount per cycle
-volatile unsigned long beatCount = 0;
-// volatile int bar_step; // 0-32
-volatile int currentStep; // 0-32
-int next_beatCount = 0;   // will be reset when timer restarts
-volatile boolean sendMidiClock = false;
+// // ----------------------------- timer counter ---------------------------------
+// volatile unsigned long masterClockCount = 0; // 4*32 = 128 masterClockCount per cycle
+// volatile unsigned long beatCount = 0;
+// // volatile int bar_step; // 0-32
+// volatile int currentStep; // 0-32
+// int next_beatCount = 0;   // will be reset when timer restarts
+// volatile boolean sendMidiClock = false;
 
 // ----------------- MUSICAL AND PERFORMATIVE PARAMETERS --------------
 
@@ -159,14 +159,13 @@ struct TOPOGRAPHY_16 // must be global!
 
 int pinValue(int instr)
 {
-  return abs(instruments[instr]->sensitivity.noiseFloor - analogRead(pins[instr]));
+  return abs(instruments[instr]->sensitivity.noiseFloor - analogRead(instruments[instr]->pin));
 }
 // --------------------------------------------------------------------
 
-/* --------------------------------------------------------------------- */
-/* -------------------------- TIMED INTERRUPTS ------------------------- */
-/* --------------------------------------------------------------------- */
-
+// /* --------------------------------------------------------------------- */
+// /* -------------------------- TIMED INTERRUPTS ------------------------- */
+// /* --------------------------------------------------------------------- */
 void samplePins()
 {
   // ------------------------- read all pins -----------------------------------
@@ -174,56 +173,70 @@ void samplePins()
   {
     if (pinValue(pinNum) > instruments[pinNum]->sensitivity.threshold)
     {
-      if (counts[pinNum] < 1)
-        firstPinActiveTime[pinNum] = millis();
-      lastPinActiveTime[pinNum] = millis();
-      counts[pinNum]++;
+      if (instruments[pinNum]->timing.counts < 1)
+        instruments[pinNum]->timing.firstPinActiveTime = millis();
+      instruments[pinNum]->timing.lastPinActiveTime = millis();
+      instruments[pinNum]->timing.counts++;
     }
   }
 }
+// void samplePins()
+// {
+//   // ------------------------- read all pins -----------------------------------
+//   for (int pinNum = 0; pinNum < numInputs; pinNum++)
+//   {
+//     if (pinValue(pinNum) > instruments[pinNum]->sensitivity.threshold)
+//     {
+//       if (counts[pinNum] < 1)
+//         firstPinActiveTime[pinNum] = millis();
+//       lastPinActiveTime[pinNum] = millis();
+//       counts[pinNum]++;
+//     }
+//   }
+// }
 // -----------------------------------------------------------------------------
 
-void masterClockTimer()
-{
-  /*
-    timing              fraction          bar @ 120 BPM    bar @ 180 BPM
-    1 bar             = 1               = 2 s       | 1.3 s
-    1 beatCount       = 1/32 bar        = 62.5 ms   | 41.7 ms
-    stroke precision  = 1/4 beatCount   = 15.625 ms | 10.4166 ms
+// void masterClockTimer()
+// {
+//   /*
+//     timing              fraction          bar @ 120 BPM    bar @ 180 BPM
+//     1 bar             = 1               = 2 s       | 1.3 s
+//     1 beatCount       = 1/32 bar        = 62.5 ms   | 41.7 ms
+//     stroke precision  = 1/4 beatCount   = 15.625 ms | 10.4166 ms
 
 
-    |     .-.
-    |    /   \         .-.
-    |   /     \       /   \       .-.     .-.     _   _
-    +--/-------\-----/-----\-----/---\---/---\---/-\-/-\/\/---
-    | /         \   /       \   /     '-'     '-'
-    |/           '-'         '-'
-    |--------2 oscil---------|
-    |------snare = 10 ms-----|
+//     |     .-.
+//     |    /   \         .-.
+//     |   /     \       /   \       .-.     .-.     _   _
+//     +--/-------\-----/-----\-----/---\---/---\---/-\-/-\/\/---
+//     | /         \   /       \   /     '-'     '-'
+//     |/           '-'         '-'
+//     |--------2 oscil---------|
+//     |------snare = 10 ms-----|
 
-  */
+//   */
 
-  masterClockCount++; // will rise infinitely
+//   masterClockCount++; // will rise infinitely
 
-  // ------------ 1/32 increase in 4 full precisionCounts -----------
-  if (masterClockCount % 4 == 0)
-  {
-    beatCount++; // will rise infinitely
-  }
+//   // ------------ 1/32 increase in 4 full precisionCounts -----------
+//   if (masterClockCount % 4 == 0)
+//   {
+//     beatCount++; // will rise infinitely
+//   }
 
-  // evaluate current position of beat in bar for stroke precision
-  // 2020-09-07: this doesn't help and it's also not working...
-  // if ((masterClockCount % 4) >= next_beatCount - 2)
-  // {
-  //   currentStep = next_beatCount;
-  //   next_beatCount += 4;
-  // }
+//   // evaluate current position of beat in bar for stroke precision
+//   // 2020-09-07: this doesn't help and it's also not working...
+//   // if ((masterClockCount % 4) >= next_beatCount - 2)
+//   // {
+//   //   currentStep = next_beatCount;
+//   //   next_beatCount += 4;
+//   // }
 
-  // prepare MIDI clock:
-  sendMidiClock = (((masterClockCount % 4) / 3) % 4 == 0);
+//   // prepare MIDI clock:
+//   sendMidiClock = (((masterClockCount % 4) / 3) % 4 == 0);
 
-  // ---------------------------------------------------------------------------
-}
+// }
+//   // ---------------------------------------------------------------------------
 
 /* --------------------------------------------------------------------- */
 /* ----------------------------- FUNCTIONS ----------------------------- */
@@ -243,7 +256,7 @@ void calculateNoiseFloor()
     Serial.print(" ..waiting for stroke");
     if (use_responsiveCalibration)
     {
-      while (analogRead(pins[pinNum]) < 700 + instruments[pinNum]->sensitivity.threshold)
+      while (analogRead(instruments[pinNum]->pin) < 700 + instruments[pinNum]->sensitivity.threshold)
         ; // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
       Serial.print(" .");
       delay(1000); // should be long enough for drum not to oscillate anymore
@@ -259,7 +272,7 @@ void calculateNoiseFloor()
         digitalWrite(leds[pinNum], toggleState);
         toggleState = !toggleState;
       }
-      totalSamples += analogRead(pins[pinNum]);
+      totalSamples += analogRead(instruments[pinNum]->pin);
     }
     instruments[pinNum]->sensitivity.noiseFloor = totalSamples / 400;
     digitalWrite(leds[pinNum], LOW);
@@ -476,7 +489,7 @@ boolean stroke_detected(int instr)
   // static boolean toggleState = false; // for LED toggle
 
   noInterrupts();
-  lastPinActiveTimeCopy[instr] = lastPinActiveTime[instr];
+  lastPinActiveTimeCopy[instr] = instruments[instr]->timing.lastPinActiveTime;
   // firstPinActiveTimeCopy[instr] = firstPinActiveTime[instr];
   interrupts();
 
@@ -487,8 +500,8 @@ boolean stroke_detected(int instr)
   {
     static int countsCopy;
     noInterrupts();
-    countsCopy = counts[instr];
-    counts[instr] = 0;
+    countsCopy = instruments[instr]->timing.counts;
+    instruments[instr]->timing.counts = 0;
     interrupts();
 
     // ---------------------------- found significant count!
@@ -579,7 +592,7 @@ void swell_rec(int instr) // remembers beat stroke position
   {
     // grab the current beat counter
     noInterrupts();
-    previous_swell_beatPos[instr] = beatCount;
+    previous_swell_beatPos[instr] = Globals::beatCount;
     interrupts();
 
     // start MIDI note and proceed to next state
@@ -601,7 +614,7 @@ void swell_rec(int instr) // remembers beat stroke position
     unsigned long current_swell_beatPos;
 
     noInterrupts();
-    current_swell_beatPos = beatCount;
+    current_swell_beatPos = Globals::beatCount;
     interrupts();
 
     // calculate diff and interval:
@@ -698,59 +711,59 @@ void swell_perform(int instr, int perform_action) // updates once a 32nd-beat-st
 ////////////////////////////// TAP TEMPO //////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void getTapTempo()
-{
-  static unsigned long timeSinceFirstTap = 0;
-  static int tapState = 1;
-  static int num_of_taps = 0;
-  static int clock_sum = 0;
+// void getTapTempo()
+// {
+//   static unsigned long timeSinceFirstTap = 0;
+//   static int tapState = 1;
+//   static int num_of_taps = 0;
+//   static int clock_sum = 0;
 
-  switch (tapState)
-  {
-    //    case 0: // this is for activation of tap tempo listen
-    //      tapState = 1;
-    //      break;
+//   switch (tapState)
+//   {
+//     //    case 0: // this is for activation of tap tempo listen
+//     //      tapState = 1;
+//     //      break;
 
-  case 1:                                     // first hit
-    if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
-    {
-      num_of_taps = 0;
-      clock_sum = 0;
-      Serial.println("-----------TAP RESET!-----------\n");
-    }
-    timeSinceFirstTap = millis(); // record time of first hit
-    tapState = 2;                 // next: wait for second hit
+//   case 1:                                     // first hit
+//     if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
+//     {
+//       num_of_taps = 0;
+//       clock_sum = 0;
+//       Serial.println("-----------TAP RESET!-----------\n");
+//     }
+//     timeSinceFirstTap = millis(); // record time of first hit
+//     tapState = 2;                 // next: wait for second hit
 
-    break;
+//     break;
 
-  case 2: // second hit
+//   case 2: // second hit
 
-    if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
-    {
-      num_of_taps++;
-      clock_sum += millis() - timeSinceFirstTap;
-      tapInterval = clock_sum / num_of_taps;
-      Serial.print("new tap Tempo is ");
-      Serial.print(60000 / tapInterval);
-      Serial.print(" bpm (");
-      Serial.print(tapInterval);
-      Serial.println(" ms interval)");
+//     if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
+//     {
+//       num_of_taps++;
+//       clock_sum += millis() - timeSinceFirstTap;
+//       tapInterval = clock_sum / num_of_taps;
+//       Serial.print("new tap Tempo is ");
+//       Serial.print(60000 / tapInterval);
+//       Serial.print(" bpm (");
+//       Serial.print(tapInterval);
+//       Serial.println(" ms interval)");
 
-      current_BPM = 60000 / tapInterval;
-      tapState = 1;
+//       current_BPM = 60000 / tapInterval;
+//       tapState = 1;
 
-      masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
-    }
+//       masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+//     }
 
-    if (timeSinceFirstTap > 2000) // forget tap if time was too long
-    {
-      tapState = 1;
-      // Serial.println("too long...");
-    }
-    // }
-    break;
-  }
-}
+//     if (timeSinceFirstTap > 2000) // forget tap if time was too long
+//     {
+//       tapState = 1;
+//       // Serial.println("too long...");
+//     }
+//     // }
+//     break;
+//   }
+// }
 // --------------------------------------------------------------------
 
 //////////////////// TSUNAMI BEAT-LINKED PLAYBACK /////////////////////
@@ -873,7 +886,7 @@ void tsunami_beat_playback(int instr, int current_beat_in)
     // set loudness and fade:
     //int trackLevel = min(-40 + (beat_topo_average_smooth * 5), 0);
     int trackLevel = 0;                                          // Debug
-    tsunami.trackFade(tracknum, trackLevel, tapInterval, false); // fade smoothly within length of a quarter note
+    tsunami.trackFade(tracknum, trackLevel, Globals::tapInterval, false); // fade smoothly within length of a quarter note
 
     // TODO: set track channels for each instrument according to output
     // output A: speaker on drumset
@@ -885,7 +898,7 @@ void tsunami_beat_playback(int instr, int current_beat_in)
     {
       // set playback speed according to current_BPM:
       int sr_offset;
-      float r = current_BPM / float(track_bpm[tracknum]);
+      float r = Globals::current_BPM / float(track_bpm[tracknum]);
       Serial.print("r = ");
       Serial.println(r);
       if (!(r > 2) && !(r < 0.5))
@@ -1163,7 +1176,7 @@ void setup()
   for (int i = 0; i < numInputs; i++)
   {
     pinMode(leds[i], OUTPUT);
-    counts[i] = 0;
+    instruments[i]->timing.counts = 0;
     for (int j = 0; j < 8; j++)
     {
       instruments[i]->score.read_rhythm_slot[j] = false;
@@ -1181,6 +1194,13 @@ void setup()
   calculateNoiseFloor();
 
   // setup initial values ---------------------------------------------
+  instruments[Snare]->pin = A0;
+  instruments[Hihat]->pin = A1;
+  instruments[Kick]->pin = A2;
+  instruments[Tom1]->pin = A3;
+  instruments[Tom2]->pin = A4;
+  instruments[Standtom1]->pin = A5;
+  instruments[Cowbell]->pin = A6;
 
   // set instrument calibration array
   // values as of 2020-08-27:
@@ -1239,7 +1259,7 @@ void setup()
   // start timers -----------------------------------------------------
   pinMonitor.begin(samplePins, 1000); // sample pin every 1 millisecond
 
-  masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+  Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
 
   // Debug:
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
@@ -1297,9 +1317,9 @@ void loop()
       //   set_rhythm_slot[i][Globals::current_eighth_count] = true;
       //   break;
 
-      case 4: // tapTempo
-        getTapTempo();
-        break;
+      // case 4: // tapTempo
+        // getTapTempo();
+        // break;
 
       case 5: // "swell"
         setInstrumentPrintString(i, instruments[i]->effect);
@@ -1344,8 +1364,8 @@ void loop()
   static boolean already_printed = false;
 
   noInterrupts();
-  current_beat_pos = beatCount % 32; // (beatCount increases infinitely)
-  sendMidiCopy = sendMidiClock;      // MIDI flag for Clock to be sent
+  current_beat_pos = Globals::beatCount % 32; // (beatCount increases infinitely)
+  sendMidiCopy = Globals::sendMidiClock;      // MIDI flag for Clock to be sent
   interrupts();
 
   // ---------------------------- send MIDI-Clock on beat
@@ -1357,7 +1377,7 @@ void loop()
   {
     Serial2.write(0xF8); // MIDI-clock has to be sent 24 times per quarter note
     noInterrupts();
-    sendMidiClock = false;
+    Globals::sendMidiClock = false;
     interrupts();
   }
 
