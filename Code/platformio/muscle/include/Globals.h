@@ -44,11 +44,14 @@ enum EffectsType
 class Globals
 {
 public:
+
   static const uint8_t numInputs = 7;
   static std::vector<int> pins;
 
   static int tapInterval;
   static int current_BPM;
+
+  static Tsunami tsunami;
 
   // ------------------ variables for interrupt timers ------------------
   // static IntervalTimer pinMonitor;  // reads pins every 1 ms
@@ -56,20 +59,19 @@ public:
 
   // ----------------------------- timer counter ---------------------------------
   static volatile unsigned long masterClockCount; // 4*32 = 128 masterClockCount per cycle
-  static volatile unsigned long beatCount;
-  // static volatile int currentStep; // 0-32
-  static int next_beatCount; // will be reset when timer restarts
+  static volatile unsigned long beatCount;        // static volatile int currentStep; // 0-32
+  static int next_beatCount;                      // will be reset when timer restarts
   static volatile boolean sendMidiClock;
 
-  // static int pinValue(Instrument *instrument); // general pin reading
-
-  // static void samplePins();
   static void masterClockTimer();
 
   static int current_eighth_count; // overflows at current_beat_pos % 8
   static int current_16th_count;   // overflows at current_beat_pos % 2
   static int last_eighth_count;    // stores last eightNoteCount for comparison
   static int last_16th_count;      // stores last eightNoteCount for comparison
+
+  static boolean footswitch_is_pressed;
+
 
   static String DrumtypeToHumanreadable(DrumType type)
   {

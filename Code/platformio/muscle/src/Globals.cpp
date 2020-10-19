@@ -1,10 +1,12 @@
 #include <Globals.h>
+#include <Tsunami.h>
 // #include <vector>
 // #include <MIDI.h>
 boolean Globals::printStrokes = true;
 String Globals::output_string[Globals::numInputs];
 IntervalTimer Globals::masterClock; // 1 bar
 
+Tsunami Globals::tsunami;
 
 std::vector<int> Globals::pins = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};
 
@@ -17,6 +19,8 @@ int Globals::last_16th_count = 0;      // stores last eightNoteCount for compari
 
 int Globals::tapInterval = 500; // 0.5 s per beat for 120 BPM
 int Globals::current_BPM = 120;
+
+boolean Globals::footswitch_is_pressed = false;
 
 // ----------------------------- timer counter ---------------------------------
 volatile unsigned long Globals::masterClockCount = 0; // 4*32 = 128 masterClockCount per cycle

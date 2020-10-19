@@ -1,6 +1,6 @@
 /*
    ------------------------------------
-   September 2020
+   October 2020
    by David Unland david[at]unland[dot]eu
    ------------------------------------
    ------------------------------------
@@ -33,11 +33,8 @@
 #include <Instruments.h>
 #include <Effects.h>
 
-Tsunami tsunami;
-// MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI); // for Serial-specific usage
-midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial&)Serial2); // same as // MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
-
-
+// Tsunami tsunami;
+midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as // MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
 // ----------------------------- pins ---------------------------------
 static const uint8_t numInputs = 7;
@@ -49,57 +46,23 @@ static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTI
 
 // ------------------------- Debug variables --------------------------
 boolean use_responsiveCalibration = false;
-boolean printStrokes = true;
 boolean printNormalizedValues_ = false;
 boolean do_print_to_console = true;
 boolean do_send_to_processing = false;
-String output_string[numInputs];
 
-// ------------------ variables for interrupt timers ------------------
-IntervalTimer pinMonitor;  // reads pins every 1 ms
-// IntervalTimer masterClock; // 1 bar
-// volatile int counts[numInputs];
-// volatile unsigned long lastPinActiveTime[numInputs];
-// volatile unsigned long firstPinActiveTime[numInputs];
+// ------------------------- interrupt timers -------------------------
+IntervalTimer pinMonitor; // reads pins every 1 ms
 
-// ------------------ timing and rhythm tracking ------------------
+// -------------------- timing and rhythm tracking --------------------
 int countsCopy[numInputs];
 int current_beat_pos = 0; // always stores the current position in the beat
 
-// int tapInterval = 500; // 0.5 s per beat for 120 BPM
-// int current_BPM = 120;
-
-// // ----------------------------- timer counter ---------------------------------
-// volatile unsigned long masterClockCount = 0; // 4*32 = 128 masterClockCount per cycle
-// volatile unsigned long beatCount = 0;
-// // volatile int bar_step; // 0-32
-// volatile int currentStep; // 0-32
-// int next_beatCount = 0;   // will be reset when timer restarts
-// volatile boolean sendMidiClock = false;
-
 // ----------------- MUSICAL AND PERFORMATIVE PARAMETERS --------------
-
-// boolean read_rhythm_slot[numInputs][8];
-// boolean set_rhythm_slot[numInputs][8];
-// int beat_topography_8[numInputs][8];
-// int beat_topography_16[numInputs][16];
 
 const int LOG_BEATS = 0;
 const int HOLD_CC = 1;
 const int RESET_TOPO = 2; // resets beat_topography (of all instruments)
 const int FOOTSWITCH_MODE = 2;
-
-// int notes_list[] = {60, 61, 45, 74, 72, 44, 71};
-int cc_chan[] = {50, 0, 0, 25, 71, 50, 0, 0}; // needed in pinAction 5 and 6
-/* channels on mKORG:
-   44=cutoff
-   71=resonance
-   50=amplevel
-   23=attack
-   25=sustain
-   26=release
-*/
-// int pinAction[] = {8, 4, 8, 8, 8, 8, 1, 0}; // array to be changed within code loop.
 
 /*
     0 = play MIDI note upon stroke
@@ -113,8 +76,8 @@ int cc_chan[] = {50, 0, 0, 25, 71, 50, 0, 0}; // needed in pinAction 5 and 6
     8 = 16th-note-topography with MIDI playback and volume changet
 */
 // int initialPinAction[numInputs];
-int allocated_track[numInputs];                   // tracks will be allocated in tsunami_beat_playback
-int allocated_channels[] = {0, 0, 0, 0, 0, 0, 0}; // channels to send audio from tsunami to
+// int allocated_track[numInputs];                   // tracks will be allocated in tsunami_beat_playback
+// int allocated_channels[] = {0, 0, 0, 0, 0, 0, 0}; // channels to send audio from tsunami to
 
 // hard-coded list of BPMs of tracks stored on Tsunami's SD card.
 // TODO: somehow make BPM accessible from file title
@@ -180,63 +143,8 @@ void samplePins()
     }
   }
 }
-// void samplePins()
-// {
-//   // ------------------------- read all pins -----------------------------------
-//   for (int pinNum = 0; pinNum < numInputs; pinNum++)
-//   {
-//     if (pinValue(pinNum) > instruments[pinNum]->sensitivity.threshold)
-//     {
-//       if (counts[pinNum] < 1)
-//         firstPinActiveTime[pinNum] = millis();
-//       lastPinActiveTime[pinNum] = millis();
-//       counts[pinNum]++;
-//     }
-//   }
-// }
+
 // -----------------------------------------------------------------------------
-
-// void masterClockTimer()
-// {
-//   /*
-//     timing              fraction          bar @ 120 BPM    bar @ 180 BPM
-//     1 bar             = 1               = 2 s       | 1.3 s
-//     1 beatCount       = 1/32 bar        = 62.5 ms   | 41.7 ms
-//     stroke precision  = 1/4 beatCount   = 15.625 ms | 10.4166 ms
-
-
-//     |     .-.
-//     |    /   \         .-.
-//     |   /     \       /   \       .-.     .-.     _   _
-//     +--/-------\-----/-----\-----/---\---/---\---/-\-/-\/\/---
-//     | /         \   /       \   /     '-'     '-'
-//     |/           '-'         '-'
-//     |--------2 oscil---------|
-//     |------snare = 10 ms-----|
-
-//   */
-
-//   masterClockCount++; // will rise infinitely
-
-//   // ------------ 1/32 increase in 4 full precisionCounts -----------
-//   if (masterClockCount % 4 == 0)
-//   {
-//     beatCount++; // will rise infinitely
-//   }
-
-//   // evaluate current position of beat in bar for stroke precision
-//   // 2020-09-07: this doesn't help and it's also not working...
-//   // if ((masterClockCount % 4) >= next_beatCount - 2)
-//   // {
-//   //   currentStep = next_beatCount;
-//   //   next_beatCount += 4;
-//   // }
-
-//   // prepare MIDI clock:
-//   sendMidiClock = (((masterClockCount % 4) / 3) % 4 == 0);
-
-// }
-//   // ---------------------------------------------------------------------------
 
 /* --------------------------------------------------------------------- */
 /* ----------------------------- FUNCTIONS ----------------------------- */
@@ -284,7 +192,7 @@ void calculateNoiseFloor()
   for (int i = 0; i < numInputs; i++) // turn LEDs off again
   {
     digitalWrite(leds[i], LOW);
-    output_string[i] = "\t";
+    Globals::output_string[i] = "\t";
   }
 }
 // --------------------------------------------------------------------
@@ -293,8 +201,8 @@ void calculateNoiseFloor()
 ///////////////////////////////////////////////////////////////////////
 EffectsType lastEffect[numInputs];
 
-int swell_val[numInputs];
-boolean footswitch_is_pressed = false;
+// int swell_val[numInputs];
+// boolean footswitch_is_pressed = false;
 
 void footswitch_pressed()
 {
@@ -304,15 +212,15 @@ void footswitch_pressed()
     // set pinMode of all instruments to 3 (record what is being played)
     for (int i = 0; i < numInputs; i++)
     {
-      lastEffect[i] = instruments[i]->effect; // TODO: lastPinAction seems to be overwritten quickly, so it will not be able to return to its former state. fix this!
-      instruments[i]->effect = FootSwitchLooper;                // TODO: not for Cowbell?
+      lastEffect[i] = instruments[i]->effect;    // TODO: lastPinAction seems to be overwritten quickly, so it will not be able to return to its former state. fix this!
+      instruments[i]->effect = FootSwitchLooper; // TODO: not for Cowbell?
       for (int j = 0; j < 8; j++)
         instruments[i]->score.set_rhythm_slot[j] = false; // reset entire record
     }
     break;
 
   case (HOLD_CC): // prevents swell_vals to be changed in swell_beat()
-    footswitch_is_pressed = true;
+    Globals::footswitch_is_pressed = true;
     break;
 
   case (RESET_TOPO): // resets beat_topography (for all instruments)
@@ -350,7 +258,7 @@ void footswitch_released()
     break;
 
   case (HOLD_CC):
-    footswitch_is_pressed = false;
+    Globals::footswitch_is_pressed = false;
     break;
 
   default:
@@ -383,100 +291,6 @@ void checkFootSwitch()
     last_switch_toggle = millis();
   }
 }
-// --------------------------------------------------------------------
-
-///////////////////// SET STRING FOR PLAY LOGGING /////////////////////
-///////////////////////////////////////////////////////////////////////
-
-// int swell_val[numInputs]; // this should be done in the swell section, but is needed in print section already... :/
-
-void setInstrumentPrintString(int incoming_i, int incoming_pinAction)
-{
-  switch (incoming_pinAction)
-  {
-
-  case 1: // monitor: just print what is being played
-    if (incoming_i == Kick)
-      output_string[incoming_i] = "■\t"; // Kickdrum
-    else if (incoming_i == Cowbell)
-      output_string[incoming_i] = "▲\t"; // Crash
-    else if (incoming_i == Standtom1)
-      output_string[incoming_i] = "□\t"; // Standtom
-    else if (incoming_i == Standtom2)
-      output_string[incoming_i] = "O\t"; // Standtom
-    else if (incoming_i == Hihat)
-      output_string[incoming_i] = "x\t"; // Hi-Hat
-    else if (incoming_i == Tom1)
-      output_string[incoming_i] = "°\t"; // Tom 1
-    else if (incoming_i == Snare)
-      output_string[incoming_i] = "※\t"; // Snaredrum
-    else if (incoming_i == Tom2)
-      output_string[incoming_i] = "o\t"; // Tom 2
-    else if (incoming_i == Ride)
-      output_string[incoming_i] = "xx\t"; // Ride
-    else if (incoming_i == Crash1)
-      output_string[incoming_i] = "-X-\t"; // Crash
-    else if (incoming_i == Crash2)
-      output_string[incoming_i] = "-XX-\t"; // Crash
-    break;
-
-  case 2: // toggle beat slot
-    if (incoming_i == Kick)
-      output_string[incoming_i] = "■\t"; // Kickdrum
-    else if (incoming_i == Cowbell)
-      output_string[incoming_i] = "▲\t"; // Crash
-    else if (incoming_i == Standtom1)
-      output_string[incoming_i] = "□\t"; // Standtom
-    else if (incoming_i == Standtom2)
-      output_string[incoming_i] = "O\t"; // Standtom
-    else if (incoming_i == Hihat)
-      output_string[incoming_i] = "x\t"; // Hi-Hat
-    else if (incoming_i == Tom1)
-      output_string[incoming_i] = "°\t"; // Tom 1
-    else if (incoming_i == Snare)
-      output_string[incoming_i] = "※\t"; // Snaredrum
-    else if (incoming_i == Tom2)
-      output_string[incoming_i] = "o\t"; // Tom 2
-    else if (incoming_i == Ride)
-      output_string[incoming_i] = "xx\t"; // Ride
-    else if (incoming_i == Crash1)
-      output_string[incoming_i] = "-X-\t"; // Crash
-    else if (incoming_i == Crash2)
-      output_string[incoming_i] = "-XX-\t"; // Crash
-    break;
-
-  case 3: // add an ! if pinAction == 3 (replay logged rhythm)
-    if (incoming_i == Kick)
-      output_string[incoming_i] = "!■\t"; // Kickdrum
-    else if (incoming_i == Cowbell)
-      output_string[incoming_i] = "!▲\t"; // Crash
-    else if (incoming_i == Standtom1)
-      output_string[incoming_i] = "!□\t"; // Standtom
-    else if (incoming_i == Standtom2)
-      output_string[incoming_i] = "!O\t"; // Standtom
-    else if (incoming_i == Hihat)
-      output_string[incoming_i] = "!x\t"; // Hi-Hat
-    else if (incoming_i == Tom1)
-      output_string[incoming_i] = "!°\t"; // Tom 1
-    else if (incoming_i == Snare)
-      output_string[incoming_i] = "!※\t"; // Snaredrum
-    else if (incoming_i == Tom2)
-      output_string[incoming_i] = "!o\t"; // Tom 2
-    else if (incoming_i == Ride)
-      output_string[incoming_i] = "!xx\t"; // Ride
-    else if (incoming_i == Crash1)
-      output_string[incoming_i] = "!-X-\t"; // Crash
-    else if (incoming_i == Crash2)
-      output_string[incoming_i] = "!-XX-\t"; // Crash
-    break;
-
-    // case 5: // print swell_val for repeated MIDI notes in "swell" mode
-    //   output_string[incoming_i] = swell_val[incoming_i];
-    //   output_string[incoming_i] += "\t";
-    //   break;
-  }
-}
-
 // --------------------------------------------------------------------
 
 // ///////////////////////// STROKE DETECTION /////////////////////////
@@ -528,242 +342,6 @@ boolean stroke_detected(int instr)
     }
   }
 }
-// --------------------------------------------------------------------
-
-// //////////////////// SOUND SWELL: INITIALIZATION ///////////////////
-// ////////////////////////////////////////////////////////////////////
-
-/* SOUND SWELL ALGORITHM: ---------------------------------------------
-
-  RECORD:
-
-  -------X-------X-------X-------X------- hits
-  -------|-------|-------|-------|-------
-  -------1-------2-------3-------4------- num_of_swell_taps
-  -------|-------|-------|-------|-------
-  ------502-----510-----518-----526------ beatCount (beatPos)
-  -------|-------|-------|-------|-------
-  -------|-------|------prev----curr-----
-  -------|-------|-------|-------|-------
-  -------|-------8-------16------32------ swell_beatPos_sum = sum + (curr - prev)
-  -------|---8---|---8---|---8---|------- swell_stroke_interval = sum/num
-  ------v++-----v++-----v++-----v++------ increase swell_val
-
-
-  PLAY:
-
-  -------|-------|-------|-------|-------
-  -------0-------1-------2-------3------- beatStep
-  -------|-------|-------|-------|-------
-  -------v-----(v↓)----(v↓)----(v↓)------ decrease swell_val
-  -------🎵-------🎵-------🎵------🎵------- play MIDI note
-
-  ---------------------------------------------------------------------*/
-
-int num_of_swell_taps[numInputs];     // will be used in both swell_rec() and swell_beat(). serves as swell_val for MIDI notes.
-int swell_stroke_interval[numInputs]; // will be needed for timed replay
-int swell_state[numInputs];
-unsigned long swell_beatPos_sum[numInputs];
-int swell_beatStep[numInputs]; // increases with beatCount and initiates action.
-
-void swell_init() // initialize arrays for swell functions (run in setup())
-{
-  for (int i = 0; i < numInputs; i++)
-  {
-    swell_state[i] = 1; // waits for first tap
-    num_of_swell_taps[i] = 0;
-    swell_val[i] = 10;
-    swell_beatPos_sum[i] = 0;
-    swell_beatStep[i] = 0;
-  }
-}
-// --------------------------------------------------------------------
-
-// -------------------- SOUND SWELL: RECORD STROKES -------------------
-// --------------------------------------------------------------------
-
-void swell_rec(int instr) // remembers beat stroke position
-{
-  /* works pretty much just like the tapTempo, but repeats the triggered drums on external MIDI instrument (-> swell_beat() in TIMED INTERVALS) */
-  static unsigned long previous_swell_beatPos[numInputs];
-  // static unsigned long lastSwellRec = 0;
-
-  if (swell_state[instr] == 1) // first hit
-  {
-    // grab the current beat counter
-    noInterrupts();
-    previous_swell_beatPos[instr] = Globals::beatCount;
-    interrupts();
-
-    // start MIDI note and proceed to next state
-    swell_state[instr] = 2;
-    MIDI.sendNoteOn(instruments[instr]->score.active_note, 127, 2);
-
-    // lastSwellRec = millis();
-  }
-
-  else if (swell_state[instr] == 2) // second hit
-  {
-    if (!footswitch_is_pressed)
-    {
-      num_of_swell_taps[instr]++;
-      swell_val[instr] += 4;                         // ATTENTION: must rise faster than it decreases! otherwise swell resets right away.
-      swell_val[instr] = min(swell_val[instr], 127); // max swell_val = 127
-    }
-
-    unsigned long current_swell_beatPos;
-
-    noInterrupts();
-    current_swell_beatPos = Globals::beatCount;
-    interrupts();
-
-    // calculate diff and interval:
-    if ((current_swell_beatPos - previous_swell_beatPos[instr]) <= 32) // only do this if interval was not too long
-    {
-      // get diff to first (how many beats were in between?):
-      swell_beatPos_sum[instr] += (current_swell_beatPos - previous_swell_beatPos[instr]);
-      // average all hits and repeat at that rate:
-      float a = float(swell_beatPos_sum[instr]) / float(num_of_swell_taps[instr]);
-      a += 0.5;                              // rounds up or down
-      swell_stroke_interval[instr] = int(a); // round down
-      previous_swell_beatPos[instr] = current_swell_beatPos;
-    }
-  }
-}
-// --------------------------------------------------------------------
-
-// -------------------- SOUND SWELL: REPLAY STROKES -------------------
-// --------------------------------------------------------------------
-
-void swell_perform(int instr, int perform_action) // updates once a 32nd-beat-step
-{
-  if (swell_state[instr] == 2)
-  {
-    // remember moment of update in beat:
-    //    noInterrupts();
-    //    unsigned long updateMoment = beatCount;
-    //    interrupts();
-
-    // ready to play MIDI again?
-    // increase swell_beatStep and modulo interval
-    swell_beatStep[instr] = (swell_beatStep[instr] + 1) % swell_stroke_interval[instr];
-
-    if (swell_beatStep[instr] == 0) // on swell beat
-    {
-
-      // Debug print:
-      //output_string[instr] = String(swell_val[instr]);
-      //      output_string[instr] = "[";
-      //      output_string[instr] += String(swell_stroke_interval[instr]);
-      //      output_string[instr] += "] ";
-      //      output_string[instr] += num_of_swell_taps[instr];
-      //      output_string[instr] += "/";
-      //      output_string[instr] += swell_beatPos_sum[instr];
-      //      output_string[instr] += " (";
-      output_string[instr] = String(swell_val[instr]);
-      //      output_string[instr] += ") ";
-      output_string[instr] += "\t";
-
-      if (perform_action == 5)
-      {
-        if (!footswitch_is_pressed)
-          MIDI.sendControlChange(cc_chan[instr], swell_val[instr], 2);
-      }
-      /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
-        finding the right CC# on microKORG: (manual p.61):
-        1. press SHIFT + 5
-        2. choose parameter to find out via EDIT SELECT 1 & 2
-        (3. reset that parameter, if you like) */
-
-      // MIDI.sendNoteOn(notes_list[instr], 127, 2); // also play a note on each hit?
-      else if (perform_action == 7)
-      {
-        if (tsunami.isTrackPlaying(allocated_track[instr]))
-        {
-          static int trackLevel = 0;
-          static int previousTracklevel = 0;
-          trackLevel = min(-40 + swell_val[instr], 0);
-          if (trackLevel != previousTracklevel)
-            tsunami.trackFade(allocated_track[instr], trackLevel, 100, false); // fade smoothly within 100 ms
-          previousTracklevel = trackLevel;
-        }
-      }
-      // decrease swell_val:
-      if (swell_val[instr] > 0)
-      {
-        if (!footswitch_is_pressed)
-          swell_val[instr]--;
-      }
-      else // reset swell if swell_val == 0:
-      {
-        swell_state[instr] = 1; // waits for first tap
-        num_of_swell_taps[instr] = 0;
-        swell_val[instr] = 10;
-        swell_beatPos_sum[instr] = 0;
-        swell_beatStep[instr] = 0;
-        MIDI.sendNoteOff(instruments[instr]->score.active_note, 127, 2);
-      }
-    }
-  }
-}
-// --------------------------------------------------------------------
-
-////////////////////////////// TAP TEMPO //////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-// void getTapTempo()
-// {
-//   static unsigned long timeSinceFirstTap = 0;
-//   static int tapState = 1;
-//   static int num_of_taps = 0;
-//   static int clock_sum = 0;
-
-//   switch (tapState)
-//   {
-//     //    case 0: // this is for activation of tap tempo listen
-//     //      tapState = 1;
-//     //      break;
-
-//   case 1:                                     // first hit
-//     if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
-//     {
-//       num_of_taps = 0;
-//       clock_sum = 0;
-//       Serial.println("-----------TAP RESET!-----------\n");
-//     }
-//     timeSinceFirstTap = millis(); // record time of first hit
-//     tapState = 2;                 // next: wait for second hit
-
-//     break;
-
-//   case 2: // second hit
-
-//     if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
-//     {
-//       num_of_taps++;
-//       clock_sum += millis() - timeSinceFirstTap;
-//       tapInterval = clock_sum / num_of_taps;
-//       Serial.print("new tap Tempo is ");
-//       Serial.print(60000 / tapInterval);
-//       Serial.print(" bpm (");
-//       Serial.print(tapInterval);
-//       Serial.println(" ms interval)");
-
-//       current_BPM = 60000 / tapInterval;
-//       tapState = 1;
-
-//       masterClock.begin(masterClockTimer, tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
-//     }
-
-//     if (timeSinceFirstTap > 2000) // forget tap if time was too long
-//     {
-//       tapState = 1;
-//       // Serial.println("too long...");
-//     }
-//     // }
-//     break;
-//   }
-// }
 // --------------------------------------------------------------------
 
 //////////////////// TSUNAMI BEAT-LINKED PLAYBACK /////////////////////
@@ -881,12 +459,12 @@ void tsunami_beat_playback(int instr, int current_beat_in)
           tracknum += 1;
       }
     }
-    allocated_track[instr] = tracknum; // save for use in other functions
+    instruments[instr]->score.allocated_track = tracknum; // save for use in other functions
 
     // set loudness and fade:
     //int trackLevel = min(-40 + (beat_topo_average_smooth * 5), 0);
-    int trackLevel = 0;                                          // Debug
-    tsunami.trackFade(tracknum, trackLevel, Globals::tapInterval, false); // fade smoothly within length of a quarter note
+    int trackLevel = 0;                                                   // Debug
+    Globals::tsunami.trackFade(tracknum, trackLevel, Globals::tapInterval, false); // fade smoothly within length of a quarter note
 
     // TODO: set track channels for each instrument according to output
     // output A: speaker on drumset
@@ -894,7 +472,7 @@ void tsunami_beat_playback(int instr, int current_beat_in)
     // cool effects: let sounds walk through room from drumset to PA
 
     // --------------------------- play track -------------------------
-    if (!tsunami.isTrackPlaying(tracknum) && current_beat_in == 0)
+    if (!Globals::tsunami.isTrackPlaying(tracknum) && current_beat_in == 0)
     {
       // set playback speed according to current_BPM:
       int sr_offset;
@@ -916,9 +494,9 @@ void tsunami_beat_playback(int instr, int current_beat_in)
       }
 
       //int channel = 0;                              // Debug
-      tsunami.samplerateOffset(allocated_channels[instr], sr_offset); // TODO: link channels to instruments
-      tsunami.trackGain(tracknum, trackLevel);
-      tsunami.trackPlayPoly(tracknum, allocated_channels[instr], true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
+      Globals::tsunami.samplerateOffset(instruments[instr]->score.allocated_channel, sr_offset); // TODO: link channels to instruments
+      Globals::tsunami.trackGain(tracknum, trackLevel);
+      Globals::tsunami.trackPlayPoly(tracknum, instruments[instr]->score.allocated_channel, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
       Serial.print("starting to play track ");
       Serial.println(tracknum);
     } // track playing end
@@ -1165,11 +743,11 @@ void setup()
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
   delay(1000);     // wait for Tsunami to finish reset // redundant?
-  tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
+  Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
   delay(100);
-  tsunami.stopAllTracks(); // in case Tsunami was already playing.
-  tsunami.samplerateOffset(0, 0);
-  tsunami.setReporting(true); // Enable track reporting from the Tsunami
+  Globals::tsunami.stopAllTracks(); // in case Tsunami was already playing.
+  Globals::tsunami.samplerateOffset(0, 0);
+  Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
   delay(100);                 // some time for Tsunami to respond with version string
 
   //------------------------ initialize pins and arrays ------------------------
@@ -1183,10 +761,10 @@ void setup()
       instruments[i]->score.set_rhythm_slot[j] = false;
       instruments[i]->topography.a_8[j] = 0;
       instruments[i]->topography.a_16[j] = 0;
+      instruments[i]->score.allocated_channel = 0;
     }
     instruments[i]->initialEffect = instruments[i]->effect;
   }
-  swell_init();
   pinMode(VIBR, OUTPUT);
   pinMode(FOOTSWITCH, INPUT_PULLUP);
 
@@ -1237,9 +815,27 @@ void setup()
   // setup notes
   for (int i = 0; i < numInputs; i++)
   {
-    instruments[i]->setup_notes({60, 61, 45, 74, 72, 44, 71}); // insert array of MIDI-notes
+    instruments[i]->setup_notes({60, 61, 45, 74, 72, 44, 71});          // insert array of MIDI-notes
     instruments[i]->score.active_note = instruments[i]->score.notes[0]; // set active note pointer to first note
   }
+
+  // int cc_chan[] = {50, 0, 0, 25, 71, 50, 0, 0}; // needed in pinAction 5 and 6
+  instruments[Snare]->midi.cc_chan = 50;       // amplevel
+  instruments[Hihat]->midi.cc_chan = 0;
+  instruments[Kick]->midi.cc_chan = 0;
+  instruments[Tom1]->midi.cc_chan = 25;      // sustain
+  instruments[Tom2]->midi.cc_chan = 71;      // resonance
+  instruments[Standtom1]->midi.cc_chan = 50; // amplevel
+  instruments[Cowbell]->midi.cc_chan = 0;
+
+  /* channels on mKORG:
+   44=cutoff
+   71=resonance
+   50=amplevel
+   23=attack
+   25=sustain
+   26=release
+*/
 
   Serial.println("-----------------------------------------------");
   Serial.println("calibration values set as follows:");
@@ -1272,13 +868,8 @@ void setup()
 
 void loop()
 {
-  // static int current_eighth_count = 0; // overflows at current_beat_pos % 8
-  // static int current_16th_count = 0;   // overflows at current_beat_pos % 2
-  // static int last_eighth_count = 0;    // stores last eightNoteCount for comparison
-  // static int last_16th_count = 0;      // stores last eightNoteCount for comparison
-  // static unsigned long lastNotePlayed[numInputs];
 
-  tsunami.update();
+  Globals::tsunami.update();
 
   // ------------------------- DEBUG AREA -----------------------------
   printNormalizedValues(printNormalizedValues_);
@@ -1293,52 +884,24 @@ void loop()
       instruments[i]->trigger(instruments[i], MIDI); // runs trigger function according to instrument's EffectType
       switch (instruments[i]->effect)
       {
-        // case 0:
-        //   MIDI.sendNoteOn(notes_list[i], 127, 2);
-        //   lastNotePlayed[i] = millis();
+        // case 5: // "swell"
+        //   Globals::setInstrumentPrintString(instruments[i]->drumtype, instruments[i]->effect);
+        //   swell_rec(i);
         //   break;
 
-      // case 1: // monitor: just print what is being played.
-      //   if (printStrokes)
-      //   {
-      //     setInstrumentPrintString(i, instruments[i]->effect);
-      //   }
-      //   break;
-
-      // case 2: // toggle beat slot
-      //   if (printStrokes)
-      //     setInstrumentPrintString(i, instruments[i]->effect);
-      //   read_rhythm_slot[i][Globals::current_eighth_count] = !read_rhythm_slot[i][Globals::current_eighth_count];
-      //   break;
-
-      // case 3: // record what is being played and replay it later
-      //   if (printStrokes)
-      //     setInstrumentPrintString(i, instruments[i]->effect);
-      //   set_rhythm_slot[i][Globals::current_eighth_count] = true;
-      //   break;
-
-      // case 4: // tapTempo
-        // getTapTempo();
-        // break;
-
-      case 5: // "swell"
-        setInstrumentPrintString(i, instruments[i]->effect);
-        swell_rec(i);
-        break;
-
       case 6: // Tsunami beat-linked pattern
-        setInstrumentPrintString(i, 1);
+        Globals::setInstrumentPrintString(instruments[i]->drumtype, Monitor);
         instruments[i]->topography.a_8[Globals::current_eighth_count]++;
         break;
 
-      case 7: // swell-effect for loudness on field recordings (use on cymbals e.g.)
+      // case 7: // swell-effect for loudness on field recordings (use on cymbals e.g.)
         // TODO: UNTESTED! (2020-10-09)
-        setInstrumentPrintString(i, instruments[i]->effect);
-        swell_rec(i);
-        break;
+        // Globals::setInstrumentPrintString(instruments[i]->drumtype, instruments[i]->effect);
+        // swell_rec(i);
+        // break;
 
       case 8: // create beat-topography in 16-th
-        setInstrumentPrintString(i, 1);
+        Globals::setInstrumentPrintString(instruments[i]->drumtype, Monitor);
         instruments[i]->topography.a_16[Globals::current_16th_count]++;
         break;
 
@@ -1403,22 +966,22 @@ void loop()
     // ----------------------------------------------------------------
     for (int i = 0; i < numInputs; i++)
     {
-      // instruments[i]->perform(instruments[i]->effect);
+      instruments[i]->perform(instruments[i], MIDI);
       // --------------------------- SWELL: ---------------------------
-      if (instruments[i]->effect == Swell || instruments[i]->effect == CymbalSwell)
-        swell_perform(i, instruments[i]->effect); // ...updates once a 32nd-beat-step
+      // if (instruments[i]->effect == Swell || instruments[i]->effect == CymbalSwell)
+      //   swell_perform(i, instruments[i]->effect); // ...updates once a 32nd-beat-step
 
-      else if (instruments[i]->effect == FootSwitchLooper) // set rhythm slots to play MIDI notes:
-        instruments[i]->score.read_rhythm_slot[Globals::current_eighth_count] =  instruments[i]->score.set_rhythm_slot[Globals::current_eighth_count];
+      if (instruments[i]->effect == FootSwitchLooper) // set rhythm slots to play MIDI notes:
+        instruments[i]->score.read_rhythm_slot[Globals::current_eighth_count] = instruments[i]->score.set_rhythm_slot[Globals::current_eighth_count];
 
       // ----------- (pinActions 2 and 3): send MIDI notes ------------
       else if (instruments[i]->effect == ToggleRhythmSlot || instruments[i]->effect == FootSwitchLooper)
       {
         if (Globals::current_eighth_count != Globals::last_eighth_count) // in 8th-interval
         {
-          if ( instruments[i]->score.read_rhythm_slot[Globals::current_eighth_count])
+          if (instruments[i]->score.read_rhythm_slot[Globals::current_eighth_count])
           {
-            setInstrumentPrintString(i, 3);
+            Globals::setInstrumentPrintString(instruments[i]->drumtype, FootSwitchLooper);
             MIDI.sendNoteOn(instruments[i]->score.active_note, 127, 2);
           }
           else
@@ -1578,8 +1141,8 @@ void loop()
     // Serial.print(Globals::current_eighth_count);
     for (int i = 0; i < numInputs; i++)
     {
-      print_to_console(output_string[i]);
-      output_string[i] = "\t";
+      print_to_console(Globals::output_string[i]);
+      Globals::output_string[i] = "\t";
     }
     println_to_console("");
 

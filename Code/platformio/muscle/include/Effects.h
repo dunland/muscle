@@ -21,9 +21,13 @@ public:
 
     static void getTapTempo();
 
+    static void swell_rec(Instrument* instrument, midi::MidiInterface<HardwareSerial>);
+
+
+
     // timed events: --------------------------------------------------
 
-    // static void swell_perform(i, instruments[i]->effect); // ...updates once a 32nd-beat-step
+    static void swell_perform(Instrument* instrument, midi::MidiInterface<HardwareSerial> MIDI); // ...updates once a 32nd-beat-step
 
 
 };

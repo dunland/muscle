@@ -4,6 +4,7 @@
 #include <vector>
 #include <Globals.h>
 #include <Effects.h>
+#include <Tsunami.h>
 
 class Instrument
 {
@@ -35,7 +36,24 @@ public:
         unsigned long last_notePlayed;
         boolean read_rhythm_slot[8];
         boolean set_rhythm_slot[8];
+
+        // swell-effect:
+        int swell_val = 10;
+        int swell_state = 1;       // waits for first tap
+        int num_of_swell_taps = 0; // will be used in both swell_rec() and swell_beat(). serves as swell_val for MIDI notes.
+        int swell_stroke_interval; // will be needed for timed replay
+        int swell_beatStep = 0;    // increases with beatCount and initiates action.
+        unsigned long swell_beatPos_sum = 0;
+
+        //field recordings
+        int allocated_track; // tracks will be allocated in tsunami_beat_playback
+        int allocated_channel;
     } score;
+
+    struct MIDI
+    {
+        int cc_chan;
+    } midi;
 
     struct TIMING
     {
@@ -46,9 +64,9 @@ public:
 
     TOPOGRAPHY topography;
 
-    void trigger(Instrument *, midi::MidiInterface<HardwareSerial>);
+    void trigger(Instrument*, midi::MidiInterface<HardwareSerial>);
 
-    void perform(EffectsType effect);
+    void perform(Instrument*, midi::MidiInterface<HardwareSerial>);
 
     void setup_notes(std::vector<int> list)
     {
