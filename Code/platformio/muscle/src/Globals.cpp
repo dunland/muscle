@@ -8,6 +8,9 @@ std::vector<int> Globals::leds = {LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUI
 
 boolean Globals::printStrokes = true;
 String Globals::output_string[Globals::numInputs];
+boolean Globals::use_responsiveCalibration = false;
+
+
 IntervalTimer Globals::masterClock; // 1 bar
 
 Tsunami Globals::tsunami;

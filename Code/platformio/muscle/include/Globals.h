@@ -48,6 +48,10 @@ public:
   static std::vector<int> pins; // stores contact piezo pin of each instrument
   static std::vector<int> leds; // stores leds for each instrument (if differing)
 
+  static boolean printStrokes;
+  static String output_string[numInputs];
+  static boolean use_responsiveCalibration;
+  
   static int tapInterval;
   static int current_BPM;
 
@@ -73,9 +77,9 @@ public:
   static Tsunami tsunami;
   static boolean footswitch_is_pressed;
 
-// hard-coded list of BPMs of tracks stored on Tsunami's SD card.
-// TODO: somehow make BPM accessible from file title
-static float track_bpm[256];
+  // hard-coded list of BPMs of tracks stored on Tsunami's SD card.
+  // TODO: somehow make BPM accessible from file title
+  static float track_bpm[256];
 
   // ----------------------------- Auxiliary --------------------------
 
@@ -108,9 +112,6 @@ static float track_bpm[256];
     }
     return "";
   }
-
-  static boolean printStrokes;
-  static String output_string[numInputs];
 
   static void setInstrumentPrintString(DrumType drum, EffectsType effect);
 };

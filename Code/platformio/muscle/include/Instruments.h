@@ -75,4 +75,6 @@ public:
             score.notes[i] = list[i];
         }
     }
+
+    void calculateNoiseFloor(Instrument*);
 };

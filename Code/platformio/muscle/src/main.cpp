@@ -38,7 +38,6 @@ midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as 
 Instrument *instruments[Globals::numInputs];
 
 // ------------------------- Debug variables --------------------------
-boolean use_responsiveCalibration = false;
 boolean printNormalizedValues_ = false;
 boolean do_print_to_console = true;
 boolean do_send_to_processing = false;
@@ -111,52 +110,6 @@ void samplePins()
 /* ----------------------------- FUNCTIONS ----------------------------- */
 /* --------------------------------------------------------------------- */
 
-////////////////////////////// CALCULATE NOISEFLOOR ///////////////////
-///////////////////////////////////////////////////////////////////////
-void calculateNoiseFloor()
-{
-  // calculates the average noise floor out of 400 samples from all inputs
-
-  int led_idx = 0;
-  for (int pinNum = 0; pinNum < Globals::numInputs; pinNum++)
-  {
-    Serial.print("calculating noiseFloor for ");
-    Serial.print(Globals::DrumtypeToHumanreadable(DrumType(pinNum)));
-    Serial.print(" ..waiting for stroke");
-    if (use_responsiveCalibration)
-    {
-      while (analogRead(instruments[pinNum]->pin) < 700 + instruments[pinNum]->sensitivity.threshold)
-        ; // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
-      Serial.print(" .");
-      delay(1000); // should be long enough for drum not to oscillate anymore
-    }
-
-    int totalSamples = 0;
-    boolean toggleState = false;
-    for (int n = 0; n < 400; n++)
-    {
-      if (n % 100 == 0)
-      {
-        Serial.print(" . ");
-        digitalWrite(Globals::leds[pinNum], toggleState);
-        toggleState = !toggleState;
-      }
-      totalSamples += analogRead(instruments[pinNum]->pin);
-    }
-    instruments[pinNum]->sensitivity.noiseFloor = totalSamples / 400;
-    digitalWrite(Globals::leds[pinNum], LOW);
-    led_idx++;
-    Serial.print("noiseFloor = ");
-    Serial.println(instruments[pinNum]->sensitivity.noiseFloor);
-  }
-
-  for (int i = 0; i < Globals::numInputs; i++) // turn LEDs off again
-  {
-    digitalWrite(Globals::leds[i], LOW);
-    Globals::output_string[i] = "\t";
-  }
-}
-// --------------------------------------------------------------------
 
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -548,9 +501,6 @@ void setup()
   pinMode(VIBR, OUTPUT);
   pinMode(FOOTSWITCH, INPUT_PULLUP);
 
-  // calculate noise floor:
-  calculateNoiseFloor();
-
   // setup initial values ---------------------------------------------
   instruments[Snare]->pin = A0;
   instruments[Hihat]->pin = A1;
@@ -576,6 +526,9 @@ void setup()
   instruments[Standtom1]->sensitivity.crossings = 12;
   instruments[Cowbell]->sensitivity.threshold = 80;
   instruments[Cowbell]->sensitivity.crossings = 15;
+
+  // calculate noise floor:
+  for (int i = 0; i<Globals::numInputs; i++) instruments[i]->calculateNoiseFloor(instruments[i]);
 
   instruments[Snare]->effect = TopographyLog;
   instruments[Snare]->initialEffect = TopographyLog;
