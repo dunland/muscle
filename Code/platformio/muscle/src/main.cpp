@@ -107,57 +107,6 @@ void samplePins()
 /* --------------------------------------------------------------------- */
 
 
-// ///////////////////////// STROKE DETECTION /////////////////////////
-// ////////////////////////////////////////////////////////////////////
-boolean stroke_detected(int instr)
-{
-  static unsigned long lastPinActiveTimeCopy[Globals::numInputs];
-  // static unsigned long firstPinActiveTimeCopy[Globals::numInputs];
-  // static int lastValue[Globals::numInputs];    // for LED toggle
-  // static boolean toggleState = false; // for LED toggle
-
-  noInterrupts();
-  lastPinActiveTimeCopy[instr] = instruments[instr]->timing.lastPinActiveTime;
-  // firstPinActiveTimeCopy[instr] = firstPinActiveTime[instr];
-  interrupts();
-
-  if (millis() > lastPinActiveTimeCopy[instr] + instruments[instr]->sensitivity.delayAfterStroke) // get counts only X ms after LAST hit
-
-  //if (millis() > firstPinActiveTimeCopy[instr] + globalDelayAfterStroke)
-  //get counts only X ms after FIRST hit ??
-  {
-    static int countsCopy;
-    noInterrupts();
-    countsCopy = instruments[instr]->timing.counts;
-    instruments[instr]->timing.counts = 0;
-    interrupts();
-
-    // ---------------------------- found significant count!
-    if (countsCopy >= instruments[instr]->sensitivity.crossings)
-    {
-      // LED blink:
-      //if (countsCopy[instr] != lastValue[instr]) toggleState = !toggleState;
-      //digitalWrite(LED_BUILTIN, toggleState);
-      // lastValue[instr] = countsCopy;
-
-      // countsCopy[instr] = 0;
-
-      return true;
-    }
-    else // timing ok but no significant counts
-    {
-      return false;
-    }
-  }
-  else // TODO: timing not ok (obsolete: will always be ok!)
-  {
-    {
-      return false;
-    }
-  }
-}
-// --------------------------------------------------------------------
-
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -511,7 +460,7 @@ void loop()
   // (define what should happen when instruments are hit)
   for (int i = 0; i < Globals::numInputs; i++)
   {
-    if (stroke_detected(i)) // evaluates pins for activity repeatedly
+    if (instruments[i]->stroke_detected(instruments[i])) // evaluates pins for activity repeatedly
     {
       // ----------------------- perform pin action -------------------
       instruments[i]->trigger(instruments[i], MIDI); // runs trigger function according to instrument's EffectType

@@ -3,6 +3,57 @@
 #include <Tsunami.h>
 
 
+///////////////////////// STROKE DETECTION /////////////////////////
+////////////////////////////////////////////////////////////////////
+bool Instrument::stroke_detected(Instrument* instrument)
+{
+  static unsigned long lastPinActiveTimeCopy[Globals::numInputs];
+  // static unsigned long firstPinActiveTimeCopy[Globals::numInputs];
+  // static int lastValue[Globals::numInputs];    // for LED toggle
+  // static boolean toggleState = false; // for LED toggle
+
+  noInterrupts();
+  lastPinActiveTimeCopy[instrument->drumtype] = instrument->timing.lastPinActiveTime;
+  // firstPinActiveTimeCopy[instr] = firstPinActiveTime[instr];
+  interrupts();
+
+  if (millis() > lastPinActiveTimeCopy[instrument->drumtype] + instrument->sensitivity.delayAfterStroke) // get counts only X ms after LAST hit
+
+  //if (millis() > firstPinActiveTimeCopy[instr] + globalDelayAfterStroke)
+  //get counts only X ms after FIRST hit ??
+  {
+    static int countsCopy;
+    noInterrupts();
+    countsCopy = instrument->timing.counts;
+    instrument->timing.counts = 0;
+    interrupts();
+
+    // ---------------------------- found significant count!
+    if (countsCopy >= instrument->sensitivity.crossings)
+    {
+      // LED blink:
+      //if (countsCopy[instr] != lastValue[instr]) toggleState = !toggleState;
+      //digitalWrite(LED_BUILTIN, toggleState);
+      // lastValue[instr] = countsCopy;
+
+      // countsCopy[instr] = 0;
+
+      return true;
+    }
+    else // timing ok but no significant counts
+    {
+      return false;
+    }
+  }
+  else // TODO: timing not ok (obsolete: will always be ok!)
+  {
+    {
+      return false;
+    }
+  }
+}
+// --------------------------------------------------------------------
+
 ////////////////////////////// CALCULATE NOISEFLOOR ///////////////////
 ///////////////////////////////////////////////////////////////////////
 void Instrument::calculateNoiseFloor(Instrument* instrument)

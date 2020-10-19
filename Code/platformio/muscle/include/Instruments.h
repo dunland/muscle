@@ -64,9 +64,11 @@ public:
 
     TOPOGRAPHY topography;
 
-    void trigger(Instrument*, midi::MidiInterface<HardwareSerial>);
+    void trigger(Instrument *, midi::MidiInterface<HardwareSerial>);
 
-    void perform(Instrument*, midi::MidiInterface<HardwareSerial>);
+    void perform(Instrument *, midi::MidiInterface<HardwareSerial>);
+
+    bool stroke_detected(Instrument *instrument);
 
     void setup_notes(std::vector<int> list)
     {
@@ -76,5 +78,5 @@ public:
         }
     }
 
-    void calculateNoiseFloor(Instrument*);
+    void calculateNoiseFloor(Instrument *);
 };
