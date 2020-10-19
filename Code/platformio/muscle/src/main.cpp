@@ -33,16 +33,9 @@
 #include <Instruments.h>
 #include <Effects.h>
 
-// Tsunami tsunami;
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as // MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
-// ----------------------------- pins ---------------------------------
-static const uint8_t numInputs = 7;
-// static const uint8_t pins[] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};
-Instrument *instruments[numInputs];
-
-// static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN1, LED_BUILTIN2, LED_BUILTIN3}; // array when using SPRESENSE
-static const uint8_t leds[] = {LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN};
+Instrument *instruments[Globals::numInputs];
 
 // ------------------------- Debug variables --------------------------
 boolean use_responsiveCalibration = false;
@@ -54,8 +47,7 @@ boolean do_send_to_processing = false;
 IntervalTimer pinMonitor; // reads pins every 1 ms
 
 // -------------------- timing and rhythm tracking --------------------
-int countsCopy[numInputs];
-int current_beat_pos = 0; // always stores the current position in the beat
+int countsCopy[Globals::numInputs];
 
 // ----------------- MUSICAL AND PERFORMATIVE PARAMETERS --------------
 
@@ -75,40 +67,9 @@ const int FOOTSWITCH_MODE = 2;
     7 = using swell effect for tsunami playback loudness (arhythmic field recordings for cymbals)
     8 = 16th-note-topography with MIDI playback and volume changet
 */
-// int initialPinAction[numInputs];
-// int allocated_track[numInputs];                   // tracks will be allocated in tsunami_beat_playback
+// int initialPinAction[Globals::numInputs];
+// int allocated_track[Globals::numInputs];                   // tracks will be allocated in tsunami_beat_playback
 // int allocated_channels[] = {0, 0, 0, 0, 0, 0, 0}; // channels to send audio from tsunami to
-
-// hard-coded list of BPMs of tracks stored on Tsunami's SD card.
-// TODO: somehow make BPM accessible from file title
-const float track_bpm[256] =
-    {
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
-        1, 1, 90, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 73, 1, 1, 1,
-        100, 1, 1, 1, 200, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 41, 1, 1,
-        103, 1, 1, 1, 1, 1, 1, 93, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 78, 1, 100, 100, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 100, 1, 1, 1, 1,
-        1, 1, 1, 1, 100, 60};
 
 struct TOPOGRAPHY_16 // must be global!
 {
@@ -132,7 +93,7 @@ int pinValue(int instr)
 void samplePins()
 {
   // ------------------------- read all pins -----------------------------------
-  for (int pinNum = 0; pinNum < numInputs; pinNum++)
+  for (int pinNum = 0; pinNum < Globals::numInputs; pinNum++)
   {
     if (pinValue(pinNum) > instruments[pinNum]->sensitivity.threshold)
     {
@@ -157,7 +118,7 @@ void calculateNoiseFloor()
   // calculates the average noise floor out of 400 samples from all inputs
 
   int led_idx = 0;
-  for (int pinNum = 0; pinNum < numInputs; pinNum++)
+  for (int pinNum = 0; pinNum < Globals::numInputs; pinNum++)
   {
     Serial.print("calculating noiseFloor for ");
     Serial.print(Globals::DrumtypeToHumanreadable(DrumType(pinNum)));
@@ -177,21 +138,21 @@ void calculateNoiseFloor()
       if (n % 100 == 0)
       {
         Serial.print(" . ");
-        digitalWrite(leds[pinNum], toggleState);
+        digitalWrite(Globals::leds[pinNum], toggleState);
         toggleState = !toggleState;
       }
       totalSamples += analogRead(instruments[pinNum]->pin);
     }
     instruments[pinNum]->sensitivity.noiseFloor = totalSamples / 400;
-    digitalWrite(leds[pinNum], LOW);
+    digitalWrite(Globals::leds[pinNum], LOW);
     led_idx++;
     Serial.print("noiseFloor = ");
     Serial.println(instruments[pinNum]->sensitivity.noiseFloor);
   }
 
-  for (int i = 0; i < numInputs; i++) // turn LEDs off again
+  for (int i = 0; i < Globals::numInputs; i++) // turn LEDs off again
   {
-    digitalWrite(leds[i], LOW);
+    digitalWrite(Globals::leds[i], LOW);
     Globals::output_string[i] = "\t";
   }
 }
@@ -199,9 +160,9 @@ void calculateNoiseFloor()
 
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
-EffectsType lastEffect[numInputs];
+EffectsType lastEffect[Globals::numInputs];
 
-// int swell_val[numInputs];
+// int swell_val[Globals::numInputs];
 // boolean footswitch_is_pressed = false;
 
 void footswitch_pressed()
@@ -210,7 +171,7 @@ void footswitch_pressed()
   {
   case (LOG_BEATS):
     // set pinMode of all instruments to 3 (record what is being played)
-    for (int i = 0; i < numInputs; i++)
+    for (int i = 0; i < Globals::numInputs; i++)
     {
       lastEffect[i] = instruments[i]->effect;    // TODO: lastPinAction seems to be overwritten quickly, so it will not be able to return to its former state. fix this!
       instruments[i]->effect = FootSwitchLooper; // TODO: not for Cowbell?
@@ -224,7 +185,7 @@ void footswitch_pressed()
     break;
 
   case (RESET_TOPO): // resets beat_topography (for all instruments)
-    for (int i = 0; i < numInputs; i++)
+    for (int i = 0; i < Globals::numInputs; i++)
     {
       // reset 8th-note-topography:
       for (int j = 0; j < 8; j++)
@@ -253,7 +214,7 @@ void footswitch_released()
   switch (FOOTSWITCH_MODE)
   {
   case (LOG_BEATS):
-    for (int i = 0; i < numInputs; i++)
+    for (int i = 0; i < Globals::numInputs; i++)
       instruments[i]->effect = instruments[i]->initialEffect;
     break;
 
@@ -272,7 +233,7 @@ void checkFootSwitch()
   static int switch_state;
   static int last_switch_state = HIGH;
   static unsigned long last_switch_toggle = 1000; // some pre-delay to prevent initial misdetection
-  //static boolean lastPinAction[numInputs];
+  //static boolean lastPinAction[Globals::numInputs];
 
   switch_state = digitalRead(FOOTSWITCH);
   if (switch_state != last_switch_state && millis() > last_switch_toggle + 20)
@@ -297,9 +258,9 @@ void checkFootSwitch()
 // ////////////////////////////////////////////////////////////////////
 boolean stroke_detected(int instr)
 {
-  static unsigned long lastPinActiveTimeCopy[numInputs];
-  // static unsigned long firstPinActiveTimeCopy[numInputs];
-  // static int lastValue[numInputs];    // for LED toggle
+  static unsigned long lastPinActiveTimeCopy[Globals::numInputs];
+  // static unsigned long firstPinActiveTimeCopy[Globals::numInputs];
+  // static int lastValue[Globals::numInputs];    // for LED toggle
   // static boolean toggleState = false; // for LED toggle
 
   noInterrupts();
@@ -344,187 +305,6 @@ boolean stroke_detected(int instr)
 }
 // --------------------------------------------------------------------
 
-//////////////////// TSUNAMI BEAT-LINKED PLAYBACK /////////////////////
-///////////////////////////////////////////////////////////////////////
-
-/* ------------- Tsunami Beat-linked Playback algorithm: --------------
-
-
-  X-----------X---X--------------- 32nd Beat
-  [1,  0,  0,  1,  1,  0,  0,  0  ] 1. iteration
-  |-----------|---|---------------
-  +1, +0, +0, +1, +1, +0, +0, +0    changes between iterations
-  |-----------|---|---------------
-  [2,  0,  0,  2,  2,  0,  0,  0  ] 2. iteration
-  |-----------|---|---------------
-  +0. +1, +0, +1, +1, +0, +0, +0    changes, unprecisely played
-  ----|-------|---|---------------
-  [2,  1,  0,  3,  3,  0,  0,  0  ] 3. iteration
-  |-----------|---|---------------
-  4 + 1 + 0 + 9 + 9 + 0 + 0 + 0 = 23 beat_topo_squared_sum
-  |-----------|---|---------------
-
-  4/23 = 0.174
-          ratio = 4:1 = 0.25
-  1/23 = 0.043
-          ratio = 9:1 = 0.111 --> beat_topo_entries -= 1; beat_topo[i] = 0
-  9/23 = 0.391
-
-  beat_topo_regular_sum = 2 + 1 + 3 + 3 = 9
-  smoothing: beat_topo_entries = 4 - 1 = 3
-  beat_topo_average_smooth = int(9/3 + 0.5) = 3
-
-  ---------------------------------------------------------------------*/
-
-void tsunami_beat_playback(int instr, int current_beat_in)
-{
-  // ------------------ create topography and smoothen it -------------
-  // smoothen_dataArray(beat_topography_8, instr, 3)
-  int beat_topo_entries = 0;
-  int beat_topo_squared_sum = 0;
-  int beat_topo_regular_sum = 0;
-
-  // TODO: compress 16-bit to 8-bit topography
-
-  // count entries and create squared sum:
-  for (int j = 0; j < 8; j++)
-  {
-    if (instruments[instr]->topography.a_8[j] > 0)
-    {
-      beat_topo_entries++;
-      beat_topo_squared_sum += instruments[instr]->topography.a_8[j] * instruments[instr]->topography.a_8[j];
-      beat_topo_regular_sum += instruments[instr]->topography.a_8[j];
-    }
-  }
-
-  beat_topo_regular_sum = beat_topo_regular_sum / beat_topo_entries;
-
-  // calculate site-specific fractions (squared):
-  float beat_topo_squared_frac[8];
-  for (int j = 0; j < 8; j++)
-    beat_topo_squared_frac[j] =
-        float(instruments[instr]->topography.a_8[j]) / float(beat_topo_squared_sum);
-
-  // get highest frac:
-  float highest_frac = 0;
-  for (int j = 0; j < 8; j++)
-    highest_frac = (beat_topo_squared_frac[j] > highest_frac) ? beat_topo_squared_frac[j] : highest_frac;
-
-  // get "topography height":
-  // divide highest with other entries and omit entries if ratio > 3:
-  for (int j = 0; j < 8; j++)
-    if (beat_topo_squared_frac[j] > 0)
-      if (highest_frac / beat_topo_squared_frac[j] > 3 || beat_topo_squared_frac[j] / highest_frac > 3)
-      {
-        instruments[instr]->topography.a_8[j] = 0;
-        beat_topo_entries -= 1;
-        Serial.print(Globals::DrumtypeToHumanreadable(DrumType(j)));
-        Serial.print(": REDUCED VAL AT POS ");
-        Serial.println(j);
-      }
-
-  int beat_topo_average_smooth = 0;
-  // assess average topo sum for loudness
-  for (int j = 0; j < 8; j++)
-    beat_topo_regular_sum += instruments[instr]->topography.a_8[j];
-  beat_topo_average_smooth = int((float(beat_topo_regular_sum) / float(beat_topo_entries)) + 0.5);
-
-  // TODO: reduce all params if not played for long.
-
-  int tracknum = 0;               // Debug
-  if (beat_topo_regular_sum >= 3) // only initiate playback if average of entries > certain threshold.
-  {
-
-    // find right track from database:
-    //int tracknum = 0;
-    for (int j = 0; j < 8; j++)
-    {
-      if (instruments[instr]->topography.a_8[j] > 0)
-      {
-        if (j == 0)
-          tracknum += 128;
-        if (j == 1)
-          tracknum += 64;
-        if (j == 2)
-          tracknum += 32;
-        if (j == 3)
-          tracknum += 16;
-        if (j == 4)
-          tracknum += 8;
-        if (j == 5)
-          tracknum += 4;
-        if (j == 6)
-          tracknum += 2;
-        if (j == 7)
-          tracknum += 1;
-      }
-    }
-    instruments[instr]->score.allocated_track = tracknum; // save for use in other functions
-
-    // set loudness and fade:
-    //int trackLevel = min(-40 + (beat_topo_average_smooth * 5), 0);
-    int trackLevel = 0;                                                   // Debug
-    Globals::tsunami.trackFade(tracknum, trackLevel, Globals::tapInterval, false); // fade smoothly within length of a quarter note
-
-    // TODO: set track channels for each instrument according to output
-    // output A: speaker on drumset
-    // output B: speaker in room (PA)
-    // cool effects: let sounds walk through room from drumset to PA
-
-    // --------------------------- play track -------------------------
-    if (!Globals::tsunami.isTrackPlaying(tracknum) && current_beat_in == 0)
-    {
-      // set playback speed according to current_BPM:
-      int sr_offset;
-      float r = Globals::current_BPM / float(track_bpm[tracknum]);
-      Serial.print("r = ");
-      Serial.println(r);
-      if (!(r > 2) && !(r < 0.5))
-      {
-        // samplerateOffset scales playback speeds from 0.5 to 1 to 2
-        // and maps to -32768 to 0 to 32767
-        sr_offset = (r >= 1) ? 32767 * (r - 1) : -32768 + 32768 * 2 * (r - 0.5);
-        sr_offset = int(sr_offset);
-        Serial.print("sr_offset = ");
-        Serial.println(sr_offset);
-      }
-      else
-      {
-        sr_offset = 0;
-      }
-
-      //int channel = 0;                              // Debug
-      Globals::tsunami.samplerateOffset(instruments[instr]->score.allocated_channel, sr_offset); // TODO: link channels to instruments
-      Globals::tsunami.trackGain(tracknum, trackLevel);
-      Globals::tsunami.trackPlayPoly(tracknum, instruments[instr]->score.allocated_channel, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
-      Serial.print("starting to play track ");
-      Serial.println(tracknum);
-    } // track playing end
-  }   // threshold end
-
-  // Debug:
-  Serial.print("[");
-  for (int i = 0; i < 8; i++)
-  {
-    Serial.print(instruments[instr]->topography.a_8[i]);
-    if (i < 7)
-      Serial.print(", ");
-  }
-  Serial.print("]\t");
-  //  Serial.print(beat_topo_entries);
-  //  Serial.print("\t");
-  //  Serial.print(beat_topo_squared_sum);
-  //  Serial.print("\t");
-  //  Serial.print(beat_topo_regular_sum);
-  //  Serial.print("\t");
-  //  Serial.print(beat_topo_average_smooth);
-  Serial.print("\t");
-  int trackLevel = min(-40 + (beat_topo_average_smooth * 5), 0);
-  Serial.print(trackLevel);
-  Serial.print("dB\t->");
-  Serial.println(tracknum);
-}
-// --------------------------------------------------------------------
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -565,9 +345,9 @@ void printNormalizedValues(boolean printNorm_criterion)
     static unsigned long lastMillis;
     if (millis() != lastMillis)
     {
-      for (int i = 0; i < numInputs; i++)
+      for (int i = 0; i < Globals::numInputs; i++)
       {
-        // static int countsCopy[numInputs];
+        // static int countsCopy[Globals::numInputs];
         //noInterrupts();
         //countsCopy[i] = counts[i];
         //interrupts();
@@ -638,7 +418,7 @@ void smoothen_dataArray(struct TOPOGRAPHY_16 *struct_ptr)
 }
 
 // --------------- smoothen 8-bit array holding instrument ------------
-void smoothen_dataArray(int input_array[numInputs][8], int instr_in, int threshold_to_omit_entry)
+void smoothen_dataArray(int input_array[Globals::numInputs][8], int instr_in, int threshold_to_omit_entry)
 {
   int entries = 0;
   int squared_sum = 0;
@@ -729,7 +509,7 @@ void setup()
 {
 
   // instantiate instruments:
-  for (int i = 0; i < numInputs; i++)
+  for (int i = 0; i < Globals::numInputs; i++)
   {
     instruments[i] = new Instrument;
   }
@@ -751,9 +531,9 @@ void setup()
   delay(100);                 // some time for Tsunami to respond with version string
 
   //------------------------ initialize pins and arrays ------------------------
-  for (int i = 0; i < numInputs; i++)
+  for (int i = 0; i < Globals::numInputs; i++)
   {
-    pinMode(leds[i], OUTPUT);
+    pinMode(Globals::leds[i], OUTPUT);
     instruments[i]->timing.counts = 0;
     for (int j = 0; j < 8; j++)
     {
@@ -813,7 +593,7 @@ void setup()
   instruments[Cowbell]->initialEffect = Monitor;
 
   // setup notes
-  for (int i = 0; i < numInputs; i++)
+  for (int i = 0; i < Globals::numInputs; i++)
   {
     instruments[i]->setup_notes({60, 61, 45, 74, 72, 44, 71});          // insert array of MIDI-notes
     instruments[i]->score.active_note = instruments[i]->score.notes[0]; // set active note pointer to first note
@@ -840,7 +620,7 @@ void setup()
   Serial.println("-----------------------------------------------");
   Serial.println("calibration values set as follows:");
   Serial.println("instr\tthrshld\tcrosses\tnoiseFloor");
-  for (int i = 0; i < numInputs; i++)
+  for (int i = 0; i < Globals::numInputs; i++)
   {
     Serial.print(Globals::DrumtypeToHumanreadable(DrumType(i)));
     Serial.print("\t");
@@ -876,7 +656,7 @@ void loop()
 
   // --------------------- INCOMING SIGNALS FROM PIEZOS ---------------
   // (define what should happen when instruments are hit)
-  for (int i = 0; i < numInputs; i++)
+  for (int i = 0; i < Globals::numInputs; i++)
   {
     if (stroke_detected(i)) // evaluates pins for activity repeatedly
     {
@@ -884,21 +664,6 @@ void loop()
       instruments[i]->trigger(instruments[i], MIDI); // runs trigger function according to instrument's EffectType
       switch (instruments[i]->effect)
       {
-        // case 5: // "swell"
-        //   Globals::setInstrumentPrintString(instruments[i]->drumtype, instruments[i]->effect);
-        //   swell_rec(i);
-        //   break;
-
-      case 6: // Tsunami beat-linked pattern
-        Globals::setInstrumentPrintString(instruments[i]->drumtype, Monitor);
-        instruments[i]->topography.a_8[Globals::current_eighth_count]++;
-        break;
-
-      // case 7: // swell-effect for loudness on field recordings (use on cymbals e.g.)
-        // TODO: UNTESTED! (2020-10-09)
-        // Globals::setInstrumentPrintString(instruments[i]->drumtype, instruments[i]->effect);
-        // swell_rec(i);
-        // break;
 
       case 8: // create beat-topography in 16-th
         Globals::setInstrumentPrintString(instruments[i]->drumtype, Monitor);
@@ -927,7 +692,7 @@ void loop()
   static boolean already_printed = false;
 
   noInterrupts();
-  current_beat_pos = Globals::beatCount % 32; // (beatCount increases infinitely)
+  Globals::current_beat_pos = Globals::beatCount % 32; // (beatCount increases infinitely)
   sendMidiCopy = Globals::sendMidiClock;      // MIDI flag for Clock to be sent
   interrupts();
 
@@ -946,10 +711,10 @@ void loop()
 
   // DO THINGS ONCE PER 32nd-STEP: ------------------------------------
   // ------------------------------------------------------------------
-  if (current_beat_pos != last_beat_pos)
+  if (Globals::current_beat_pos != last_beat_pos)
   {
     // increase 8th note counter:
-    if (current_beat_pos % 4 == 0)
+    if (Globals::current_beat_pos % 4 == 0)
     {
       Globals::current_eighth_count = (Globals::current_eighth_count + 1) % 8;
       toggleLED = !toggleLED;
@@ -957,43 +722,17 @@ void loop()
     digitalWrite(LED_BUILTIN, toggleLED);
 
     // increase 16th note counter:
-    if (current_beat_pos % 2 == 0)
+    if (Globals::current_beat_pos % 2 == 0)
     {
       Globals::current_16th_count = (Globals::current_16th_count + 1) % 16;
     }
 
     // -------------------------- PIN ACTIONS: ------------------------
     // ----------------------------------------------------------------
-    for (int i = 0; i < numInputs; i++)
+    for (int i = 0; i < Globals::numInputs; i++)
     {
       instruments[i]->perform(instruments[i], MIDI);
-      // --------------------------- SWELL: ---------------------------
-      // if (instruments[i]->effect == Swell || instruments[i]->effect == CymbalSwell)
-      //   swell_perform(i, instruments[i]->effect); // ...updates once a 32nd-beat-step
 
-      if (instruments[i]->effect == FootSwitchLooper) // set rhythm slots to play MIDI notes:
-        instruments[i]->score.read_rhythm_slot[Globals::current_eighth_count] = instruments[i]->score.set_rhythm_slot[Globals::current_eighth_count];
-
-      // ----------- (pinActions 2 and 3): send MIDI notes ------------
-      else if (instruments[i]->effect == ToggleRhythmSlot || instruments[i]->effect == FootSwitchLooper)
-      {
-        if (Globals::current_eighth_count != Globals::last_eighth_count) // in 8th-interval
-        {
-          if (instruments[i]->score.read_rhythm_slot[Globals::current_eighth_count])
-          {
-            Globals::setInstrumentPrintString(instruments[i]->drumtype, FootSwitchLooper);
-            MIDI.sendNoteOn(instruments[i]->score.active_note, 127, 2);
-          }
-          else
-            MIDI.sendNoteOff(instruments[i]->score.active_note, 127, 2);
-        }
-      }
-
-      // ----------------------- TSUNAMI PLAYBACK: --------------------
-      else if (instruments[i]->effect == 6)
-      {
-        tsunami_beat_playback(i, current_beat_pos);
-      }
 
       // ---------- MIDI playback according to beat_topography --------
       if (instruments[i]->effect == 8)
@@ -1006,7 +745,7 @@ void loop()
 
           for (int idx = 0; idx < 16; idx++)
           {
-            for (int instr = 0; instr < numInputs; instr++)
+            for (int instr = 0; instr < Globals::numInputs; instr++)
             {
               if (instruments[instr]->effect == 8)
                 total_vol[idx] += instruments[instr]->topography.a_16[idx];
@@ -1123,7 +862,7 @@ void loop()
 
     /////////////////////// AUXILIARY FUNCTIONS ///////////////////////
     // ---------------------------- vibrate on beat:
-    if (current_beat_pos % 8 == 0) // current_beat_pos holds 32 → %8 makes 4.
+    if (Globals::current_beat_pos % 8 == 0) // Globals::current_beat_pos holds 32 → %8 makes 4.
     {
       vibration_begin = millis();
       vibration_duration = 50;
@@ -1134,12 +873,12 @@ void loop()
     print_to_console(String(millis()));
     print_to_console("\t");
     // Serial.print(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
-    print_to_console(current_beat_pos);
+    print_to_console(Globals::current_beat_pos);
     print_to_console("\t");
-    // Serial.print(current_beat_pos / 4);
+    // Serial.print(Globals::current_beat_pos / 4);
     // Serial.print("\t");
     // Serial.print(Globals::current_eighth_count);
-    for (int i = 0; i < numInputs; i++)
+    for (int i = 0; i < Globals::numInputs; i++)
     {
       print_to_console(Globals::output_string[i]);
       Globals::output_string[i] = "\t";
@@ -1147,7 +886,7 @@ void loop()
     println_to_console("");
 
     // Debug: play MIDI note on quarter notes
-    //    if (current_beat_pos % 8 == 0)
+    //    if (Globals::current_beat_pos % 8 == 0)
     //    MIDI.sendNoteOn(57, 127, 2);
     //    else
     //    MIDI.sendNoteOff(57, 127, 2);
@@ -1156,7 +895,7 @@ void loop()
   // ------------------------------------------------------------------
 
   ///////////////////////////// tidy up ///////////////////////////////
-  last_beat_pos = current_beat_pos;
+  last_beat_pos = Globals::current_beat_pos;
   Globals::last_eighth_count = Globals::current_eighth_count;
   Globals::last_16th_count = Globals::current_16th_count;
   already_printed = false;
@@ -1168,7 +907,7 @@ void loop()
   if (millis() > vibration_begin + vibration_duration)
     digitalWrite(VIBR, LOW);
 
-  for (int i = 0; i < numInputs; i++)
+  for (int i = 0; i < Globals::numInputs; i++)
     if (millis() > instruments[i]->score.last_notePlayed + 200 && instruments[i]->effect != Swell) // pinAction 5 turns notes off in swell_beat()
       MIDI.sendNoteOff(instruments[i]->score.active_note, 127, 2);
 }

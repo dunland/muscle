@@ -44,20 +44,17 @@ enum EffectsType
 class Globals
 {
 public:
-
   static const uint8_t numInputs = 7;
-  static std::vector<int> pins;
+  static std::vector<int> pins; // stores contact piezo pin of each instrument
+  static std::vector<int> leds; // stores leds for each instrument (if differing)
 
   static int tapInterval;
   static int current_BPM;
 
-  static Tsunami tsunami;
-
   // ------------------ variables for interrupt timers ------------------
-  // static IntervalTimer pinMonitor;  // reads pins every 1 ms
+
   static IntervalTimer masterClock; // 1 bar
 
-  // ----------------------------- timer counter ---------------------------------
   static volatile unsigned long masterClockCount; // 4*32 = 128 masterClockCount per cycle
   static volatile unsigned long beatCount;        // static volatile int currentStep; // 0-32
   static int next_beatCount;                      // will be reset when timer restarts
@@ -65,13 +62,22 @@ public:
 
   static void masterClockTimer();
 
+  static int current_beat_pos;     // always stores the current position in the beat
   static int current_eighth_count; // overflows at current_beat_pos % 8
   static int current_16th_count;   // overflows at current_beat_pos % 2
   static int last_eighth_count;    // stores last eightNoteCount for comparison
   static int last_16th_count;      // stores last eightNoteCount for comparison
 
+  // ----------------------------- Hardware ---------------------------
+
+  static Tsunami tsunami;
   static boolean footswitch_is_pressed;
 
+// hard-coded list of BPMs of tracks stored on Tsunami's SD card.
+// TODO: somehow make BPM accessible from file title
+static float track_bpm[256];
+
+  // ----------------------------- Auxiliary --------------------------
 
   static String DrumtypeToHumanreadable(DrumType type)
   {

@@ -61,9 +61,12 @@ void Instrument::perform(Instrument *instrument, midi::MidiInterface<HardwareSer
         break;
 
     case ToggleRhythmSlot:
+        Effect::sendMidiNotes_timed(instrument, MIDI);
         break;
 
     case FootSwitchLooper:
+        Effect::setInstrumentSlots(instrument);
+        Effect::sendMidiNotes_timed(instrument, MIDI);
         break;
 
     case TapTempo:

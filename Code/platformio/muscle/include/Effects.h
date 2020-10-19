@@ -23,11 +23,15 @@ public:
 
     static void swell_rec(Instrument* instrument, midi::MidiInterface<HardwareSerial>);
 
-
+    static void tsunamiLink(Instrument* instrument); // Tsunami beat-linked pattern
 
     // timed events: --------------------------------------------------
 
     static void swell_perform(Instrument* instrument, midi::MidiInterface<HardwareSerial> MIDI); // ...updates once a 32nd-beat-step
+
+    static void sendMidiNotes_timed(Instrument* instrument, midi::MidiInterface<HardwareSerial> MIDI);
+
+    static void setInstrumentSlots(Instrument *instrument); // for Footswitchlooper
 
 
 };

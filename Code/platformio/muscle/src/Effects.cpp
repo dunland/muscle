@@ -118,7 +118,7 @@ void Effect::getTapTempo()
   ---------------------------------------------------------------------*/
 void Effect::swell_rec(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI) // remembers beat stroke position
 {
-/* works pretty much just like the tapTempo, but repeats the triggered drums on external MIDI instrument (-> swell_beat() in TIMED INTERVALS) */
+  /* works pretty much just like the tapTempo, but repeats the triggered drums on external MIDI instrument (-> swell_beat() in TIMED INTERVALS) */
   Globals::setInstrumentPrintString(instrument->drumtype, instrument->effect);
 
   static unsigned long previous_swell_beatPos;
@@ -169,8 +169,37 @@ void Effect::swell_rec(Instrument *instrument, midi::MidiInterface<HardwareSeria
   // --------------------------------------------------------------------
 }
 
+void Effect::tsunamiLink(Instrument *instrument) // just prints what is being played.
+{
+  if (Globals::printStrokes)
+  {
+    Globals::setInstrumentPrintString(instrument->drumtype, instrument->effect);
+  }
+  instrument->topography.a_8[Globals::current_eighth_count]++;
+}
+
 ///////////////////////////// TIMED EFFECTS ///////////////////////////
 ///////////////////////////////////////////////////////////////////////
+
+void Effect::sendMidiNotes_timed(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
+{
+  if (Globals::current_eighth_count != Globals::last_eighth_count) // in 8th-interval
+  {
+    if (instrument->score.read_rhythm_slot[Globals::current_eighth_count])
+    {
+      Globals::setInstrumentPrintString(instrument->drumtype, FootSwitchLooper);
+      MIDI.sendNoteOn(instrument->score.active_note, 127, 2);
+    }
+    else
+      MIDI.sendNoteOff(instrument->score.active_note, 127, 2);
+  }
+}
+
+void Effect::setInstrumentSlots(Instrument *instrument)
+{
+  // set rhythm slots to play MIDI notes:
+  instrument->score.read_rhythm_slot[Globals::current_eighth_count] = instrument->score.set_rhythm_slot[Globals::current_eighth_count];
+}
 
 // -------------------- SOUND SWELL: REPLAY STROKES -------------------
 // --------------------------------------------------------------------
@@ -245,5 +274,187 @@ void Effect::swell_perform(Instrument *instrument, midi::MidiInterface<HardwareS
       }
     }
   }
+}
+// --------------------------------------------------------------------
+
+//////////////////// TSUNAMI BEAT-LINKED PLAYBACK /////////////////////
+///////////////////////////////////////////////////////////////////////
+
+/* ------------- Tsunami Beat-linked Playback algorithm: --------------
+
+
+  X-----------X---X--------------- 32nd Beat
+  [1,  0,  0,  1,  1,  0,  0,  0  ] 1. iteration
+  |-----------|---|---------------
+  +1, +0, +0, +1, +1, +0, +0, +0    changes between iterations
+  |-----------|---|---------------
+  [2,  0,  0,  2,  2,  0,  0,  0  ] 2. iteration
+  |-----------|---|---------------
+  +0. +1, +0, +1, +1, +0, +0, +0    changes, unprecisely played
+  ----|-------|---|---------------
+  [2,  1,  0,  3,  3,  0,  0,  0  ] 3. iteration
+  |-----------|---|---------------
+  4 + 1 + 0 + 9 + 9 + 0 + 0 + 0 = 23 beat_topo_squared_sum
+  |-----------|---|---------------
+
+  4/23 = 0.174
+          ratio = 4:1 = 0.25
+  1/23 = 0.043
+          ratio = 9:1 = 0.111 --> beat_topo_entries -= 1; beat_topo[i] = 0
+  9/23 = 0.391
+
+  beat_topo_regular_sum = 2 + 1 + 3 + 3 = 9
+  smoothing: beat_topo_entries = 4 - 1 = 3
+  beat_topo_average_smooth = int(9/3 + 0.5) = 3
+
+  ---------------------------------------------------------------------*/
+
+void tsunami_beat_playback(Instrument *instrument)
+{
+  // ------------------ create topography and smoothen it -------------
+  // smoothen_dataArray(beat_topography_8, instr, 3)
+  int beat_topo_entries = 0;
+  int beat_topo_squared_sum = 0;
+  int beat_topo_regular_sum = 0;
+
+  // TODO: compress 16-bit to 8-bit topography
+
+  // count entries and create squared sum:
+  for (int j = 0; j < 8; j++)
+  {
+    if (instrument->topography.a_8[j] > 0)
+    {
+      beat_topo_entries++;
+      beat_topo_squared_sum += instrument->topography.a_8[j] * instrument->topography.a_8[j];
+      beat_topo_regular_sum += instrument->topography.a_8[j];
+    }
+  }
+
+  beat_topo_regular_sum = beat_topo_regular_sum / beat_topo_entries;
+
+  // calculate site-specific fractions (squared):
+  float beat_topo_squared_frac[8];
+  for (int j = 0; j < 8; j++)
+    beat_topo_squared_frac[j] =
+        float(instrument->topography.a_8[j]) / float(beat_topo_squared_sum);
+
+  // get highest frac:
+  float highest_frac = 0;
+  for (int j = 0; j < 8; j++)
+    highest_frac = (beat_topo_squared_frac[j] > highest_frac) ? beat_topo_squared_frac[j] : highest_frac;
+
+  // get "topography height":
+  // divide highest with other entries and omit entries if ratio > 3:
+  for (int j = 0; j < 8; j++)
+    if (beat_topo_squared_frac[j] > 0)
+      if (highest_frac / beat_topo_squared_frac[j] > 3 || beat_topo_squared_frac[j] / highest_frac > 3)
+      {
+        instrument->topography.a_8[j] = 0;
+        beat_topo_entries -= 1;
+        Serial.print(Globals::DrumtypeToHumanreadable(DrumType(j)));
+        Serial.print(": REDUCED VAL AT POS ");
+        Serial.println(j);
+      }
+
+  int beat_topo_average_smooth = 0;
+  // assess average topo sum for loudness
+  for (int j = 0; j < 8; j++)
+    beat_topo_regular_sum += instrument->topography.a_8[j];
+  beat_topo_average_smooth = int((float(beat_topo_regular_sum) / float(beat_topo_entries)) + 0.5);
+
+  // TODO: reduce all params if not played for long.
+
+  int tracknum = 0;               // Debug
+  if (beat_topo_regular_sum >= 3) // only initiate playback if average of entries > certain threshold.
+  {
+
+    // find right track from database:
+    //int tracknum = 0;
+    for (int j = 0; j < 8; j++)
+    {
+      if (instrument->topography.a_8[j] > 0)
+      {
+        if (j == 0)
+          tracknum += 128;
+        if (j == 1)
+          tracknum += 64;
+        if (j == 2)
+          tracknum += 32;
+        if (j == 3)
+          tracknum += 16;
+        if (j == 4)
+          tracknum += 8;
+        if (j == 5)
+          tracknum += 4;
+        if (j == 6)
+          tracknum += 2;
+        if (j == 7)
+          tracknum += 1;
+      }
+    }
+    instrument->score.allocated_track = tracknum; // save for use in other functions
+
+    // set loudness and fade:
+    //int trackLevel = min(-40 + (beat_topo_average_smooth * 5), 0);
+    int trackLevel = 0;                                                            // Debug
+    Globals::tsunami.trackFade(tracknum, trackLevel, Globals::tapInterval, false); // fade smoothly within length of a quarter note
+
+    // TODO: set track channels for each instrument according to output
+    // output A: speaker on drumset
+    // output B: speaker in room (PA)
+    // cool effects: let sounds walk through room from drumset to PA
+
+    // --------------------------- play track -------------------------
+    if (!Globals::tsunami.isTrackPlaying(tracknum) && Globals::beatCount == 0)
+    {
+      // set playback speed according to current_BPM:
+      int sr_offset;
+      float r = Globals::current_BPM / float(Globals::track_bpm[tracknum]);
+      Serial.print("r = ");
+      Serial.println(r);
+      if (!(r > 2) && !(r < 0.5))
+      {
+        // samplerateOffset scales playback speeds from 0.5 to 1 to 2
+        // and maps to -32768 to 0 to 32767
+        sr_offset = (r >= 1) ? 32767 * (r - 1) : -32768 + 32768 * 2 * (r - 0.5);
+        sr_offset = int(sr_offset);
+        Serial.print("sr_offset = ");
+        Serial.println(sr_offset);
+      }
+      else
+      {
+        sr_offset = 0;
+      }
+
+      //int channel = 0;                              // Debug
+      Globals::tsunami.samplerateOffset(instrument->score.allocated_channel, sr_offset); // TODO: link channels to instruments
+      Globals::tsunami.trackGain(tracknum, trackLevel);
+      Globals::tsunami.trackPlayPoly(tracknum, instrument->score.allocated_channel, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
+      Serial.print("starting to play track ");
+      Serial.println(tracknum);
+    } // track playing end
+  }   // threshold end
+
+  // Debug:
+  Serial.print("[");
+  for (int i = 0; i < 8; i++)
+  {
+    Serial.print(instrument->topography.a_8[i]);
+    if (i < 7)
+      Serial.print(", ");
+  }
+  Serial.print("]\t");
+  //  Serial.print(beat_topo_entries);
+  //  Serial.print("\t");
+  //  Serial.print(beat_topo_squared_sum);
+  //  Serial.print("\t");
+  //  Serial.print(beat_topo_regular_sum);
+  //  Serial.print("\t");
+  //  Serial.print(beat_topo_average_smooth);
+  Serial.print("\t");
+  int trackLevel = min(-40 + (beat_topo_average_smooth * 5), 0);
+  Serial.print(trackLevel);
+  Serial.print("dB\t->");
+  Serial.println(tracknum);
 }
 // --------------------------------------------------------------------

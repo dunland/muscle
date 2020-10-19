@@ -2,16 +2,47 @@
 #include <Tsunami.h>
 // #include <vector>
 // #include <MIDI.h>
+
+std::vector<int> Globals::pins = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};
+std::vector<int> Globals::leds = {LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN};
+
 boolean Globals::printStrokes = true;
 String Globals::output_string[Globals::numInputs];
 IntervalTimer Globals::masterClock; // 1 bar
 
 Tsunami Globals::tsunami;
-
-std::vector<int> Globals::pins = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};
+float Globals::track_bpm[256] =
+    {
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
+        1, 1, 90, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 73, 1, 1, 1,
+        100, 1, 1, 1, 200, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 41, 1, 1,
+        103, 1, 1, 1, 1, 1, 1, 93, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 78, 1, 100, 100, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 100, 1, 1, 1, 1,
+        1, 1, 1, 1, 100, 60};
 
 // int swell_val[numInputs]; // this should be done in the swell section, but is needed in print section already... :/
 
+int Globals::current_beat_pos = 0;     // always stores the current position in the beat
 int Globals::current_eighth_count = 0; // overflows at current_beat_pos % 8
 int Globals::current_16th_count = 0;   // overflows at current_beat_pos % 2
 int Globals::last_eighth_count = 0;    // stores last eightNoteCount for comparison
