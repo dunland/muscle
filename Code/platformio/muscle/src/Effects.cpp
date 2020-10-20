@@ -309,63 +309,26 @@ void Effect::swell_perform(Instrument *instrument, midi::MidiInterface<HardwareS
 
   ---------------------------------------------------------------------*/
 
-void tsunami_beat_playback(Instrument *instrument)
+void Effect::tsunami_beat_playback(Instrument *instrument)
 {
-  // ------------------ create topography and smoothen it -------------
-  // smoothen_dataArray(beat_topography_8, instr, 3)
-  int beat_topo_entries = 0;
-  int beat_topo_squared_sum = 0;
-  int beat_topo_regular_sum = 0;
-
-  // TODO: compress 16-bit to 8-bit topography
-
-  // count entries and create squared sum:
-  for (int j = 0; j < 8; j++)
+  // smoothen 16-bit topography to erase sites with noise:
+  instrument->smoothen_dataArray(instrument);
+  
+  // translate 16-bit to 8-bit topography for track footprint:
+  int j = 0;
+  for (int i = 1; i < 16; i += 2)
   {
-    if (instrument->topography.a_8[j] > 0)
+    if (i > 0 || i-1 > 0)
     {
-      beat_topo_entries++;
-      beat_topo_squared_sum += instrument->topography.a_8[j] * instrument->topography.a_8[j];
-      beat_topo_regular_sum += instrument->topography.a_8[j];
+      instrument->topography.a_8[j] = 1;
     }
+    j++;
   }
-
-  beat_topo_regular_sum = beat_topo_regular_sum / beat_topo_entries;
-
-  // calculate site-specific fractions (squared):
-  float beat_topo_squared_frac[8];
-  for (int j = 0; j < 8; j++)
-    beat_topo_squared_frac[j] =
-        float(instrument->topography.a_8[j]) / float(beat_topo_squared_sum);
-
-  // get highest frac:
-  float highest_frac = 0;
-  for (int j = 0; j < 8; j++)
-    highest_frac = (beat_topo_squared_frac[j] > highest_frac) ? beat_topo_squared_frac[j] : highest_frac;
-
-  // get "topography height":
-  // divide highest with other entries and omit entries if ratio > 3:
-  for (int j = 0; j < 8; j++)
-    if (beat_topo_squared_frac[j] > 0)
-      if (highest_frac / beat_topo_squared_frac[j] > 3 || beat_topo_squared_frac[j] / highest_frac > 3)
-      {
-        instrument->topography.a_8[j] = 0;
-        beat_topo_entries -= 1;
-        Serial.print(Globals::DrumtypeToHumanreadable(DrumType(j)));
-        Serial.print(": REDUCED VAL AT POS ");
-        Serial.println(j);
-      }
-
-  int beat_topo_average_smooth = 0;
-  // assess average topo sum for loudness
-  for (int j = 0; j < 8; j++)
-    beat_topo_regular_sum += instrument->topography.a_8[j];
-  beat_topo_average_smooth = int((float(beat_topo_regular_sum) / float(beat_topo_entries)) + 0.5);
-
+  
   // TODO: reduce all params if not played for long.
 
   int tracknum = 0;               // Debug
-  if (beat_topo_regular_sum >= 3) // only initiate playback if average of entries > certain threshold.
+  if (instrument->topography.regular_sum >= 3) // only initiate playback if average of entries > certain threshold.
   {
 
     // find right track from database:
@@ -395,7 +358,7 @@ void tsunami_beat_playback(Instrument *instrument)
     instrument->score.allocated_track = tracknum; // save for use in other functions
 
     // set loudness and fade:
-    //int trackLevel = min(-40 + (beat_topo_average_smooth * 5), 0);
+    //int trackLevel = min(-40 + (instrument->topography.average_smooth * 5), 0);
     int trackLevel = 0;                                                            // Debug
     Globals::tsunami.trackFade(tracknum, trackLevel, Globals::tapInterval, false); // fade smoothly within length of a quarter note
 
@@ -450,9 +413,9 @@ void tsunami_beat_playback(Instrument *instrument)
   //  Serial.print("\t");
   //  Serial.print(beat_topo_regular_sum);
   //  Serial.print("\t");
-  //  Serial.print(beat_topo_average_smooth);
+  //  Serial.print(instrument->topography.average_smooth);
   Serial.print("\t");
-  int trackLevel = min(-40 + (beat_topo_average_smooth * 5), 0);
+  int trackLevel = min(-40 + (instrument->topography.average_smooth * 5), 0);
   Serial.print(trackLevel);
   Serial.print("dB\t->");
   Serial.println(tracknum);

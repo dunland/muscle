@@ -33,5 +33,7 @@ public:
 
     static void setInstrumentSlots(Instrument *instrument); // for Footswitchlooper
 
+    static void tsunami_beat_playback(Instrument *instrument);
+
 
 };

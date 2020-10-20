@@ -79,4 +79,6 @@ public:
     }
 
     void calculateNoiseFloor(Instrument *);
+
+    void smoothen_dataArray(Instrument *instrument);
 };

@@ -61,13 +61,6 @@ int countsCopy[Globals::numInputs];
 // int allocated_track[Globals::numInputs];                   // tracks will be allocated in tsunami_beat_playback
 // int allocated_channels[] = {0, 0, 0, 0, 0, 0, 0}; // channels to send audio from tsunami to
 
-struct TOPOGRAPHY_16 // must be global!
-{
-  int topo_array[16];
-  int threshold;
-  int average_smooth;
-} beat_topography_8_, beat_topography_16_, beat_regularity_16_;
-
 /////////////////////////// general pin reading ///////////////////////
 ///////////////////////////////////////////////////////////////////////
 
@@ -132,142 +125,6 @@ void printNormalizedValues(boolean printNorm_criterion)
 }
 // --------------------------------------------------------------------
 
-//////////////////////// SMOOTHEN TOPOGRAPHY ARRAYS ///////////////////
-///////////////////////////////////////////////////////////////////////
-
-// ---------------- smoothen 16-bit array using struct ----------------
-void smoothen_dataArray(struct TOPOGRAPHY_16 *struct_ptr)
-{
-  int *input_array = (*struct_ptr).topo_array;
-  int entries = 0;
-  int squared_sum = 0;
-  int regular_sum = 0;
-
-  // count entries and create squared sum:
-  for (int j = 0; j < 16; j++)
-  {
-    if (input_array[j] > 0)
-    {
-      entries++;
-      squared_sum += input_array[j] * input_array[j];
-      regular_sum += input_array[j];
-    }
-  }
-
-  regular_sum = regular_sum / entries;
-
-  // calculate site-specific (squared) fractions of total:
-  float squared_frac[16];
-  for (int j = 0; j < 16; j++)
-    squared_frac[j] =
-        float(input_array[j]) / float(squared_sum);
-
-  // get highest frac:
-  float highest_squared_frac = 0;
-  for (int j = 0; j < 16; j++)
-    highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
-
-  // get "topography height":
-  // divide highest with other entries and reset entries if ratio > 3:
-  for (int j = 0; j < 16; j++)
-    if (squared_frac[j] > 0)
-      if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > (*struct_ptr).threshold)
-      {
-        input_array[j] = 0;
-        entries -= 1;
-      }
-
-  (*struct_ptr).average_smooth = 0;
-  // assess average topo sum for loudness
-  for (int j = 0; j < 8; j++)
-    (*struct_ptr).average_smooth += input_array[j];
-  struct_ptr->average_smooth = int((float((*struct_ptr).average_smooth) / float(entries)) + 0.5);
-}
-
-// --------------- smoothen 8-bit array holding instrument ------------
-void smoothen_dataArray(int input_array[Globals::numInputs][8], int instr_in, int threshold_to_omit_entry)
-{
-  int entries = 0;
-  int squared_sum = 0;
-  int regular_sum = 0;
-
-  // count entries and create squared sum:
-  for (int j = 0; j < 8; j++)
-  {
-    if (input_array[instr_in][j] > 0)
-    {
-      entries++;
-      squared_sum += input_array[instr_in][j] * input_array[instr_in][j];
-      regular_sum += input_array[instr_in][j];
-    }
-  }
-
-  regular_sum = regular_sum / entries;
-
-  // calculate site-specific (squared) fractions of total:
-  float squared_frac[8];
-  for (int j = 0; j < 8; j++)
-    squared_frac[j] =
-        float(input_array[instr_in][j]) / float(squared_sum);
-
-  // get highest frac:
-  float highest_squared_frac = 0;
-  for (int j = 0; j < 8; j++)
-    highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
-
-  // get "topography height":
-  // divide highest with other entries and reset entries if ratio > 3:
-  for (int j = 0; j < 8; j++)
-    if (squared_frac[j] > 0)
-      if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > threshold_to_omit_entry)
-      {
-        input_array[instr_in][j] = 0;
-        entries -= 1;
-      }
-}
-
-// ------------------------ smoothen 16-bit array ---------------------
-void smoothen_dataArray(int input_array[16], int threshold_to_omit_entry)
-{
-  int entries = 0;
-  int squared_sum = 0;
-  int regular_sum = 0;
-
-  // count entries and create squared sum:
-  for (int j = 0; j < 16; j++)
-  {
-    if (input_array[j] > 0)
-    {
-      entries++;
-      squared_sum += input_array[j] * input_array[j];
-      regular_sum += input_array[j];
-    }
-  }
-
-  regular_sum = regular_sum / entries;
-
-  // calculate site-specific (squared) fractions of total:
-  float squared_frac[16];
-  for (int j = 0; j < 16; j++)
-    squared_frac[j] =
-        float(input_array[j]) / float(squared_sum);
-
-  // get highest frac:
-  float highest_squared_frac = 0;
-  for (int j = 0; j < 16; j++)
-    highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
-
-  // get "topography height":
-  // divide highest with other entries and reset entries if ratio > 3:
-  for (int j = 0; j < 16; j++)
-    if (squared_frac[j] > 0)
-      if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > threshold_to_omit_entry)
-      {
-        input_array[j] = 0;
-        entries -= 1;
-      }
-}
-
 /* --------------------------------------------------------------------- */
 /* ---------------------------------- SETUP ---------------------------- */
 /* --------------------------------------------------------------------- */
@@ -289,13 +146,13 @@ void setup()
 
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
-  delay(1000);     // wait for Tsunami to finish reset // redundant?
+  delay(1000);              // wait for Tsunami to finish reset // redundant?
   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
   delay(100);
   Globals::tsunami.stopAllTracks(); // in case Tsunami was already playing.
   Globals::tsunami.samplerateOffset(0, 0);
   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
-  delay(100);                 // some time for Tsunami to respond with version string
+  delay(100);                          // some time for Tsunami to respond with version string
 
   //------------------------ initialize pins and arrays ------------------------
   for (int i = 0; i < Globals::numInputs; i++)
@@ -342,7 +199,8 @@ void setup()
   instruments[Cowbell]->sensitivity.crossings = 15;
 
   // calculate noise floor:
-  for (int i = 0; i<Globals::numInputs; i++) instruments[i]->calculateNoiseFloor(instruments[i]);
+  for (int i = 0; i < Globals::numInputs; i++)
+    instruments[i]->calculateNoiseFloor(instruments[i]);
 
   instruments[Snare]->effect = TopographyLog;
   instruments[Snare]->initialEffect = TopographyLog;
@@ -367,7 +225,7 @@ void setup()
   }
 
   // int cc_chan[] = {50, 0, 0, 25, 71, 50, 0, 0}; // needed in pinAction 5 and 6
-  instruments[Snare]->midi.cc_chan = 50;       // amplevel
+  instruments[Snare]->midi.cc_chan = 50; // amplevel
   instruments[Hihat]->midi.cc_chan = 0;
   instruments[Kick]->midi.cc_chan = 0;
   instruments[Tom1]->midi.cc_chan = 25;      // sustain
@@ -460,7 +318,7 @@ void loop()
 
   noInterrupts();
   Globals::current_beat_pos = Globals::beatCount % 32; // (beatCount increases infinitely)
-  sendMidiCopy = Globals::sendMidiClock;      // MIDI flag for Clock to be sent
+  sendMidiCopy = Globals::sendMidiClock;               // MIDI flag for Clock to be sent
   interrupts();
 
   // ---------------------------- send MIDI-Clock on beat
@@ -500,7 +358,6 @@ void loop()
     {
       instruments[i]->perform(instruments[i], MIDI);
 
-
       // ---------- MIDI playback according to beat_topography --------
       if (instruments[i]->effect == 8)
       {
@@ -521,7 +378,7 @@ void loop()
 
           // smoothen array:
           // ------------------ create topography and smoothen it -------------
-          smoothen_dataArray(total_vol, 3);
+          instruments[i]->smoothen_dataArray(instruments[i]); // erases "noise" from arrays if SNR>3
 
           // print volume layer:
           if (!already_printed)
@@ -538,7 +395,7 @@ void loop()
             already_printed = true;
           }
 
-          // ------------ result: change volume and play MIDI ---------
+          // ------------ result-> change volume and play MIDI --------
           // ----------------------------------------------------------
           int vol = min(40 + total_vol[Globals::current_16th_count] * 15, 255);
 
@@ -573,7 +430,7 @@ void loop()
 
     //makeTopo();
     // works like this:
-    smoothen_dataArray(&beat_topography_16_);
+    instruments[0]->smoothen_dataArray(instruments[0]);
     // LOTS OF PSEUDOCODE HERE:
 
     //    beat_topography_16.smoothen(); // → beat_topography.average_smoothened_height

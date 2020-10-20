@@ -189,3 +189,63 @@ void Instrument::perform(Instrument *instrument, midi::MidiInterface<HardwareSer
         break;
     }
 }
+
+//////////////////////// SMOOTHEN TOPOGRAPHY ARRAYS ///////////////////
+///////////////////////////////////////////////////////////////////////
+
+// ---------------- smoothen 16-bit array using struct ----------------
+void Instrument::smoothen_dataArray(Instrument* instrument)
+{
+  /* input an array of size 16
+1. count entries and create squared sum of each entry
+2. calculate (squared) fraction of total for each entry
+3. get highest of these fractions
+4. get ratio of highest fraction to other and reset values if ratio > threshold
+->  
+*/
+
+  int len = *(&instrument->topography.a_16 + 1) - instrument->topography.a_16;
+  int entries = 0;
+  int squared_sum = 0;
+  instrument->topography.regular_sum = 0;
+
+  // count entries and create squared sum:
+  for (int j = 0; j < len; j++)
+  {
+    if (instrument->topography.a_16[j] > 0)
+    {
+      entries++;
+      squared_sum += instrument->topography.a_16[j] * instrument->topography.a_16[j];
+      instrument->topography.regular_sum += instrument->topography.a_16[j];
+    }
+  }
+
+  instrument->topography.regular_sum = instrument->topography.regular_sum / entries;
+
+  // calculate site-specific (squared) fractions of total:
+  float squared_frac[len];
+  for (int j = 0; j < len; j++)
+    squared_frac[j] =
+        float(instrument->topography.a_16[j]) / float(squared_sum);
+
+  // get highest frac:
+  float highest_squared_frac = 0;
+  for (int j = 0; j < len; j++)
+    highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
+
+  // get "topography height":
+  // divide highest with other entries and reset entries if ratio > threshold:
+  for (int j = 0; j < len; j++)
+    if (squared_frac[j] > 0)
+      if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > instrument->topography.threshold)
+      {
+        instrument->topography.a_16[j] = 0;
+        entries -= 1;
+      }
+
+  instrument->topography.average_smooth = 0;
+  // assess average topo sum for loudness
+  for (int j = 0; j < 8; j++)
+    instrument->topography.average_smooth += instrument->topography.a_16[j];
+  instrument->topography.average_smooth = int((float(instrument->topography.average_smooth) / float(entries)) + 0.5);
+}
