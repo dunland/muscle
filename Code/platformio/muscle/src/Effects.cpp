@@ -3,6 +3,9 @@
 #include <Globals.h>
 #include <MIDI.h>
 
+// create overall volume topography of all instrument layers:
+std::vector<int> Effect::total_vol = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
 ///////////////////////////// TRIGGER EFFECTS /////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
@@ -173,9 +176,10 @@ void Effect::tsunamiLink(Instrument *instrument) // just prints what is being pl
 {
   if (Globals::printStrokes)
   {
-    Globals::setInstrumentPrintString(instrument->drumtype, instrument->effect);
+    Globals::setInstrumentPrintString(instrument->drumtype, Monitor);
   }
-  instrument->topography.a_8[Globals::current_eighth_count]++;
+  // instrument->topography.a_8[Globals::current_eighth_count]++;
+  instrument->topography.a_16[Globals::current_16th_count]++; // will be translated to topography.a_8 when evoked
 }
 
 ///////////////////////////// TIMED EFFECTS ///////////////////////////
@@ -313,21 +317,21 @@ void Effect::tsunami_beat_playback(Instrument *instrument)
 {
   // smoothen 16-bit topography to erase sites with noise:
   instrument->smoothen_dataArray(instrument);
-  
+
   // translate 16-bit to 8-bit topography for track footprint:
   int j = 0;
   for (int i = 1; i < 16; i += 2)
   {
-    if (i > 0 || i-1 > 0)
+    if (i > 0 || i - 1 > 0)
     {
       instrument->topography.a_8[j] = 1;
     }
     j++;
   }
-  
+
   // TODO: reduce all params if not played for long.
 
-  int tracknum = 0;               // Debug
+  int tracknum = 0;                            // Debug
   if (instrument->topography.regular_sum >= 3) // only initiate playback if average of entries > certain threshold.
   {
 
@@ -421,3 +425,60 @@ void Effect::tsunami_beat_playback(Instrument *instrument)
   Serial.println(tracknum);
 }
 // --------------------------------------------------------------------
+
+// ---------- MIDI playback according to beat_topography --------
+void Effect::topography_midi_effects(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
+{
+  if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
+  {
+    for (int idx = 0; idx < 16; idx++)
+    {
+      for (int instr = 0; instr < Globals::numInputs; instr++)
+      {
+        if (instrument->effect == 8)
+          total_vol[idx] += instrument->topography.a_16[idx];
+      }
+    }
+
+    // smoothen array:
+    // ------------------ create topography and smoothen it -------------
+    instrument->smoothen_dataArray(instrument); // erases "noise" from arrays if SNR>3
+
+    // print volume layer:
+
+    Serial.print("vol:\t[");
+
+    for (int j = 0; j < 16; j++)
+    {
+      Serial.print(total_vol[j]);
+      if (j < 15)
+        Serial.print(",");
+    }
+    Serial.println("]");
+
+    // ------------ result-> change volume and play MIDI --------
+    // ----------------------------------------------------------
+    int vol = min(40 + total_vol[Globals::current_16th_count] * 15, 255);
+
+    if (instrument->topography.a_16[Globals::current_16th_count] > 0)
+    {
+      MIDI.sendControlChange(50, vol, 2);
+      MIDI.sendNoteOn(instrument->score.active_note, 127, 2);
+    }
+    else
+    {
+      MIDI.sendNoteOff(instrument->score.active_note, 127, 2);
+    }
+
+    // Debug:
+    Serial.print(Globals::DrumtypeToHumanreadable(instrument->drumtype));
+    Serial.print(":\t[");
+    for (int j = 0; j < 16; j++)
+    {
+      Serial.print(instrument->topography.a_16[j]);
+      if (j < 15)
+        Serial.print(",");
+    }
+    Serial.println("]");
+  } // end only once per 16th-step
+}

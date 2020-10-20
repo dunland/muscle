@@ -182,7 +182,7 @@ void Instrument::perform(Instrument *instrument, midi::MidiInterface<HardwareSer
 
         break;
     case TopographyLog:
-
+        Effect::topography_midi_effects(instrument, MIDI);
         break;
 
     default:

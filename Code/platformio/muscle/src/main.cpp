@@ -265,7 +265,7 @@ void setup()
 void loop()
 {
 
-  Globals::tsunami.update();
+  Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
 
   // ------------------------- DEBUG AREA -----------------------------
   printNormalizedValues(Globals::printNormalizedValues_);
@@ -278,25 +278,13 @@ void loop()
     {
       // ----------------------- perform pin action -------------------
       instruments[i]->trigger(instruments[i], MIDI); // runs trigger function according to instrument's EffectType
-      switch (instruments[i]->effect)
-      {
-
-      case 8: // create beat-topography in 16-th
-        Globals::setInstrumentPrintString(instruments[i]->drumtype, Monitor);
-        instruments[i]->topography.a_16[Globals::current_16th_count]++;
-        break;
-
-      default:
-        break;
-      }
 
       // send instrument stroke to processing:
       // send_to_processing(i);
     }
-  } // end main commands loop -----------------------------------------
+  }
 
-  /////////////////////////// TIMED ACTIONS ///////////////////////////
-  /////////////////////////////////////////////////////////////////////
+  // ------------------------- TIMED ACTIONS --------------------------
   // (automatically invoke rhythm-linked actions)
   static int last_beat_pos = 0;
   static boolean toggleLED = true;
@@ -305,7 +293,7 @@ void loop()
   static unsigned long vibration_begin = 0;
   static int vibration_duration = 0;
 
-  static boolean already_printed = false;
+  // static boolean already_printed = false;
 
   // get current beat position:
   noInterrupts();
@@ -344,76 +332,11 @@ void loop()
       Globals::current_16th_count = (Globals::current_16th_count + 1) % 16;
     }
 
-    // -------------------------- PIN ACTIONS: ------------------------
-    // ----------------------------------------------------------------
+    // perform timed pin actions according to current beat:
     for (int i = 0; i < Globals::numInputs; i++)
     {
       instruments[i]->perform(instruments[i], MIDI);
-
-      // ---------- MIDI playback according to beat_topography --------
-      if (instruments[i]->effect == 8)
-      {
-        if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
-        {
-
-          // create overall volume topography of all instrument layers:
-          int total_vol[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-          for (int idx = 0; idx < 16; idx++)
-          {
-            for (int instr = 0; instr < Globals::numInputs; instr++)
-            {
-              if (instruments[instr]->effect == 8)
-                total_vol[idx] += instruments[instr]->topography.a_16[idx];
-            }
-          }
-
-          // smoothen array:
-          // ------------------ create topography and smoothen it -------------
-          instruments[i]->smoothen_dataArray(instruments[i]); // erases "noise" from arrays if SNR>3
-
-          // print volume layer:
-          if (!already_printed)
-          {
-            Serial.print("vol:\t[");
-
-            for (int j = 0; j < 16; j++)
-            {
-              Serial.print(total_vol[j]);
-              if (j < 15)
-                Serial.print(",");
-            }
-            Serial.println("]");
-            already_printed = true;
-          }
-
-          // ------------ result-> change volume and play MIDI --------
-          // ----------------------------------------------------------
-          int vol = min(40 + total_vol[Globals::current_16th_count] * 15, 255);
-
-          if (instruments[i]->topography.a_16[Globals::current_16th_count] > 0)
-          {
-            MIDI.sendControlChange(50, vol, 2);
-            MIDI.sendNoteOn(instruments[i]->score.active_note, 127, 2);
-          }
-          else
-          {
-            MIDI.sendNoteOff(instruments[i]->score.active_note, 127, 2);
-          }
-
-          // Debug:
-          Serial.print(Globals::DrumtypeToHumanreadable(DrumType(i)));
-          Serial.print(":\t[");
-          for (int j = 0; j < 16; j++)
-          {
-            Serial.print(instruments[i]->topography.a_16[j]);
-            if (j < 15)
-              Serial.print(",");
-          }
-          Serial.println("]");
-        } // end only once per 16th-step
-      }   // end pinAction[8]
-    }     // end pin Actions
+    } 
     // ----------------------------------------------------------------
 
     ///////////////////////////////////////////////////////////////////
@@ -514,7 +437,7 @@ void loop()
   last_beat_pos = Globals::current_beat_pos;
   Globals::last_eighth_count = Globals::current_eighth_count;
   Globals::last_16th_count = Globals::current_16th_count;
-  already_printed = false;
+  // already_printed = false;
 
   // check footswitch -------------------------------------------------
   Hardware::checkFootSwitch(instruments);
