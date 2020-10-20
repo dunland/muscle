@@ -70,30 +70,6 @@ int pinValue(int instr)
 }
 // --------------------------------------------------------------------
 
-// /* --------------------------------------------------------------------- */
-// /* -------------------------- TIMED INTERRUPTS ------------------------- */
-// /* --------------------------------------------------------------------- */
-void samplePins()
-{
-  // ------------------------- read all pins -----------------------------------
-  for (int pinNum = 0; pinNum < Globals::numInputs; pinNum++)
-  {
-    if (pinValue(pinNum) > instruments[pinNum]->sensitivity.threshold)
-    {
-      if (instruments[pinNum]->timing.counts < 1)
-        instruments[pinNum]->timing.firstPinActiveTime = millis();
-      instruments[pinNum]->timing.lastPinActiveTime = millis();
-      instruments[pinNum]->timing.counts++;
-    }
-  }
-}
-
-// -----------------------------------------------------------------------------
-
-/* --------------------------------------------------------------------- */
-/* ----------------------------- FUNCTIONS ----------------------------- */
-/* --------------------------------------------------------------------- */
-
 //////////////////////////// PRINT NORMALIZED VALUES //////////////////
 ///////////////////////////////////////////////////////////////////////
 void printNormalizedValues(boolean printNorm_criterion)
@@ -125,19 +101,30 @@ void printNormalizedValues(boolean printNorm_criterion)
 }
 // --------------------------------------------------------------------
 
+// interrupt for sensor reading ---------------------------------------
+void samplePins()
+{
+  // read all pins:
+  for (int pinNum = 0; pinNum < Globals::numInputs; pinNum++)
+  {
+    if (pinValue(pinNum) > instruments[pinNum]->sensitivity.threshold)
+    {
+      if (instruments[pinNum]->timing.counts < 1)
+        instruments[pinNum]->timing.firstPinActiveTime = millis();
+      instruments[pinNum]->timing.lastPinActiveTime = millis();
+      instruments[pinNum]->timing.counts++;
+    }
+  }
+}
+
+// --------------------------------------------------------------------
+
 /* --------------------------------------------------------------------- */
 /* ---------------------------------- SETUP ---------------------------- */
 /* --------------------------------------------------------------------- */
 
 void setup()
 {
-
-  // instantiate instruments:
-  for (int i = 0; i < Globals::numInputs; i++)
-  {
-    instruments[i] = new Instrument;
-  }
-
   Serial.begin(115200);
   // Serial3.begin(57600); // contained in tsunami.begin()
   while (!Serial)
@@ -154,7 +141,18 @@ void setup()
   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
   delay(100);                          // some time for Tsunami to respond with version string
 
-  //------------------------ initialize pins and arrays ------------------------
+  //------------------------ initialize pins --------------------------
+  pinMode(VIBR, OUTPUT);
+  pinMode(FOOTSWITCH, INPUT_PULLUP);
+
+  // ------------------------ INSTRUMENT SETUP ------------------------
+  // instantiate instruments:
+  for (int i = 0; i < Globals::numInputs; i++)
+  {
+    instruments[i] = new Instrument;
+  }
+
+  // initialize arrays:
   for (int i = 0; i < Globals::numInputs; i++)
   {
     pinMode(Globals::leds[i], OUTPUT);
@@ -165,12 +163,8 @@ void setup()
       instruments[i]->score.set_rhythm_slot[j] = false;
       instruments[i]->topography.a_8[j] = 0;
       instruments[i]->topography.a_16[j] = 0;
-      instruments[i]->score.allocated_channel = 0;
     }
-    instruments[i]->initialEffect = instruments[i]->effect;
   }
-  pinMode(VIBR, OUTPUT);
-  pinMode(FOOTSWITCH, INPUT_PULLUP);
 
   // setup initial values ---------------------------------------------
   instruments[Snare]->pin = A0;
@@ -202,21 +196,16 @@ void setup()
   for (int i = 0; i < Globals::numInputs; i++)
     instruments[i]->calculateNoiseFloor(instruments[i]);
 
+  // assign effects to instruments:
   instruments[Snare]->effect = TopographyLog;
-  instruments[Snare]->initialEffect = TopographyLog;
   instruments[Hihat]->effect = TapTempo;
-  instruments[Hihat]->initialEffect = TapTempo;
   instruments[Kick]->effect = TopographyLog;
-  instruments[Kick]->initialEffect = TopographyLog;
   instruments[Tom1]->effect = TopographyLog;
-  instruments[Tom1]->initialEffect = TopographyLog;
   instruments[Tom2]->effect = TopographyLog;
-  instruments[Tom2]->initialEffect = TopographyLog;
   instruments[Standtom1]->effect = TopographyLog;
-  instruments[Standtom1]->initialEffect = TopographyLog;
   instruments[Cowbell]->effect = Monitor;
-  instruments[Cowbell]->initialEffect = Monitor;
 
+  // ---------------------------- SCORE -------------------------------
   // setup notes
   for (int i = 0; i < Globals::numInputs; i++)
   {
@@ -224,7 +213,7 @@ void setup()
     instruments[i]->score.active_note = instruments[i]->score.notes[0]; // set active note pointer to first note
   }
 
-  // int cc_chan[] = {50, 0, 0, 25, 71, 50, 0, 0}; // needed in pinAction 5 and 6
+  // midi channels:
   instruments[Snare]->midi.cc_chan = 50; // amplevel
   instruments[Hihat]->midi.cc_chan = 0;
   instruments[Kick]->midi.cc_chan = 0;
@@ -242,6 +231,7 @@ void setup()
    26=release
 */
 
+  // print startup information:
   Serial.println("-----------------------------------------------");
   Serial.println("calibration values set as follows:");
   Serial.println("instr\tthrshld\tcrosses\tnoiseFloor");
@@ -257,7 +247,8 @@ void setup()
   }
   Serial.println("-----------------------------------------------");
 
-  // start timers -----------------------------------------------------
+
+  // -------------------------- START TIMERS --------------------------
   pinMonitor.begin(samplePins, 1000); // sample pin every 1 millisecond
 
   Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
@@ -316,12 +307,13 @@ void loop()
 
   static boolean already_printed = false;
 
+  // get current beat position:
   noInterrupts();
   Globals::current_beat_pos = Globals::beatCount % 32; // (beatCount increases infinitely)
   sendMidiCopy = Globals::sendMidiClock;               // MIDI flag for Clock to be sent
   interrupts();
 
-  // ---------------------------- send MIDI-Clock on beat
+  // send MIDI-Clock on beat:
   /* MIDI Clock events are sent at a rate of 24 pulses per quarter note
      one tap beat equals one quarter note
      only one midi clock signal should be send per 24th quarter note

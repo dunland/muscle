@@ -17,7 +17,6 @@ public:
     int pin;
 
     EffectsType effect;
-    EffectsType initialEffect; // holds the pinAction array as defined above
     DrumType drumtype;
 
     // sensitivity and instrument calibration
@@ -47,7 +46,7 @@ public:
 
         //field recordings
         int allocated_track; // tracks will be allocated in tsunami_beat_playback
-        int allocated_channel;
+        int allocated_channel = 0;
     } score;
 
     struct MIDI
