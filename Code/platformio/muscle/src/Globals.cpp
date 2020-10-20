@@ -9,7 +9,9 @@ std::vector<int> Globals::leds = {LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUI
 boolean Globals::printStrokes = true;
 String Globals::output_string[Globals::numInputs];
 boolean Globals::use_responsiveCalibration = false;
-
+boolean Globals::printNormalizedValues_ = false;
+boolean Globals::do_print_to_console = true;
+boolean Globals::do_send_to_processing = false;
 
 IntervalTimer Globals::masterClock; // 1 bar
 
@@ -218,3 +220,21 @@ void Globals::masterClockTimer()
     sendMidiClock = (((masterClockCount % 4) / 3) % 4 == 0);
 }
 // ---------------------------------------------------------------------------
+
+void Globals::print_to_console(String message_to_print)
+{
+  if (Globals::do_print_to_console)
+    Serial.print(message_to_print);
+}
+
+void Globals::println_to_console(String message_to_print)
+{
+  if (Globals::do_print_to_console)
+    Serial.println(message_to_print);
+}
+
+void Globals::send_to_processing(int message_to_send)
+{
+  if (Globals::do_send_to_processing)
+    Serial.write(message_to_send);
+}

@@ -48,10 +48,14 @@ public:
   static std::vector<int> pins; // stores contact piezo pin of each instrument
   static std::vector<int> leds; // stores leds for each instrument (if differing)
 
+  // ------------------------- Debug variables --------------------------
+  static boolean printNormalizedValues_;
+  static boolean do_print_to_console;
+  static boolean do_send_to_processing;
   static boolean printStrokes;
   static String output_string[numInputs];
   static boolean use_responsiveCalibration;
-  
+
   static int tapInterval;
   static int current_BPM;
 
@@ -114,6 +118,17 @@ public:
   }
 
   static void setInstrumentPrintString(DrumType drum, EffectsType effect);
+
+// DEBUG FUNCTIONS: ---------------------------------------------------
+// print the play log to Arduino console:
+static void print_to_console(String message_to_print);
+
+static void println_to_console(String message_to_print);
+
+// or send stuff to processing:
+static void send_to_processing(int message_to_send);
+// --------------------------------------------------------------------
+
 };
 
 struct TOPOGRAPHY

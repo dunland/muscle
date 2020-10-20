@@ -38,11 +38,6 @@ midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as 
 
 Instrument *instruments[Globals::numInputs];
 
-// ------------------------- Debug variables --------------------------
-boolean printNormalizedValues_ = false;
-boolean do_print_to_console = true;
-boolean do_send_to_processing = false;
-
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
 
@@ -105,36 +100,6 @@ void samplePins()
 /* --------------------------------------------------------------------- */
 /* ----------------------------- FUNCTIONS ----------------------------- */
 /* --------------------------------------------------------------------- */
-
-
-
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-/////////////////////////// DEBUG FUNCTIONS ///////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-// print the play log to Arduino console:
-void print_to_console(String message_to_print)
-{
-  if (do_print_to_console)
-    Serial.print(message_to_print);
-}
-
-void println_to_console(String message_to_print)
-{
-  if (do_print_to_console)
-    Serial.println(message_to_print);
-}
-
-// or send stuff to processing:
-void send_to_processing(int message_to_send)
-{
-  if (do_send_to_processing)
-    Serial.write(message_to_send);
-}
-
-// --------------------------------------------------------------------
 
 //////////////////////////// PRINT NORMALIZED VALUES //////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -454,7 +419,7 @@ void loop()
   Globals::tsunami.update();
 
   // ------------------------- DEBUG AREA -----------------------------
-  printNormalizedValues(printNormalizedValues_);
+  printNormalizedValues(Globals::printNormalizedValues_);
 
   // --------------------- INCOMING SIGNALS FROM PIEZOS ---------------
   // (define what should happen when instruments are hit)
@@ -672,20 +637,20 @@ void loop()
     }
 
     // ----------------------------- draw play log to console
-    print_to_console(String(millis()));
-    print_to_console("\t");
+    Globals::print_to_console(String(millis()));
+    Globals::print_to_console("\t");
     // Serial.print(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
-    print_to_console(Globals::current_beat_pos);
-    print_to_console("\t");
+    Globals::print_to_console(Globals::current_beat_pos);
+    Globals::print_to_console("\t");
     // Serial.print(Globals::current_beat_pos / 4);
     // Serial.print("\t");
     // Serial.print(Globals::current_eighth_count);
     for (int i = 0; i < Globals::numInputs; i++)
     {
-      print_to_console(Globals::output_string[i]);
+      Globals::print_to_console(Globals::output_string[i]);
       Globals::output_string[i] = "\t";
     }
-    println_to_console("");
+    Globals::println_to_console("");
 
     // Debug: play MIDI note on quarter notes
     //    if (Globals::current_beat_pos % 8 == 0)
