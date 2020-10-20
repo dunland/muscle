@@ -1,5 +1,8 @@
 #include <Hardware.h>
 
+////////////////////////////////// FOOT SWITCH ////////////////////////
+///////////////////////////////////////////////////////////////////////
+
 void Hardware::footswitch_pressed(Instrument *instruments[Globals::numInputs])
 {
   switch (FOOTSWITCH_MODE)
@@ -86,4 +89,22 @@ void Hardware::checkFootSwitch(Instrument *instruments[Globals::numInputs])
     last_switch_state = switch_state;
     last_switch_toggle = millis();
   }
+}
+////////////////////////////// VIBRATION MOTOR ////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+unsigned long Hardware::motor_vibration_begin = 0;
+int Hardware::motor_vibration_duration = 0;
+
+void Hardware::vibrate_motor(unsigned long vibration_duration_input)
+{
+  motor_vibration_begin = millis();
+  motor_vibration_duration = vibration_duration_input;
+  digitalWrite(VIBR, HIGH);
+}
+
+void Hardware::request_motor_deactivation() // turn off vibration and MIDI notes
+{
+  if (millis() > motor_vibration_begin + motor_vibration_duration)
+    digitalWrite(VIBR, LOW);
 }

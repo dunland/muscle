@@ -444,18 +444,6 @@ void Effect::topography_midi_effects(Instrument *instrument, midi::MidiInterface
     // ------------------ create topography and smoothen it -------------
     instrument->smoothen_dataArray(instrument); // erases "noise" from arrays if SNR>3
 
-    // print volume layer:
-
-    Serial.print("vol:\t[");
-
-    for (int j = 0; j < 16; j++)
-    {
-      Serial.print(total_vol[j]);
-      if (j < 15)
-        Serial.print(",");
-    }
-    Serial.println("]");
-
     // ------------ result-> change volume and play MIDI --------
     // ----------------------------------------------------------
     int vol = min(40 + total_vol[Globals::current_16th_count] * 15, 255);
@@ -481,4 +469,14 @@ void Effect::topography_midi_effects(Instrument *instrument, midi::MidiInterface
     }
     Serial.println("]");
   } // end only once per 16th-step
+}
+
+/////////////////////////// TIDY UP FUNCTIONS /////////////////////////
+///////////////////////////////////////////////////////////////////////
+/* destructor for playing MIDI notes etc */
+
+void Effect::turnMidiNoteOff(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
+{
+  if (millis() > instrument->score.last_notePlayed + 200 && instrument->effect != Swell) // pinAction 5 turns notes off in swell_beat()
+    MIDI.sendNoteOff(instrument->score.active_note, 127, 2);
 }

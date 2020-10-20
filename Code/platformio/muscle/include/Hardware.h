@@ -3,8 +3,7 @@
 
 class Hardware
 {
-  public:
-
+public:
   ////////////////////////////////// FOOT SWITCH ////////////////////////
   ///////////////////////////////////////////////////////////////////////
 
@@ -12,7 +11,7 @@ class Hardware
   static const int HOLD_CC = 1;
   static const int RESET_TOPO = 2; // resets beat_topography (of all instruments)
   static const int FOOTSWITCH_MODE = 2;
-  
+
   static EffectsType lastEffect[Globals::numInputs];
 
   static void footswitch_pressed(Instrument *instruments[Globals::numInputs]);
@@ -21,4 +20,15 @@ class Hardware
 
   static void checkFootSwitch(Instrument *instruments[Globals::numInputs]);
   // --------------------------------------------------------------------
+
+  ////////////////////////////// VIBRATION MOTOR ////////////////////////
+  ///////////////////////////////////////////////////////////////////////
+
+  static unsigned long motor_vibration_begin;
+  static int motor_vibration_duration;
+  
+  static void vibrate_motor(unsigned long vibration_duration);
+
+  static void request_motor_deactivation();
+
 };

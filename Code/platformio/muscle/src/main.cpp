@@ -247,7 +247,6 @@ void setup()
   }
   Serial.println("-----------------------------------------------");
 
-
   // -------------------------- START TIMERS --------------------------
   pinMonitor.begin(samplePins, 1000); // sample pin every 1 millisecond
 
@@ -264,7 +263,6 @@ void setup()
 
 void loop()
 {
-
   Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
 
   // ------------------------- DEBUG AREA -----------------------------
@@ -290,11 +288,6 @@ void loop()
   static boolean toggleLED = true;
   static boolean sendMidiCopy = false;
 
-  static unsigned long vibration_begin = 0;
-  static int vibration_duration = 0;
-
-  // static boolean already_printed = false;
-
   // get current beat position:
   noInterrupts();
   Globals::current_beat_pos = Globals::beatCount % 32; // (beatCount increases infinitely)
@@ -314,21 +307,32 @@ void loop()
     interrupts();
   }
 
-  // DO THINGS ONCE PER 32nd-STEP: ------------------------------------
-  // ------------------------------------------------------------------
+  //////////////////// DO THINGS ONCE PER 32nd-step: //////////////////
+  /////////////////////////////////////////////////////////////////////
   if (Globals::current_beat_pos != last_beat_pos)
   {
-    // increase 8th note counter:
+
+    // ------------------------- quarter notes: -----------------------
+    if (Globals::current_beat_pos % 8 == 0) // Globals::current_beat_pos holds 32 → %8 makes 4.
+    {
+      Hardware::vibrate_motor(50);
+    }
+
+    // --------------------------- 8th notes: -------------------------
     if (Globals::current_beat_pos % 4 == 0)
     {
+      // increase 8th note counter:
       Globals::current_eighth_count = (Globals::current_eighth_count + 1) % 8;
       toggleLED = !toggleLED;
-    }
-    digitalWrite(LED_BUILTIN, toggleLED);
 
-    // increase 16th note counter:
+      // blink LED rhythmically:
+      digitalWrite(LED_BUILTIN, toggleLED);
+    }
+
+    // --------------------------- 16th notes: ------------------------
     if (Globals::current_beat_pos % 2 == 0)
     {
+      // increase 16th note counter:
       Globals::current_16th_count = (Globals::current_16th_count + 1) % 16;
     }
 
@@ -336,9 +340,10 @@ void loop()
     for (int i = 0; i < Globals::numInputs; i++)
     {
       instruments[i]->perform(instruments[i], MIDI);
-    } 
-    // ----------------------------------------------------------------
+    }
+    ///////////////////////////////////////////////////////////////////
 
+    // TODO:
     ///////////////////////////////////////////////////////////////////
     /////////////////////////// ABSTRACTIONS //////////////////////////
     ///////////////////////////////////////////////////////////////////
@@ -400,13 +405,6 @@ void loop()
     // ----------------------------------------------------------------
 
     /////////////////////// AUXILIARY FUNCTIONS ///////////////////////
-    // ---------------------------- vibrate on beat:
-    if (Globals::current_beat_pos % 8 == 0) // Globals::current_beat_pos holds 32 → %8 makes 4.
-    {
-      vibration_begin = millis();
-      vibration_duration = 50;
-      digitalWrite(VIBR, HIGH);
-    }
 
     // ----------------------------- draw play log to console
     Globals::print_to_console(String(millis()));
@@ -424,7 +422,17 @@ void loop()
     }
     Globals::println_to_console("");
 
-    // Debug: play MIDI note on quarter notes
+    // print volume layer:
+    Serial.print("vol:\t[");
+    for (int j = 0; j < 16; j++)
+    {
+      Serial.print(Effect::total_vol[j]);
+      if (j < 15)
+        Serial.print(",");
+    }
+    Serial.println("]");
+
+    // ----------------- Debug: play MIDI note on quarter notes
     //    if (Globals::current_beat_pos % 8 == 0)
     //    MIDI.sendNoteOn(57, 127, 2);
     //    else
@@ -437,17 +445,13 @@ void loop()
   last_beat_pos = Globals::current_beat_pos;
   Globals::last_eighth_count = Globals::current_eighth_count;
   Globals::last_16th_count = Globals::current_16th_count;
-  // already_printed = false;
 
-  // check footswitch -------------------------------------------------
-  Hardware::checkFootSwitch(instruments);
+  // Hardware:
+  Hardware::checkFootSwitch(instruments); // check state of footswitch
+  Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
 
-  // turn off vibration and MIDI notes --------------------------------
-  if (millis() > vibration_begin + vibration_duration)
-    digitalWrite(VIBR, LOW);
-
+  // tidying up what's left from performing functions..
   for (int i = 0; i < Globals::numInputs; i++)
-    if (millis() > instruments[i]->score.last_notePlayed + 200 && instruments[i]->effect != Swell) // pinAction 5 turns notes off in swell_beat()
-      MIDI.sendNoteOff(instruments[i]->score.active_note, 127, 2);
+    instruments[i]->tidyUp(instruments[i], MIDI);
 }
 // --------------------------------------------------------------------

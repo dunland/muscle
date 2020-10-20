@@ -190,6 +190,48 @@ void Instrument::perform(Instrument *instrument, midi::MidiInterface<HardwareSer
     }
 }
 
+/////////////////////////// TIDY UP FUNCTIONS /////////////////////////
+///////////////////////////////////////////////////////////////////////
+/* destructor for playing MIDI notes etc */
+
+void Instrument::tidyUp(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
+{
+    switch (effect)
+    {
+    case PlayMidi:
+        break;
+
+    case Monitor:
+        break;
+
+    case ToggleRhythmSlot:
+        break;
+
+    case FootSwitchLooper:
+        break;
+
+    case TapTempo:
+        break;
+
+    case Swell:
+        break;
+
+    case TsunamiLink:
+
+        break;
+
+    case CymbalSwell:
+
+        break;
+    case TopographyLog:
+        break;
+
+    default:
+        break;
+    }
+}
+
+
 //////////////////////// SMOOTHEN TOPOGRAPHY ARRAYS ///////////////////
 ///////////////////////////////////////////////////////////////////////
 

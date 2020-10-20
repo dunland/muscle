@@ -67,6 +67,8 @@ public:
 
     void perform(Instrument *, midi::MidiInterface<HardwareSerial>);
 
+    void tidyUp(Instrument *, midi::MidiInterface<HardwareSerial>); // turn of MIDI notes etc
+
     bool stroke_detected(Instrument *instrument);
 
     void setup_notes(std::vector<int> list)
