@@ -142,7 +142,7 @@ void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSer
     break;
 
   case TsunamiLink:
-
+    Effect::countup_topography(instrument);
     break;
 
   case CymbalSwell: // swell-effect for loudness on field recordings (use on cymbals e.g.)
@@ -150,7 +150,7 @@ void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSer
     Effect::swell_rec(instrument, MIDI);
     break;
   case TopographyLog:
-
+    Effect::countup_topography(instrument);
     break;
 
   default:

@@ -41,6 +41,16 @@ enum EffectsType
   TopographyLog = 8
 };
 
+struct TOPOGRAPHY
+{
+  std::vector<int> a_8 = {0,0,0,0,0,0,0,0};   // size-8 array for comparison with 8-bit-length sound files
+  std::vector<int> a_16 = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // size-16 array for abstractions like beat regularity etc
+  std::vector<int> a_16_prior;
+  int threshold = 3;
+  int average_smooth;
+  int regular_sum = 0;
+};
+
 class Globals
 {
 public:
@@ -119,6 +129,10 @@ public:
 
   static void setInstrumentPrintString(DrumType drum, EffectsType effect);
 
+  // TOPOGRAPHIES: ------------------------------------------------------
+  static void smoothen_dataArray(TOPOGRAPHY *topography); // there is a double of this in Instruments to perform instrument-specific operations
+  static void derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction);
+
   // DEBUG FUNCTIONS: ---------------------------------------------------
   // print the play log to Arduino console:
   static void print_to_console(String message_to_print);
@@ -128,16 +142,6 @@ public:
   // or send stuff to processing:
   static void send_to_processing(int message_to_send);
   // --------------------------------------------------------------------
-};
-
-struct TOPOGRAPHY
-{
-  std::vector<int> a = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  std::vector<int> a_8 = {0,0,0,0,0,0,0,0};   // size-8 array for comparison with 8-bit-length sound files
-  std::vector<int> a_16 = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // size-16 array for abstractions like beat regularity etc
-  int threshold = 3;
-  int average_smooth;
-  int regular_sum = 0;
 };
 
 // TODO: may be obsolete..

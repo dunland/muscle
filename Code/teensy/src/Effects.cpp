@@ -4,7 +4,8 @@
 #include <MIDI.h>
 
 // create overall volume topography of all instrument layers:
-std::vector<int> Effect::total_vol = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+TOPOGRAPHY Effect::total_vol;
+// std::vector<int> Effect::total_vol.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 ///////////////////////////// TRIGGER EFFECTS /////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -172,7 +173,7 @@ void Effect::swell_rec(Instrument *instrument, midi::MidiInterface<HardwareSeria
   // --------------------------------------------------------------------
 }
 
-void Effect::tsunamiLink(Instrument *instrument) // just prints what is being played.
+void Effect::countup_topography(Instrument *instrument) // just prints what is being played.
 {
   if (Globals::printStrokes)
   {
@@ -431,24 +432,24 @@ void Effect::topography_midi_effects(Instrument *instrument, Instrument *instrum
 {
   if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
   {
+    // smoothen array:
+    instrument->smoothen_dataArray(instrument); // erases "noise" from arrays if SNR>3
+
+    total_vol.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     // each slot:
     for (int idx = 0; idx < 16; idx++)
     {
       // of each instrument:
       for (int i = 0; i < Globals::numInputs; i++)
       {
-        if (instruments[i]->effect == TopographyLog) 
-          total_vol[idx] += instrument->topography.a_16[idx];
+        if (instruments[i]->effect == TopographyLog)
+          total_vol.a_16[idx] += instrument->topography.a_16[idx];
       }
     }
 
-    // smoothen array:
-    // ------------------ create topography and smoothen it -------------
-    instrument->smoothen_dataArray(instrument); // erases "noise" from arrays if SNR>3
-
     // ------------ result-> change volume and play MIDI --------
     // ----------------------------------------------------------
-    int vol = min(40 + total_vol[Globals::current_16th_count] * 15, 255);
+    int vol = min(40 + total_vol.a_16[Globals::current_16th_count] * 15, 255);
 
     if (instrument->topography.a_16[Globals::current_16th_count] > 0)
     {
@@ -479,6 +480,6 @@ void Effect::topography_midi_effects(Instrument *instrument, Instrument *instrum
 
 void Effect::turnMidiNoteOff(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
 {
-  if (millis() > instrument->score.last_notePlayed + 200 && instrument->effect != Swell) // pinAction 5 turns notes off in swell_beat()
+  if (millis() > instrument->score.last_notePlayed + 200 && instrument->effect != Swell) // Swell effect turns notes off itself
     MIDI.sendNoteOff(instrument->midi.active_note, 127, 2);
 }
