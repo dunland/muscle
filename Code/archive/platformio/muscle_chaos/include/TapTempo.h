@@ -1,0 +1,17 @@
+#ifndef TAPTEMPO_H
+#define TAPTEMPO_H
+
+
+#include <Arduino.h>
+#include <Globals.h>
+
+////////////////////////////// TAP TEMPO //////////////////////////////
+///////////////////////////////////////////////////////////////////////
+class TapTempo
+  {
+
+  public:
+    void getTapTempo();
+};
+
+#endif
