@@ -84,11 +84,28 @@ void draw()
         }
 
         textAlign(RIGHT, BOTTOM);
+        textSize(14);
+        fill(255);
         text(list_of_circles.size() + "\n" + mouseX + " " + mouseY, width, height);
 
 
         // ------------------------ Read Serial ---------------------------
         serialEvent(myPort);
+
+        // ------------------------ print beat step -------------------
+        textAlign(LEFT,BOTTOM);
+        int current_16th_step = current_16ths_step();
+        if (current_16th_step % 4 == 0)
+        {
+          textSize(24);
+          fill(255,0,0);
+        }
+        else
+        {
+          textSize(16);
+          fill(255);
+        }
+        text(str(current_16th_step), 0, height);
 }
 
 // ------------------------ KEYS ---------------------------

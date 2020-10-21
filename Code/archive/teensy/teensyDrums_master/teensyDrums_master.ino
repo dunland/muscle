@@ -64,15 +64,13 @@ boolean do_send_to_processing = false;
 String output_string[numInputs];
 
 // ------------------ variables for interrupt timers ------------------
-IntervalTimer pinMonitor;   // reads pins every 1 ms
-IntervalTimer masterClock;  // 1 bar
-IntervalTimer stateChecker; // runs functions and sets flags for timed functions etc
+IntervalTimer pinMonitor;  // reads pins every 1 ms
+IntervalTimer masterClock; // 1 bar
 volatile int counts[numInputs];
 volatile unsigned long lastPinActiveTime[numInputs];
 volatile unsigned long firstPinActiveTime[numInputs];
 
 // ------------------ timing and rhythm tracking ------------------
-int countsCopy[numInputs];
 int current_beat_pos = 0; // always stores the current position in the beat
 
 int tapInterval = 500; // 0.5 s per beat for 120 BPM
@@ -87,8 +85,8 @@ int globalDelayAfterStroke = 10; // 50 ms TODO: assess best timing for each inst
 
 boolean read_rhythm_slot[numInputs][8];
 boolean set_rhythm_slot[numInputs][8];
-int beat_topography_8[numInputs][8];
-int beat_topography_16[numInputs][16];
+ int beat_topography_8[numInputs][8];
+ int beat_topography_16[numInputs][16];
 
 const int LOG_BEATS = 0;
 const int HOLD_CC = 1;
@@ -124,33 +122,43 @@ int allocated_channels[] = {0, 0, 0, 0, 0, 0, 0}; // channels to send audio from
 // hard-coded list of BPMs of tracks stored on Tsunami's SD card.
 // TODO: somehow make BPM accessible from file title
 const float track_bpm[256] =
-    {
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
-        1, 1, 90, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 73, 1, 1, 1,
-        100, 1, 1, 1, 200, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 41, 1, 1,
-        103, 1, 1, 1, 1, 1, 1, 93, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 78, 1, 100, 100, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 100, 1, 1, 1, 1,
-        1, 1, 1, 1, 100, 60};
+{
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
+  1, 1, 90, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 73, 1, 1, 1,
+  100, 1, 1, 1, 200, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 41, 1, 1,
+  103, 1, 1, 1, 1, 1, 1, 93, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 78, 1, 100, 100, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 100, 1, 1, 1, 1,
+  1, 1, 1, 1, 100, 60
+};
+
+
+struct TOPOGRAPHY_16
+{
+  int topo_array[16];
+  int threshold;
+  int average_smooth;
+} beat_topography_8_, beat_topography_16_, beat_regularity_16_;
+
 
 /* --------------------------------------------------------------------- */
 /* ---------------------------------- SETUP ---------------------------- */
@@ -279,7 +287,7 @@ void samplePins()
 volatile unsigned long masterClockCount = 0; // 4*32 = 128 masterClockCount per cycle
 volatile unsigned long beatCount = 0;
 // volatile int bar_step; // 0-32
-volatile int currentStep; // 0-32
+// volatile int currentStep; // 0-32
 int next_beatCount = 0;   // will be reset when timer restarts
 volatile boolean sendMidiClock = false;
 
@@ -351,57 +359,57 @@ void loop()
       // ----------------------- perform pin action -------------------
       switch (pinAction[i])
       {
-      case 0:
-        MIDI.sendNoteOn(notes_list[i], 127, 2);
-        lastNotePlayed[i] = millis();
-        break;
+        case 0:
+          MIDI.sendNoteOn(notes_list[i], 127, 2);
+          lastNotePlayed[i] = millis();
+          break;
 
-      case 1: // monitor: just print what is being played.
-        if (printStrokes)
-        {
+        case 1: // monitor: just print what is being played.
+          if (printStrokes)
+          {
+            setInstrumentPrintString(i, pinAction[i]);
+          }
+          break;
+
+        case 2: // toggle beat slot via footswitch
+          if (printStrokes)
+            setInstrumentPrintString(i, pinAction[i]);
+          read_rhythm_slot[i][current_eighth_count] = !read_rhythm_slot[i][current_eighth_count];
+          break;
+
+        case 3: // record what is being played and replay it later
+          if (printStrokes)
+            setInstrumentPrintString(i, pinAction[i]);
+          set_rhythm_slot[i][current_eighth_count] = true;
+          break;
+
+        case 4: // tapTempo
+          getTapTempo();
+          break;
+
+        case 5: // "swell"
           setInstrumentPrintString(i, pinAction[i]);
-        }
-        break;
+          swell_rec(i);
+          break;
 
-      case 2: // toggle beat slot
-        if (printStrokes)
+        case 6: // Tsunami beat-linked pattern
+          setInstrumentPrintString(i, 1);
+          beat_topography_8[i][current_eighth_count]++;
+          break;
+
+        case 7: // swell-effect for loudness on field recordings (use on cymbals e.g.)
+          // TODO: UNTESTED! (2020-10-09)
           setInstrumentPrintString(i, pinAction[i]);
-        read_rhythm_slot[i][current_eighth_count] = !read_rhythm_slot[i][current_eighth_count];
-        break;
+          swell_rec(i);
+          break;
 
-      case 3: // record what is being played and replay it later
-        if (printStrokes)
-          setInstrumentPrintString(i, pinAction[i]);
-        set_rhythm_slot[i][current_eighth_count] = true;
-        break;
+        case 8: // create beat-topography in 16-th
+          setInstrumentPrintString(i, 1);
+          beat_topography_16[i][current_16th_count]++;
+          break;
 
-      case 4: // tapTempo
-        getTapTempo();
-        break;
-
-      case 5: // "swell"
-        setInstrumentPrintString(i, pinAction[i]);
-        swell_rec(i);
-        break;
-
-      case 6: // Tsunami beat-linked pattern
-        setInstrumentPrintString(i, 1);
-        beat_topography_8[i][current_eighth_count]++;
-        break;
-
-      case 7: // swell-effect for loudness on field recordings (use on cymbals e.g.)
-        // TODO: UNTESTED! (2020-10-09)
-        setInstrumentPrintString(i, pinAction[i]);
-        swell_rec(i);
-        break;
-
-      case 8: // create beat-topography in 16-th
-        setInstrumentPrintString(i, 1);
-        beat_topography_16[i][current_16th_count]++;
-        break;
-
-      default:
-        break;
+        default:
+          break;
       }
 
       // send instrument stroke to processing:
@@ -526,7 +534,6 @@ void loop()
             already_printed = true;
           }
 
-
           // ------------ result: change volume and play MIDI ---------
           // ----------------------------------------------------------
           int vol = min(40 + total_vol[current_16th_count] * 15, 255);
@@ -552,8 +559,68 @@ void loop()
           }
           Serial.println("]");
         } // end only once per 16th-step
-      } // end pinAction[8]
-    } // end pin Actions
+      }   // end pinAction[8]
+    }     // end pin Actions
+    // ----------------------------------------------------------------
+
+    ///////////////////////////////////////////////////////////////////
+    /////////////////////////// ABSTRACTIONS //////////////////////////
+    ///////////////////////////////////////////////////////////////////
+
+    //makeTopo();
+    // works like this:
+    smoothen_dataArray(&beat_topography_16_);
+    // LOTS OF PSEUDOCODE HERE:
+
+    //    beat_topography_16.smoothen(); // → beat_topography.average_smoothened_height
+    //
+    //    if (beat_topography_16.average_smoothened_height >= beat_topography.threshold)
+    //    {
+    //      // create next abstraction layer
+    //      int[] beat_regularity = new int[16];
+    //
+    //      // update abstraction layer:
+    //      for (int i = 0; i < 16; i++)
+    //        beat_regularity[i] = beat_topography_16[i];
+    //
+    //      // get average height again:
+    //      beat_regularity.smoothen();
+    //    }
+    //
+    //    if (beat_regularity.amplitude >= beat_regularity.threshold)
+    //    {
+    //      // you are playing super regularly. that's awesome. now activate next element in score
+    //      score_next_element_ready = true;
+    //    }
+    //
+    //    // if regularity is held for certain time (threshold reached):
+    //    read_to_break
+    //
+    //    when regularity expectations not fulfilled:
+    //    score: go to next element
+    //
+    //    // elsewhere:
+    //    if (hit_certain_trigger)
+    //    {
+    //
+    //      if (score_next_element_ready)
+    //      {
+    //        /* do whatever is up next in the score */
+    //      }
+    //    }
+
+    /* Score could look like this:
+      intro----------part 1--...-----outro--------
+      1     2     3     4    ...     20    21     step
+      ++    ++    ++                              element_FX
+                ++    ++   ...     ++    ++     element_notes
+                      ++           ++           element_fieldRecordings
+
+      cool thing: create score dynamically according to how I play
+    */
+
+    // PSEUDOCODE END
+
     // ----------------------------------------------------------------
 
     /////////////////////// AUXILIARY FUNCTIONS ///////////////////////
