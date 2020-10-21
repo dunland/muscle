@@ -46,6 +46,8 @@ int countsCopy[Globals::numInputs];
 
 // ----------------- MUSICAL AND PERFORMATIVE PARAMETERS --------------
 
+TOPOGRAPHY regularity;
+
 /*
     0 = play MIDI note upon stroke
     1 = binary beat logger (print beat)
@@ -150,6 +152,7 @@ void setup()
   for (int i = 0; i < Globals::numInputs; i++)
   {
     instruments[i] = new Instrument;
+    instruments[i]->drumtype = DrumType(i);
   }
 
   // initialize arrays:
@@ -163,6 +166,7 @@ void setup()
       instruments[i]->score.set_rhythm_slot[j] = false;
       instruments[i]->topography.a_8[j] = 0;
       instruments[i]->topography.a_16[j] = 0;
+      instruments[i]->topography.a_16[j * 2] = 0;
     }
   }
 
@@ -196,23 +200,28 @@ void setup()
   for (int i = 0; i < Globals::numInputs; i++)
     instruments[i]->calculateNoiseFloor(instruments[i]);
 
+  Serial.println("\n..calculating noiseFloor done.");
+
   // assign effects to instruments:
+  Serial.println("assigning effects...");
   instruments[Snare]->effect = TopographyLog;
   instruments[Hihat]->effect = TapTempo;
-  instruments[Kick]->effect = TopographyLog;
-  instruments[Tom1]->effect = TopographyLog;
-  instruments[Tom2]->effect = TopographyLog;
-  instruments[Standtom1]->effect = TopographyLog;
+  instruments[Kick]->effect = Monitor;
+  instruments[Tom1]->effect = Monitor;
+  instruments[Tom2]->effect = Monitor;
+  instruments[Standtom1]->effect = Monitor;
   instruments[Cowbell]->effect = Monitor;
 
   // ---------------------------- SCORE -------------------------------
+  Serial.println("setting up variables for score..");
   // setup notes
   for (int i = 0; i < Globals::numInputs; i++)
   {
-    instruments[i]->setup_notes({60, 61, 45, 74, 72, 44, 71});          // insert array of MIDI-notes
-    instruments[i]->score.active_note = instruments[i]->score.notes[0]; // set active note pointer to first note
+    instruments[i]->setup_notes({60, 61, 45, 74, 72, 44, 71});        // insert array of MIDI-notes
+    instruments[i]->midi.active_note = instruments[i]->midi.notes[0]; // set active note pointer to first note
   }
 
+  Serial.println("setting up midi channels..");
   // midi channels:
   instruments[Snare]->midi.cc_chan = 50; // amplevel
   instruments[Hihat]->midi.cc_chan = 0;
@@ -317,6 +326,11 @@ void loop()
     {
       Hardware::vibrate_motor(50);
     }
+    // Debug: play MIDI note on quarter notes
+    //    if (Globals::current_beat_pos % 8 == 0)
+    //    MIDI.sendNoteOn(57, 127, 2);
+    //    else
+    //    MIDI.sendNoteOff(57, 127, 2);
 
     // --------------------------- 8th notes: -------------------------
     if (Globals::current_beat_pos % 4 == 0)
@@ -336,10 +350,36 @@ void loop()
       Globals::current_16th_count = (Globals::current_16th_count + 1) % 16;
     }
 
+    // ----------------------------- draw play log to console
+    Globals::print_to_console(String(millis()));
+    Globals::print_to_console("\t");
+    // Serial.print(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
+    Globals::print_to_console(Globals::current_beat_pos);
+    Globals::print_to_console("\t");
+    // Serial.print(Globals::current_beat_pos / 4);
+    // Serial.print("\t");
+    // Serial.print(Globals::current_eighth_count);
+    for (int i = 0; i < Globals::numInputs; i++)
+    {
+      Globals::print_to_console(Globals::output_string[i]);
+      Globals::output_string[i] = "\t";
+    }
+    Globals::println_to_console("");
+
+    // print volume layer:
+    Globals::print_to_console("vol:\t[");
+    for (int j = 0; j < 16; j++)
+    {
+      Globals::print_to_console(Effect::total_vol.a_16[j]);
+      if (j < 15)
+        Globals::print_to_console(",");
+    }
+    Globals::println_to_console("]");
+
     // perform timed pin actions according to current beat:
     for (int i = 0; i < Globals::numInputs; i++)
     {
-      instruments[i]->perform(instruments[i], MIDI);
+      instruments[i]->perform(instruments[i], instruments, MIDI);
     }
     ///////////////////////////////////////////////////////////////////
 
@@ -348,12 +388,15 @@ void loop()
     /////////////////////////// ABSTRACTIONS //////////////////////////
     ///////////////////////////////////////////////////////////////////
 
+    Globals::derive_topography(&Effect::total_vol, &regularity);
+    Globals::smoothen_dataArray(&regularity);
+
     //makeTopo();
     // works like this:
-    instruments[0]->smoothen_dataArray(instruments[0]);
+    // instruments[0]->smoothen_dataArray(instruments[0]);
     // LOTS OF PSEUDOCODE HERE:
 
-    //    beat_topography_16.smoothen(); // → beat_topography.average_smoothened_height
+    //    beat_topography_16.smoothen(); // → gives you beat_topography.average_smoothened_height
     //
     //    if (beat_topography_16.average_smoothened_height >= beat_topography.threshold)
     //    {
@@ -394,8 +437,8 @@ void loop()
       intro----------part 1--...-----outro--------
       1     2     3     4    ...     20    21     step
       ++    ++    ++                              element_FX
-                ++    ++   ...     ++    ++     element_notes
-                      ++           ++           element_fieldRecordings
+                  ++    ++   ...     ++    ++     element_notes
+                        ++           ++           element_fieldRecordings
 
       cool thing: create score dynamically according to how I play
     */
@@ -405,38 +448,6 @@ void loop()
     // ----------------------------------------------------------------
 
     /////////////////////// AUXILIARY FUNCTIONS ///////////////////////
-
-    // ----------------------------- draw play log to console
-    Globals::print_to_console(String(millis()));
-    Globals::print_to_console("\t");
-    // Serial.print(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
-    Globals::print_to_console(Globals::current_beat_pos);
-    Globals::print_to_console("\t");
-    // Serial.print(Globals::current_beat_pos / 4);
-    // Serial.print("\t");
-    // Serial.print(Globals::current_eighth_count);
-    for (int i = 0; i < Globals::numInputs; i++)
-    {
-      Globals::print_to_console(Globals::output_string[i]);
-      Globals::output_string[i] = "\t";
-    }
-    Globals::println_to_console("");
-
-    // print volume layer:
-    Serial.print("vol:\t[");
-    for (int j = 0; j < 16; j++)
-    {
-      Serial.print(Effect::total_vol[j]);
-      if (j < 15)
-        Serial.print(",");
-    }
-    Serial.println("]");
-
-    // ----------------- Debug: play MIDI note on quarter notes
-    //    if (Globals::current_beat_pos % 8 == 0)
-    //    MIDI.sendNoteOn(57, 127, 2);
-    //    else
-    //    MIDI.sendNoteOff(57, 127, 2);
 
   } // end of (32nd-step) TIMED ACTIONS
   // ------------------------------------------------------------------

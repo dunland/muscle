@@ -48,8 +48,9 @@
     #  - "E24"
   java:
     indent_class: true
-    # indent_with_tabs: 0
+    indent_with_tabs: false
     indent_size: 2
+    indent_level: 1
   ruby:
     indent_size: 4
   erb:
