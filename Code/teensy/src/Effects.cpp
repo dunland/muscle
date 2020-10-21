@@ -11,7 +11,7 @@ std::vector<int> Effect::total_vol = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 
 void Effect::playMidi(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
 {
-  MIDI.sendNoteOn(instrument->score.active_note, 127, 2);
+  MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
   instrument->score.last_notePlayed = millis();
 }
 
@@ -136,7 +136,7 @@ void Effect::swell_rec(Instrument *instrument, midi::MidiInterface<HardwareSeria
 
     // start MIDI note and proceed to next state
     instrument->score.swell_state = 2;
-    MIDI.sendNoteOn(instrument->score.active_note, 127, 2);
+    MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
 
     // lastSwellRec = millis();
   }
@@ -192,10 +192,10 @@ void Effect::sendMidiNotes_timed(Instrument *instrument, midi::MidiInterface<Har
     if (instrument->score.read_rhythm_slot[Globals::current_eighth_count])
     {
       Globals::setInstrumentPrintString(instrument->drumtype, FootSwitchLooper);
-      MIDI.sendNoteOn(instrument->score.active_note, 127, 2);
+      MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
     }
     else
-      MIDI.sendNoteOff(instrument->score.active_note, 127, 2);
+      MIDI.sendNoteOff(instrument->midi.active_note, 127, 2);
   }
 }
 
@@ -274,7 +274,7 @@ void Effect::swell_perform(Instrument *instrument, midi::MidiInterface<HardwareS
         instrument->score.swell_val = 10;
         instrument->score.swell_beatPos_sum = 0;
         instrument->score.swell_beatStep = 0;
-        MIDI.sendNoteOff(instrument->score.active_note, 127, 2);
+        MIDI.sendNoteOff(instrument->midi.active_note, 127, 2);
       }
     }
   }
@@ -427,15 +427,17 @@ void Effect::tsunami_beat_playback(Instrument *instrument)
 // --------------------------------------------------------------------
 
 // ---------- MIDI playback according to beat_topography --------
-void Effect::topography_midi_effects(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
+void Effect::topography_midi_effects(Instrument *instrument, Instrument *instruments[Globals::numInputs], midi::MidiInterface<HardwareSerial> MIDI)
 {
   if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
   {
+    // each slot:
     for (int idx = 0; idx < 16; idx++)
     {
-      for (int instr = 0; instr < Globals::numInputs; instr++)
+      // of each instrument:
+      for (int i = 0; i < Globals::numInputs; i++)
       {
-        if (instrument->effect == 8)
+        if (instruments[i]->effect == TopographyLog) 
           total_vol[idx] += instrument->topography.a_16[idx];
       }
     }
@@ -451,11 +453,11 @@ void Effect::topography_midi_effects(Instrument *instrument, midi::MidiInterface
     if (instrument->topography.a_16[Globals::current_16th_count] > 0)
     {
       MIDI.sendControlChange(50, vol, 2);
-      MIDI.sendNoteOn(instrument->score.active_note, 127, 2);
+      MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
     }
     else
     {
-      MIDI.sendNoteOff(instrument->score.active_note, 127, 2);
+      MIDI.sendNoteOff(instrument->midi.active_note, 127, 2);
     }
 
     // Debug:
@@ -478,5 +480,5 @@ void Effect::topography_midi_effects(Instrument *instrument, midi::MidiInterface
 void Effect::turnMidiNoteOff(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
 {
   if (millis() > instrument->score.last_notePlayed + 200 && instrument->effect != Swell) // pinAction 5 turns notes off in swell_beat()
-    MIDI.sendNoteOff(instrument->score.active_note, 127, 2);
+    MIDI.sendNoteOff(instrument->midi.active_note, 127, 2);
 }

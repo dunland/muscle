@@ -164,6 +164,7 @@ void setup()
       instruments[i]->score.set_rhythm_slot[j] = false;
       instruments[i]->topography.a_8[j] = 0;
       instruments[i]->topography.a_16[j] = 0;
+      instruments[i]->topography.a_16[j*2] = 0;
     }
   }
 
@@ -203,10 +204,10 @@ void setup()
   Serial.println("assigning effects...");
   instruments[Snare]->effect = TopographyLog;
   instruments[Hihat]->effect = TapTempo;
-  instruments[Kick]->effect = TopographyLog;
-  instruments[Tom1]->effect = TopographyLog;
-  instruments[Tom2]->effect = TopographyLog;
-  instruments[Standtom1]->effect = TopographyLog;
+  instruments[Kick]->effect = Monitor;
+  instruments[Tom1]->effect = Monitor;
+  instruments[Tom2]->effect = Monitor;
+  instruments[Standtom1]->effect = Monitor;
   instruments[Cowbell]->effect = Monitor;
 
   // ---------------------------- SCORE -------------------------------
@@ -215,7 +216,7 @@ void setup()
   for (int i = 0; i < Globals::numInputs; i++)
   {
     instruments[i]->setup_notes({60, 61, 45, 74, 72, 44, 71});          // insert array of MIDI-notes
-    instruments[i]->score.active_note = instruments[i]->score.notes[0]; // set active note pointer to first note
+    instruments[i]->midi.active_note = instruments[i]->midi.notes[0]; // set active note pointer to first note
   }
 
   Serial.println("setting up midi channels..");
@@ -345,7 +346,7 @@ void loop()
     // perform timed pin actions according to current beat:
     for (int i = 0; i < Globals::numInputs; i++)
     {
-      instruments[i]->perform(instruments[i], MIDI);
+      instruments[i]->perform(instruments[i], instruments, MIDI);
     }
     ///////////////////////////////////////////////////////////////////
 

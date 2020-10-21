@@ -132,9 +132,9 @@ public:
 
 struct TOPOGRAPHY
 {
-  int a[16];
-  int a_8[8];   // 8-bit array for comparison with 8-bit-length sound files
-  int a_16[16]; // 16-bit array for abstractions like beat regularity etc
+  std::vector<int> a = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  std::vector<int> a_8 = {0,0,0,0,0,0,0,0};   // size-8 array for comparison with 8-bit-length sound files
+  std::vector<int> a_16 = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // size-16 array for abstractions like beat regularity etc
   int threshold = 3;
   int average_smooth;
   int regular_sum = 0;

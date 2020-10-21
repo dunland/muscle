@@ -30,8 +30,6 @@ public:
 
     struct SCORE
     {
-        std::vector<int> notes;
-        int active_note;
         unsigned long last_notePlayed;
         boolean read_rhythm_slot[8];
         boolean set_rhythm_slot[8];
@@ -51,6 +49,8 @@ public:
 
     struct MIDI
     {
+        std::vector<int> notes;
+        int active_note;
         int cc_chan;
     } midi;
 
@@ -65,7 +65,7 @@ public:
 
     void trigger(Instrument *, midi::MidiInterface<HardwareSerial>);
 
-    void perform(Instrument *, midi::MidiInterface<HardwareSerial>);
+    void perform(Instrument *, Instrument *instruments[Globals::numInputs], midi::MidiInterface<HardwareSerial>);
 
     void tidyUp(Instrument *, midi::MidiInterface<HardwareSerial>); // turn of MIDI notes etc
 

@@ -6,7 +6,7 @@ void Instrument::setup_notes(std::vector<int> list)
 {
   for (int i = 0; i < list.size(); i++)
   {
-    score.notes.push_back(list[i]);
+    midi.notes.push_back(list[i]);
   }
 }
 
@@ -161,7 +161,7 @@ void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSer
 ///////////////////////////// TIMED EFFECTS ///////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void Instrument::perform(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::perform(Instrument *instrument, Instrument *instruments[Globals::numInputs], midi::MidiInterface<HardwareSerial> MIDI)
 {
   switch (effect)
   {
@@ -195,7 +195,7 @@ void Instrument::perform(Instrument *instrument, midi::MidiInterface<HardwareSer
 
     break;
   case TopographyLog:
-    Effect::topography_midi_effects(instrument, MIDI);
+    Effect::topography_midi_effects(instrument, instruments, MIDI);
     break;
 
   default:
@@ -258,7 +258,8 @@ void Instrument::smoothen_dataArray(Instrument *instrument)
 ->  
 */
 
-  int len = *(&instrument->topography.a_16 + 1) - instrument->topography.a_16;
+  // int len = *(&instrument->topography.a_16 + 1) - instrument->topography.a_16;
+  int len = instrument->topography.a_16.size(); // TODO: use dynamic vector topography.a instead
   int entries = 0;
   int squared_sum = 0;
   instrument->topography.regular_sum = 0;

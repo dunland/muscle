@@ -37,7 +37,7 @@ public:
 
     static std::vector<int> total_vol; // for TopographyLog
 
-    static void topography_midi_effects(Instrument *instrument, midi::MidiInterface<HardwareSerial>); // MIDI playback according to beat_topography
+    static void topography_midi_effects(Instrument *instrument, Instrument *instruments[Globals::numInputs], midi::MidiInterface<HardwareSerial>); // MIDI playback according to beat_topography
 
     // final tidy up functions: ---------------------------------------
 
