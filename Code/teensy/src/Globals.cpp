@@ -154,6 +154,7 @@ void Globals::setInstrumentPrintString(DrumType drum, EffectsType effect)
 
 // --------------------------------------------------------------------
 
+<<<<<<< HEAD
 // general pin reading:
 // static int pinValue(Instrument *instrument)
 // {
@@ -180,6 +181,8 @@ void Globals::setInstrumentPrintString(DrumType drum, EffectsType effect)
 // }
 // -----------------------------------------------------------------------------
 
+=======
+>>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
 void Globals::masterClockTimer()
 {
     /*
@@ -221,20 +224,113 @@ void Globals::masterClockTimer()
 }
 // ---------------------------------------------------------------------------
 
+<<<<<<< HEAD
 void Globals::print_to_console(String message_to_print)
 {
   if (Globals::do_print_to_console)
     Serial.print(message_to_print);
+=======
+// ----------------------------- TOPOGRAPHIES -------------------------
+void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
+{
+    for (int i = 0; i < 16; i++)
+    {
+        if (original->a_16[i] == 0 && original->a_16_prior[i] == 0) // empty slot repeatedly not played
+        {
+            abstraction->a_16[i]++;
+        }
+        else if (original->a_16[i] > 0 && original->a_16[i] > original->a_16_prior[i]) // occupied slot repeatedly played
+        {
+            abstraction->a_16[i]++;
+        }
+        original->a_16_prior = original->a_16;
+    }
+}
+
+// ---------------- smoothen 16-bit array using struct ----------------
+void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
+{
+    /* input an array of size 16
+1. count entries and create squared sum of each entry
+2. calculate (squared) fraction of total for each entry
+3. get highest of these fractions
+4. get ratio of highest fraction to other and reset values if ratio > threshold
+->  
+*/
+
+    // int len = *(&topography.a_16 + 1) - topography.a_16;
+    int len = topography->a_16.size(); // TODO: use dynamic vector topography.a instead
+    int entries = 0;
+    int squared_sum = 0;
+    topography->regular_sum = 0;
+
+    // count entries and create squared sum:
+    for (int j = 0; j < len; j++)
+    {
+        if (topography->a_16[j] > 0)
+        {
+            entries++;
+            squared_sum += topography->a_16[j] * topography->a_16[j];
+            topography->regular_sum += topography->a_16[j];
+        }
+    }
+
+    topography->regular_sum = topography->regular_sum / entries;
+
+    // calculate site-specific (squared) fractions of total:
+    float squared_frac[len];
+    for (int j = 0; j < len; j++)
+        squared_frac[j] =
+            float(topography->a_16[j]) / float(squared_sum);
+
+    // get highest frac:
+    float highest_squared_frac = 0;
+    for (int j = 0; j < len; j++)
+        highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
+
+    // get "topography height":
+    // divide highest with other entries and reset entries if ratio > threshold:
+    for (int j = 0; j < len; j++)
+        if (squared_frac[j] > 0)
+            if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > topography->threshold)
+            {
+                topography->a_16[j] = 0;
+                entries -= 1;
+            }
+
+    topography->average_smooth = 0;
+    // assess average topo sum for loudness
+    for (int j = 0; j < 8; j++)
+        topography->average_smooth += topography->a_16[j];
+    topography->average_smooth = int((float(topography->average_smooth) / float(entries)) + 0.5);
+}
+
+// ---------------------------- DEBUG FUNCTIONS ------------------------------
+void Globals::print_to_console(String message_to_print)
+{
+    if (Globals::do_print_to_console)
+        Serial.print(message_to_print);
+>>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
 }
 
 void Globals::println_to_console(String message_to_print)
 {
+<<<<<<< HEAD
   if (Globals::do_print_to_console)
     Serial.println(message_to_print);
+=======
+    if (Globals::do_print_to_console)
+        Serial.println(message_to_print);
+>>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
 }
 
 void Globals::send_to_processing(int message_to_send)
 {
+<<<<<<< HEAD
   if (Globals::do_send_to_processing)
     Serial.write(message_to_send);
+=======
+    if (Globals::do_send_to_processing)
+        Serial.write(message_to_send);
+>>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
 }

@@ -3,3 +3,8 @@
 *.mp4
 *.code-workspace
 Samples/
+Code/archive/
+.vscode/
+*.java
+*.class
+*.code-workspace

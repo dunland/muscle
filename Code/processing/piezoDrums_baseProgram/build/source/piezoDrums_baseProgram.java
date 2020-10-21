@@ -102,11 +102,27 @@ public void draw()
         }
 
         textAlign(RIGHT, BOTTOM);
+        textSize(14);
         text(list_of_circles.size() + "\n" + mouseX + " " + mouseY, width, height);
 
 
         // ------------------------ Read Serial ---------------------------
         serialEvent(myPort);
+
+        // ------------------------ print beat step -------------------
+        textAlign(LEFT,BOTTOM);
+        int current_16th_step = current_16ths_step();
+        if (current_16th_step % 4 == 0)
+        {
+          textSize(24);
+          fill(255,0,0);
+        }
+        else
+        {
+          textSize(16);
+          fill(255);
+        }
+        text(str(current_16th_step), 0, height);
 }
 
 // ------------------------ KEYS ---------------------------
@@ -188,74 +204,80 @@ public void serialEvent(Serial myPort)
         //  printArray(serialInArray);
         //}
 }
+
 int countIntersections = 0;
 
 class Circle
 {
-  // int pointCounter = 0; // increments for each intersected point; makes sure that the signal does not grow beyond that.
+        // int pointCounter = 0; // increments for each intersected point; makes sure that the signal does not grow beyond that.
 
-  int signal_magnitude = 0;
-  PVector position;
-  boolean stopped = false;
+        int signal_magnitude = 0;
+        PVector position;
+        boolean stopped = false;
 
-  int xPos, yPos;
-  Circle(int x_in, int y_in)
-  {
-    xPos = x_in;
-    yPos = y_in;
-    position = new PVector(xPos, yPos);
-  }
+        int xPos, yPos;
+        Circle(int x_in, int y_in)
+        {
+                xPos = x_in;
+                yPos = y_in;
+                position = new PVector(xPos, yPos);
+        }
 
-  public void propagateSignal()
-  {
-    // if (pointCounter < selectedDatapoints.size())
-    signal_magnitude += signalGrowthSpeed;
-  }
+        public void propagateSignal()
+        {
+                // if (pointCounter < selectedDatapoints.size())
+                signal_magnitude += signalGrowthSpeed;
+        }
 
-  public void drawSignal()
-  {
-    noFill();
-    stroke(255);
-    ellipse(xPos, yPos, signal_magnitude, signal_magnitude);
-  }
+        public void drawSignal()
+        {
+                noFill();
+                stroke(255);
+                ellipse(xPos, yPos, signal_magnitude, signal_magnitude);
+        }
 
-  public void checkIntersection()
-  {
-    //for (Datapoint dp : selectedDatapoints) {
+        public void checkIntersection()
+        {
+                //for (Datapoint dp : selectedDatapoints) {
 
-    //        if (abs(PVector.dist(this.position, dp.position)) - 3 <= signal_magnitude / 2
-    //            && abs(PVector.dist(this.position, dp.position)) + 3 >= signal_magnitude / 2 && !activeDataPoints.contains(dp))
-    //        {
-    //                // dp.alreadyIntersected = true;
-    //                activeDataPoints.add(dp);
-    //                countIntersections = activeDataPoints.size();
-    //                println("active intersections: " + countIntersections);
-    //                dp.intersectionTime = millis();
-    //                dp.sound.amp(0.8 / float(countIntersections));
-    //                dp.env.play(dp.sound, globalAttackTime, globalSustainTime, globalSustainLevel, globalReleaseTime);
-    //                println(millis() + " " + dp.value + " intersect!");
-    //                // dp.sound.play(dp.value * data_to_freq_ratio, loudness);
-    //                println("loduness = " + 0.8/float(countIntersections));
-    //                // pointCounter++;
-    //        }
+                //        if (abs(PVector.dist(this.position, dp.position)) - 3 <= signal_magnitude / 2
+                //            && abs(PVector.dist(this.position, dp.position)) + 3 >= signal_magnitude / 2 && !activeDataPoints.contains(dp))
+                //        {
+                //                // dp.alreadyIntersected = true;
+                //                activeDataPoints.add(dp);
+                //                countIntersections = activeDataPoints.size();
+                //                println("active intersections: " + countIntersections);
+                //                dp.intersectionTime = millis();
+                //                dp.sound.amp(0.8 / float(countIntersections));
+                //                dp.env.play(dp.sound, globalAttackTime, globalSustainTime, globalSustainLevel, globalReleaseTime);
+                //                println(millis() + " " + dp.value + " intersect!");
+                //                // dp.sound.play(dp.value * data_to_freq_ratio, loudness);
+                //                println("loduness = " + 0.8/float(countIntersections));
+                //                // pointCounter++;
+                //        }
 
 
-    //}
-  }
+                //}
+        }
 }
 
 class Line {
-  int xPos;
-  Line(int x_in)
-  {
-    xPos = x_in;
-  }
+        int xPos;
+        Line(int x_in)
+        {
+                xPos = x_in;
+        }
 
-  public void draw()
-  {
-    stroke(255);
-    line(xPos, 0, xPos, height);
-  }
+        public void draw()
+        {
+                stroke(255);
+                line(xPos, 0, xPos, height);
+        }
+}
+public int current_16ths_step()
+{
+  int current_16ths_step_ = (PApplet.parseInt(millis() / 125) % 16) + 1;
+  return current_16ths_step_;
 }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "piezoDrums_baseProgram" };
