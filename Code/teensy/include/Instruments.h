@@ -71,13 +71,7 @@ public:
 
     bool stroke_detected(Instrument *instrument);
 
-    void setup_notes(std::vector<int> list)
-    {
-        for (int i = 0; i < list.size(); i++)
-        {
-            score.notes[i] = list[i];
-        }
-    }
+    void setup_notes(std::vector<int> list);
 
     void calculateNoiseFloor(Instrument *);
 

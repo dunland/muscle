@@ -150,6 +150,7 @@ void setup()
   for (int i = 0; i < Globals::numInputs; i++)
   {
     instruments[i] = new Instrument;
+    instruments[i]->drumtype = DrumType(i);
   }
 
   // initialize arrays:
@@ -196,7 +197,10 @@ void setup()
   for (int i = 0; i < Globals::numInputs; i++)
     instruments[i]->calculateNoiseFloor(instruments[i]);
 
+    Serial.println("\n..calculating noiseFloor done.");
+
   // assign effects to instruments:
+  Serial.println("assigning effects...");
   instruments[Snare]->effect = TopographyLog;
   instruments[Hihat]->effect = TapTempo;
   instruments[Kick]->effect = TopographyLog;
@@ -206,6 +210,7 @@ void setup()
   instruments[Cowbell]->effect = Monitor;
 
   // ---------------------------- SCORE -------------------------------
+  Serial.println("setting up variables for score..");
   // setup notes
   for (int i = 0; i < Globals::numInputs; i++)
   {
@@ -213,6 +218,7 @@ void setup()
     instruments[i]->score.active_note = instruments[i]->score.notes[0]; // set active note pointer to first note
   }
 
+  Serial.println("setting up midi channels..");
   // midi channels:
   instruments[Snare]->midi.cc_chan = 50; // amplevel
   instruments[Hihat]->midi.cc_chan = 0;

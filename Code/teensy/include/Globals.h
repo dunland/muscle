@@ -102,9 +102,9 @@ public:
     case Tom2:
       return "Tom2";
     case Standtom1:
-      return "Standtom1";
+      return "S_Tom1";
     case Standtom2:
-      return "Standtom2";
+      return "S_Tom2";
     case Ride:
       return "Ride";
     case Crash1:
