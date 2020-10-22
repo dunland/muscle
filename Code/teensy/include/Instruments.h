@@ -30,11 +30,6 @@ public:
 
     struct SCORE
     {
-<<<<<<< HEAD
-        std::vector<int> notes;
-        int active_note;
-=======
->>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
         unsigned long last_notePlayed;
         boolean read_rhythm_slot[8];
         boolean set_rhythm_slot[8];
@@ -54,11 +49,8 @@ public:
 
     struct MIDI
     {
-<<<<<<< HEAD
-=======
         std::vector<int> notes;
         int active_note;
->>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
         int cc_chan;
     } midi;
 
@@ -73,27 +65,13 @@ public:
 
     void trigger(Instrument *, midi::MidiInterface<HardwareSerial>);
 
-<<<<<<< HEAD
-    void perform(Instrument *, midi::MidiInterface<HardwareSerial>);
-=======
     void perform(Instrument *, Instrument *instruments[Globals::numInputs], midi::MidiInterface<HardwareSerial>);
->>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
 
     void tidyUp(Instrument *, midi::MidiInterface<HardwareSerial>); // turn of MIDI notes etc
 
     bool stroke_detected(Instrument *instrument);
 
-<<<<<<< HEAD
-    void setup_notes(std::vector<int> list)
-    {
-        for (int i = 0; i < list.size(); i++)
-        {
-            score.notes[i] = list[i];
-        }
-    }
-=======
     void setup_notes(std::vector<int> list);
->>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
 
     void calculateNoiseFloor(Instrument *);
 

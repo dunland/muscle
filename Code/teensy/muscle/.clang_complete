@@ -1,8 +1,5 @@
--I/home/dav/hfk/7.Sem_DM-MA/Master_Thesis/muscle/Code/teensy/include
--I/home/dav/hfk/7.Sem_DM-MA/Master_Thesis/muscle/Code/teensy/src
--I/home/dav/hfk/7.Sem_DM-MA/Master_Thesis/muscle/Code/teensy/lib/Tsunami-Arduino-Serial-Library
--I/home/dav/.platformio/packages/framework-arduinoteensy/libraries/AltSoftSerial
--I/home/dav/hfk/7.Sem_DM-MA/Master_Thesis/muscle/Code/teensy/lib/MIDI/src
+-I/home/dav/hfk/7.Sem_DM-MA/Master_Thesis/muscle/Code/teensy/muscle/include
+-I/home/dav/hfk/7.Sem_DM-MA/Master_Thesis/muscle/Code/teensy/muscle/src
 -I/home/dav/.platformio/packages/framework-arduinoteensy/cores/teensy3
 -I/home/dav/.platformio/packages/framework-arduinoteensy/libraries/ADC
 -I/home/dav/.platformio/packages/framework-arduinoteensy/libraries/AccelStepper/src
@@ -11,6 +8,7 @@
 -I/home/dav/.platformio/packages/framework-arduinoteensy/libraries/Adafruit_VS1053
 -I/home/dav/.platformio/packages/framework-arduinoteensy/libraries/Adafruit_nRF8001
 -I/home/dav/.platformio/packages/framework-arduinoteensy/libraries/Adafruit_nRF8001/utility
+-I/home/dav/.platformio/packages/framework-arduinoteensy/libraries/AltSoftSerial
 -I/home/dav/.platformio/packages/framework-arduinoteensy/libraries/Artnet
 -I/home/dav/.platformio/packages/framework-arduinoteensy/libraries/Audio
 -I/home/dav/.platformio/packages/framework-arduinoteensy/libraries/Audio/utility

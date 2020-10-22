@@ -154,35 +154,6 @@ void Globals::setInstrumentPrintString(DrumType drum, EffectsType effect)
 
 // --------------------------------------------------------------------
 
-<<<<<<< HEAD
-// general pin reading:
-// static int pinValue(Instrument *instrument)
-// {
-//     return abs(instrument->sensitivity.noiseFloor - analogRead(instrument->pin));
-// }
-// --------------------------------------------------------------------
-/* --------------------------------------------------------------------- */
-/* -------------------------- TIMED INTERRUPTS ------------------------- */
-/* --------------------------------------------------------------------- */
-
-// void Globals::samplePins()
-// {
-//     // ------------------------- read all pins -----------------------------------
-//     for (Instrument *instrument : instruments)
-//     {
-//         if (pinValue(instrument) > instrument->sensitivity.threshold)
-//         {
-//             if (instrument->timing.counts < 1)
-//                 instrument->timing.firstPinActiveTime = millis();
-//             instrument->timing.lastPinActiveTime = millis();
-//             instrument->timing.counts++;
-//         }
-//     }
-// }
-// -----------------------------------------------------------------------------
-
-=======
->>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
 void Globals::masterClockTimer()
 {
     /*
@@ -224,12 +195,6 @@ void Globals::masterClockTimer()
 }
 // ---------------------------------------------------------------------------
 
-<<<<<<< HEAD
-void Globals::print_to_console(String message_to_print)
-{
-  if (Globals::do_print_to_console)
-    Serial.print(message_to_print);
-=======
 // ----------------------------- TOPOGRAPHIES -------------------------
 void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
 {
@@ -310,27 +275,16 @@ void Globals::print_to_console(String message_to_print)
 {
     if (Globals::do_print_to_console)
         Serial.print(message_to_print);
->>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
 }
 
 void Globals::println_to_console(String message_to_print)
 {
-<<<<<<< HEAD
-  if (Globals::do_print_to_console)
-    Serial.println(message_to_print);
-=======
     if (Globals::do_print_to_console)
         Serial.println(message_to_print);
->>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
 }
 
 void Globals::send_to_processing(int message_to_send)
 {
-<<<<<<< HEAD
-  if (Globals::do_send_to_processing)
-    Serial.write(message_to_send);
-=======
     if (Globals::do_send_to_processing)
         Serial.write(message_to_send);
->>>>>>> b7acb17d225ad8ec1a0afd56cafcd5e07798be9e
 }
