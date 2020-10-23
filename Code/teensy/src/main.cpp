@@ -129,7 +129,7 @@ void setup()
 {
 
   Globals::do_print_to_console = true;
-  Globals::do_send_to_processing = true;
+  Globals::do_send_to_processing = false;
 
   Serial.begin(115200);
   // Serial3.begin(57600); // contained in tsunami.begin()
@@ -151,7 +151,7 @@ void setup()
   pinMode(VIBR, OUTPUT);
   pinMode(FOOTSWITCH, INPUT_PULLUP);
 
-  // setup names of elements for UDP communication: -------------------
+  // setup names of elements for Serial communication (to processing): -------------------
   regularity.tag = "r";
   Effect::total_vol.tag = "v";
 
@@ -359,8 +359,10 @@ void loop()
     }
 
     // ----------------------------- draw play log to console
+    Globals::print_to_console("m");
     Globals::print_to_console(String(millis()));
-    Globals::print_to_console("\t");
+    Globals::print_to_console("\n");
+    // Globals::print_to_console("\t");
     // Globals::print_to_console(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
     Globals::print_to_console(Globals::current_beat_pos);
     Globals::print_to_console("\t");
@@ -374,15 +376,7 @@ void loop()
     }
     Globals::println_to_console("");
 
-    // print volume layer:
-    Globals::print_to_console("vol:\t[");
-    for (int j = 0; j < 16; j++)
-    {
-      Globals::print_to_console(Effect::total_vol.a_16[j]);
-      if (j < 15)
-        Globals::print_to_console(",");
-    }
-    Globals::println_to_console("]");
+    Globals::printTopoArray(&Effect::total_vol); // print volume layer
 
     // perform timed pin actions according to current beat:
     for (int i = 0; i < Globals::numInputs; i++)
@@ -399,6 +393,10 @@ void loop()
     Globals::derive_topography(&Effect::total_vol, &regularity);
     Globals::smoothen_dataArray(&regularity);
     Globals::printTopoArray(&regularity);
+    // TODO:
+    // Globals::topo_array_to_processing(&instruments[Snare]->topography);
+    // Globals::topo_array_to_processing(&Effect::total_vol);
+    // Globals::topo_array_to_processing(&regularity);
 
     //makeTopo();
     // works like this:

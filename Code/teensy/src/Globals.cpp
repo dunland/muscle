@@ -202,13 +202,17 @@ void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
     {
         if (original->a_16[i] == 0 && original->a_16_prior[i] == 0) // empty slot repeatedly not played
         {
+            original->a_16_prior = original->a_16;
             abstraction->a_16[i]++;
         }
         else if (original->a_16[i] > 0 && original->a_16[i] > original->a_16_prior[i]) // occupied slot repeatedly played
         {
+            original->a_16_prior = original->a_16;
             abstraction->a_16[i]++;
         }
-        original->a_16_prior = original->a_16;
+        // TODO:
+        // else if     // occupied slot NOT played
+        //     else if // empty slot PLAYED
     }
 }
 
@@ -281,6 +285,8 @@ void Globals::print_to_console(int int_to_print) // print int
 {
     if (Globals::do_print_to_console)
         Serial.print(int_to_print);
+    else if (Globals::do_send_to_processing)
+        Serial.write(int_to_print);
 }
 
 void Globals::print_to_console(float float_to_print) // print float
@@ -307,30 +313,34 @@ void Globals::println_to_console(float float_to_print) // print float
         Serial.println(float_to_print);
 }
 
-// send to processing via UDP instead:
-void Globals::send_to_processing(int message_to_send) // send int
+void Globals::printTopoArray(TOPOGRAPHY *topography)
 {
-    if (Globals::do_send_to_processing)
-        Serial.write(message_to_send);
+    // print layer:
+    print_to_console(topography->tag);
+    print_to_console(":\t[");
+    for (int j = 0; j < 16; j++)
+    {
+        print_to_console(topography->a_16[j]);
+        if (j < 15)
+            print_to_console(",");
+    }
+    println_to_console("]");
 }
 
-// send to processing via UDP instead:
+// send to processing instead:
 void Globals::send_to_processing(char message_to_send) // send char
 {
     if (Globals::do_send_to_processing)
         Serial.write(message_to_send);
 }
 
-void Globals::printTopoArray(TOPOGRAPHY* topography)
+void Globals::topo_array_to_processing(TOPOGRAPHY *topo)
 {
-  // print layer:
-  print_to_console(topography->tag);
-  print_to_console(":\t[");
-  for (int j = 0; j < 16; j++)
-  {
-    print_to_console(topography->a_16[j]);
-    if (j < 15)
-      print_to_console(",");
-  }
-  println_to_console("]");
+    if (Globals::do_send_to_processing)
+    {
+        // Serial.write(topo->tag);
+        for (int j = 0; j < 16; j++)
+            Serial.write(topo->a_16[j]);
+        Serial.write("\n");
+    }
 }

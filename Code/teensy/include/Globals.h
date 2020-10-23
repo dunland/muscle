@@ -49,7 +49,7 @@ struct TOPOGRAPHY
   int threshold = 3;
   int average_smooth;
   int regular_sum = 0;
-  String tag = ""; // very short name for topography. also to be sent via UDP to processing
+  String tag; // very short name for topography. also to be sent via Serial to processing
 };
 
 class Globals
@@ -149,6 +149,7 @@ public:
   static void send_to_processing(char message_to_send);
 
   static void printTopoArray(TOPOGRAPHY *topography);
+  static void topo_array_to_processing(TOPOGRAPHY* topo);
   // --------------------------------------------------------------------
 };
 

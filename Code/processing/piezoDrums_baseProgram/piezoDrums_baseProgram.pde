@@ -16,6 +16,13 @@ int signalGrowthSpeed = 2;
 int globalThreshold = 30;
 
 boolean serial_available = true;
+String printstr = "";
+String print_topo = "";
+String incoming_millis_str = "";
+int[] topo = new int[16];
+boolean collect_r = false; // enables data recording for "regularity" array
+boolean collect_m = false; // enables storage of incoming millis
+int n = 0;
 
 void setup()
 {
@@ -93,19 +100,26 @@ void draw()
         serialEvent(myPort);
 
         // ------------------------ print beat step -------------------
-        textAlign(LEFT,BOTTOM);
+        textAlign(CENTER,BOTTOM);
         int current_16th_step = current_16ths_step();
         if (current_16th_step % 4 == 0)
         {
-          textSize(24);
-          fill(255,0,0);
+                textSize(24);
+                fill(255,0,0);
         }
         else
         {
-          textSize(16);
-          fill(255);
+                textSize(16);
+                fill(255);
         }
-        text(str(current_16th_step), 0, height);
+        text(str(current_16th_step), width/2, height);
+
+        // --------------------- print incoming millis -------------------
+        textAlign(LEFT,BOTTOM);
+        textSize(14);
+        fill(255);
+        text(incoming_millis_str, 0, height);
+
 }
 
 // ------------------------ KEYS ---------------------------
@@ -162,17 +176,21 @@ void objectsFromSerial()
         //}
 }
 
-
 void serialEvent(Serial myPort)
 {
         if (serial_available)
         {
-
                 if (myPort.available() > 0)
                 {
                         int serialVal = myPort.read();
-                        print(millis() + "\t");
-                        println(serialVal);
+                        // general char reading:
+                        printstr += char(serialVal);
+                        if (char(serialVal) == '\n')
+                        {
+                                // print(printstr);
+                                decode_incoming_string(printstr);
+                                printstr = "";
+                        }
                 }
         }
         //println();
@@ -186,4 +204,42 @@ void serialEvent(Serial myPort)
         //  print(millis() + " ");
         //  printArray(serialInArray);
         //}
+}
+
+void decode_incoming_string(String decode_message)
+{
+        // TODO: decode incoming topographies
+        // for (int i = 0; i < decode_message.length(); i++)
+        // {
+        //         char c = decode_message.charAt(i);
+        //
+        //         // decode incoming topographies:
+        //         if (c == 'r') // 'r' initiates collection of vals from array
+        //         {
+        //                 collect_r = true;
+        //         }
+        //         if (c != 'r' && collect_r && n < 16) // add incoming val to array
+        //         {
+        //                 // topo[n] = serialVal;
+        //                 print_topo += c;
+        //                 n++;
+        //         }
+        //         if (c == '\n' && collect_r) // end of topo array
+        //         {
+        //                 // println(print_topo);
+        //                 print_topo = "";
+        //                 collect_r = false;
+        //                 n = 0;
+        //                 printArray(topo);
+        //         }
+        // }
+
+        // store incoming millis:
+        if (decode_message.charAt(0) == 'm')
+        {
+                incoming_millis_str = "";
+                for (int i = 1; i< decode_message.length()-1; i++)
+                        incoming_millis_str += decode_message.charAt(i);
+                println("incoming_millis = " + incoming_millis_str);
+        }
 }
