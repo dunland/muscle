@@ -49,6 +49,7 @@ struct TOPOGRAPHY
   int threshold = 3;
   int average_smooth;
   int regular_sum = 0;
+  String tag = ""; // very short name for topography. also to be sent via UDP to processing
 };
 
 class Globals
@@ -136,11 +137,18 @@ public:
   // DEBUG FUNCTIONS: ---------------------------------------------------
   // print the play log to Arduino console:
   static void print_to_console(String message_to_print);
+  static void print_to_console(int int_to_print);
+  static void print_to_console(float float_to_print); 
 
   static void println_to_console(String message_to_print);
+  static void println_to_console(int int_to_print);
+  static void println_to_console(float float_to_print);
 
   // or send stuff to processing:
   static void send_to_processing(int message_to_send);
+  static void send_to_processing(char message_to_send);
+
+  static void printTopoArray(TOPOGRAPHY *topography);
   // --------------------------------------------------------------------
 };
 

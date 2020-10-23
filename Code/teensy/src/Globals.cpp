@@ -11,7 +11,7 @@ String Globals::output_string[Globals::numInputs];
 boolean Globals::use_responsiveCalibration = false;
 boolean Globals::printNormalizedValues_ = false;
 boolean Globals::do_print_to_console = true;
-boolean Globals::do_send_to_processing = false;
+boolean Globals::do_send_to_processing = true;
 
 IntervalTimer Globals::masterClock; // 1 bar
 
@@ -220,7 +220,7 @@ void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
 2. calculate (squared) fraction of total for each entry
 3. get highest of these fractions
 4. get ratio of highest fraction to other and reset values if ratio > threshold
-->  
+->
 */
 
     // int len = *(&topography.a_16 + 1) - topography.a_16;
@@ -271,10 +271,22 @@ void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
 }
 
 // ---------------------------- DEBUG FUNCTIONS ------------------------------
-void Globals::print_to_console(String message_to_print)
+void Globals::print_to_console(String message_to_print) // print String
 {
     if (Globals::do_print_to_console)
         Serial.print(message_to_print);
+}
+
+void Globals::print_to_console(int int_to_print) // print int
+{
+    if (Globals::do_print_to_console)
+        Serial.print(int_to_print);
+}
+
+void Globals::print_to_console(float float_to_print) // print float
+{
+    if (Globals::do_print_to_console)
+        Serial.print(float_to_print);
 }
 
 void Globals::println_to_console(String message_to_print)
@@ -283,8 +295,42 @@ void Globals::println_to_console(String message_to_print)
         Serial.println(message_to_print);
 }
 
-void Globals::send_to_processing(int message_to_send)
+void Globals::println_to_console(int int_to_print) // print int
+{
+    if (Globals::do_print_to_console)
+        Serial.println(int_to_print);
+}
+
+void Globals::println_to_console(float float_to_print) // print float
+{
+    if (Globals::do_print_to_console)
+        Serial.println(float_to_print);
+}
+
+// send to processing via UDP instead:
+void Globals::send_to_processing(int message_to_send) // send int
 {
     if (Globals::do_send_to_processing)
         Serial.write(message_to_send);
+}
+
+// send to processing via UDP instead:
+void Globals::send_to_processing(char message_to_send) // send char
+{
+    if (Globals::do_send_to_processing)
+        Serial.write(message_to_send);
+}
+
+void Globals::printTopoArray(TOPOGRAPHY* topography)
+{
+  // print layer:
+  print_to_console(topography->tag);
+  print_to_console(":\t[");
+  for (int j = 0; j < 16; j++)
+  {
+    print_to_console(topography->a_16[j]);
+    if (j < 15)
+      print_to_console(",");
+  }
+  println_to_console("]");
 }

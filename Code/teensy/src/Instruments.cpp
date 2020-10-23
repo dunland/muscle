@@ -69,14 +69,14 @@ void Instrument::calculateNoiseFloor(Instrument *instrument)
 
   int led_idx = 0;
 
-  Serial.print("calculating noiseFloor for ");
-  Serial.print(Globals::DrumtypeToHumanreadable(instrument->drumtype));
-  Serial.print(" ..waiting for stroke");
+  Globals::print_to_console("calculating noiseFloor for ");
+  Globals::print_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
+  Globals::print_to_console(" ..waiting for stroke");
   if (Globals::use_responsiveCalibration)
   {
     while (analogRead(instrument->pin) < 700 + instrument->sensitivity.threshold)
       ; // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
-    Serial.print(" .");
+    Globals::print_to_console(" .");
     delay(1000); // should be long enough for drum not to oscillate anymore
   }
 
@@ -86,7 +86,7 @@ void Instrument::calculateNoiseFloor(Instrument *instrument)
   {
     if (n % 100 == 0)
     {
-      Serial.print(" . ");
+      Globals::print_to_console(" . ");
       digitalWrite(Globals::leds[instrument->drumtype], toggleState);
       toggleState = !toggleState;
     }
@@ -95,8 +95,8 @@ void Instrument::calculateNoiseFloor(Instrument *instrument)
   instrument->sensitivity.noiseFloor = totalSamples / 400;
   digitalWrite(Globals::leds[instrument->drumtype], LOW);
   led_idx++;
-  Serial.print("noiseFloor = ");
-  Serial.println(instrument->sensitivity.noiseFloor);
+  Globals::print_to_console("noiseFloor = ");
+  Globals::println_to_console(instrument->sensitivity.noiseFloor);
 
   for (int i = 0; i < Globals::numInputs; i++) // turn LEDs off again
   {

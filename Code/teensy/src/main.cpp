@@ -89,14 +89,14 @@ void printNormalizedValues(boolean printNorm_criterion)
         //noInterrupts();
         //countsCopy[i] = counts[i];
         //interrupts();
-        //Serial.print(pins[i]);
-        //Serial.print(":\t");
-        Serial.print(pinValue(i));
-        Serial.print("\t");
-        //Serial.print(", ");
-        //Serial.print(countsCopy[i]);
+        //Globals::print_to_console(pins[i]);
+        //Globals::print_to_console(":\t");
+        Globals::print_to_console(pinValue(i));
+        Globals::print_to_console("\t");
+        //Globals::print_to_console(", ");
+        //Globals::print_to_console(countsCopy[i]);
       }
-      Serial.println("");
+      Globals::println_to_console("");
     }
     lastMillis = millis();
   }
@@ -127,6 +127,10 @@ void samplePins()
 
 void setup()
 {
+
+  Globals::do_print_to_console = true;
+  Globals::do_send_to_processing = true;
+
   Serial.begin(115200);
   // Serial3.begin(57600); // contained in tsunami.begin()
   while (!Serial)
@@ -146,6 +150,10 @@ void setup()
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
   pinMode(FOOTSWITCH, INPUT_PULLUP);
+
+  // setup names of elements for UDP communication: -------------------
+  regularity.tag = "r";
+  Effect::total_vol.tag = "v";
 
   // ------------------------ INSTRUMENT SETUP ------------------------
   // instantiate instruments:
@@ -200,10 +208,10 @@ void setup()
   for (int i = 0; i < Globals::numInputs; i++)
     instruments[i]->calculateNoiseFloor(instruments[i]);
 
-  Serial.println("\n..calculating noiseFloor done.");
+  Globals::println_to_console("\n..calculating noiseFloor done.");
 
   // assign effects to instruments:
-  Serial.println("assigning effects...");
+  Globals::println_to_console("assigning effects...");
   instruments[Snare]->effect = TopographyLog;
   instruments[Hihat]->effect = TapTempo;
   instruments[Kick]->effect = Monitor;
@@ -213,7 +221,7 @@ void setup()
   instruments[Cowbell]->effect = Monitor;
 
   // ---------------------------- SCORE -------------------------------
-  Serial.println("setting up variables for score..");
+  Globals::println_to_console("setting up variables for score..");
   // setup notes
   for (int i = 0; i < Globals::numInputs; i++)
   {
@@ -221,7 +229,7 @@ void setup()
     instruments[i]->midi.active_note = instruments[i]->midi.notes[0]; // set active note pointer to first note
   }
 
-  Serial.println("setting up midi channels..");
+  Globals::println_to_console("setting up midi channels..");
   // midi channels:
   instruments[Snare]->midi.cc_chan = 50; // amplevel
   instruments[Hihat]->midi.cc_chan = 0;
@@ -241,20 +249,20 @@ void setup()
 */
 
   // print startup information:
-  Serial.println("-----------------------------------------------");
-  Serial.println("calibration values set as follows:");
-  Serial.println("instr\tthrshld\tcrosses\tnoiseFloor");
+  Globals::println_to_console("-----------------------------------------------");
+  Globals::println_to_console("calibration values set as follows:");
+  Globals::println_to_console("instr\tthrshld\tcrosses\tnoiseFloor");
   for (int i = 0; i < Globals::numInputs; i++)
   {
-    Serial.print(Globals::DrumtypeToHumanreadable(DrumType(i)));
-    Serial.print("\t");
-    Serial.print(instruments[i]->sensitivity.threshold);
-    Serial.print("\t");
-    Serial.print(instruments[i]->sensitivity.crossings);
-    Serial.print("\t");
-    Serial.println(instruments[i]->sensitivity.noiseFloor);
+    Globals::print_to_console(Globals::DrumtypeToHumanreadable(DrumType(i)));
+    Globals::print_to_console("\t");
+    Globals::print_to_console(instruments[i]->sensitivity.threshold);
+    Globals::print_to_console("\t");
+    Globals::print_to_console(instruments[i]->sensitivity.crossings);
+    Globals::print_to_console("\t");
+    Globals::println_to_console(instruments[i]->sensitivity.noiseFloor);
   }
-  Serial.println("-----------------------------------------------");
+  Globals::println_to_console("-----------------------------------------------");
 
   // -------------------------- START TIMERS --------------------------
   pinMonitor.begin(samplePins, 1000); // sample pin every 1 millisecond
@@ -287,7 +295,7 @@ void loop()
       instruments[i]->trigger(instruments[i], MIDI); // runs trigger function according to instrument's EffectType
 
       // send instrument stroke to processing:
-      // send_to_processing(i);
+      // Globals::send_to_processing('i');
     }
   }
 
@@ -353,12 +361,12 @@ void loop()
     // ----------------------------- draw play log to console
     Globals::print_to_console(String(millis()));
     Globals::print_to_console("\t");
-    // Serial.print(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
+    // Globals::print_to_console(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
     Globals::print_to_console(Globals::current_beat_pos);
     Globals::print_to_console("\t");
-    // Serial.print(Globals::current_beat_pos / 4);
-    // Serial.print("\t");
-    // Serial.print(Globals::current_eighth_count);
+    // Globals::print_to_console(Globals::current_beat_pos / 4);
+    // Globals::print_to_console("\t");
+    // Globals::print_to_console(Globals::current_eighth_count);
     for (int i = 0; i < Globals::numInputs; i++)
     {
       Globals::print_to_console(Globals::output_string[i]);
@@ -390,6 +398,7 @@ void loop()
 
     Globals::derive_topography(&Effect::total_vol, &regularity);
     Globals::smoothen_dataArray(&regularity);
+    Globals::printTopoArray(&regularity);
 
     //makeTopo();
     // works like this:

@@ -56,7 +56,7 @@ void Effect::getTapTempo()
     {
       num_of_taps = 0;
       clock_sum = 0;
-      Serial.println("-----------TAP RESET!-----------\n");
+      Globals::println_to_console("-----------TAP RESET!-----------\n");
     }
     timeSinceFirstTap = millis(); // record time of first hit
     tapState = 2;                 // next: wait for second hit
@@ -70,11 +70,11 @@ void Effect::getTapTempo()
       num_of_taps++;
       clock_sum += millis() - timeSinceFirstTap;
       Globals::tapInterval = clock_sum / num_of_taps;
-      Serial.print("new tap Tempo is ");
-      Serial.print(60000 / Globals::tapInterval);
-      Serial.print(" bpm (");
-      Serial.print(Globals::tapInterval);
-      Serial.println(" ms interval)");
+      Globals::print_to_console("new tap Tempo is ");
+      Globals::print_to_console(60000 / Globals::tapInterval);
+      Globals::print_to_console(" bpm (");
+      Globals::print_to_console(Globals::tapInterval);
+      Globals::println_to_console(" ms interval)");
 
       Globals::current_BPM = 60000 / Globals::tapInterval;
       tapState = 1;
@@ -85,7 +85,7 @@ void Effect::getTapTempo()
     if (timeSinceFirstTap > 2000) // forget tap if time was too long
     {
       tapState = 1;
-      // Serial.println("too long...");
+      // Globals::println_to_console(("too long...");
     }
     // }
     break;
@@ -378,16 +378,16 @@ void Effect::tsunami_beat_playback(Instrument *instrument)
       // set playback speed according to current_BPM:
       int sr_offset;
       float r = Globals::current_BPM / float(Globals::track_bpm[tracknum]);
-      Serial.print("r = ");
-      Serial.println(r);
+      Globals::print_to_console("r = ");
+      Globals::println_to_console(r);
       if (!(r > 2) && !(r < 0.5))
       {
         // samplerateOffset scales playback speeds from 0.5 to 1 to 2
         // and maps to -32768 to 0 to 32767
         sr_offset = (r >= 1) ? 32767 * (r - 1) : -32768 + 32768 * 2 * (r - 0.5);
         sr_offset = int(sr_offset);
-        Serial.print("sr_offset = ");
-        Serial.println(sr_offset);
+        Globals::print_to_console("sr_offset = ");
+        Globals::println_to_console(sr_offset);
       }
       else
       {
@@ -398,32 +398,32 @@ void Effect::tsunami_beat_playback(Instrument *instrument)
       Globals::tsunami.samplerateOffset(instrument->score.allocated_channel, sr_offset); // TODO: link channels to instruments
       Globals::tsunami.trackGain(tracknum, trackLevel);
       Globals::tsunami.trackPlayPoly(tracknum, instrument->score.allocated_channel, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
-      Serial.print("starting to play track ");
-      Serial.println(tracknum);
+      Globals::print_to_console("starting to play track ");
+      Globals::println_to_console(tracknum);
     } // track playing end
   }   // threshold end
 
   // Debug:
-  Serial.print("[");
+  Globals::print_to_console("[");
   for (int i = 0; i < 8; i++)
   {
-    Serial.print(instrument->topography.a_8[i]);
+    Globals::print_to_console(instrument->topography.a_8[i]);
     if (i < 7)
-      Serial.print(", ");
+      Globals::print_to_console(", ");
   }
-  Serial.print("]\t");
-  //  Serial.print(beat_topo_entries);
-  //  Serial.print("\t");
-  //  Serial.print(beat_topo_squared_sum);
-  //  Serial.print("\t");
-  //  Serial.print(beat_topo_regular_sum);
-  //  Serial.print("\t");
-  //  Serial.print(instrument->topography.average_smooth);
-  Serial.print("\t");
+  Globals::print_to_console("]\t");
+  //  Globals::print_to_console(beat_topo_entries);
+  //  Globals::print_to_console("\t");
+  //  Globals::print_to_console(beat_topo_squared_sum);
+  //  Globals::print_to_console("\t");
+  //  Globals::print_to_console(beat_topo_regular_sum);
+  //  Globals::print_to_console("\t");
+  //  Globals::print_to_console(instrument->topography.average_smooth);
+  Globals::print_to_console("\t");
   int trackLevel = min(-40 + (instrument->topography.average_smooth * 5), 0);
-  Serial.print(trackLevel);
-  Serial.print("dB\t->");
-  Serial.println(tracknum);
+  Globals::print_to_console(trackLevel);
+  Globals::print_to_console("dB\t->");
+  Globals::println_to_console(tracknum);
 }
 // --------------------------------------------------------------------
 
@@ -462,15 +462,15 @@ void Effect::topography_midi_effects(Instrument *instrument, Instrument *instrum
     }
 
     // Debug:
-    Serial.print(Globals::DrumtypeToHumanreadable(instrument->drumtype));
-    Serial.print(":\t[");
+    Globals::print_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
+    Globals::print_to_console(":\t[");
     for (int j = 0; j < 16; j++)
     {
-      Serial.print(instrument->topography.a_16[j]);
+      Globals::print_to_console(instrument->topography.a_16[j]);
       if (j < 15)
-        Serial.print(",");
+        Globals::print_to_console(",");
     }
-    Serial.println("]");
+    Globals::println_to_console("]");
   } // end only once per 16th-step
 }
 
