@@ -3,7 +3,7 @@
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void Hardware::footswitch_pressed(Instrument *instruments[Globals::numInputs])
+void Hardware::footswitch_pressed(Instrument *instruments[Globals::numInputs], Score *score)
 {
   switch (FOOTSWITCH_MODE)
   {
@@ -37,7 +37,24 @@ void Hardware::footswitch_pressed(Instrument *instruments[Globals::numInputs])
         instruments[i]->topography.a_16[j] = 0;
       }
     }
+    break;
 
+  case (RESET_AND_PROCEED_SCORE):
+    if (score->overall_regularity.average_smooth > 10)
+    {
+      Globals::println_to_console("regularity height > 10: reset!");
+      Globals::score_state++; // go to next score state
+      for (int i = 0; i < 16; i++)
+      {
+        score->overall_regularity.a_16[i] = 0; // reset topography
+        score->overall_regularity.observe[i] = false;
+      }
+    }
+    else
+    {
+      Globals::print_to_console("regularity too low to proceed.. is at ");
+      Globals::println_to_console(score->overall_regularity.average_smooth);
+    }
     break;
 
   default:
@@ -46,6 +63,7 @@ void Hardware::footswitch_pressed(Instrument *instruments[Globals::numInputs])
   }
 }
 // --------------------------------------------------------------------
+
 
 void Hardware::footswitch_released(Instrument *instruments[Globals::numInputs])
 {
@@ -65,7 +83,7 @@ void Hardware::footswitch_released(Instrument *instruments[Globals::numInputs])
   }
 }
 
-void Hardware::checkFootSwitch(Instrument *instruments[Globals::numInputs])
+void Hardware::checkFootSwitch(Instrument *instruments[Globals::numInputs], Score* score)
 {
 
   static int switch_state;
@@ -78,7 +96,7 @@ void Hardware::checkFootSwitch(Instrument *instruments[Globals::numInputs])
   {
     if (switch_state == LOW)
     {
-      footswitch_pressed(instruments);
+      footswitch_pressed(instruments, score);
       Serial.println("Footswitch pressed.");
     }
     else

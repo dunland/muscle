@@ -6,12 +6,13 @@
 std::vector<int> Globals::pins = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};
 std::vector<int> Globals::leds = {LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN};
 
+int Globals::score_state = 1;
+
 boolean Globals::printStrokes = true;
 String Globals::output_string[Globals::numInputs];
 boolean Globals::use_responsiveCalibration = false;
-boolean Globals::printNormalizedValues_ = false;
 boolean Globals::do_print_to_console = true;
-boolean Globals::do_send_to_processing = true;
+boolean Globals::do_send_to_processing = false;
 
 IntervalTimer Globals::masterClock; // 1 bar
 
@@ -198,28 +199,42 @@ void Globals::masterClockTimer()
 // ----------------------------- TOPOGRAPHIES -------------------------
 void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
 {
-    for (int i = 0; i < 16; i++)
+    if (original->average_smooth > original->activation_thresh) // only execute if threshold of original topography
     {
-        if (original->a_16[i] == 0 && original->a_16_prior[i] == 0) // empty slot repeatedly not played
+        for (int i = 0; i < 16; i++)
         {
-            original->a_16_prior = original->a_16;
-            abstraction->a_16[i]++;
+            // only look at slots that have changed before:
+            if (abstraction->observe[i] == true)
+            {
+                if (original->a_16[i] == 0 && original->a_16_prior[i] == 0) // empty slot repeatedly not played: increase
+                {
+                    abstraction->a_16[i]++;
+                }
+
+                else if (original->a_16[i] > 0 && original->a_16[i] > original->a_16_prior[i]) // occupied slot repeatedly played: increase
+                {
+                    abstraction->a_16[i]++;
+                }
+
+                else if (original->a_16[i] > 0 && original->a_16[i] == original->a_16_prior[i]) // occupied slot NOT played : decrease
+                {
+                    abstraction->a_16[i]--;
+                }
+
+                else if (original->a_16_prior[i] == 0 && original->a_16[i] > 0) // empty slot PLAYED: decrease
+                {
+                    abstraction->a_16[i]--;
+                }
+            }
         }
-        else if (original->a_16[i] > 0 && original->a_16[i] > original->a_16_prior[i]) // occupied slot repeatedly played
-        {
-            original->a_16_prior = original->a_16;
-            abstraction->a_16[i]++;
-        }
-        // TODO:
-        // else if     // occupied slot NOT played
-        //     else if // empty slot PLAYED
+        original->a_16_prior = original->a_16;
     }
 }
 
 // ---------------- smoothen 16-bit array using struct ----------------
 void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
 {
-    /* input an array of size 16
+/* input an array of size 16
 1. count entries and create squared sum of each entry
 2. calculate (squared) fraction of total for each entry
 3. get highest of these fractions
@@ -227,7 +242,6 @@ void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
 ->
 */
 
-    // int len = *(&topography.a_16 + 1) - topography.a_16;
     int len = topography->a_16.size(); // TODO: use dynamic vector topography.a instead
     int entries = 0;
     int squared_sum = 0;
@@ -257,11 +271,12 @@ void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
     for (int j = 0; j < len; j++)
         highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
 
-    // get "topography height":
+    // SMOOTHEN ARRAY / get "topography height":
     // divide highest with other entries and reset entries if ratio > threshold:
+    topography->flag_entry_dismissed = false;
     for (int j = 0; j < len; j++)
         if (squared_frac[j] > 0)
-            if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > topography->threshold)
+            if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > topography->snr_thresh)
             {
                 topography->a_16[j] = 0;
                 entries -= 1;
@@ -269,7 +284,7 @@ void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
 
     topography->average_smooth = 0;
     // assess average topo sum for loudness
-    for (int j = 0; j < 8; j++)
+    for (int j = 0; j < 16; j++)
         topography->average_smooth += topography->a_16[j];
     topography->average_smooth = int((float(topography->average_smooth) / float(entries)) + 0.5);
 }
@@ -324,7 +339,16 @@ void Globals::printTopoArray(TOPOGRAPHY *topography)
         if (j < 15)
             print_to_console(",");
     }
-    println_to_console("]");
+    print_to_console("] \t(");
+    print_to_console(topography->average_smooth);
+    print_to_console("/");
+    print_to_console(topography->activation_thresh);
+    print_to_console(")");
+    if (topography->flag_entry_dismissed)
+    {
+        print_to_console("\t entries dismissed!");
+    }
+    println_to_console("");
 }
 
 // send to processing instead:

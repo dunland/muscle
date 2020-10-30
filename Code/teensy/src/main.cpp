@@ -33,6 +33,7 @@
 #include <Instruments.h>
 #include <Effects.h>
 #include <Hardware.h>
+#include <Score.h>
 
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
@@ -46,7 +47,9 @@ int countsCopy[Globals::numInputs];
 
 // ----------------- MUSICAL AND PERFORMATIVE PARAMETERS --------------
 
-TOPOGRAPHY regularity;
+Score score1;
+
+// TOPOGRAPHY regularity;
 
 /*
     0 = play MIDI note upon stroke
@@ -152,7 +155,7 @@ void setup()
   pinMode(FOOTSWITCH, INPUT_PULLUP);
 
   // setup names of elements for Serial communication (to processing): -------------------
-  regularity.tag = "r";
+  score1.overall_regularity.tag = "r";
   Effect::total_vol.tag = "v";
 
   // ------------------------ INSTRUMENT SETUP ------------------------
@@ -179,13 +182,14 @@ void setup()
   }
 
   // setup initial values ---------------------------------------------
-  instruments[Snare]->pin = A0;
-  instruments[Hihat]->pin = A1;
-  instruments[Kick]->pin = A2;
-  instruments[Tom1]->pin = A3;
-  instruments[Tom2]->pin = A4;
-  instruments[Standtom1]->pin = A5;
-  instruments[Cowbell]->pin = A6;
+  instruments[Snare]->pin = A3;
+  instruments[Hihat]->pin = A2;
+  instruments[Kick]->pin = A0;
+  instruments[Tom1]->pin = A7;
+  instruments[Tom2]->pin = A5;
+  instruments[Standtom1]->pin = A6;
+  instruments[Cowbell]->pin = A4;
+  // instruments[Crash]->pin = A1;
 
   // set instrument calibration array
   // values as of 2020-08-27:
@@ -210,33 +214,46 @@ void setup()
 
   Globals::println_to_console("\n..calculating noiseFloor done.");
 
-  // assign effects to instruments:
   Globals::println_to_console("assigning effects...");
-  instruments[Snare]->effect = TopographyLog;
+
+  // assign effects to instruments:
+  instruments[Snare]->effect = Swell;
   instruments[Hihat]->effect = TapTempo;
-  instruments[Kick]->effect = Monitor;
+  instruments[Kick]->effect = Swell;
   instruments[Tom1]->effect = Monitor;
   instruments[Tom2]->effect = Monitor;
-  instruments[Standtom1]->effect = Monitor;
+  instruments[Standtom1]->effect = Swell;
   instruments[Cowbell]->effect = Monitor;
 
   // ---------------------------- SCORE -------------------------------
   Globals::println_to_console("setting up variables for score..");
+  Globals::print_to_console("note seed for score = ");
+  randomSeed(analogRead(A0));
+  score1.notes.push_back(random(24, 36));
+  Globals::println_to_console(score1.notes[0]);
   // setup notes
-  for (int i = 0; i < Globals::numInputs; i++)
-  {
-    instruments[i]->setup_notes({60, 61, 45, 74, 72, 44, 71});        // insert array of MIDI-notes
-    instruments[i]->midi.active_note = instruments[i]->midi.notes[0]; // set active note pointer to first note
-  }
+  // for (int i = 0; i < Globals::numInputs; i++)
+  // {
+  //   instruments[i]->setup_notes({60, 61, 45, 74, 72, 44, 71});        // insert array of MIDI-notes
+  //   instruments[i]->midi.active_note = instruments[i]->midi.notes[0]; // set active note pointer to first note
+  // }
+
+  instruments[Snare]->midi.active_note = 74;
+  instruments[Hihat]->midi.active_note = 72;
+  instruments[Kick]->midi.active_note = 45;
+  instruments[Tom1]->midi.active_note = 71;
+  instruments[Tom2]->midi.active_note = 74;
+  instruments[Standtom1]->midi.active_note = 44;
+  instruments[Cowbell]->midi.active_note = 60;
 
   Globals::println_to_console("setting up midi channels..");
   // midi channels:
-  instruments[Snare]->midi.cc_chan = 50; // amplevel
+  instruments[Snare]->midi.cc_chan = 94;
   instruments[Hihat]->midi.cc_chan = 0;
   instruments[Kick]->midi.cc_chan = 0;
   instruments[Tom1]->midi.cc_chan = 25;      // sustain
   instruments[Tom2]->midi.cc_chan = 71;      // resonance
-  instruments[Standtom1]->midi.cc_chan = 50; // amplevel
+  instruments[Standtom1]->midi.cc_chan = 51; // delayTime
   instruments[Cowbell]->midi.cc_chan = 0;
 
   /* channels on mKORG:
@@ -246,6 +263,8 @@ void setup()
    23=attack
    25=sustain
    26=release
+   51=delayTime
+   94=delayDepth
 */
 
   // print startup information:
@@ -283,7 +302,7 @@ void loop()
   Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
 
   // ------------------------- DEBUG AREA -----------------------------
-  printNormalizedValues(Globals::printNormalizedValues_);
+  printNormalizedValues(false);
 
   // --------------------- INCOMING SIGNALS FROM PIEZOS ---------------
   // (define what should happen when instruments are hit)
@@ -328,17 +347,28 @@ void loop()
   /////////////////////////////////////////////////////////////////////
   if (Globals::current_beat_pos != last_beat_pos)
   {
+    if (Globals::do_send_to_processing)
+      Globals::print_to_console("b");
+    if (Globals::do_send_to_processing)
+      Globals::println_to_console(Globals::current_beat_pos);
+
+    // -------------------------- full notes: -------------------------
+    if (Globals::current_beat_pos == 0)
+    {
+      Globals::print_to_console("score_state = ");
+      Globals::println_to_console(Globals::score_state);
+    }
 
     // ------------------------- quarter notes: -----------------------
     if (Globals::current_beat_pos % 8 == 0) // Globals::current_beat_pos holds 32 → %8 makes 4.
     {
-      Hardware::vibrate_motor(50);
+      // Hardware::vibrate_motor(50);
     }
     // Debug: play MIDI note on quarter notes
-    //    if (Globals::current_beat_pos % 8 == 0)
-    //    MIDI.sendNoteOn(57, 127, 2);
-    //    else
-    //    MIDI.sendNoteOff(57, 127, 2);
+      //  if (Globals::current_beat_pos % 8 == 0)
+      //  MIDI.sendNoteOn(57, 127, 2);
+      //  else
+      //  MIDI.sendNoteOff(57, 127, 2);
 
     // --------------------------- 8th notes: -------------------------
     if (Globals::current_beat_pos % 4 == 0)
@@ -359,10 +389,11 @@ void loop()
     }
 
     // ----------------------------- draw play log to console
-    Globals::print_to_console("m");
+    if (Globals::do_send_to_processing)
+      Globals::print_to_console("m");
     Globals::print_to_console(String(millis()));
-    Globals::print_to_console("\n");
-    // Globals::print_to_console("\t");
+    // Globals::print_to_console("\n");
+    Globals::print_to_console("\t");
     // Globals::print_to_console(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
     Globals::print_to_console(Globals::current_beat_pos);
     Globals::print_to_console("\t");
@@ -376,8 +407,6 @@ void loop()
     }
     Globals::println_to_console("");
 
-    Globals::printTopoArray(&Effect::total_vol); // print volume layer
-
     // perform timed pin actions according to current beat:
     for (int i = 0; i < Globals::numInputs; i++)
     {
@@ -390,9 +419,26 @@ void loop()
     /////////////////////////// ABSTRACTIONS //////////////////////////
     ///////////////////////////////////////////////////////////////////
 
-    Globals::derive_topography(&Effect::total_vol, &regularity);
-    Globals::smoothen_dataArray(&regularity);
-    Globals::printTopoArray(&regularity);
+    Globals::derive_topography(&Effect::total_vol, &score1.overall_regularity); // derive regularity from total_vol
+    Globals::smoothen_dataArray(&score1.overall_regularity);
+
+    // vibrate if new score is ready:
+    if (score1.overall_regularity.average_smooth > score1.overall_regularity.activation_thresh)
+      digitalWrite(VIBR, HIGH);
+    else
+      digitalWrite(VIBR, LOW);
+
+    boolean anytopo = false;
+    for (int i = 0; i < Globals::numInputs; i++)
+    {
+      if (instruments[i]->effect == TopographyLog)
+        anytopo = true;
+    }
+    if (anytopo)
+    {
+      Globals::printTopoArray(&Effect::total_vol); // print volume layer
+      Globals::printTopoArray(&score1.overall_regularity);
+    }
     // TODO:
     // Globals::topo_array_to_processing(&instruments[Snare]->topography);
     // Globals::topo_array_to_processing(&Effect::total_vol);
@@ -452,7 +498,23 @@ void loop()
 
     // PSEUDOCODE END
 
-    // ----------------------------------------------------------------
+    // SCORE
+    // state proceeds if footswitch is pressed (in mode RESET_AND_PROCEED_SCORE) when regularity is high enough
+    switch (Globals::score_state)
+    {
+    case 1:
+      score1.continuousBassNote(MIDI); // will play continuous bass note from score
+      break;
+    case 2:
+      score1.envelope_volume(&Effect::total_vol, MIDI);
+      break;
+    case 3:
+      score1.crazyDelays(MIDI);
+      break;
+    case 4:
+      score1.envelope_cutoff(&Effect::total_vol, MIDI);
+      break;
+    }
 
     /////////////////////// AUXILIARY FUNCTIONS ///////////////////////
 
@@ -465,8 +527,8 @@ void loop()
   Globals::last_16th_count = Globals::current_16th_count;
 
   // Hardware:
-  Hardware::checkFootSwitch(instruments); // check state of footswitch
-  Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
+  Hardware::checkFootSwitch(instruments, &score1); // check state of footswitch
+  // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
 
   // tidying up what's left from performing functions..
   for (int i = 0; i < Globals::numInputs; i++)

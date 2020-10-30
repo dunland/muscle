@@ -46,10 +46,21 @@ struct TOPOGRAPHY
   std::vector<int> a_8 = {0,0,0,0,0,0,0,0};   // size-8 array for comparison with 8-bit-length sound files
   std::vector<int> a_16 = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // size-16 array for abstractions like beat regularity etc
   std::vector<int> a_16_prior;
-  int threshold = 3;
+  
+  boolean observe[16] = 
+  {
+    false, false, false, false,
+    false, false, false, false,
+    false, false, false, false,
+    false, false, false, false};
+
+  int snr_thresh = 3; // threshold for signal-to-noise-ratio to be smoothened
+  int activation_thresh = 5; // threshold in average_smooth to activate next action
   int average_smooth;
   int regular_sum = 0;
   String tag; // very short name for topography. also to be sent via Serial to processing
+  boolean flag_entry_dismissed = false;
+
 };
 
 class Globals
@@ -58,9 +69,9 @@ public:
   static const uint8_t numInputs = 7;
   static std::vector<int> pins; // stores contact piezo pin of each instrument
   static std::vector<int> leds; // stores leds for each instrument (if differing)
+  static int score_state;
 
   // ------------------------- Debug variables --------------------------
-  static boolean printNormalizedValues_;
   static boolean do_print_to_console;
   static boolean do_send_to_processing;
   static boolean printStrokes;
@@ -152,50 +163,5 @@ public:
   static void topo_array_to_processing(TOPOGRAPHY* topo);
   // --------------------------------------------------------------------
 };
-
-// TODO: may be obsolete..
-// ---------------------- smoothen array of all sizes -----------------
-
-// void smoothen_dataArray(int input_array[], int threshold_to_omit_entry = 3)
-// {
-//   int len = *(&input_array + 1) - input_array;
-//   int entries = 0;
-//   int squared_sum = 0;
-//   int regular_sum = 0;
-
-//   // count entries and create squared sum:
-//   for (int j = 0; j < len; j++)
-//   {
-//     if (input_array[j] > 0)
-//     {
-//       entries++;
-//       squared_sum += input_array[j] * input_array[j];
-//       regular_sum += input_array[j];
-//     }
-//   }
-
-//   regular_sum = regular_sum / entries;
-
-//   // calculate site-specific (squared) fractions of total:
-//   float squared_frac[len];
-//   for (int j = 0; j < len; j++)
-//     squared_frac[j] =
-//         float(input_array[j]) / float(squared_sum);
-
-//   // get highest frac:
-//   float highest_squared_frac = 0;
-//   for (int j = 0; j < len; j++)
-//     highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
-
-//   // get "topography height":
-//   // divide highest with other entries and reset entries if ratio > threshold:
-//   for (int j = 0; j < len; j++)
-//     if (squared_frac[j] > 0)
-//       if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > threshold_to_omit_entry)
-//       {
-//         input_array[j] = 0;
-//         entries -= 1;
-//       }
-// }
 
 #endif

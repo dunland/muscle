@@ -181,6 +181,7 @@ void Effect::countup_topography(Instrument *instrument) // just prints what is b
   }
   // instrument->topography.a_8[Globals::current_eighth_count]++;
   instrument->topography.a_16[Globals::current_16th_count]++; // will be translated to topography.a_8 when evoked
+  instrument->topography.observe[Globals::current_16th_count] = true; // this slot shall be observed for changes
 }
 
 ///////////////////////////// TIMED EFFECTS ///////////////////////////
@@ -213,11 +214,6 @@ void Effect::swell_perform(Instrument *instrument, midi::MidiInterface<HardwareS
 {
   if (instrument->score.swell_state == 2)
   {
-    // remember moment of update in beat:
-    //    noInterrupts();
-    //    unsigned long updateMoment = beatCount;
-    //    interrupts();
-
     // ready to play MIDI again?
     // increase swell_beatStep and modulo interval
     instrument->score.swell_beatStep = (instrument->score.swell_beatStep + 1) % instrument->score.swell_stroke_interval;
@@ -238,11 +234,8 @@ void Effect::swell_perform(Instrument *instrument, midi::MidiInterface<HardwareS
       //      output_string[instr] += ") ";
       Globals::output_string[instrument->drumtype] += "\t";
 
-      if (instrument->effect == Swell)
-      {
         if (!Globals::footswitch_is_pressed)
-          MIDI.sendControlChange(instrument->midi.cc_chan, instrument->score.swell_val, 2);
-      }
+          MIDI.sendControlChange(instrument->midi.cc_chan, instrument->score.swell_val * instrument->score.swell_factor, 2);
       /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
         finding the right CC# on microKORG: (manual p.61):
         1. press SHIFT + 5
@@ -250,7 +243,7 @@ void Effect::swell_perform(Instrument *instrument, midi::MidiInterface<HardwareS
         (3. reset that parameter, if you like) */
 
       // MIDI.sendNoteOn(notes_list[instr], 127, 2); // also play a note on each hit?
-      else if (instrument->effect == CymbalSwell)
+      if (instrument->effect == CymbalSwell)
       {
         if (Globals::tsunami.isTrackPlaying(instrument->score.allocated_track))
         {
@@ -265,7 +258,7 @@ void Effect::swell_perform(Instrument *instrument, midi::MidiInterface<HardwareS
       // decrease swell_val:
       if (instrument->score.swell_val > 0)
       {
-        if (!Globals::footswitch_is_pressed)
+        if (!Globals::footswitch_is_pressed) // do not decrease while footswitch is pressed
           instrument->score.swell_val--;
       }
       else // reset swell if swell_val == 0:
@@ -317,7 +310,7 @@ void Effect::swell_perform(Instrument *instrument, midi::MidiInterface<HardwareS
 void Effect::tsunami_beat_playback(Instrument *instrument)
 {
   // smoothen 16-bit topography to erase sites with noise:
-  instrument->smoothen_dataArray(instrument);
+  Globals::smoothen_dataArray(&instrument->topography);
 
   // translate 16-bit to 8-bit topography for track footprint:
   int j = 0;
@@ -433,7 +426,7 @@ void Effect::topography_midi_effects(Instrument *instrument, Instrument *instrum
   if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
   {
     // smoothen array:
-    instrument->smoothen_dataArray(instrument); // erases "noise" from arrays if SNR>3
+    Globals::smoothen_dataArray(&instrument->topography); // erases "noise" from arrays if SNR>snr_threshold
 
     total_vol.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     // each slot:
@@ -449,7 +442,7 @@ void Effect::topography_midi_effects(Instrument *instrument, Instrument *instrum
 
     // ------------ result-> change volume and play MIDI --------
     // ----------------------------------------------------------
-    int vol = min(40 + total_vol.a_16[Globals::current_16th_count] * 15, 255);
+    int vol = min(total_vol.a_16[Globals::current_16th_count] * 13, 255);
 
     if (instrument->topography.a_16[Globals::current_16th_count] > 0)
     {
@@ -463,14 +456,15 @@ void Effect::topography_midi_effects(Instrument *instrument, Instrument *instrum
 
     // Debug:
     Globals::print_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
-    Globals::print_to_console(":\t[");
-    for (int j = 0; j < 16; j++)
-    {
-      Globals::print_to_console(instrument->topography.a_16[j]);
-      if (j < 15)
-        Globals::print_to_console(",");
-    }
-    Globals::println_to_console("]");
+    Globals::printTopoArray(&instrument->topography);
+    // Globals::print_to_console(":\t[");
+    // for (int j = 0; j < 16; j++)
+    // {
+    //   Globals::print_to_console(instrument->topography.a_16[j]);
+    //   if (j < 15)
+    //     Globals::print_to_console(",");
+    // }
+    // Globals::println_to_console("]");
   } // end only once per 16th-step
 }
 

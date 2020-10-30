@@ -71,7 +71,9 @@ void Instrument::calculateNoiseFloor(Instrument *instrument)
 
   Globals::print_to_console("calculating noiseFloor for ");
   Globals::print_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
-  Globals::print_to_console(" ..waiting for stroke");
+  Globals::print_to_console(" (A");
+  Globals::print_to_console(instrument->pin - 14);
+  Globals::print_to_console(") ..waiting for stroke");
   if (Globals::use_responsiveCalibration)
   {
     while (analogRead(instrument->pin) < 700 + instrument->sensitivity.threshold)
@@ -112,7 +114,6 @@ void Instrument::calculateNoiseFloor(Instrument *instrument)
 ///////////////////////////////////////////////////////////////////////
 
 ////////////////////////////// TRIGGERS ///////////////////////////////
-///////////////////////////////////////////////////////////////////////
 void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
 {
   switch (effect)
@@ -248,59 +249,59 @@ void Instrument::tidyUp(Instrument *instrument, midi::MidiInterface<HardwareSeri
 ///////////////////////////////////////////////////////////////////////
 
 // ---------------- smoothen 16-bit array using struct ----------------
-void Instrument::smoothen_dataArray(Instrument *instrument)
-{
-  /* input an array of size 16
-1. count entries and create squared sum of each entry
-2. calculate (squared) fraction of total for each entry
-3. get highest of these fractions
-4. get ratio of highest fraction to other and reset values if ratio > threshold
-->  
-*/
+// void Instrument::smoothen_dataArray(Instrument *instrument)
+// {
+//   /* input an array of size 16
+// 1. count entries and create squared sum of each entry
+// 2. calculate (squared) fraction of total for each entry
+// 3. get highest of these fractions
+// 4. get ratio of highest fraction to other and reset values if ratio > threshold
+// ->  
+// */
 
-  // int len = *(&instrument->topography.a_16 + 1) - instrument->topography.a_16;
-  int len = instrument->topography.a_16.size(); // TODO: use dynamic vector topography.a instead
-  int entries = 0;
-  int squared_sum = 0;
-  instrument->topography.regular_sum = 0;
+//   // int len = *(&instrument->topography.a_16 + 1) - instrument->topography.a_16;
+//   int len = instrument->topography.a_16.size(); // TODO: use dynamic vector topography.a instead
+//   int entries = 0;
+//   int squared_sum = 0;
+//   instrument->topography.regular_sum = 0;
 
-  // count entries and create squared sum:
-  for (int j = 0; j < len; j++)
-  {
-    if (instrument->topography.a_16[j] > 0)
-    {
-      entries++;
-      squared_sum += instrument->topography.a_16[j] * instrument->topography.a_16[j];
-      instrument->topography.regular_sum += instrument->topography.a_16[j];
-    }
-  }
+//   // count entries and create squared sum:
+//   for (int j = 0; j < len; j++)
+//   {
+//     if (instrument->topography.a_16[j] > 0)
+//     {
+//       entries++;
+//       squared_sum += instrument->topography.a_16[j] * instrument->topography.a_16[j];
+//       instrument->topography.regular_sum += instrument->topography.a_16[j];
+//     }
+//   }
 
-  instrument->topography.regular_sum = instrument->topography.regular_sum / entries;
+//   instrument->topography.regular_sum = instrument->topography.regular_sum / entries;
 
-  // calculate site-specific (squared) fractions of total:
-  float squared_frac[len];
-  for (int j = 0; j < len; j++)
-    squared_frac[j] =
-        float(instrument->topography.a_16[j]) / float(squared_sum);
+//   // calculate site-specific (squared) fractions of total:
+//   float squared_frac[len];
+//   for (int j = 0; j < len; j++)
+//     squared_frac[j] =
+//         float(instrument->topography.a_16[j]) / float(squared_sum);
 
-  // get highest frac:
-  float highest_squared_frac = 0;
-  for (int j = 0; j < len; j++)
-    highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
+//   // get highest frac:
+//   float highest_squared_frac = 0;
+//   for (int j = 0; j < len; j++)
+//     highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
 
-  // get "topography height":
-  // divide highest with other entries and reset entries if ratio > threshold:
-  for (int j = 0; j < len; j++)
-    if (squared_frac[j] > 0)
-      if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > instrument->topography.threshold)
-      {
-        instrument->topography.a_16[j] = 0;
-        entries -= 1;
-      }
+//   // get "topography height":
+//   // divide highest with other entries and reset entries if ratio > threshold:
+//   for (int j = 0; j < len; j++)
+//     if (squared_frac[j] > 0)
+//       if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > instrument->topography.snr_thresh)
+//       {
+//         instrument->topography.a_16[j] = 0;
+//         entries -= 1;
+//       }
 
-  instrument->topography.average_smooth = 0;
-  // assess average topo sum for loudness
-  for (int j = 0; j < 8; j++)
-    instrument->topography.average_smooth += instrument->topography.a_16[j];
-  instrument->topography.average_smooth = int((float(instrument->topography.average_smooth) / float(entries)) + 0.5);
-}
+//   instrument->topography.average_smooth = 0;
+//   // assess average topo sum for loudness
+//   for (int j = 0; j < 8; j++)
+//     instrument->topography.average_smooth += instrument->topography.a_16[j];
+//   instrument->topography.average_smooth = int((float(instrument->topography.average_smooth) / float(entries)) + 0.5);
+// }

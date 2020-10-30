@@ -36,7 +36,9 @@ public:
 
         // swell-effect:
         int swell_val = 10;
+        int swell_factor = 2;      // factor by which to increase swell_val
         int swell_state = 1;       // waits for first tap
+        // int min_swell_val = 10;    // the minimum the swell value can be
         int num_of_swell_taps = 0; // will be used in both swell_rec() and swell_beat(). serves as swell_val for MIDI notes.
         int swell_stroke_interval; // will be needed for timed replay
         int swell_beatStep = 0;    // increases with beatCount and initiates action.
@@ -75,5 +77,5 @@ public:
 
     void calculateNoiseFloor(Instrument *);
 
-    void smoothen_dataArray(Instrument *instrument);
+    // void smoothen_dataArray(Instrument *instrument);
 };
