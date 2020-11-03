@@ -1,6 +1,6 @@
 /*
    ------------------------------------
-   October 2020
+   November 2020
    by David Unland david[at]unland[dot]eu
    ------------------------------------
    ------------------------------------
@@ -155,7 +155,6 @@ void setup()
   pinMode(FOOTSWITCH, INPUT_PULLUP);
 
   // setup names of elements for Serial communication (to processing): -------------------
-  score1.beat_regularity.tag = "r";
   Effect::total_vol.tag = "v";
 
   // ------------------------ INSTRUMENT SETUP ------------------------
@@ -219,10 +218,10 @@ void setup()
   // assign effects to instruments:
   instruments[Snare]->effect = TopographyLog;
   instruments[Hihat]->effect = TapTempo;
-  instruments[Kick]->effect = Swell;
+  instruments[Kick]->effect = TopographyLog;
   instruments[Tom1]->effect = Monitor;
   instruments[Tom2]->effect = Monitor;
-  instruments[Standtom1]->effect = Swell;
+  instruments[Standtom1]->effect = TopographyLog;
   instruments[Cowbell]->effect = Monitor;
 
   // ---------------------------- SCORE -------------------------------
@@ -248,24 +247,13 @@ void setup()
 
   Globals::println_to_console("setting up midi channels..");
   // midi channels:
-  instruments[Snare]->midi.cc_chan = 51;
+  instruments[Snare]->midi.cc_chan = DelayTime;
   instruments[Hihat]->midi.cc_chan = 0;
   instruments[Kick]->midi.cc_chan = 0;
-  instruments[Tom1]->midi.cc_chan = 25; // sustain
-  instruments[Tom2]->midi.cc_chan = 71; // resonance
-  instruments[Standtom1]->midi.cc_chan = 26;
+  instruments[Tom1]->midi.cc_chan = Sustain;
+  instruments[Tom2]->midi.cc_chan = Resonance;
+  instruments[Standtom1]->midi.cc_chan = Release;
   instruments[Cowbell]->midi.cc_chan = 0;
-
-  /* channels on mKORG:
-   44=cutoff
-   71=resonance
-   50=amplevel
-   23=attack
-   25=sustain
-   26=release
-   51=delayTime
-   94=delayDepth
-*/
 
   // print startup information:
   Globals::println_to_console("-----------------------------------------------");
@@ -312,7 +300,6 @@ void loop()
     {
       // ----------------------- perform pin action -------------------
       instruments[i]->trigger(instruments[i], MIDI); // runs trigger function according to instrument's EffectType
-      instruments[i]->timing.stroke_flag = true;
       // send instrument stroke to processing:
       // Globals::send_to_processing('i');
     }
@@ -352,12 +339,6 @@ void loop()
     // apply topography derivations from previous beats
     // → problem: if there was any stroke at all, it was probably not on the very first run BEFORE derivation was executed
 
-    // reset stroke flag for this beat:
-    for (int i = 0; i < Globals::numInputs; i++)
-    {
-      instruments[i]->timing.stroke_flag = false;
-    }
-
     // -------------------------- 32nd-notes --------------------------
 
     // print millis and current beat:
@@ -369,7 +350,7 @@ void loop()
     if (Globals::do_send_to_processing)
       Globals::print_to_console("b");
     Globals::print_to_console(Globals::current_beat_pos);
-    Globals::print_to_console("\n");
+    Globals::print_to_console("\t");
 
     // -------------------------- full notes: -------------------------
     if (Globals::current_beat_pos == 0)
@@ -403,44 +384,18 @@ void loop()
     // --------------------------- 16th notes: ------------------------
     if (Globals::current_beat_pos % 2 == 0)
     {
-      // BEFORE INCREASE:
-      // Abstraction:
-      Globals::derive_topography(&Effect::total_vol, &score1.beat_regularity); // derive regularity from total_vol
-      Globals::smoothen_dataArray(&score1.beat_regularity);
-      
-      if (score1.beat_regularity.average_smooth <= 0)
-      {
-        Globals::println_to_console("beat_regularity <= 0 → reset regularity and total_vol!");
-        for (int i = 0; i < Globals::numInputs; i++)
-        {
-          score1.beat_regularity.a_16[i] = 0;
-          Effect::total_vol.a_16[i] = 0;
-        }
-        score1.beat_regularity.average_smooth = 0; // maybe unnecessary?
-        Effect::total_vol.average_smooth = 0;
-      }
 
       // increase 16th note counter:
       Globals::current_16th_count = (Globals::current_16th_count + 1) % 16;
 
       // vibrate if new score is ready:
-      if (score1.beat_regularity.average_smooth > score1.beat_regularity.activation_thresh)
+      if (Effect::total_vol.average_smooth > Effect::total_vol.activation_thresh)
+      {
         digitalWrite(VIBR, HIGH);
+        Globals::println_to_console("ready to go to next score step! hit footswitch!");
+      }
       else
         digitalWrite(VIBR, LOW);
-
-      // print topo arrays:
-      boolean anytopo = false;
-      for (int i = 0; i < Globals::numInputs; i++)
-      {
-        if (instruments[i]->effect == TopographyLog)
-          anytopo = true;
-      }
-      if (anytopo)
-      {
-        Globals::printTopoArray(&Effect::total_vol); // print volume layer
-        Globals::printTopoArray(&score1.beat_regularity);
-      }
     }
 
     // ----------------------------- draw play log to console
@@ -454,6 +409,19 @@ void loop()
       Globals::output_string[i] = "\t";
     }
     Globals::println_to_console("");
+
+    // print topo arrays:
+    boolean anytopo = false;
+    for (int i = 0; i < Globals::numInputs; i++)
+    {
+      if (instruments[i]->effect == TopographyLog)
+        anytopo = true;
+    }
+    if (anytopo)
+    {
+      Globals::printTopoArray(&Effect::total_vol); // print volume layer
+      // Globals::printTopoArray(&score1.beat_regularity);
+    }
 
     // perform timed pin actions according to current beat:
     for (int i = 0; i < Globals::numInputs; i++)
@@ -500,7 +468,7 @@ void loop()
     //    // if regularity is held for certain time (threshold reached):
     //    read_to_break
     //
-    //    when regularity expectations not fulfilled:
+    //    when THEN regularity expectations not fulfilled:
     //    score: go to next element
     //
     //    // elsewhere:
@@ -525,23 +493,57 @@ void loop()
 
     // PSEUDOCODE END
 
-    // SCORE
+    //////////////////////////////// SCORE ////////////////////////////
+    ///////////////////////////////////////////////////////////////////
+
     // state proceeds if footswitch is pressed (in mode RESET_AND_PROCEED_SCORE) when regularity is high enough
+    static float delayTime = 0;
     switch (Globals::score_state)
     {
     case 1:
       score1.continuousBassNote(MIDI); // will play continuous bass note from score
       break;
+
     case 2:
+      instruments[Snare]->effect = Swell;
+      instruments[Snare]->midi.cc_chan = DelayTime;
+      delayTime += 1;
+      delayTime = min(delayTime, 127);
+      MIDI.sendControlChange(DelayDepth, int(delayTime), 2);
+      // Globals::print_to_console("delayTime = ");
+      // Globals::println_to_console(delayTime);
+      // score1.crazyDelays(instruments[Snare], MIDI);
+      break;
+
+    case 3: // crazyDelay
+      delayTime -= 3;
+      delayTime = max(delayTime, 0);
+
+      MIDI.sendControlChange(DelayDepth, 127, 2);
+      instruments[Snare]->effect = PlayMidi;
       score1.envelope_volume(&Effect::total_vol, MIDI);
       break;
-    case 3:
-      score1.crazyDelays(MIDI);
+
+    case 4: // note ascend
+      instruments[Standtom1]->topography.activation_thresh = 2;
+      instruments[Kick]->topography.activation_thresh = 2;
+      instruments[Snare]->topography.activation_thresh = 2;
+
+      for (int i = 0; i < Globals::numInputs; i++)
+      {
+        if (instruments[i]->topography.average_smooth >= instruments[i]->topography.activation_thresh)
+        {
+          instruments[i]->midi.active_note += 3;
+        }
+      }
       break;
-    case 4:
+      
+    case 5: // envelope cutoff
       score1.envelope_cutoff(&Effect::total_vol, MIDI);
       break;
     }
+
+    // continuousBassNote, quarterBassNotes, addBassNote,
 
     /////////////////////// AUXILIARY FUNCTIONS ///////////////////////
 

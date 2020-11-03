@@ -9,12 +9,10 @@ class Score
 public:
     std::vector<int> notes;
 
-    TOPOGRAPHY beat_regularity;
-
     void continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI);                      // initiates a continuous bass note from score
     void envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
     void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for volume filter via topography
-    void crazyDelays(midi::MidiInterface<HardwareSerial> MIDI);                             // changes the delay times on each 16th-step
+    void crazyDelays(Instrument* instrument, midi::MidiInterface<HardwareSerial> MIDI);                             // changes the delay times on each 16th-step
     void regularHighNote(Instrument *instrument);                                           // plays a high note according to instrument pattern
 
     // TODO: automatically assign first random note upon instantiation

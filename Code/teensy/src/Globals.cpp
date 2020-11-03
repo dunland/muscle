@@ -197,49 +197,49 @@ void Globals::masterClockTimer()
 // ---------------------------------------------------------------------------
 
 // ----------------------------- TOPOGRAPHIES -------------------------
-void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
-{
-	if (original->average_smooth < original->activation_thresh)
-		abstraction->a_16[Globals::current_16th_count] = original->a_16[Globals::current_16th_count]; // sync both arrays
+// void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
+// {
+// 	if (original->average_smooth < original->activation_thresh)
+// 		abstraction->a_16[Globals::current_16th_count] = original->a_16[Globals::current_16th_count]; // sync both arrays
 
-	else if (original->average_smooth >= original->activation_thresh) // only execute if threshold of original topography
-	{
+// 	else if (original->average_smooth >= original->activation_thresh) // only execute if threshold of original topography
+// 	{
 
-		// reset flags:
-		abstraction->flag_empty_increased = false;
-		abstraction->flag_empty_played = false;
-		abstraction->flag_occupied_increased = false;
-		abstraction->flag_occupied_missed = false;
+// 		// reset flags:
+// 		abstraction->flag_empty_increased = false;
+// 		abstraction->flag_empty_played = false;
+// 		abstraction->flag_occupied_increased = false;
+// 		abstraction->flag_occupied_missed = false;
 
-		// CASES:
-		if (original->a_16[Globals::current_16th_count] == 0 && original->a_16_prior[Globals::current_16th_count] == 0) // empty slot repeatedly not played: increase
-		{
-			abstraction->a_16[Globals::current_16th_count]++;
-			abstraction->flag_empty_increased = true;
-		}
+// 		// CASES:
+// 		if (original->a_16[Globals::current_16th_count] == 0 && original->a_16_prior[Globals::current_16th_count] == 0) // empty slot repeatedly not played: increase
+// 		{
+// 			abstraction->a_16[Globals::current_16th_count]++;
+// 			abstraction->flag_empty_increased = true;
+// 		}
 
-		else if (original->a_16[Globals::current_16th_count] > 0 && original->a_16[Globals::current_16th_count] > original->a_16_prior[Globals::current_16th_count]) // occupied slot repeatedly played: increase
-		{
-			abstraction->a_16[Globals::current_16th_count]++;
-			abstraction->flag_occupied_increased = true;
-		}
+// 		else if (original->a_16[Globals::current_16th_count] > 0 && original->a_16[Globals::current_16th_count] > original->a_16_prior[Globals::current_16th_count]) // occupied slot repeatedly played: increase
+// 		{
+// 			abstraction->a_16[Globals::current_16th_count]++;
+// 			abstraction->flag_occupied_increased = true;
+// 		}
 
-		else if (original->a_16[Globals::current_16th_count] > 0 && original->a_16[Globals::current_16th_count] == original->a_16_prior[Globals::current_16th_count]) // occupied slot NOT played : decrease
-		{
-			abstraction->a_16[Globals::current_16th_count]--;
-			abstraction->a_16[Globals::current_16th_count] = max(0, abstraction->a_16[Globals::current_16th_count]);
-			abstraction->flag_occupied_missed = true;
-		}
+// 		else if (original->a_16[Globals::current_16th_count] > 0 && original->a_16[Globals::current_16th_count] == original->a_16_prior[Globals::current_16th_count]) // occupied slot NOT played : decrease
+// 		{
+// 			abstraction->a_16[Globals::current_16th_count]--;
+// 			abstraction->a_16[Globals::current_16th_count] = max(0, abstraction->a_16[Globals::current_16th_count]);
+// 			abstraction->flag_occupied_missed = true;
+// 		}
 
-		else if (original->a_16_prior[Globals::current_16th_count] == 0 && original->a_16[Globals::current_16th_count] > 0) // empty slot PLAYED: decrease
-		{
-			abstraction->a_16[Globals::current_16th_count]--;
-			abstraction->a_16[Globals::current_16th_count] = max(0, abstraction->a_16[Globals::current_16th_count]);
-			abstraction->flag_empty_played = true;
-		}
-		original->a_16_prior[Globals::current_16th_count] = original->a_16[Globals::current_16th_count];
-	}
-}
+// 		else if (original->a_16_prior[Globals::current_16th_count] == 0 && original->a_16[Globals::current_16th_count] > 0) // empty slot PLAYED: decrease
+// 		{
+// 			abstraction->a_16[Globals::current_16th_count]--;
+// 			abstraction->a_16[Globals::current_16th_count] = max(0, abstraction->a_16[Globals::current_16th_count]);
+// 			abstraction->flag_empty_played = true;
+// 		}
+// 		original->a_16_prior[Globals::current_16th_count] = original->a_16[Globals::current_16th_count];
+// 	}
+// }
 
 // ---------------- smoothen 16-bit array using struct ----------------
 void Globals::smoothen_dataArray(TOPOGRAPHY *topography)

@@ -40,19 +40,25 @@ void Hardware::footswitch_pressed(Instrument *instruments[Globals::numInputs], S
     break;
 
   case (RESET_AND_PROCEED_SCORE):
-    if (score->beat_regularity.average_smooth > 10)
+    if (Effect::total_vol.average_smooth > Effect::total_vol.activation_thresh)
     {
       Globals::println_to_console("regularity height > 10: reset!");
       Globals::score_state++; // go to next score state
-      for (int i = 0; i < 16; i++)
-      {
-        score->beat_regularity.a_16[i] = 0; // reset topography
-      }
+      for (int i = 0; i < Globals::numInputs; i++)
+        for (int j = 0; j < 16; j++)
+          instruments[i]->topography.a_16[j] = 0;
+
+      Globals::println_to_console("all instrument topographies were reset.");
+
+      for (int j = 0; j < 16; j++)
+        Effect::total_vol.a_16[j] = 0; // reset topography
+      Effect::total_vol.average_smooth = 0;
     }
+    
     else
     {
       Globals::print_to_console("regularity too low to proceed.. is at ");
-      Globals::println_to_console(score->beat_regularity.average_smooth);
+      Globals::println_to_console(Effect::total_vol.average_smooth);
     }
     break;
 
@@ -62,7 +68,6 @@ void Hardware::footswitch_pressed(Instrument *instruments[Globals::numInputs], S
   }
 }
 // --------------------------------------------------------------------
-
 
 void Hardware::footswitch_released(Instrument *instruments[Globals::numInputs])
 {
@@ -82,7 +87,7 @@ void Hardware::footswitch_released(Instrument *instruments[Globals::numInputs])
   }
 }
 
-void Hardware::checkFootSwitch(Instrument *instruments[Globals::numInputs], Score* score)
+void Hardware::checkFootSwitch(Instrument *instruments[Globals::numInputs], Score *score)
 {
 
   static int switch_state;

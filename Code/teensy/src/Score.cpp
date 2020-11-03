@@ -5,10 +5,10 @@
 
 void Score::continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
 {
-    if (Globals::current_beat_pos % 8 == 0)
+    if (Globals::current_beat_pos % 32 == 0)
         MIDI.sendNoteOn(notes[0], 127, 2);
-    else
-        MIDI.sendNoteOff(notes[0], 127, 2);
+    // else
+        // MIDI.sendNoteOff(notes[0], 127, 2);
 }
 
 void Score::envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)
@@ -27,9 +27,9 @@ void Score::envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<Hardware
     MIDI.sendControlChange(50, amp_val, 2); // set loudness
 }
 
-void Score::crazyDelays(midi::MidiInterface<HardwareSerial> MIDI)
+void Score::crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
 {
-    int delaytime = beat_regularity.a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
+    int delaytime = instrument->topography.a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
     delaytime = min(delaytime, 127);                                           // must not be greater than 127
     MIDI.sendControlChange(51, delaytime, 2);
 }

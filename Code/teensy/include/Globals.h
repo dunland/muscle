@@ -41,14 +41,26 @@ enum EffectsType
   TopographyLog = 8
 };
 
+enum CC_Type // channels on mKORG:
+{
+   Cutoff = 44,
+   Resonance = 71,
+   Amplevel = 50,
+   Attack = 23,
+   Sustain = 25,
+   Release = 26,
+   DelayTime = 51,
+   DelayDepth = 94
+};
+
 struct TOPOGRAPHY
 {
   std::vector<int> a_8 = {0, 0, 0, 0, 0, 0, 0, 0};                          // size-8 array for comparison with 8-bit-length sound files
   std::vector<int> a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // size-16 array for abstractions like beat regularity etc
   std::vector<int> a_16_prior = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-  int snr_thresh = 3;        // threshold for signal-to-noise-ratio to be smoothened
-  int activation_thresh = 2; // threshold in average_smooth to activate next action
+  int snr_thresh = 3;         // threshold for signal-to-noise-ratio to be smoothened
+  int activation_thresh = 10; // threshold in average_smooth to activate next action
   int average_smooth;
   int regular_sum = 0;
   String tag; // very short name for topography. also to be sent via Serial to processing
