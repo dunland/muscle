@@ -61,6 +61,7 @@ public:
         volatile unsigned long lastPinActiveTime;
         volatile unsigned long firstPinActiveTime;
         volatile int counts;
+        boolean stroke_flag = false;
     } timing;
 
     TOPOGRAPHY topography;

@@ -43,24 +43,23 @@ enum EffectsType
 
 struct TOPOGRAPHY
 {
-  std::vector<int> a_8 = {0,0,0,0,0,0,0,0};   // size-8 array for comparison with 8-bit-length sound files
-  std::vector<int> a_16 = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // size-16 array for abstractions like beat regularity etc
-  std::vector<int> a_16_prior;
-  
-  boolean observe[16] = 
-  {
-    false, false, false, false,
-    false, false, false, false,
-    false, false, false, false,
-    false, false, false, false};
+  std::vector<int> a_8 = {0, 0, 0, 0, 0, 0, 0, 0};                          // size-8 array for comparison with 8-bit-length sound files
+  std::vector<int> a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // size-16 array for abstractions like beat regularity etc
+  std::vector<int> a_16_prior = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-  int snr_thresh = 3; // threshold for signal-to-noise-ratio to be smoothened
-  int activation_thresh = 5; // threshold in average_smooth to activate next action
+  int snr_thresh = 3;        // threshold for signal-to-noise-ratio to be smoothened
+  int activation_thresh = 2; // threshold in average_smooth to activate next action
   int average_smooth;
   int regular_sum = 0;
   String tag; // very short name for topography. also to be sent via Serial to processing
-  boolean flag_entry_dismissed = false;
 
+  boolean flag_entry_dismissed = false; // indicates that an entry has been dropped due to too high topography difference
+
+  boolean flag_empty_increased = false;    // indicates that an empty slot has repeatedly NOT been played → increase
+  boolean flag_occupied_increased = false; // indicates that an occupied slot has repeatedly been played → increase
+  boolean flag_empty_played = false;       // indicates that an empty slot WAS played → decrease
+  boolean flag_occupied_missed = false;    // indicates that an occupied slot has NOT been played → decrease
+  // boolean change_expected[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 };
 
 class Globals
@@ -149,7 +148,7 @@ public:
   // print the play log to Arduino console:
   static void print_to_console(String message_to_print);
   static void print_to_console(int int_to_print);
-  static void print_to_console(float float_to_print); 
+  static void print_to_console(float float_to_print);
 
   static void println_to_console(String message_to_print);
   static void println_to_console(int int_to_print);
@@ -160,7 +159,7 @@ public:
   static void send_to_processing(char message_to_send);
 
   static void printTopoArray(TOPOGRAPHY *topography);
-  static void topo_array_to_processing(TOPOGRAPHY* topo);
+  static void topo_array_to_processing(TOPOGRAPHY *topo);
   // --------------------------------------------------------------------
 };
 

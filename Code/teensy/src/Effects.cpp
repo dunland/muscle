@@ -137,7 +137,7 @@ void Effect::swell_rec(Instrument *instrument, midi::MidiInterface<HardwareSeria
 
     // start MIDI note and proceed to next state
     instrument->score.swell_state = 2;
-    MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
+    // MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
 
     // lastSwellRec = millis();
   }
@@ -173,17 +173,17 @@ void Effect::swell_rec(Instrument *instrument, midi::MidiInterface<HardwareSeria
   // --------------------------------------------------------------------
 }
 
-void Effect::countup_topography(Instrument *instrument) // just prints what is being played.
+void Effect::countup_topography(Instrument *instrument) // increases slot position of current 16th beat when instrument hit
 {
   if (Globals::printStrokes)
   {
     Globals::setInstrumentPrintString(instrument->drumtype, Monitor);
   }
-  // instrument->topography.a_8[Globals::current_eighth_count]++;
-  instrument->topography.a_16[Globals::current_16th_count]++; // will be translated to topography.a_8 when evoked
-  instrument->topography.observe[Globals::current_16th_count] = true; // this slot shall be observed for changes
+  instrument->topography.a_16[Globals::current_16th_count]++; // will be translated to topography.a_8 when evoked by tsunamiPlayback(?)
 }
 
+///////////////////////////////////////////////////////////////////////
+//////////////////////////////// PERFORM //////////////////////////////
 ///////////////////////////// TIMED EFFECTS ///////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
@@ -428,17 +428,19 @@ void Effect::topography_midi_effects(Instrument *instrument, Instrument *instrum
     // smoothen array:
     Globals::smoothen_dataArray(&instrument->topography); // erases "noise" from arrays if SNR>snr_threshold
 
+    // reset slot for volume
     total_vol.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    // each slot:
-    for (int idx = 0; idx < 16; idx++)
+  
+    // sum up all topographies of all instruments:
+    for (int idx = 0; idx < 16; idx++) // each slot
     {
-      // of each instrument:
-      for (int i = 0; i < Globals::numInputs; i++)
+      for (int i = 0; i < Globals::numInputs; i++) // of each instrument
       {
         if (instruments[i]->effect == TopographyLog)
           total_vol.a_16[idx] += instrument->topography.a_16[idx];
       }
     }
+    Globals::smoothen_dataArray(&total_vol);
 
     // ------------ result-> change volume and play MIDI --------
     // ----------------------------------------------------------

@@ -40,20 +40,19 @@ void Hardware::footswitch_pressed(Instrument *instruments[Globals::numInputs], S
     break;
 
   case (RESET_AND_PROCEED_SCORE):
-    if (score->overall_regularity.average_smooth > 10)
+    if (score->beat_regularity.average_smooth > 10)
     {
       Globals::println_to_console("regularity height > 10: reset!");
       Globals::score_state++; // go to next score state
       for (int i = 0; i < 16; i++)
       {
-        score->overall_regularity.a_16[i] = 0; // reset topography
-        score->overall_regularity.observe[i] = false;
+        score->beat_regularity.a_16[i] = 0; // reset topography
       }
     }
     else
     {
       Globals::print_to_console("regularity too low to proceed.. is at ");
-      Globals::println_to_console(score->overall_regularity.average_smooth);
+      Globals::println_to_console(score->beat_regularity.average_smooth);
     }
     break;
 

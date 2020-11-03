@@ -9,7 +9,7 @@ class Score
 public:
     std::vector<int> notes;
 
-    TOPOGRAPHY overall_regularity;
+    TOPOGRAPHY beat_regularity;
 
     void continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI);                      // initiates a continuous bass note from score
     void envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography

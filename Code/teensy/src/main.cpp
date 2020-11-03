@@ -155,7 +155,7 @@ void setup()
   pinMode(FOOTSWITCH, INPUT_PULLUP);
 
   // setup names of elements for Serial communication (to processing): -------------------
-  score1.overall_regularity.tag = "r";
+  score1.beat_regularity.tag = "r";
   Effect::total_vol.tag = "v";
 
   // ------------------------ INSTRUMENT SETUP ------------------------
@@ -217,7 +217,7 @@ void setup()
   Globals::println_to_console("assigning effects...");
 
   // assign effects to instruments:
-  instruments[Snare]->effect = Swell;
+  instruments[Snare]->effect = TopographyLog;
   instruments[Hihat]->effect = TapTempo;
   instruments[Kick]->effect = Swell;
   instruments[Tom1]->effect = Monitor;
@@ -248,12 +248,12 @@ void setup()
 
   Globals::println_to_console("setting up midi channels..");
   // midi channels:
-  instruments[Snare]->midi.cc_chan = 94;
+  instruments[Snare]->midi.cc_chan = 51;
   instruments[Hihat]->midi.cc_chan = 0;
   instruments[Kick]->midi.cc_chan = 0;
-  instruments[Tom1]->midi.cc_chan = 25;      // sustain
-  instruments[Tom2]->midi.cc_chan = 71;      // resonance
-  instruments[Standtom1]->midi.cc_chan = 51; // delayTime
+  instruments[Tom1]->midi.cc_chan = 25; // sustain
+  instruments[Tom2]->midi.cc_chan = 71; // resonance
+  instruments[Standtom1]->midi.cc_chan = 26;
   instruments[Cowbell]->midi.cc_chan = 0;
 
   /* channels on mKORG:
@@ -312,13 +312,13 @@ void loop()
     {
       // ----------------------- perform pin action -------------------
       instruments[i]->trigger(instruments[i], MIDI); // runs trigger function according to instrument's EffectType
-
+      instruments[i]->timing.stroke_flag = true;
       // send instrument stroke to processing:
       // Globals::send_to_processing('i');
     }
   }
 
-  // ------------------------- TIMED ACTIONS --------------------------
+  ///////////////////////////// TIMED ACTIONS /////////////////////////
   // (automatically invoke rhythm-linked actions)
   static int last_beat_pos = 0;
   static boolean toggleLED = true;
@@ -343,14 +343,33 @@ void loop()
     interrupts();
   }
 
-  //////////////////// DO THINGS ONCE PER 32nd-step: //////////////////
-  /////////////////////////////////////////////////////////////////////
+  //----------------------- DO THINGS ONCE PER 32nd-step:--------------
+  //-------------------------------------------------------------------
+
   if (Globals::current_beat_pos != last_beat_pos)
   {
+    // tidy up with previous beat position ----------------------------
+    // apply topography derivations from previous beats
+    // → problem: if there was any stroke at all, it was probably not on the very first run BEFORE derivation was executed
+
+    // reset stroke flag for this beat:
+    for (int i = 0; i < Globals::numInputs; i++)
+    {
+      instruments[i]->timing.stroke_flag = false;
+    }
+
+    // -------------------------- 32nd-notes --------------------------
+
+    // print millis and current beat:
+    if (Globals::do_send_to_processing)
+      Globals::print_to_console("m");
+    Globals::print_to_console(String(millis()));
+    Globals::print_to_console("\t");
+    // Globals::print_to_console(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
     if (Globals::do_send_to_processing)
       Globals::print_to_console("b");
-    if (Globals::do_send_to_processing)
-      Globals::println_to_console(Globals::current_beat_pos);
+    Globals::print_to_console(Globals::current_beat_pos);
+    Globals::print_to_console("\n");
 
     // -------------------------- full notes: -------------------------
     if (Globals::current_beat_pos == 0)
@@ -365,10 +384,10 @@ void loop()
       // Hardware::vibrate_motor(50);
     }
     // Debug: play MIDI note on quarter notes
-      //  if (Globals::current_beat_pos % 8 == 0)
-      //  MIDI.sendNoteOn(57, 127, 2);
-      //  else
-      //  MIDI.sendNoteOff(57, 127, 2);
+    //  if (Globals::current_beat_pos % 8 == 0)
+    //  MIDI.sendNoteOn(57, 127, 2);
+    //  else
+    //  MIDI.sendNoteOff(57, 127, 2);
 
     // --------------------------- 8th notes: -------------------------
     if (Globals::current_beat_pos % 4 == 0)
@@ -384,19 +403,48 @@ void loop()
     // --------------------------- 16th notes: ------------------------
     if (Globals::current_beat_pos % 2 == 0)
     {
+      // BEFORE INCREASE:
+      // Abstraction:
+      Globals::derive_topography(&Effect::total_vol, &score1.beat_regularity); // derive regularity from total_vol
+      Globals::smoothen_dataArray(&score1.beat_regularity);
+      
+      if (score1.beat_regularity.average_smooth <= 0)
+      {
+        Globals::println_to_console("beat_regularity <= 0 → reset regularity and total_vol!");
+        for (int i = 0; i < Globals::numInputs; i++)
+        {
+          score1.beat_regularity.a_16[i] = 0;
+          Effect::total_vol.a_16[i] = 0;
+        }
+        score1.beat_regularity.average_smooth = 0; // maybe unnecessary?
+        Effect::total_vol.average_smooth = 0;
+      }
+
       // increase 16th note counter:
       Globals::current_16th_count = (Globals::current_16th_count + 1) % 16;
+
+      // vibrate if new score is ready:
+      if (score1.beat_regularity.average_smooth > score1.beat_regularity.activation_thresh)
+        digitalWrite(VIBR, HIGH);
+      else
+        digitalWrite(VIBR, LOW);
+
+      // print topo arrays:
+      boolean anytopo = false;
+      for (int i = 0; i < Globals::numInputs; i++)
+      {
+        if (instruments[i]->effect == TopographyLog)
+          anytopo = true;
+      }
+      if (anytopo)
+      {
+        Globals::printTopoArray(&Effect::total_vol); // print volume layer
+        Globals::printTopoArray(&score1.beat_regularity);
+      }
     }
 
     // ----------------------------- draw play log to console
-    if (Globals::do_send_to_processing)
-      Globals::print_to_console("m");
-    Globals::print_to_console(String(millis()));
-    // Globals::print_to_console("\n");
-    Globals::print_to_console("\t");
-    // Globals::print_to_console(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
-    Globals::print_to_console(Globals::current_beat_pos);
-    Globals::print_to_console("\t");
+
     // Globals::print_to_console(Globals::current_beat_pos / 4);
     // Globals::print_to_console("\t");
     // Globals::print_to_console(Globals::current_eighth_count);
@@ -414,31 +462,10 @@ void loop()
     }
     ///////////////////////////////////////////////////////////////////
 
-    // TODO:
     ///////////////////////////////////////////////////////////////////
     /////////////////////////// ABSTRACTIONS //////////////////////////
     ///////////////////////////////////////////////////////////////////
 
-    Globals::derive_topography(&Effect::total_vol, &score1.overall_regularity); // derive regularity from total_vol
-    Globals::smoothen_dataArray(&score1.overall_regularity);
-
-    // vibrate if new score is ready:
-    if (score1.overall_regularity.average_smooth > score1.overall_regularity.activation_thresh)
-      digitalWrite(VIBR, HIGH);
-    else
-      digitalWrite(VIBR, LOW);
-
-    boolean anytopo = false;
-    for (int i = 0; i < Globals::numInputs; i++)
-    {
-      if (instruments[i]->effect == TopographyLog)
-        anytopo = true;
-    }
-    if (anytopo)
-    {
-      Globals::printTopoArray(&Effect::total_vol); // print volume layer
-      Globals::printTopoArray(&score1.overall_regularity);
-    }
     // TODO:
     // Globals::topo_array_to_processing(&instruments[Snare]->topography);
     // Globals::topo_array_to_processing(&Effect::total_vol);
