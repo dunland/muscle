@@ -38,7 +38,9 @@ enum EffectsType
   Swell = 5,
   TsunamiLink = 6,
   CymbalSwell = 7,
-  TopographyLog = 8
+  TopographyLog = 8,
+  PlayMidi_rawPin = 9, // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
+  CC_Effect_rawPin = 10
 };
 
 enum CC_Type // channels on mKORG:

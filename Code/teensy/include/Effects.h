@@ -10,6 +10,9 @@ class Effect
 {
 public:
     // trigger effects: -----------------------------------------------
+    static void playMidi_rawPin(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
+
+    static void cc_effect_rawPin(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 
     static void playMidi(Instrument *instrument, midi::MidiInterface<HardwareSerial>);
 
@@ -37,11 +40,13 @@ public:
 
     static void tsunami_beat_playback(Instrument *instrument);
 
-    static TOPOGRAPHY total_vol; // for TopographyLog
+    static TOPOGRAPHY beat_sum; // for TopographyLog
 
     static void topography_midi_effects(Instrument *instrument, Instrument *instruments[Globals::numInputs], midi::MidiInterface<HardwareSerial>); // MIDI playback according to beat_topography
 
     // final tidy up functions: ---------------------------------------
 
-    static void turnMidiNoteOff(Instrument* instrument, midi::MidiInterface<HardwareSerial>);
+    static void turnMidiNoteOff(Instrument *instrument, midi::MidiInterface<HardwareSerial>);
+
+    static void decay_ccVal(Instrument *instrument, midi::MidiInterface<HardwareSerial>);
 };

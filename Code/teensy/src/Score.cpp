@@ -3,9 +3,9 @@
 
 // TOPOGRAPHY Score::beat_regularity;
 
-void Score::continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
+void Score::continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI, int note_length) // initiates a continuous bass note from score
 {
-    if (Globals::current_beat_pos % 32 == 0)
+    if (Globals::current_beat_pos % note_length == 0)
         MIDI.sendNoteOn(notes[0], 127, 2);
     // else
         // MIDI.sendNoteOff(notes[0], 127, 2);

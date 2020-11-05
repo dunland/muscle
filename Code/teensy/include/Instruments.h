@@ -36,8 +36,8 @@ public:
 
         // swell-effect:
         int swell_val = 10;
-        int swell_factor = 2;      // factor by which to increase swell_val
-        int swell_state = 1;       // waits for first tap
+        int swell_factor = 2; // factor by which to increase swell_val
+        int swell_state = 1;  // waits for first tap
         // int min_swell_val = 10;    // the minimum the swell value can be
         int num_of_swell_taps = 0; // will be used in both swell_rec() and swell_beat(). serves as swell_val for MIDI notes.
         int swell_stroke_interval; // will be needed for timed replay
@@ -54,6 +54,11 @@ public:
         std::vector<int> notes;
         int active_note;
         int cc_chan;
+        float cc_val = 0;
+        int cc_max = 127;       // MIDI values cannot be greater than this
+        int cc_min = 30;        // MIDI values cannot be smaller than this
+        float cc_increase_factor = 0.7; // factor by which MIDI vals will be increased upon hit
+        float cc_decay_factor = 1;    // factor by which MIDI vals decay
     } midi;
 
     struct TIMING
@@ -75,6 +80,8 @@ public:
     bool stroke_detected(Instrument *instrument);
 
     void setup_notes(std::vector<int> list);
+
+    void setup_midi(CC_Type cc_type, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor);
 
     void calculateNoiseFloor(Instrument *);
 

@@ -4,11 +4,38 @@
 #include <MIDI.h>
 
 // create overall volume topography of all instrument layers:
-TOPOGRAPHY Effect::total_vol;
-// std::vector<int> Effect::total_vol.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+TOPOGRAPHY Effect::beat_sum;
+// std::vector<int> Effect::beat_sum.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 ///////////////////////////// TRIGGER EFFECTS /////////////////////////
 ///////////////////////////////////////////////////////////////////////
+
+void Effect::cc_effect_rawPin(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI) // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+{
+  // if (abs(instrument->sensitivity.noiseFloor - analogRead(instrument->pin)) > instrument->sensitivity.threshold)
+  // {
+  instrument->midi.cc_val += instrument->midi.cc_increase_factor;
+  instrument->midi.cc_val = min(instrument->midi.cc_val, instrument->midi.cc_max);
+  MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), 2);
+  Globals::output_string[instrument->drumtype] = String(instrument->midi.cc_val);
+  Globals::output_string[instrument->drumtype] += "\t";
+  // }
+  // else
+  // {
+  //   instrument->midi.cc_val -= instrument->midi.cc_decay_factor;
+  //   instrument->midi.cc_val = max(instrument->midi.cc_val, instrument->midi.cc_min);
+  //   MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), 2);
+  //   Globals::output_string[instrument->drumtype] = String(int(instrument->midi.cc_val));
+  // }
+}
+
+void Effect::playMidi_rawPin(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
+{
+  if (abs(instrument->sensitivity.noiseFloor - analogRead(instrument->pin)) > instrument->sensitivity.threshold)
+    MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
+  else
+    MIDI.sendNoteOff(instrument->midi.active_note, 127, 2);
+}
 
 void Effect::playMidi(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
 {
@@ -234,8 +261,8 @@ void Effect::swell_perform(Instrument *instrument, midi::MidiInterface<HardwareS
       //      output_string[instr] += ") ";
       Globals::output_string[instrument->drumtype] += "\t";
 
-        if (!Globals::footswitch_is_pressed)
-          MIDI.sendControlChange(instrument->midi.cc_chan, instrument->score.swell_val * instrument->score.swell_factor, 2);
+      if (!Globals::footswitch_is_pressed)
+        MIDI.sendControlChange(instrument->midi.cc_chan, instrument->score.swell_val * instrument->score.swell_factor, 2);
       /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
         finding the right CC# on microKORG: (manual p.61):
         1. press SHIFT + 5
@@ -429,32 +456,25 @@ void Effect::topography_midi_effects(Instrument *instrument, Instrument *instrum
     Globals::smoothen_dataArray(&instrument->topography); // erases "noise" from arrays if SNR>snr_threshold
 
     // reset slot for volume
-    total_vol.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  
+    beat_sum.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
     // sum up all topographies of all instruments:
     for (int idx = 0; idx < 16; idx++) // each slot
     {
       for (int i = 0; i < Globals::numInputs; i++) // of each instrument
       {
         if (instruments[i]->effect == TopographyLog)
-          total_vol.a_16[idx] += instrument->topography.a_16[idx];
+          beat_sum.a_16[idx] += instrument->topography.a_16[idx];
       }
     }
-    Globals::smoothen_dataArray(&total_vol);
+    Globals::smoothen_dataArray(&beat_sum);
 
     // ------------ result-> change volume and play MIDI --------
     // ----------------------------------------------------------
-    int vol = min(total_vol.a_16[Globals::current_16th_count] * 13, 255);
+    int vol = min(beat_sum.a_16[Globals::current_16th_count] * 13, 255);
 
     if (instrument->topography.a_16[Globals::current_16th_count] > 0)
-    {
-      MIDI.sendControlChange(50, vol, 2);
-      MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
-    }
-    else
-    {
-      MIDI.sendNoteOff(instrument->midi.active_note, 127, 2);
-    }
+      MIDI.sendControlChange(instrument->midi.cc_chan, vol, 2);
 
     // Debug:
     Globals::print_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
@@ -478,4 +498,14 @@ void Effect::turnMidiNoteOff(Instrument *instrument, midi::MidiInterface<Hardwar
 {
   if (millis() > instrument->score.last_notePlayed + 200 && instrument->effect != Swell) // Swell effect turns notes off itself
     MIDI.sendNoteOff(instrument->midi.active_note, 127, 2);
+}
+
+// TODO: make this decrease with 32nd-notes.
+void Effect::decay_ccVal(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI) // decreases value of CC effect each loop (!)
+{
+  instrument->midi.cc_val -= instrument->midi.cc_decay_factor;
+  instrument->midi.cc_val = max(instrument->midi.cc_val, instrument->midi.cc_min);
+  MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), 2);
+  Globals::output_string[instrument->drumtype] = String(instrument->midi.cc_val);
+  Globals::output_string[instrument->drumtype] += "\t";
 }

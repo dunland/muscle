@@ -10,6 +10,15 @@ void Instrument::setup_notes(std::vector<int> list)
   }
 }
 
+void Instrument::setup_midi(CC_Type cc_type, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor)
+{
+  midi.cc_chan = cc_type;
+  midi.cc_max = cc_max;
+  midi.cc_min = cc_min;
+  midi.cc_increase_factor = cc_increase_factor;
+  midi.cc_decay_factor = cc_decay_factor;
+}
+
 ///////////////////////// STROKE DETECTION /////////////////////////
 ////////////////////////////////////////////////////////////////////
 bool Instrument::stroke_detected(Instrument *instrument)
@@ -109,7 +118,6 @@ void Instrument::calculateNoiseFloor(Instrument *instrument)
 }
 // --------------------------------------------------------------------
 
-
 ///////////////////////////////////////////////////////////////////////
 ////////////////////////// INSTRUMENT EVENTS //////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -153,6 +161,14 @@ void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSer
     break;
   case TopographyLog:
     Effect::countup_topography(instrument);
+    break;
+
+  case PlayMidi_rawPin:
+    Effect::playMidi_rawPin(instrument, MIDI);
+    break;
+
+  case CC_Effect_rawPin:
+    Effect::cc_effect_rawPin(instrument, MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
     break;
 
   default:
@@ -241,6 +257,10 @@ void Instrument::tidyUp(Instrument *instrument, midi::MidiInterface<HardwareSeri
   case TopographyLog:
     break;
 
+  case CC_Effect_rawPin:
+    Effect::decay_ccVal(instrument, MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    break;
+
   default:
     break;
   }
@@ -257,7 +277,7 @@ void Instrument::tidyUp(Instrument *instrument, midi::MidiInterface<HardwareSeri
 // 2. calculate (squared) fraction of total for each entry
 // 3. get highest of these fractions
 // 4. get ratio of highest fraction to other and reset values if ratio > threshold
-// ->  
+// ->
 // */
 
 //   // int len = *(&instrument->topography.a_16 + 1) - instrument->topography.a_16;
