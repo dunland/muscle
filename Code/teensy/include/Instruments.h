@@ -19,7 +19,10 @@ public:
     int pin;
 
     EffectsType effect;
+    EffectsType lastEffect; // used to store original effect temporarily (in footswitch functions)
     DrumType drumtype;
+
+    String output_string;
 
     // sensitivity and instrument calibration
     struct SENSITIVITY
@@ -57,16 +60,17 @@ public:
         int active_note;
         int cc_chan;
         float cc_val = 0;
-        int cc_max = 127;       // MIDI values cannot be greater than this
-        int cc_min = 30;        // MIDI values cannot be smaller than this
+        int cc_max = 127;               // MIDI values cannot be greater than this
+        int cc_min = 30;                // MIDI values cannot be smaller than this
         float cc_increase_factor = 0.7; // factor by which MIDI vals will be increased upon hit
-        float cc_decay_factor = 1;    // factor by which MIDI vals decay
+        float cc_decay_factor = 1;      // factor by which MIDI vals decay
     } midi;
 
     struct TIMING
     {
         volatile unsigned long lastPinActiveTime;
         volatile unsigned long firstPinActiveTime;
+        unsigned long lastPinActiveTimeCopy;
         volatile int counts;
         boolean stroke_flag = false;
         int countsCopy;
@@ -76,11 +80,11 @@ public:
 
     void trigger(Instrument *, midi::MidiInterface<HardwareSerial>);
 
-    void perform(Instrument *, std::vector<Instrument*> instruments, midi::MidiInterface<HardwareSerial>);
+    void perform(Instrument *, std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>);
 
     void tidyUp(Instrument *, midi::MidiInterface<HardwareSerial>); // turn of MIDI notes etc
 
-    bool stroke_detected(Instrument *instrument);
+    bool stroke_detected();
 
     void setup_notes(std::vector<int> list);
 

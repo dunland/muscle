@@ -17,8 +17,8 @@ void Effect::cc_effect_rawPin(Instrument *instrument, midi::MidiInterface<Hardwa
   instrument->midi.cc_val += instrument->midi.cc_increase_factor;
   instrument->midi.cc_val = min(instrument->midi.cc_val, instrument->midi.cc_max);
   MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), 2);
-  Globals::output_string[instrument->drumtype] = String(instrument->midi.cc_val);
-  Globals::output_string[instrument->drumtype] += "\t";
+  instrument->output_string = String(instrument->midi.cc_val);
+  instrument->output_string += "\t";
   // }
   // else
   // {
@@ -47,21 +47,21 @@ void Effect::monitor(Instrument *instrument) // just prints what is being played
 {
   if (Globals::printStrokes)
   {
-    Globals::setInstrumentPrintString(instrument->drumtype, instrument->effect);
+    Globals::setInstrumentPrintString(instrument);
   }
 }
 
 void Effect::toggleRhythmSlot(Instrument *instrument)
 {
   if (Globals::printStrokes)
-    Globals::setInstrumentPrintString(instrument->drumtype, instrument->effect);
+    Globals::setInstrumentPrintString(instrument);
   instrument->score.read_rhythm_slot[Globals::current_eighth_count] = !instrument->score.read_rhythm_slot[Globals::current_eighth_count];
 }
 
 void Effect::footswitch_recordSlots(Instrument *instrument) // record what is being played and replay it later
 {
   if (Globals::printStrokes)
-    Globals::setInstrumentPrintString(instrument->drumtype, instrument->effect);
+    Globals::setInstrumentPrintString(instrument);
   instrument->score.set_rhythm_slot[Globals::current_eighth_count] = true;
 }
 
@@ -150,7 +150,7 @@ void Effect::getTapTempo()
 void Effect::swell_rec(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI) // remembers beat stroke position
 {
   /* works pretty much just like the tapTempo, but repeats the triggered drums on external MIDI instrument (-> swell_beat() in TIMED INTERVALS) */
-  Globals::setInstrumentPrintString(instrument->drumtype, instrument->effect);
+  Globals::setInstrumentPrintString(instrument);
 
   static unsigned long previous_swell_beatPos;
   // static unsigned long lastSwellRec = 0;
@@ -204,7 +204,7 @@ void Effect::countup_topography(Instrument *instrument) // increases slot positi
 {
   if (Globals::printStrokes)
   {
-    Globals::setInstrumentPrintString(instrument->drumtype, Monitor);
+    Globals::setInstrumentPrintString(instrument); // TODO: SHOULD BE HANDLED LIKE MONITOR!
   }
   instrument->topography.a_16[Globals::current_16th_count]++; // will be translated to topography.a_8 when evoked by tsunamiPlayback(?)
 }
@@ -220,7 +220,7 @@ void Effect::sendMidiNotes_timed(Instrument *instrument, midi::MidiInterface<Har
   {
     if (instrument->score.read_rhythm_slot[Globals::current_eighth_count])
     {
-      Globals::setInstrumentPrintString(instrument->drumtype, FootSwitchLooper);
+      Globals::setInstrumentPrintString(instrument); // TODO: SHOULD BE HANDLED LIKE FOOTSWITCHLOOPER!
       MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
     }
     else
@@ -257,9 +257,9 @@ void Effect::swell_perform(Instrument *instrument, midi::MidiInterface<HardwareS
       //      output_string[instr] += "/";
       //      output_string[instr] += swell_beatPos_sum[instr];
       //      output_string[instr] += " (";
-      Globals::output_string[instrument->drumtype] = String(instrument->score.swell_val);
+      instrument->output_string = String(instrument->score.swell_val);
       //      output_string[instr] += ") ";
-      Globals::output_string[instrument->drumtype] += "\t";
+      instrument->output_string += "\t";
 
       if (!Globals::footswitch_is_pressed)
         MIDI.sendControlChange(instrument->midi.cc_chan, instrument->score.swell_val * instrument->score.swell_factor, 2);
@@ -461,9 +461,9 @@ void Effect::topography_midi_effects(Instrument *instrument, std::vector<Instrum
     // sum up all topographies of all instruments:
     for (int idx = 0; idx < 16; idx++) // each slot
     {
-      for (int i = 0; i < Globals::numInputs; i++) // of each instrument
+      for (Instrument* instr : instruments) // of each instrument
       {
-        if (instruments[i]->effect == TopographyLog)
+        if (instr->effect == TopographyLog)
           beat_sum.a_16[idx] += instrument->topography.a_16[idx];
       }
     }
@@ -506,6 +506,6 @@ void Effect::decay_ccVal(Instrument *instrument, midi::MidiInterface<HardwareSer
   instrument->midi.cc_val -= instrument->midi.cc_decay_factor;
   instrument->midi.cc_val = max(instrument->midi.cc_val, instrument->midi.cc_min);
   MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), 2);
-  Globals::output_string[instrument->drumtype] = String(instrument->midi.cc_val);
-  Globals::output_string[instrument->drumtype] += "\t";
+  instrument->output_string = String(instrument->midi.cc_val);
+  instrument->output_string += "\t";
 }

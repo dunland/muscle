@@ -48,7 +48,7 @@ Instrument *cowbell;
 // Instrument crash2;
 // Instrument ride;
 
-std::vector<Instrument *> instruments = {snare, hihat, kick, tom2, standtom, cowbell};
+Globals::instruments = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
 
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
@@ -176,6 +176,7 @@ void setup()
   tom2 = new Instrument(A5, Tom2);
   standtom = new Instrument(A1, Standtom1);
   cowbell = new Instrument(A2, Cowbell);
+  crash1 = new Instrument(A6, Crash1);
 
   // initialize arrays:
   for (Instrument *instrument : instruments)
@@ -304,7 +305,7 @@ void loop()
     // if (instrument->effect == PlayMidi_rawPin || instrument->effect == CC_Effect_rawPin)
     //  instrument->trigger(instrument, MIDI);
 
-    if (instrument->stroke_detected(instrument)) // evaluates pins for activity repeatedly
+    if (instrument->stroke_detected()) // evaluates pins for activity repeatedly
     {
       // ----------------------- perform pin action -------------------
       instrument->trigger(instrument, MIDI); // runs trigger function according to instrument's EffectType

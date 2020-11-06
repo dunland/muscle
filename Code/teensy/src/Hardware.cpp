@@ -9,12 +9,12 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments, Score *s
   {
   case (LOG_BEATS):
     // set pinMode of all instruments to 3 (record what is being played)
-    for (int i = 0; i < Globals::numInputs; i++)
+    for (Instrument* instrument : instruments)
     {
-      lastEffect[i] = instruments[i]->effect;
-      instruments[i]->effect = FootSwitchLooper; // TODO: not for Cowbell?
+      instrument->lastEffect = instrument->effect;
+      instrument->effect = FootSwitchLooper; // TODO: not for Cowbell?
       for (int j = 0; j < 8; j++)
-        instruments[i]->score.set_rhythm_slot[j] = false; // reset entire record
+        instrument->score.set_rhythm_slot[j] = false; // reset entire record
     }
     break;
 
@@ -23,18 +23,18 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments, Score *s
     break;
 
   case (RESET_TOPO): // resets beat_topography (for all instruments)
-    for (int i = 0; i < Globals::numInputs; i++)
+    for (Instrument* instrument : instruments)
     {
       // reset 8th-note-topography:
       for (int j = 0; j < 8; j++)
       {
-        instruments[i]->topography.a_8[j] = 0;
+        instrument->topography.a_8[j] = 0;
       }
 
       // reset 16th-note-topography:
       for (int j = 0; j < 16; j++)
       {
-        instruments[i]->topography.a_16[j] = 0;
+        instrument->topography.a_16[j] = 0;
       }
     }
     break;
@@ -44,9 +44,9 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments, Score *s
     {
       Globals::println_to_console("regularity height > 10: reset!");
       Globals::score_state++; // go to next score state
-      for (int i = 0; i < Globals::numInputs; i++)
+      for (Instrument* instrument : instruments)
         for (int j = 0; j < 16; j++)
-          instruments[i]->topography.a_16[j] = 0;
+          instrument->topography.a_16[j] = 0;
 
       Globals::println_to_console("all instrument topographies were reset.");
 
@@ -74,8 +74,8 @@ void Hardware::footswitch_released(std::vector<Instrument*> instruments)
   switch (FOOTSWITCH_MODE)
   {
   case (LOG_BEATS):
-    for (int i = 0; i < Globals::numInputs; i++)
-      instruments[i]->effect = lastEffect[i];
+    for (Instrument* instrument : instruments)
+      instrument->effect = instrument->lastEffect;
     break;
 
   case (HOLD_CC):

@@ -21,31 +21,30 @@ void Instrument::setup_midi(CC_Type cc_type, int cc_max, int cc_min, float cc_in
 
 ///////////////////////// STROKE DETECTION /////////////////////////
 ////////////////////////////////////////////////////////////////////
-bool Instrument::stroke_detected(Instrument *instrument)
+bool Instrument::stroke_detected()
 {
-  static unsigned long lastPinActiveTimeCopy[Globals::numInputs];
   // static unsigned long firstPinActiveTimeCopy[Globals::numInputs];
   // static int lastValue[Globals::numInputs];    // for LED toggle
   // static boolean toggleState = false; // for LED toggle
 
   noInterrupts();
-  lastPinActiveTimeCopy[instrument->drumtype] = instrument->timing.lastPinActiveTime;
+  timing.lastPinActiveTimeCopy = timing.lastPinActiveTime;
   // firstPinActiveTimeCopy[instr] = firstPinActiveTime[instr];
   interrupts();
 
-  if (millis() > lastPinActiveTimeCopy[instrument->drumtype] + instrument->sensitivity.delayAfterStroke) // get counts only X ms after LAST hit
+  if (millis() > timing.lastPinActiveTimeCopy + sensitivity.delayAfterStroke) // get counts only X ms after LAST hit
 
   //if (millis() > firstPinActiveTimeCopy[instr] + globalDelayAfterStroke)
   //get counts only X ms after FIRST hit ??
   {
     static int countsCopy;
     noInterrupts();
-    countsCopy = instrument->timing.counts;
-    instrument->timing.counts = 0;
+    countsCopy = timing.counts;
+    timing.counts = 0;
     interrupts();
 
     // ---------------------------- found significant count!
-    if (countsCopy >= instrument->sensitivity.crossings)
+    if (countsCopy >= sensitivity.crossings)
     {
       // LED blink:
       //if (countsCopy[instr] != lastValue[instr]) toggleState = !toggleState;
@@ -110,10 +109,11 @@ void Instrument::calculateNoiseFloor(Instrument *instrument)
   Globals::print_to_console("noiseFloor = ");
   Globals::println_to_console(instrument->sensitivity.noiseFloor);
 
-  for (int i = 0; i < Globals::numInputs; i++) // turn LEDs off again
+  // turn LEDs off again:
+  for (Instrument *instrument : instruments) 
   {
-    digitalWrite(Globals::leds[i], LOW);
-    Globals::output_string[i] = "\t";
+    digitalWrite(instrument->led, LOW);
+    instrument->output_string = "\t";
   }
 }
 // --------------------------------------------------------------------

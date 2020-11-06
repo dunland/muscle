@@ -18,7 +18,7 @@ public:
   static const int RESET_AND_PROCEED_SCORE = 3;
   static const int FOOTSWITCH_MODE = RESET_AND_PROCEED_SCORE;
 
-  static EffectsType lastEffect[Globals::numInputs];
+  // static EffectsType lastEffect[Globals::numInputs];
 
   static void footswitch_pressed(std::vector<Instrument*> instruments, Score* score);
 
