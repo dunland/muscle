@@ -10,8 +10,10 @@ class Instrument
 {
 
 public:
-    Instrument()
+    Instrument(int pin_, DrumType drumtype_)
     {
+        pin = pin;
+        drumtype_ = drumtype;
     }
 
     int pin;
@@ -67,13 +69,14 @@ public:
         volatile unsigned long firstPinActiveTime;
         volatile int counts;
         boolean stroke_flag = false;
+        int countsCopy;
     } timing;
 
     TOPOGRAPHY topography;
 
     void trigger(Instrument *, midi::MidiInterface<HardwareSerial>);
 
-    void perform(Instrument *, Instrument *instruments[Globals::numInputs], midi::MidiInterface<HardwareSerial>);
+    void perform(Instrument *, std::vector<Instrument*> instruments, midi::MidiInterface<HardwareSerial>);
 
     void tidyUp(Instrument *, midi::MidiInterface<HardwareSerial>); // turn of MIDI notes etc
 

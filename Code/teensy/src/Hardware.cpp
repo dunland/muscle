@@ -3,7 +3,7 @@
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void Hardware::footswitch_pressed(Instrument *instruments[Globals::numInputs], Score *score)
+void Hardware::footswitch_pressed(std::vector<Instrument*> instruments, Score *score)
 {
   switch (FOOTSWITCH_MODE)
   {
@@ -69,7 +69,7 @@ void Hardware::footswitch_pressed(Instrument *instruments[Globals::numInputs], S
 }
 // --------------------------------------------------------------------
 
-void Hardware::footswitch_released(Instrument *instruments[Globals::numInputs])
+void Hardware::footswitch_released(std::vector<Instrument*> instruments)
 {
   switch (FOOTSWITCH_MODE)
   {
@@ -87,7 +87,7 @@ void Hardware::footswitch_released(Instrument *instruments[Globals::numInputs])
   }
 }
 
-void Hardware::checkFootSwitch(Instrument *instruments[Globals::numInputs], Score *score)
+void Hardware::checkFootSwitch(std::vector<Instrument*> instruments, Score *score)
 {
 
   static int switch_state;

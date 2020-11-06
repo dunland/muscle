@@ -179,7 +179,7 @@ void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSer
 ///////////////////////////// TIMED EFFECTS ///////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void Instrument::perform(Instrument *instrument, Instrument *instruments[Globals::numInputs], midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::perform(Instrument *instrument, std::vector<Instrument*> instruments, midi::MidiInterface<HardwareSerial> MIDI)
 {
   switch (effect)
   {

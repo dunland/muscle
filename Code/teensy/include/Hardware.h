@@ -20,11 +20,11 @@ public:
 
   static EffectsType lastEffect[Globals::numInputs];
 
-  static void footswitch_pressed(Instrument *instruments[Globals::numInputs], Score* score);
+  static void footswitch_pressed(std::vector<Instrument*> instruments, Score* score);
 
-  static void footswitch_released(Instrument *instruments[Globals::numInputs]);
+  static void footswitch_released(std::vector<Instrument*> instruments);
 
-  static void checkFootSwitch(Instrument *instruments[Globals::numInputs], Score* score);
+  static void checkFootSwitch(std::vector<Instrument*> instruments, Score* score);
   // --------------------------------------------------------------------
 
   ////////////////////////////// VIBRATION MOTOR ////////////////////////

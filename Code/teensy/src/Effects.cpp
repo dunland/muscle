@@ -448,7 +448,7 @@ void Effect::tsunami_beat_playback(Instrument *instrument)
 // --------------------------------------------------------------------
 
 // ---------- MIDI playback according to beat_topography --------
-void Effect::topography_midi_effects(Instrument *instrument, Instrument *instruments[Globals::numInputs], midi::MidiInterface<HardwareSerial> MIDI)
+void Effect::topography_midi_effects(Instrument *instrument, std::vector<Instrument*> instruments, midi::MidiInterface<HardwareSerial> MIDI)
 {
   if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
   {
