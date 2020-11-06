@@ -154,6 +154,8 @@ void setup()
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
   MIDI.begin(MIDI_CHANNEL_OMNI);
+  // MIDI.sendRealTime(0xFA);
+  Serial2.write(0xFA);
 
   delay(1000);              // wait for Tsunami to finish reset // redundant?
   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
@@ -197,7 +199,7 @@ void setup()
   instruments[Snare]->pin = A3;
   instruments[Hihat]->pin = A4;
   instruments[Kick]->pin = A0;
-  instruments[Tom1]->pin = A5;
+  instruments[Tom1]->pin = A7;
   instruments[Tom2]->pin = A5;
   instruments[Standtom1]->pin = A1;
   instruments[Cowbell]->pin = A2;
@@ -232,8 +234,8 @@ void setup()
   instruments[Snare]->effect = CC_Effect_rawPin;
   instruments[Hihat]->effect = TapTempo;
   instruments[Kick]->effect = CC_Effect_rawPin;
-  instruments[Tom1]->effect = CC_Effect_rawPin;
-  instruments[Tom2]->effect = Monitor;
+  instruments[Tom1]->effect = Monitor;
+  instruments[Tom2]->effect = CC_Effect_rawPin;
   instruments[Standtom1]->effect = CC_Effect_rawPin;
   instruments[Cowbell]->effect = CC_Effect_rawPin;
   // instruments[Ride]->effect = Monitor;
@@ -261,11 +263,11 @@ void setup()
 
   Globals::println_to_console("setting up midi channels..");
   // midi channels:
-  instruments[Snare]->setup_midi(Cutoff, 127, 30, 10, 0.1);
+  instruments[Snare]->setup_midi(Cutoff, 127, 30, 30, 1);
   instruments[Hihat]->setup_midi(Resonance, 127, 30, 10, 0.1);
   instruments[Kick]->setup_midi(Release, 127, 0, 50, 0.2);
-  instruments[Tom1]->setup_midi(Sustain, 127, 0, 5, 0.01);
-  instruments[Tom2]->setup_midi(Resonance, 127, 30, 1, 0.01);
+  // instruments[Tom1]->setup_midi(Sustain, 127, 0, 5, 0.01);
+  instruments[Tom2]->setup_midi(Resonance, 127, 30, 5, 0.01);
   instruments[Standtom1]->setup_midi(Release, 127, 0, 3, 0.01);
   instruments[Cowbell]->setup_midi(DelayDepth, 90, 0, 17, 0.1);
 
@@ -382,10 +384,14 @@ void loop()
       // Hardware::vibrate_motor(50);
     }
     // Debug: play MIDI note on quarter notes
-    //  if (Globals::current_beat_pos % 8 == 0)
-    //  MIDI.sendNoteOn(57, 127, 2);
-    //  else
-    //  MIDI.sendNoteOff(57, 127, 2);
+    // if (Globals::current_beat_pos % 8 == 0)
+    // {
+    //   Serial2.write(0xFA);
+    //   MIDI.sendNoteOn(72, 127, 2);
+    // }
+
+    // else
+    //   MIDI.sendNoteOff(72, 127, 2);
 
     // --------------------------- 8th notes: -------------------------
     if (Globals::current_beat_pos % 4 == 0)
