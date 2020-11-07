@@ -48,7 +48,7 @@ Instrument *cowbell;
 // Instrument crash2;
 // Instrument ride;
 
-Globals::instruments = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
+static std::vector<Instrument*> instruments  = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
 
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
@@ -181,8 +181,7 @@ void setup()
   // initialize arrays:
   for (Instrument *instrument : instruments)
   {
-    int i = 0;
-    pinMode(Globals::leds[i], OUTPUT);
+    pinMode(instrument->led, OUTPUT);
     instrument->timing.counts = 0;
     for (int j = 0; j < 8; j++)
     {
@@ -192,7 +191,6 @@ void setup()
       instrument->topography.a_16[j] = 0;
       instrument->topography.a_16[j * 2] = 0;
     }
-    i++;
   }
 
   // set instrument calibration array
@@ -365,7 +363,7 @@ void loop()
     if (Globals::current_beat_pos == 0)
     {
       Globals::print_to_console("score_state = ");
-      Globals::println_to_console(Globals::score_state);
+      Globals::println_to_console(Score::score_state);
     }
 
     // ------------------------- quarter notes: -----------------------
@@ -412,10 +410,10 @@ void loop()
     // Globals::print_to_console(Globals::current_beat_pos / 4);
     // Globals::print_to_console("\t");
     // Globals::print_to_console(Globals::current_eighth_count);
-    for (int i = 0; i < instruments.size(); i++)
+    for (Instrument* instrument : instruments)
     {
-      Globals::print_to_console(Globals::output_string[i]);
-      Globals::output_string[i] = "\t";
+      Globals::print_to_console(instrument->output_string);
+      instrument->output_string = "\t";
     }
     Globals::println_to_console("");
 

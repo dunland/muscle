@@ -47,21 +47,21 @@ void Effect::monitor(Instrument *instrument) // just prints what is being played
 {
   if (Globals::printStrokes)
   {
-    Globals::setInstrumentPrintString(instrument);
+    instrument->setInstrumentPrintString();
   }
 }
 
 void Effect::toggleRhythmSlot(Instrument *instrument)
 {
   if (Globals::printStrokes)
-    Globals::setInstrumentPrintString(instrument);
+    instrument->setInstrumentPrintString();
   instrument->score.read_rhythm_slot[Globals::current_eighth_count] = !instrument->score.read_rhythm_slot[Globals::current_eighth_count];
 }
 
 void Effect::footswitch_recordSlots(Instrument *instrument) // record what is being played and replay it later
 {
   if (Globals::printStrokes)
-    Globals::setInstrumentPrintString(instrument);
+    instrument->setInstrumentPrintString();
   instrument->score.set_rhythm_slot[Globals::current_eighth_count] = true;
 }
 
@@ -150,7 +150,7 @@ void Effect::getTapTempo()
 void Effect::swell_rec(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI) // remembers beat stroke position
 {
   /* works pretty much just like the tapTempo, but repeats the triggered drums on external MIDI instrument (-> swell_beat() in TIMED INTERVALS) */
-  Globals::setInstrumentPrintString(instrument);
+    instrument->setInstrumentPrintString();
 
   static unsigned long previous_swell_beatPos;
   // static unsigned long lastSwellRec = 0;
@@ -204,7 +204,7 @@ void Effect::countup_topography(Instrument *instrument) // increases slot positi
 {
   if (Globals::printStrokes)
   {
-    Globals::setInstrumentPrintString(instrument); // TODO: SHOULD BE HANDLED LIKE MONITOR!
+        instrument->setInstrumentPrintString(); // TODO: SHOULD BE HANDLED LIKE MONITOR!
   }
   instrument->topography.a_16[Globals::current_16th_count]++; // will be translated to topography.a_8 when evoked by tsunamiPlayback(?)
 }
@@ -220,7 +220,8 @@ void Effect::sendMidiNotes_timed(Instrument *instrument, midi::MidiInterface<Har
   {
     if (instrument->score.read_rhythm_slot[Globals::current_eighth_count])
     {
-      Globals::setInstrumentPrintString(instrument); // TODO: SHOULD BE HANDLED LIKE FOOTSWITCHLOOPER!
+          instrument->setInstrumentPrintString();
+ // TODO: SHOULD BE HANDLED LIKE FOOTSWITCHLOOPER!
       MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
     }
     else

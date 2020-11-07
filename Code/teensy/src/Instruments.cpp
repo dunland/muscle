@@ -98,24 +98,111 @@ void Instrument::calculateNoiseFloor(Instrument *instrument)
     if (n % 100 == 0)
     {
       Globals::print_to_console(" . ");
-      digitalWrite(Globals::leds[instrument->drumtype], toggleState);
+      digitalWrite(instrument->led, toggleState);
       toggleState = !toggleState;
     }
     totalSamples += analogRead(instrument->pin);
   }
   instrument->sensitivity.noiseFloor = totalSamples / 400;
-  digitalWrite(Globals::leds[instrument->drumtype], LOW);
+  digitalWrite(instrument->led, LOW);
   led_idx++;
   Globals::print_to_console("noiseFloor = ");
   Globals::println_to_console(instrument->sensitivity.noiseFloor);
 
   // turn LEDs off again:
-  for (Instrument *instrument : instruments) 
-  {
     digitalWrite(instrument->led, LOW);
     instrument->output_string = "\t";
-  }
 }
+// --------------------------------------------------------------------
+
+///////////////////// SET STRING FOR PLAY LOGGING /////////////////////
+///////////////////////////////////////////////////////////////////////
+void Instrument::setInstrumentPrintString()
+{
+	switch (effect)
+	{
+	case Monitor: // monitor: just print what is being played
+		if (drumtype == Kick)
+			output_string = "■\t"; // Kickdrum
+		else if (drumtype == Cowbell)
+			output_string = "▲\t"; // Crash
+		else if (drumtype == Standtom1)
+			output_string = "□\t"; // Standtom
+		else if (drumtype == Standtom2)
+			output_string = "O\t"; // Standtom
+		else if (drumtype == Hihat)
+			output_string = "x\t"; // Hi-Hat
+		else if (drumtype == Tom1)
+			output_string = "°\t"; // Tom 1
+		else if (drumtype == Snare)
+			output_string = "※\t"; // Snaredrum
+		else if (drumtype == Tom2)
+			output_string = "o\t"; // Tom 2
+		else if (drumtype == Ride)
+			output_string = "xx\t"; // Ride
+		else if (drumtype == Crash1)
+			output_string = "-X-\t"; // Crash
+		else if (drumtype == Crash2)
+			output_string = "-XX-\t"; // Crash
+		break;
+
+	case ToggleRhythmSlot: // toggle beat slot
+		if (drumtype == Kick)
+			output_string = "■\t"; // Kickdrum
+		else if (drumtype == Cowbell)
+			output_string = "▲\t"; // Crash
+		else if (drumtype == Standtom1)
+			output_string = "□\t"; // Standtom
+		else if (drumtype == Standtom2)
+			output_string = "O\t"; // Standtom
+		else if (drumtype == Hihat)
+			output_string = "x\t"; // Hi-Hat
+		else if (drumtype == Tom1)
+			output_string = "°\t"; // Tom 1
+		else if (drumtype == Snare)
+			output_string = "※\t"; // Snaredrum
+		else if (drumtype == Tom2)
+			output_string = "o\t"; // Tom 2
+		else if (drumtype == Ride)
+			output_string = "xx\t"; // Ride
+		else if (drumtype == Crash1)
+			output_string = "-X-\t"; // Crash
+		else if (drumtype == Crash2)
+			output_string = "-XX-\t"; // Crash
+		break;
+
+	case FootSwitchLooper: // add an ! if pinAction == 3 (replay logged rhythm)
+		if (drumtype == Kick)
+			output_string = "!■\t"; // Kickdrum
+		else if (drumtype == Cowbell)
+			output_string = "!▲\t"; // Crash
+		else if (drumtype == Standtom1)
+			output_string = "!□\t"; // Standtom
+		else if (drumtype == Standtom2)
+			output_string = "!O\t"; // Standtom
+		else if (drumtype == Hihat)
+			output_string = "!x\t"; // Hi-Hat
+		else if (drumtype == Tom1)
+			output_string = "!°\t"; // Tom 1
+		else if (drumtype == Snare)
+			output_string = "!※\t"; // Snaredrum
+		else if (drumtype == Tom2)
+			output_string = "!o\t"; // Tom 2
+		else if (drumtype == Ride)
+			output_string = "!xx\t"; // Ride
+		else if (drumtype == Crash1)
+			output_string = "!-X-\t"; // Crash
+		else if (drumtype == Crash2)
+			output_string = "!-XX-\t"; // Crash
+		break;
+
+		// case 5: // print swell_val for repeated MIDI notes in "swell" mode
+		//   Globals::output_string[incoming_i] = swell_val[incoming_i];
+		//   Globals::output_string[incoming_i] += "\t";
+		//   break;
+	}
+}
+
 // --------------------------------------------------------------------
 
 ///////////////////////////////////////////////////////////////////////

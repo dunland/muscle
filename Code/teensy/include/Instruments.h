@@ -17,6 +17,7 @@ public:
     }
 
     int pin;
+    int led = LED_BUILTIN;
 
     EffectsType effect;
     EffectsType lastEffect; // used to store original effect temporarily (in footswitch functions)
@@ -91,6 +92,9 @@ public:
     void setup_midi(CC_Type cc_type, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor);
 
     void calculateNoiseFloor(Instrument *);
+
+    void setInstrumentPrintString();
+
 
     // void smoothen_dataArray(Instrument *instrument);
 };

@@ -3,11 +3,6 @@
 // #include <vector>
 // #include <MIDI.h>
 
-std::vector<int> Globals::pins = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};
-std::vector<int> Globals::leds = {LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN, LED_BUILTIN};
-
-int Globals::score_state = 1;
-
 boolean Globals::printStrokes = true;
 boolean Globals::use_responsiveCalibration = false;
 boolean Globals::do_print_to_console = true;
@@ -64,95 +59,6 @@ volatile unsigned long Globals::beatCount = 0;
 int Globals::next_beatCount = 0; // will be reset when timer restarts
 volatile boolean Globals::sendMidiClock = false;
 
-///////////////////// SET STRING FOR PLAY LOGGING /////////////////////
-///////////////////////////////////////////////////////////////////////
-void Globals::setInstrumentPrintString(Instrument *instrument)
-{
-	switch (instrument->effect)
-	{
-	case Monitor: // monitor: just print what is being played
-		if (instrument->drumType == Kick)
-			instrument->output_string = "■\t"; // Kickdrum
-		else if (instrument->drumtype == Cowbell)
-			instrument->output_string = "▲\t"; // Crash
-		else if (instrument->drumtype == Standtom1)
-			instrument->output_string = "□\t"; // Standtom
-		else if (instrument->drumtype == Standtom2)
-			instrument->output_string = "O\t"; // Standtom
-		else if (instrument->drumtype == Hihat)
-			instrument->output_string = "x\t"; // Hi-Hat
-		else if (instrument->drumtype == Tom1)
-			instrument->output_string = "°\t"; // Tom 1
-		else if (instrument->drumtype == Snare)
-			instrument->output_string = "※\t"; // Snaredrum
-		else if (instrument->drumtype == Tom2)
-			instrument->output_string = "o\t"; // Tom 2
-		else if (instrument->drumtype == Ride)
-			instrument->output_string = "xx\t"; // Ride
-		else if (instrument->drumtype == Crash1)
-			instrument->output_string = "-X-\t"; // Crash
-		else if (instrument->drumtype == Crash2)
-			instrument->output_string = "-XX-\t"; // Crash
-		break;
-
-	case ToggleRhythmSlot: // toggle beat slot
-		if (instrument->drumtype == Kick)
-			instrument->output_string = "■\t"; // Kickdrum
-		else if (instrument->drumtype == Cowbell)
-			instrument->output_string = "▲\t"; // Crash
-		else if (instrument->drumtype == Standtom1)
-			instrument->output_string = "□\t"; // Standtom
-		else if (instrument->drumtype == Standtom2)
-			instrument->output_string = "O\t"; // Standtom
-		else if (instrument->drumtype == Hihat)
-			instrument->output_string = "x\t"; // Hi-Hat
-		else if (instrument->drumtype == Tom1)
-			instrument->output_string = "°\t"; // Tom 1
-		else if (instrument->drumtype == Snare)
-			instrument->output_string = "※\t"; // Snaredrum
-		else if (instrument->drumtype == Tom2)
-			instrument->output_string = "o\t"; // Tom 2
-		else if (instrument->drumtype == Ride)
-			instrument->output_string = "xx\t"; // Ride
-		else if (instrument->drumtype == Crash1)
-			instrument->output_string = "-X-\t"; // Crash
-		else if (instrument->drumtype == Crash2)
-			instrument->output_string = "-XX-\t"; // Crash
-		break;
-
-	case FootSwitchLooper: // add an ! if pinAction == 3 (replay logged rhythm)
-		if (instrument->drumtype == Kick)
-			instrument->output_string = "!■\t"; // Kickdrum
-		else if (instrument->drumtype == Cowbell)
-			instrument->output_string = "!▲\t"; // Crash
-		else if (instrument->drumtype == Standtom1)
-			instrument->output_string = "!□\t"; // Standtom
-		else if (instrument->drumtype == Standtom2)
-			instrument->output_string = "!O\t"; // Standtom
-		else if (instrument->drumtype == Hihat)
-			instrument->output_string = "!x\t"; // Hi-Hat
-		else if (instrument->drumtype == Tom1)
-			instrument->output_string = "!°\t"; // Tom 1
-		else if (instrument->drumtype == Snare)
-			instrument->output_string = "!※\t"; // Snaredrum
-		else if (instrument->drumtype == Tom2)
-			instrument->output_string = "!o\t"; // Tom 2
-		else if (instrument->drumtype == Ride)
-			instrument->output_string = "!xx\t"; // Ride
-		else if (instrument->drumtype == Crash1)
-			instrument->output_string = "!-X-\t"; // Crash
-		else if (instrument->drumtype == Crash2)
-			instrument->output_string = "!-XX-\t"; // Crash
-		break;
-
-		// case 5: // print swell_val for repeated MIDI notes in "swell" mode
-		//   Globals::output_string[incoming_i] = swell_val[incoming_i];
-		//   Globals::output_string[incoming_i] += "\t";
-		//   break;
-	}
-}
-
-// --------------------------------------------------------------------
 
 void Globals::masterClockTimer()
 {

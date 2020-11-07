@@ -5,15 +5,12 @@
 #include <Tsunami.h> // in cpp
 // #include <MIDI.h> // in cpp
 #include <vector>
-#include <Instruments.h>
 
 //MIDI_CREATE_DEFAULT_INSTANCE();
 // MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI); // for Serial-specific usage
 
 #define VIBR 0
 #define FOOTSWITCH 2
-
-class Instrument;
 
 // instrument naming for human-readable console outputs:
 enum DrumType
@@ -82,12 +79,6 @@ struct TOPOGRAPHY
 class Globals
 {
 public:
-  static const uint8_t numInputs = 7;
-  static std::vector<Instrument*> instruments;
-  static std::vector<int> pins; // stores contact piezo pin of each instrument
-  static std::vector<int> leds; // stores leds for each instrument (if differing)
-  static int score_state;
-
   // ------------------------- Debug variables --------------------------
   static boolean do_print_to_console;
   static boolean do_send_to_processing;
@@ -155,8 +146,6 @@ public:
     }
     return "";
   }
-
-  static void setInstrumentPrintString(Instrument *instrument);
 
   // TOPOGRAPHIES: ------------------------------------------------------
   static void smoothen_dataArray(TOPOGRAPHY *topography); // there is a double of this in Instruments to perform instrument-specific operations
