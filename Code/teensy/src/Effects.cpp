@@ -98,20 +98,24 @@ void Effect::getTapTempo()
       clock_sum += millis() - timeSinceFirstTap;
       Globals::tapInterval = clock_sum / num_of_taps;
       Globals::print_to_console("new tap Tempo is ");
-      Globals::print_to_console(60000 / Globals::tapInterval);
-      Globals::print_to_console(" bpm (");
-      Globals::print_to_console(Globals::tapInterval);
-      Globals::println_to_console(" ms interval)");
 
       if (Globals::tapInterval >= 333) // quarter notes when BPM <= 180
       {
         Globals::current_BPM = 60000 / Globals::tapInterval;
         Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+        Globals::print_to_console(60000 / Globals::tapInterval);
+        Globals::print_to_console(" bpm (");
+        Globals::print_to_console(Globals::tapInterval);
+        Globals::println_to_console(" ms interval int quarter-notes)");
       }
       else // eighth-notes when BPM >= 180
       {
         Globals::current_BPM = (60000 / Globals::tapInterval) / 2;                                    // BPM >= 180 → strokes are 8th-notes, BPM half-time
         Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 8 / 128); // 8 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+        Globals::print_to_console((60000 / Globals::tapInterval) / 2);
+        Globals::print_to_console(" bpm (");
+        Globals::print_to_console(Globals::tapInterval);
+        Globals::println_to_console(" ms interval in 8th-notes)");
       }
 
       tapState = 1;

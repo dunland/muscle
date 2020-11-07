@@ -93,7 +93,6 @@ void Hardware::checkFootSwitch(std::vector<Instrument*> instruments, Score *scor
   static int switch_state;
   static int last_switch_state = HIGH;
   static unsigned long last_switch_toggle = 1000; // some pre-delay to prevent initial misdetection
-  //static boolean lastPinAction[Globals::numInputs];
 
   switch_state = digitalRead(FOOTSWITCH);
   if (switch_state != last_switch_state && millis() > last_switch_toggle + 20)

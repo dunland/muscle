@@ -12,8 +12,8 @@ class Instrument
 public:
     Instrument(int pin_, DrumType drumtype_)
     {
-        pin = pin;
-        drumtype_ = drumtype;
+        pin = pin_;
+        drumtype = drumtype_;
     }
 
     int pin;
@@ -72,7 +72,9 @@ public:
         volatile unsigned long lastPinActiveTime;
         volatile unsigned long firstPinActiveTime;
         unsigned long lastPinActiveTimeCopy;
-        volatile int counts;
+        unsigned long firstPinActiveTimeCopy;
+        boolean countAfterFirstStroke = false; // start counting after first threshold crossing or using delayAfterStroke
+        volatile int counts = 0;
         boolean stroke_flag = false;
         int countsCopy;
     } timing;
@@ -90,6 +92,8 @@ public:
     void setup_notes(std::vector<int> list);
 
     void setup_midi(CC_Type cc_type, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor);
+
+    void setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean firstStroke_);
 
     void calculateNoiseFloor(Instrument *);
 

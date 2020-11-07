@@ -45,6 +45,7 @@ enum EffectsType
 
 enum CC_Type // channels on mKORG:
 {
+   None = -1,
    Cutoff = 44,
    Resonance = 71,
    Amplevel = 50,
@@ -53,6 +54,12 @@ enum CC_Type // channels on mKORG:
    Release = 26,
    DelayTime = 51,
    DelayDepth = 94
+};
+
+enum MIDI_Instruments_Channels
+{
+  Volca = 1,
+  microKORG = 2
 };
 
 struct TOPOGRAPHY

@@ -8,9 +8,9 @@ int Score::score_state = 1;
 void Score::continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI, int note_length) // initiates a continuous bass note from score
 {
     if (Globals::current_beat_pos % note_length == 0)
-        MIDI.sendNoteOn(notes[0], 127, 2);
-    // else
-        // MIDI.sendNoteOff(notes[0], 127, 2);
+        MIDI.sendNoteOn(notes[0], 127, Volca);
+    else
+        MIDI.sendNoteOff(notes[0], 127, Volca);
 }
 
 void Score::envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)
