@@ -48,7 +48,7 @@ Instrument *cowbell;
 // Instrument crash2;
 // Instrument ride;
 
-static std::vector<Instrument *> instruments = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
+static std::vector<Instrument *> instruments;
 
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
@@ -177,6 +177,8 @@ void setup()
   standtom = new Instrument(A1, Standtom1);
   cowbell = new Instrument(A2, Cowbell);
   crash1 = new Instrument(A6, Crash1);
+
+   instruments = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
 
   // initialize arrays:
   for (auto& instrument : instruments)
