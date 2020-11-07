@@ -38,17 +38,18 @@
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
 Instrument *instruments[Globals::numInputs];
-Instrument snare;
-Instrument hihat;
-Instrument kick;
+Instrument *snare;
+Instrument *hihat;
+Instrument *kick;
 // Instrument tom1;
-Instrument tom2;
-Instrument standtom;
-Instrument crash1;
+Instrument *tom2;
+Instrument *standtom;
+Instrument *crash1;
+Instrument *cowbell;
 // Instrument crash2;
 // Instrument ride;
 
-Instrument instrumente[6] = {snare, hihat, kick, tom2, standtom, crash1};
+static std::vector<Instrument *> instrumente;
 
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
@@ -180,6 +181,23 @@ void setup()
     instruments[i]->drumtype = DrumType(i);
   }
 
+  snare = new Instrument;
+  snare->drumtype = Snare;
+  hihat = new Instrument;
+  hihat->drumtype = Hihat;
+  kick = new Instrument;
+  kick->drumtype = Kick;
+  tom2 = new Instrument;
+  tom2->drumtype = Tom2;
+  cowbell = new Instrument;
+  cowbell->drumtype = Cowbell;
+  crash1 = new Instrument;
+  crash1->drumtype = Crash1;
+  standtom = new Instrument;
+  standtom->drumtype = Standtom1;
+
+  instrumente = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
+  
   // initialize arrays:
   for (int i = 0; i < Globals::numInputs; i++)
   {
@@ -303,6 +321,7 @@ void setup()
 
 void loop()
 {
+
   Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
 
   // ------------------------- DEBUG AREA -----------------------------
@@ -376,6 +395,12 @@ void loop()
     {
       Globals::print_to_console("score_state = ");
       Globals::println_to_console(Globals::score_state);
+
+      // Debug:
+      for (auto &instrument : instrumente)
+      {
+        Globals::println_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
+      }
     }
 
     // ------------------------- quarter notes: -----------------------
