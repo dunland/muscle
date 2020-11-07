@@ -48,7 +48,7 @@ Instrument *cowbell;
 // Instrument crash2;
 // Instrument ride;
 
-static std::vector<Instrument*> instruments  = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
+static std::vector<Instrument *> instruments = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
 
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
@@ -96,7 +96,7 @@ void printNormalizedValues(boolean printNorm_criterion)
     static unsigned long lastMillis;
     if (millis() != lastMillis)
     {
-      for (Instrument *instrument : instruments)
+      for (auto& instrument : instruments)
       {
         // static int countsCopy[Globals::numInputs];
         //noInterrupts();
@@ -120,7 +120,7 @@ void printNormalizedValues(boolean printNorm_criterion)
 void samplePins()
 {
   // read all pins:
-  for (Instrument *instrument : instruments)
+  for (auto& instrument : instruments)
   // Using a for loop with iterator
   {
     if (pinValue(instrument) > instrument->sensitivity.threshold)
@@ -179,7 +179,7 @@ void setup()
   crash1 = new Instrument(A6, Crash1);
 
   // initialize arrays:
-  for (Instrument *instrument : instruments)
+  for (auto& instrument : instruments)
   {
     pinMode(instrument->led, OUTPUT);
     instrument->timing.counts = 0;
@@ -211,7 +211,7 @@ void setup()
   cowbell->sensitivity.crossings = 15;
 
   // calculate noise floor:
-  for (Instrument *instrument : instruments)
+  for (auto& instrument : instruments)
     instrument->calculateNoiseFloor(instrument);
 
   Globals::println_to_console("\n..calculating noiseFloor done.");
@@ -283,6 +283,9 @@ void setup()
   // Debug:
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
   // tracknum, channel
+
+  // send MIDI-RealTime-Start-Message:
+  Serial2.write(0xFA);
 }
 
 /* --------------------------------------------------------------------- */
@@ -298,7 +301,7 @@ void loop()
 
   // --------------------- INCOMING SIGNALS FROM PIEZOS ---------------
   // (define what should happen when instruments are hit)
-  for (Instrument *instrument : instruments)
+  for (auto& instrument : instruments)
   {
     // if (instrument->effect == PlayMidi_rawPin || instrument->effect == CC_Effect_rawPin)
     //  instrument->trigger(instrument, MIDI);
@@ -364,6 +367,7 @@ void loop()
     {
       Globals::print_to_console("score_state = ");
       Globals::println_to_console(Score::score_state);
+      Serial2.write(0xFB);
     }
 
     // ------------------------- quarter notes: -----------------------
@@ -372,10 +376,15 @@ void loop()
       // Hardware::vibrate_motor(50);
     }
     // Debug: play MIDI note on quarter notes
-    //  if (Globals::current_beat_pos % 8 == 0)
-    //  MIDI.sendNoteOn(57, 127, 2);
-    //  else
-    //  MIDI.sendNoteOff(57, 127, 2);
+    if (Globals::current_beat_pos % 8 == 0)
+    {
+      // MIDI.sendRealTime(Start);
+      MIDI.sendNoteOn(57, 127, 2);
+    }
+    else
+    {
+      MIDI.sendNoteOff(57, 127, 2);
+    }
 
     // --------------------------- 8th notes: -------------------------
     if (Globals::current_beat_pos % 4 == 0)
@@ -410,7 +419,7 @@ void loop()
     // Globals::print_to_console(Globals::current_beat_pos / 4);
     // Globals::print_to_console("\t");
     // Globals::print_to_console(Globals::current_eighth_count);
-    for (Instrument* instrument : instruments)
+    for (auto& instrument : instruments)
     {
       Globals::print_to_console(instrument->output_string);
       instrument->output_string = "\t";
@@ -419,7 +428,7 @@ void loop()
 
     // print topo arrays:
     boolean anytopo = false;
-      for (Instrument *instrument : instruments)
+    for (auto& instrument : instruments)
 
     {
       if (instrument->effect == TopographyLog)
@@ -432,7 +441,7 @@ void loop()
     }
 
     // perform timed pin actions according to current beat:
-  for (Instrument *instrument : instruments)
+    for (auto& instrument : instruments)
     {
       instrument->perform(instrument, instruments, MIDI);
     }
@@ -574,7 +583,7 @@ void loop()
   // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
 
   // tidying up what's left from performing functions..
-  for (Instrument *instrument : instruments)
+  for (auto& instrument : instruments)
     instrument->tidyUp(instrument, MIDI);
 }
 // --------------------------------------------------------------------

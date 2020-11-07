@@ -9,7 +9,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments, Score *s
   {
   case (LOG_BEATS):
     // set pinMode of all instruments to 3 (record what is being played)
-    for (Instrument* instrument : instruments)
+    for (auto& instrument : instruments)
     {
       instrument->lastEffect = instrument->effect;
       instrument->effect = FootSwitchLooper; // TODO: not for Cowbell?
@@ -23,7 +23,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments, Score *s
     break;
 
   case (RESET_TOPO): // resets beat_topography (for all instruments)
-    for (Instrument* instrument : instruments)
+    for (auto& instrument : instruments)
     {
       // reset 8th-note-topography:
       for (int j = 0; j < 8; j++)
@@ -44,7 +44,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments, Score *s
     {
       Globals::println_to_console("regularity height > 10: reset!");
       Score::score_state++; // go to next score state
-      for (Instrument* instrument : instruments)
+      for (auto& instrument : instruments)
         for (int j = 0; j < 16; j++)
           instrument->topography.a_16[j] = 0;
 
@@ -74,7 +74,7 @@ void Hardware::footswitch_released(std::vector<Instrument*> instruments)
   switch (FOOTSWITCH_MODE)
   {
   case (LOG_BEATS):
-    for (Instrument* instrument : instruments)
+    for (auto& instrument : instruments)
       instrument->effect = instrument->lastEffect;
     break;
 
