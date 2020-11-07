@@ -103,10 +103,18 @@ void Effect::getTapTempo()
       Globals::print_to_console(Globals::tapInterval);
       Globals::println_to_console(" ms interval)");
 
-      Globals::current_BPM = 60000 / Globals::tapInterval;
-      tapState = 1;
+      if (Globals::tapInterval >= 333) // quarter notes when BPM <= 180
+      {
+        Globals::current_BPM = 60000 / Globals::tapInterval;
+        Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+      }
+      else // eighth-notes when BPM >= 180
+      {
+        Globals::current_BPM = (60000 / Globals::tapInterval) / 2;                                    // BPM >= 180 → strokes are 8th-notes, BPM half-time
+        Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 8 / 128); // 8 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+      }
 
-      Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+      tapState = 1;
     }
 
     if (timeSinceFirstTap > 2000) // forget tap if time was too long
@@ -150,7 +158,7 @@ void Effect::getTapTempo()
 void Effect::swell_rec(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI) // remembers beat stroke position
 {
   /* works pretty much just like the tapTempo, but repeats the triggered drums on external MIDI instrument (-> swell_beat() in TIMED INTERVALS) */
-    instrument->setInstrumentPrintString();
+  instrument->setInstrumentPrintString();
 
   static unsigned long previous_swell_beatPos;
   // static unsigned long lastSwellRec = 0;
@@ -204,7 +212,7 @@ void Effect::countup_topography(Instrument *instrument) // increases slot positi
 {
   if (Globals::printStrokes)
   {
-        instrument->setInstrumentPrintString(); // TODO: SHOULD BE HANDLED LIKE MONITOR!
+    instrument->setInstrumentPrintString(); // TODO: SHOULD BE HANDLED LIKE MONITOR!
   }
   instrument->topography.a_16[Globals::current_16th_count]++; // will be translated to topography.a_8 when evoked by tsunamiPlayback(?)
 }
@@ -220,8 +228,8 @@ void Effect::sendMidiNotes_timed(Instrument *instrument, midi::MidiInterface<Har
   {
     if (instrument->score.read_rhythm_slot[Globals::current_eighth_count])
     {
-          instrument->setInstrumentPrintString();
- // TODO: SHOULD BE HANDLED LIKE FOOTSWITCHLOOPER!
+      instrument->setInstrumentPrintString();
+      // TODO: SHOULD BE HANDLED LIKE FOOTSWITCHLOOPER!
       MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
     }
     else
@@ -449,7 +457,7 @@ void Effect::tsunami_beat_playback(Instrument *instrument)
 // --------------------------------------------------------------------
 
 // ---------- MIDI playback according to beat_topography --------
-void Effect::topography_midi_effects(Instrument *instrument, std::vector<Instrument*> instruments, midi::MidiInterface<HardwareSerial> MIDI)
+void Effect::topography_midi_effects(Instrument *instrument, std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI)
 {
   if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
   {
@@ -462,7 +470,7 @@ void Effect::topography_midi_effects(Instrument *instrument, std::vector<Instrum
     // sum up all topographies of all instruments:
     for (int idx = 0; idx < 16; idx++) // each slot
     {
-      for (Instrument* instr : instruments) // of each instrument
+      for (Instrument *instr : instruments) // of each instrument
       {
         if (instr->effect == TopographyLog)
           beat_sum.a_16[idx] += instrument->topography.a_16[idx];
