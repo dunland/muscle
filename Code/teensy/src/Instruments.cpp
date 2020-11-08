@@ -43,7 +43,7 @@ bool Instrument::stroke_detected()
   boolean stroke_criterion = false;
   if (!timing.countAfterFirstStroke && millis() > timing.lastPinActiveTimeCopy + sensitivity.delayAfterStroke) // get counts only X ms after LAST hit
     stroke_criterion = true;
-    
+
   if (timing.countAfterFirstStroke && millis() > timing.firstPinActiveTimeCopy + sensitivity.delayAfterStroke) //get counts only X ms after FIRST hit ??
     stroke_criterion = true;
 
@@ -208,10 +208,30 @@ void Instrument::setInstrumentPrintString()
       output_string = "!-XX-\t"; // Crash
     break;
 
-    // case 5: // print swell_val for repeated MIDI notes in "swell" mode
-    //   Globals::output_string[incoming_i] = swell_val[incoming_i];
-    //   Globals::output_string[incoming_i] += "\t";
-    //   break;
+  case TopographyLog: // like monitor
+    if (drumtype == Kick)
+      output_string = "■\t"; // Kickdrum
+    else if (drumtype == Cowbell)
+      output_string = "▲\t"; // Crash
+    else if (drumtype == Standtom1)
+      output_string = "□\t"; // Standtom
+    else if (drumtype == Standtom2)
+      output_string = "O\t"; // Standtom
+    else if (drumtype == Hihat)
+      output_string = "x\t"; // Hi-Hat
+    else if (drumtype == Tom1)
+      output_string = "°\t"; // Tom 1
+    else if (drumtype == Snare)
+      output_string = "※\t"; // Snaredrum
+    else if (drumtype == Tom2)
+      output_string = "o\t"; // Tom 2
+    else if (drumtype == Ride)
+      output_string = "xx\t"; // Ride
+    else if (drumtype == Crash1)
+      output_string = "-X-\t"; // Crash
+    else if (drumtype == Crash2)
+      output_string = "-XX-\t"; // Crash
+    break;
   }
 }
 
@@ -224,6 +244,9 @@ void Instrument::setInstrumentPrintString()
 ////////////////////////////// TRIGGERS ///////////////////////////////
 void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
 {
+  // always count up topography:
+  Effect::countup_topography(instrument);
+
   switch (effect)
   {
   case PlayMidi:
@@ -251,7 +274,7 @@ void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSer
     break;
 
   case TsunamiLink:
-    Effect::countup_topography(instrument);
+    // Effect::countup_topography(instrument);
     break;
 
   case CymbalSwell: // swell-effect for loudness on field recordings (use on cymbals e.g.)
@@ -259,7 +282,7 @@ void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSer
     Effect::swell_rec(instrument, MIDI);
     break;
   case TopographyLog:
-    Effect::countup_topography(instrument);
+    // Effect::countup_topography(instrument);
     break;
 
   case PlayMidi_rawPin:
@@ -364,64 +387,3 @@ void Instrument::tidyUp(Instrument *instrument, midi::MidiInterface<HardwareSeri
     break;
   }
 }
-
-//////////////////////// SMOOTHEN TOPOGRAPHY ARRAYS ///////////////////
-///////////////////////////////////////////////////////////////////////
-
-// ---------------- smoothen 16-bit array using struct ----------------
-// void Instrument::smoothen_dataArray(Instrument *instrument)
-// {
-//   /* input an array of size 16
-// 1. count entries and create squared sum of each entry
-// 2. calculate (squared) fraction of total for each entry
-// 3. get highest of these fractions
-// 4. get ratio of highest fraction to other and reset values if ratio > threshold
-// ->
-// */
-
-//   // int len = *(&instrument->topography.a_16 + 1) - instrument->topography.a_16;
-//   int len = instrument->topography.a_16.size(); // TODO: use dynamic vector topography.a instead
-//   int entries = 0;
-//   int squared_sum = 0;
-//   instrument->topography.regular_sum = 0;
-
-//   // count entries and create squared sum:
-//   for (int j = 0; j < len; j++)
-//   {
-//     if (instrument->topography.a_16[j] > 0)
-//     {
-//       entries++;
-//       squared_sum += instrument->topography.a_16[j] * instrument->topography.a_16[j];
-//       instrument->topography.regular_sum += instrument->topography.a_16[j];
-//     }
-//   }
-
-//   instrument->topography.regular_sum = instrument->topography.regular_sum / entries;
-
-//   // calculate site-specific (squared) fractions of total:
-//   float squared_frac[len];
-//   for (int j = 0; j < len; j++)
-//     squared_frac[j] =
-//         float(instrument->topography.a_16[j]) / float(squared_sum);
-
-//   // get highest frac:
-//   float highest_squared_frac = 0;
-//   for (int j = 0; j < len; j++)
-//     highest_squared_frac = (squared_frac[j] > highest_squared_frac) ? squared_frac[j] : highest_squared_frac;
-
-//   // get "topography height":
-//   // divide highest with other entries and reset entries if ratio > threshold:
-//   for (int j = 0; j < len; j++)
-//     if (squared_frac[j] > 0)
-//       if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > instrument->topography.snr_thresh)
-//       {
-//         instrument->topography.a_16[j] = 0;
-//         entries -= 1;
-//       }
-
-//   instrument->topography.average_smooth = 0;
-//   // assess average topo sum for loudness
-//   for (int j = 0; j < 8; j++)
-//     instrument->topography.average_smooth += instrument->topography.a_16[j];
-//   instrument->topography.average_smooth = int((float(instrument->topography.average_smooth) / float(entries)) + 0.5);
-// }

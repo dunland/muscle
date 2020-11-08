@@ -9,7 +9,7 @@ class Score
 public:
     static int score_state;
 
-    std::vector<int> notes;
+    static std::vector<int> notes;
 
     void continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI, int note_length);                      // initiates a continuous bass note from score
     void envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography

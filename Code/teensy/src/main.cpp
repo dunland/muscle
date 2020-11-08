@@ -196,20 +196,15 @@ void setup()
 
   // set instrument calibration array
   // values as of 2020-08-27:
-  snare->sensitivity.threshold = 180;
-  snare->sensitivity.crossings = 12;
-  hihat->sensitivity.threshold = 70; // 60
-  hihat->sensitivity.crossings = 30; // 20
-  kick->sensitivity.threshold = 100;
-  kick->sensitivity.crossings = 16;
+
   // tom1->sensitivity.threshold = 200;
   // tom1->sensitivity.crossings = 20;
-  tom2->sensitivity.threshold = 300;
-  tom2->sensitivity.crossings = 9; // 18
-  standtom->sensitivity.threshold = 70;
-  standtom->sensitivity.crossings = 12;
-  cowbell->sensitivity.threshold = 80;
-  cowbell->sensitivity.crossings = 15;
+  snare->setup_sensitivity(180, 12, 10, false);
+  hihat->setup_sensitivity(80, 15, 10, false);
+  standtom->setup_sensitivity(70, 30, 10, false); // 60, 20
+  tom2->setup_sensitivity(300, 9, 10, false);     // 300, 18
+  kick->setup_sensitivity(100, 16, 10, false);
+  cowbell->setup_sensitivity(80, 15, 10, false);
   crash1->setup_sensitivity(300, 2, 5, false);
   snare->setup_sensitivity(180, 12, 10, false);
 
@@ -236,14 +231,8 @@ void setup()
   Globals::println_to_console("setting up variables for score..");
   Globals::print_to_console("note seed for score = ");
   randomSeed(analogRead(A0) * analogRead(A19));
-  score1.notes.push_back(random(24, 36));
+  score1.notes.push_back(int(random(24, 36)));
   Globals::println_to_console(score1.notes[0]);
-  // setup notes
-  // for (int i = 0; i < Globals::numInputs; i++)
-  // {
-  //   instruments[i]->setup_notes({60, 61, 45, 74, 72, 44, 71});        // insert array of MIDI-notes
-  //   instruments[i]->midi.active_note = instruments[i]->midi.notes[0]; // set active note pointer to first note
-  // }
 
   snare->midi.active_note = score1.notes[0] + 12 + 4;
   hihat->midi.active_note = score1.notes[0] + 24;
@@ -432,14 +421,8 @@ void loop()
     Globals::println_to_console("");
 
     // print topo arrays:
-    boolean anytopo = false;
-    for (auto &instrument : instruments)
 
-    {
-      if (instrument->effect == TopographyLog)
-        anytopo = true;
-    }
-    if (anytopo)
+    if (Globals::do_print_beat_sum)
     {
       Globals::printTopoArray(&Effect::beat_sum); // print volume layer
       // Globals::printTopoArray(&score1.beat_regularity);

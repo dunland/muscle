@@ -74,6 +74,8 @@ struct TOPOGRAPHY
   int regular_sum = 0;
   String tag; // very short name for topography. also to be sent via Serial to processing
 
+  boolean ready = false; // holds whether average_smooth has reached activation_thresh
+
   boolean flag_entry_dismissed = false; // indicates that an entry has been dropped due to too high topography difference
 
   boolean flag_empty_increased = false;    // indicates that an empty slot has repeatedly NOT been played → increase
@@ -90,8 +92,8 @@ public:
   static boolean do_print_to_console;
   static boolean do_send_to_processing;
   static boolean printStrokes;
-  // static String output_string[numInputs];
   static boolean use_responsiveCalibration;
+  static boolean do_print_beat_sum; // prints Effect::beat_sum topography array
 
   static int tapInterval;
   static int current_BPM;

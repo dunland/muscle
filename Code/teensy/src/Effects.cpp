@@ -16,7 +16,7 @@ void Effect::cc_effect_rawPin(Instrument *instrument, midi::MidiInterface<Hardwa
   // {
   instrument->midi.cc_val += instrument->midi.cc_increase_factor;
   instrument->midi.cc_val = min(instrument->midi.cc_val, instrument->midi.cc_max);
-  MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), 2);
+  MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), microKORG);
   instrument->output_string = String(instrument->midi.cc_val);
   instrument->output_string += "\t";
   // }
@@ -216,7 +216,7 @@ void Effect::countup_topography(Instrument *instrument) // increases slot positi
 {
   if (Globals::printStrokes)
   {
-    instrument->setInstrumentPrintString(); // TODO: SHOULD BE HANDLED LIKE MONITOR!
+    instrument->setInstrumentPrintString();
   }
   instrument->topography.a_16[Globals::current_16th_count]++; // will be translated to topography.a_8 when evoked by tsunamiPlayback(?)
 }
