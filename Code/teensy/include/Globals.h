@@ -45,6 +45,7 @@ enum EffectsType
 
 enum CC_Type // channels on mKORG:
 {
+   None = -1,
    Cutoff = 44,
    Resonance = 71,
    Amplevel = 50,
@@ -53,6 +54,12 @@ enum CC_Type // channels on mKORG:
    Release = 26,
    DelayTime = 51,
    DelayDepth = 94
+};
+
+enum MIDI_Instruments_Channels
+{
+  Volca = 1,
+  microKORG = 2
 };
 
 struct TOPOGRAPHY
@@ -79,16 +86,11 @@ struct TOPOGRAPHY
 class Globals
 {
 public:
-  static const uint8_t numInputs = 7;
-  static std::vector<int> pins; // stores contact piezo pin of each instrument
-  static std::vector<int> leds; // stores leds for each instrument (if differing)
-  static int score_state;
-
   // ------------------------- Debug variables --------------------------
   static boolean do_print_to_console;
   static boolean do_send_to_processing;
   static boolean printStrokes;
-  static String output_string[numInputs];
+  // static String output_string[numInputs];
   static boolean use_responsiveCalibration;
 
   static int tapInterval;
@@ -151,8 +153,6 @@ public:
     }
     return "";
   }
-
-  static void setInstrumentPrintString(DrumType drum, EffectsType effect);
 
   // TOPOGRAPHIES: ------------------------------------------------------
   static void smoothen_dataArray(TOPOGRAPHY *topography); // there is a double of this in Instruments to perform instrument-specific operations
