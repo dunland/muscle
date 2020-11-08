@@ -40,8 +40,6 @@ public:
 
     static void tsunami_beat_playback(Instrument *instrument);
 
-    static TOPOGRAPHY beat_sum; // for TopographyLog
-
     static void topography_midi_effects(Instrument *instrument, std::vector<Instrument*> instruments, midi::MidiInterface<HardwareSerial>); // MIDI playback according to beat_topography
 
     // final tidy up functions: ---------------------------------------

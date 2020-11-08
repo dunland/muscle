@@ -2,10 +2,7 @@
 // #include <Instruments.h> // do not include anything here that is also in .h
 #include <Globals.h>
 #include <MIDI.h>
-
-// create overall volume topography of all instrument layers:
-TOPOGRAPHY Effect::beat_sum;
-// std::vector<int> Effect::beat_sum.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+#include <Score.h>
 
 ///////////////////////////// TRIGGER EFFECTS /////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -469,7 +466,7 @@ void Effect::topography_midi_effects(Instrument *instrument, std::vector<Instrum
     Globals::smoothen_dataArray(&instrument->topography); // erases "noise" from arrays if SNR>snr_threshold
 
     // reset slot for volume
-    beat_sum.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Score::beat_sum.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     // sum up all topographies of all instruments:
     for (int idx = 0; idx < 16; idx++) // each slot
@@ -477,14 +474,14 @@ void Effect::topography_midi_effects(Instrument *instrument, std::vector<Instrum
       for (Instrument *instr : instruments) // of each instrument
       {
         if (instr->effect == TopographyLog)
-          beat_sum.a_16[idx] += instrument->topography.a_16[idx];
+          Score::beat_sum.a_16[idx] += instrument->topography.a_16[idx];
       }
     }
-    Globals::smoothen_dataArray(&beat_sum);
+    Globals::smoothen_dataArray(&Score::beat_sum);
 
     // ------------ result-> change volume and play MIDI --------
     // ----------------------------------------------------------
-    int vol = min(beat_sum.a_16[Globals::current_16th_count] * 13, 255);
+    int vol = min(Score::beat_sum.a_16[Globals::current_16th_count] * 13, 255);
 
     if (instrument->topography.a_16[Globals::current_16th_count] > 0)
       MIDI.sendControlChange(instrument->midi.cc_chan, vol, 2);

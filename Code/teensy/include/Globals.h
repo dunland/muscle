@@ -62,8 +62,10 @@ enum MIDI_Instruments_Channels
   microKORG = 2
 };
 
-struct TOPOGRAPHY
+class TOPOGRAPHY
 {
+  public:
+
   std::vector<int> a_8 = {0, 0, 0, 0, 0, 0, 0, 0};                          // size-8 array for comparison with 8-bit-length sound files
   std::vector<int> a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // size-16 array for abstractions like beat regularity etc
   std::vector<int> a_16_prior = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -74,7 +76,7 @@ struct TOPOGRAPHY
   int regular_sum = 0;
   String tag; // very short name for topography. also to be sent via Serial to processing
 
-  boolean ready = false; // holds whether average_smooth has reached activation_thresh
+  bool ready(); // holds whether average_smooth has reached activation_thresh
 
   boolean flag_entry_dismissed = false; // indicates that an entry has been dropped due to too high topography difference
 
@@ -93,7 +95,7 @@ public:
   static boolean do_send_to_processing;
   static boolean printStrokes;
   static boolean use_responsiveCalibration;
-  static boolean do_print_beat_sum; // prints Effect::beat_sum topography array
+  static boolean do_print_beat_sum; // prints Score::beat_sum topography array
 
   static int tapInterval;
   static int current_BPM;

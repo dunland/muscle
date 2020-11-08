@@ -3,52 +3,56 @@
 // #include <vector>
 // #include <MIDI.h>
 
+bool TOPOGRAPHY::ready()
+{
+	return (average_smooth > activation_thresh);
+}
+
 boolean Globals::printStrokes = true;
 boolean Globals::use_responsiveCalibration = false;
 boolean Globals::do_print_to_console = true;
 boolean Globals::do_send_to_processing = false;
-boolean Globals::do_print_beat_sum = true; // prints Effect::beat_sum topography array
-
+boolean Globals::do_print_beat_sum = true; // prints Score::beat_sum topography array
 
 IntervalTimer Globals::masterClock; // 1 bar
 
 Tsunami Globals::tsunami;
 float Globals::track_bpm[256] =
-		{
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
-				1, 1, 90, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 73, 1, 1, 1,
-				100, 1, 1, 1, 200, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 41, 1, 1,
-				103, 1, 1, 1, 1, 1, 1, 93, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-				1, 1, 78, 1, 100, 100, 1, 1, 1, 1,
-				1, 1, 1, 1, 1, 100, 1, 1, 1, 1,
-				1, 1, 1, 1, 100, 60};
+	{
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
+		1, 1, 90, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 73, 1, 1, 1,
+		100, 1, 1, 1, 200, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 41, 1, 1,
+		103, 1, 1, 1, 1, 1, 1, 93, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 100, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 78, 1, 100, 100, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 100, 1, 1, 1, 1,
+		1, 1, 1, 1, 100, 60};
 
 // int swell_val[numInputs]; // this should be done in the swell section, but is needed in print section already... :/
 
-int Globals::current_beat_pos = 0;		 // always stores the current position in the beat
+int Globals::current_beat_pos = 0;	   // always stores the current position in the beat
 int Globals::current_eighth_count = 0; // overflows at current_beat_pos % 8
-int Globals::current_16th_count = 0;	 // overflows at current_beat_pos % 2
-int Globals::last_eighth_count = 0;		 // stores last eightNoteCount for comparison
-int Globals::last_16th_count = 0;			 // stores last eightNoteCount for comparison
+int Globals::current_16th_count = 0;   // overflows at current_beat_pos % 2
+int Globals::last_eighth_count = 0;	   // stores last eightNoteCount for comparison
+int Globals::last_16th_count = 0;	   // stores last eightNoteCount for comparison
 
 int Globals::tapInterval = 500; // 0.5 s per beat for 120 BPM
 int Globals::current_BPM = 120;
@@ -60,7 +64,6 @@ volatile unsigned long Globals::masterClockCount = 0; // 4*32 = 128 masterClockC
 volatile unsigned long Globals::beatCount = 0;
 int Globals::next_beatCount = 0; // will be reset when timer restarts
 volatile boolean Globals::sendMidiClock = false;
-
 
 void Globals::masterClockTimer()
 {
@@ -181,7 +184,7 @@ void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
 	float squared_frac[len];
 	for (int j = 0; j < len; j++)
 		squared_frac[j] =
-				float(topography->a_16[j]) / float(squared_sum);
+			float(topography->a_16[j]) / float(squared_sum);
 
 	// get highest frac:
 	float highest_squared_frac = 0;

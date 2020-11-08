@@ -166,7 +166,7 @@ void setup()
   pinMode(FOOTSWITCH, INPUT_PULLUP);
 
   // setup names of elements for Serial communication (to processing): -------------------
-  Effect::beat_sum.tag = "v";
+  Score::beat_sum.tag = "v";
 
   // ------------------------ INSTRUMENT SETUP ------------------------
   // instantiate instruments:
@@ -399,7 +399,7 @@ void loop()
       Globals::current_16th_count = (Globals::current_16th_count + 1) % 16;
 
       // vibrate if new score is ready:
-      if (Effect::beat_sum.average_smooth > Effect::beat_sum.activation_thresh)
+      if (Score::beat_sum.ready())
       {
         digitalWrite(VIBR, HIGH);
         Globals::println_to_console("ready to go to next score step! hit footswitch!");
@@ -424,7 +424,7 @@ void loop()
 
     if (Globals::do_print_beat_sum)
     {
-      Globals::printTopoArray(&Effect::beat_sum); // print volume layer
+      Globals::printTopoArray(&Score::beat_sum); // print volume layer
       // Globals::printTopoArray(&score1.beat_regularity);
     }
 
@@ -441,7 +441,7 @@ void loop()
 
     // TODO:
     // Globals::topo_array_to_processing(&snare->topography);
-    // Globals::topo_array_to_processing(&Effect::beat_sum);
+    // Globals::topo_array_to_processing(&Score::beat_sum);
     // Globals::topo_array_to_processing(&regularity);
 
     //makeTopo();
@@ -527,7 +527,7 @@ void loop()
 
     //   MIDI.sendControlChange(DelayDepth, 50, 2);
     //   snare->effect = CC_Effect_rawPin;
-    //   // score1.envelope_volume(&Effect::beat_sum, MIDI);
+    //   // score1.envelope_volume(&Score::beat_sum, MIDI);
     //   break;
 
     // case 4: // note ascend
@@ -550,7 +550,7 @@ void loop()
 
     // case 5: // envelope cutoff
     // snare->effect = TopographyLog;
-    //   score1.envelope_cutoff(&Effect::beat_sum, MIDI);
+    //   score1.envelope_cutoff(&Score::beat_sum, MIDI);
     //   break;
     // }
 

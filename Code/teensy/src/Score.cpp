@@ -5,6 +5,8 @@
 
 int Score::score_state = 1;
 
+TOPOGRAPHY Score::beat_sum;
+
 void Score::continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI, int note_length) // initiates a continuous bass note from score
 {
     if (Globals::current_beat_pos % note_length == 0)
