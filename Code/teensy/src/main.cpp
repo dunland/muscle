@@ -37,7 +37,6 @@
 
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
-Instrument *instruments[Globals::numInputs];
 Instrument *snare;
 Instrument *hihat;
 Instrument *kick;
@@ -49,13 +48,10 @@ Instrument *cowbell;
 // Instrument crash2;
 // Instrument ride;
 
-static std::vector<Instrument *> instrumente;
+static std::vector<Instrument *> instruments;
 
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
-
-// -------------------- timing and rhythm tracking --------------------
-int countsCopy[Globals::numInputs];
 
 // ----------------- MUSICAL AND PERFORMATIVE PARAMETERS --------------
 
@@ -83,9 +79,9 @@ Score score1;
 /////////////////////////// general pin reading ///////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-int pinValue(int instr)
+int pinValue(Instrument *instrument)
 {
-  return abs(instruments[instr]->sensitivity.noiseFloor - analogRead(instruments[instr]->pin));
+  return abs(instrument->sensitivity.noiseFloor - analogRead(instrument->pin));
 }
 // --------------------------------------------------------------------
 
@@ -100,7 +96,7 @@ void printNormalizedValues(boolean printNorm_criterion)
     static unsigned long lastMillis;
     if (millis() != lastMillis)
     {
-      for (int i = 0; i < Globals::numInputs; i++)
+      for (auto &instrument : instruments)
       {
         // static int countsCopy[Globals::numInputs];
         //noInterrupts();
@@ -108,7 +104,7 @@ void printNormalizedValues(boolean printNorm_criterion)
         //interrupts();
         //Globals::print_to_console(pins[i]);
         //Globals::print_to_console(":\t");
-        Globals::print_to_console(pinValue(i));
+        Globals::print_to_console(pinValue(instrument));
         Globals::print_to_console("\t");
         //Globals::print_to_console(", ");
         //Globals::print_to_console(countsCopy[i]);
@@ -124,14 +120,15 @@ void printNormalizedValues(boolean printNorm_criterion)
 void samplePins()
 {
   // read all pins:
-  for (int pinNum = 0; pinNum < Globals::numInputs; pinNum++)
+  for (auto &instrument : instruments)
+  // Using a for loop with iterator
   {
-    if (pinValue(pinNum) > instruments[pinNum]->sensitivity.threshold)
+    if (pinValue(instrument) > instrument->sensitivity.threshold)
     {
-      if (instruments[pinNum]->timing.counts < 1)
-        instruments[pinNum]->timing.firstPinActiveTime = millis();
-      instruments[pinNum]->timing.lastPinActiveTime = millis();
-      instruments[pinNum]->timing.counts++;
+      if (instrument->timing.counts < 1)
+        instrument->timing.firstPinActiveTime = millis();
+      instrument->timing.lastPinActiveTime = millis();
+      instrument->timing.counts++;
     }
   }
 }
@@ -155,8 +152,6 @@ void setup()
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
   MIDI.begin(MIDI_CHANNEL_OMNI);
-  // MIDI.sendRealTime(0xFA);
-  Serial2.write(0xFA);
 
   delay(1000);              // wait for Tsunami to finish reset // redundant?
   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
@@ -175,87 +170,66 @@ void setup()
 
   // ------------------------ INSTRUMENT SETUP ------------------------
   // instantiate instruments:
-  for (int i = 0; i < Globals::numInputs; i++)
-  {
-    instruments[i] = new Instrument;
-    instruments[i]->drumtype = DrumType(i);
-  }
+  snare = new Instrument(A3, Snare);
+  hihat = new Instrument(A4, Hihat);
+  kick = new Instrument(A0, Kick);
+  tom2 = new Instrument(A5, Tom2);
+  standtom = new Instrument(A1, Standtom1);
+  cowbell = new Instrument(A2, Cowbell);
+  crash1 = new Instrument(A6, Crash1);
 
-  snare = new Instrument;
-  snare->drumtype = Snare;
-  hihat = new Instrument;
-  hihat->drumtype = Hihat;
-  kick = new Instrument;
-  kick->drumtype = Kick;
-  tom2 = new Instrument;
-  tom2->drumtype = Tom2;
-  cowbell = new Instrument;
-  cowbell->drumtype = Cowbell;
-  crash1 = new Instrument;
-  crash1->drumtype = Crash1;
-  standtom = new Instrument;
-  standtom->drumtype = Standtom1;
+  instruments = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
 
-  instrumente = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
-  
   // initialize arrays:
-  for (int i = 0; i < Globals::numInputs; i++)
+  for (auto &instrument : instruments)
   {
-    pinMode(Globals::leds[i], OUTPUT);
-    instruments[i]->timing.counts = 0;
+    pinMode(instrument->led, OUTPUT);
     for (int j = 0; j < 8; j++)
     {
-      instruments[i]->score.read_rhythm_slot[j] = false;
-      instruments[i]->score.set_rhythm_slot[j] = false;
-      instruments[i]->topography.a_8[j] = 0;
-      instruments[i]->topography.a_16[j] = 0;
-      instruments[i]->topography.a_16[j * 2] = 0;
+      instrument->score.read_rhythm_slot[j] = false;
+      instrument->score.set_rhythm_slot[j] = false;
+      instrument->topography.a_8[j] = 0;
+      instrument->topography.a_16[j] = 0;
+      instrument->topography.a_16[j * 2] = 0;
     }
   }
 
-  // setup initial values ---------------------------------------------
-  instruments[Snare]->pin = A3;
-  instruments[Hihat]->pin = A4;
-  instruments[Kick]->pin = A0;
-  instruments[Tom1]->pin = A7;
-  instruments[Tom2]->pin = A5;
-  instruments[Standtom1]->pin = A1;
-  instruments[Cowbell]->pin = A2;
-  // instruments[Crash1]->pin = A6;
-
   // set instrument calibration array
   // values as of 2020-08-27:
-  instruments[Snare]->sensitivity.threshold = 180;
-  instruments[Snare]->sensitivity.crossings = 12;
-  instruments[Hihat]->sensitivity.threshold = 70; // 60
-  instruments[Hihat]->sensitivity.crossings = 30; // 20
-  instruments[Kick]->sensitivity.threshold = 100;
-  instruments[Kick]->sensitivity.crossings = 16;
-  instruments[Tom1]->sensitivity.threshold = 200;
-  instruments[Tom1]->sensitivity.crossings = 20;
-  instruments[Tom2]->sensitivity.threshold = 300;
-  instruments[Tom2]->sensitivity.crossings = 9; // 18
-  instruments[Standtom1]->sensitivity.threshold = 70;
-  instruments[Standtom1]->sensitivity.crossings = 12;
-  instruments[Cowbell]->sensitivity.threshold = 80;
-  instruments[Cowbell]->sensitivity.crossings = 15;
+  snare->sensitivity.threshold = 180;
+  snare->sensitivity.crossings = 12;
+  hihat->sensitivity.threshold = 70; // 60
+  hihat->sensitivity.crossings = 30; // 20
+  kick->sensitivity.threshold = 100;
+  kick->sensitivity.crossings = 16;
+  // tom1->sensitivity.threshold = 200;
+  // tom1->sensitivity.crossings = 20;
+  tom2->sensitivity.threshold = 300;
+  tom2->sensitivity.crossings = 9; // 18
+  standtom->sensitivity.threshold = 70;
+  standtom->sensitivity.crossings = 12;
+  cowbell->sensitivity.threshold = 80;
+  cowbell->sensitivity.crossings = 15;
+  crash1->setup_sensitivity(300, 2, 5, false);
+  snare->setup_sensitivity(180, 12, 10, false);
 
   // calculate noise floor:
-  for (int i = 0; i < Globals::numInputs; i++)
-    instruments[i]->calculateNoiseFloor(instruments[i]);
+  for (auto &instrument : instruments)
+    instrument->calculateNoiseFloor(instrument);
 
   Globals::println_to_console("\n..calculating noiseFloor done.");
 
   Globals::println_to_console("assigning effects...");
 
   // assign effects to instruments:
-  instruments[Snare]->effect = CC_Effect_rawPin;
-  instruments[Hihat]->effect = TapTempo;
-  instruments[Kick]->effect = CC_Effect_rawPin;
-  instruments[Tom1]->effect = Monitor;
-  instruments[Tom2]->effect = CC_Effect_rawPin;
-  instruments[Standtom1]->effect = CC_Effect_rawPin;
-  instruments[Cowbell]->effect = CC_Effect_rawPin;
+  snare->effect = CC_Effect_rawPin;
+  hihat->effect = TapTempo;
+  kick->effect = CC_Effect_rawPin;
+  // tom1->effect = CC_Effect_rawPin;
+  tom2->effect = Monitor;
+  standtom->effect = CC_Effect_rawPin;
+  cowbell->effect = CC_Effect_rawPin;
+  crash1->effect = CC_Effect_rawPin;
   // instruments[Ride]->effect = Monitor;
 
   // ---------------------------- SCORE -------------------------------
@@ -271,29 +245,31 @@ void setup()
   //   instruments[i]->midi.active_note = instruments[i]->midi.notes[0]; // set active note pointer to first note
   // }
 
-  instruments[Snare]->midi.active_note = score1.notes[0] + 12 + 4;
-  instruments[Hihat]->midi.active_note = score1.notes[0] + 24;
-  instruments[Kick]->midi.active_note = score1.notes[0];
-  instruments[Tom1]->midi.active_note = 71;
-  instruments[Tom2]->midi.active_note = 74;
-  instruments[Standtom1]->midi.active_note = score1.notes[0] + 3;
-  instruments[Cowbell]->midi.active_note = 60;
+  snare->midi.active_note = score1.notes[0] + 12 + 4;
+  hihat->midi.active_note = score1.notes[0] + 24;
+  kick->midi.active_note = score1.notes[0];
+  // tom1->midi.active_note = 71;
+  tom2->midi.active_note = 74;
+  standtom->midi.active_note = score1.notes[0] + 3;
+  cowbell->midi.active_note = 60;
+  crash1->midi.active_note = 74;
 
   Globals::println_to_console("setting up midi channels..");
-  // midi channels:
-  instruments[Snare]->setup_midi(Cutoff, 127, 30, 30, 1);
-  instruments[Hihat]->setup_midi(Resonance, 127, 30, 10, 0.1);
-  instruments[Kick]->setup_midi(Release, 127, 0, 50, 0.2);
-  // instruments[Tom1]->setup_midi(Sustain, 127, 0, 5, 0.01);
-  instruments[Tom2]->setup_midi(Resonance, 127, 30, 5, 0.01);
-  instruments[Standtom1]->setup_midi(Release, 127, 0, 3, 0.01);
-  instruments[Cowbell]->setup_midi(DelayDepth, 90, 0, 17, 0.1);
+  // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
+  snare->setup_midi(DelayTime, 127, 30, 10, 0.1);
+  hihat->setup_midi(None, 127, 30, 10, 0.1);
+  kick->setup_midi(Release, 127, 0, 50, 0.2);
+  // tom1->setup_midi(Sustain, 127, 0, 5, 0.01);
+  tom2->setup_midi(Resonance, 127, 30, 1, 0.01);
+  standtom->setup_midi(Sustain, 127, 40, 15, 0.01);
+  cowbell->setup_midi(DelayDepth, 90, 0, 30, 0.1);
+  crash1->setup_midi(Cutoff, 127, 40, 4, 0.1);
 
   // print startup information:
   Globals::println_to_console("-----------------------------------------------");
   Globals::println_to_console("calibration values set as follows:");
   Globals::println_to_console("instr\tthrshld\tcrosses\tnoiseFloor");
-  for (int i = 0; i < Globals::numInputs; i++)
+  for (int i = 0; i < instruments.size(); i++)
   {
     Globals::print_to_console(Globals::DrumtypeToHumanreadable(DrumType(i)));
     Globals::print_to_console("\t");
@@ -313,6 +289,9 @@ void setup()
   // Debug:
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
   // tracknum, channel
+
+  // send MIDI-RealTime-Start-Message:
+  // MIDI.sendRealTime(midi::Start);
 }
 
 /* --------------------------------------------------------------------- */
@@ -321,7 +300,6 @@ void setup()
 
 void loop()
 {
-
   Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
 
   // ------------------------- DEBUG AREA -----------------------------
@@ -329,15 +307,15 @@ void loop()
 
   // --------------------- INCOMING SIGNALS FROM PIEZOS ---------------
   // (define what should happen when instruments are hit)
-  for (int i = 0; i < Globals::numInputs; i++)
+  for (auto &instrument : instruments)
   {
-    // if (instruments[i]->effect == PlayMidi_rawPin || instruments[i]->effect == CC_Effect_rawPin)
-    //  instruments[i]->trigger(instruments[i], MIDI);
+    // if (instrument->effect == PlayMidi_rawPin || instrument->effect == CC_Effect_rawPin)
+    //  instrument->trigger(instrument, MIDI);
 
-    if (instruments[i]->stroke_detected(instruments[i])) // evaluates pins for activity repeatedly
+    if (instrument->stroke_detected()) // evaluates pins for activity repeatedly
     {
       // ----------------------- perform pin action -------------------
-      instruments[i]->trigger(instruments[i], MIDI); // runs trigger function according to instrument's EffectType
+      instrument->trigger(instrument, MIDI); // runs trigger function according to instrument's EffectType
       // send instrument stroke to processing:
       // Globals::send_to_processing('i');
     }
@@ -394,13 +372,8 @@ void loop()
     if (Globals::current_beat_pos == 0)
     {
       Globals::print_to_console("score_state = ");
-      Globals::println_to_console(Globals::score_state);
-
-      // Debug:
-      for (auto &instrument : instrumente)
-      {
-        Globals::println_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
-      }
+      Globals::println_to_console(Score::score_state);
+      // MIDI.sendRealTime(midi::Continue);
     }
 
     // ------------------------- quarter notes: -----------------------
@@ -409,14 +382,14 @@ void loop()
       // Hardware::vibrate_motor(50);
     }
     // Debug: play MIDI note on quarter notes
-    // if (Globals::current_beat_pos % 8 == 0)
-    // {
-    //   Serial2.write(0xFA);
-    //   MIDI.sendNoteOn(72, 127, 2);
-    // }
-
-    // else
-    //   MIDI.sendNoteOff(72, 127, 2);
+    if (Globals::current_beat_pos % 8 == 0)
+    {
+      MIDI.sendNoteOn(57, 127, 2);
+    }
+    else
+    {
+      MIDI.sendNoteOff(57, 127, 2);
+    }
 
     // --------------------------- 8th notes: -------------------------
     if (Globals::current_beat_pos % 4 == 0)
@@ -451,18 +424,19 @@ void loop()
     // Globals::print_to_console(Globals::current_beat_pos / 4);
     // Globals::print_to_console("\t");
     // Globals::print_to_console(Globals::current_eighth_count);
-    for (int i = 0; i < Globals::numInputs; i++)
+    for (auto &instrument : instruments)
     {
-      Globals::print_to_console(Globals::output_string[i]);
-      Globals::output_string[i] = "\t";
+      Globals::print_to_console(instrument->output_string);
+      instrument->output_string = "\t";
     }
     Globals::println_to_console("");
 
     // print topo arrays:
     boolean anytopo = false;
-    for (int i = 0; i < Globals::numInputs; i++)
+    for (auto &instrument : instruments)
+
     {
-      if (instruments[i]->effect == TopographyLog)
+      if (instrument->effect == TopographyLog)
         anytopo = true;
     }
     if (anytopo)
@@ -472,9 +446,9 @@ void loop()
     }
 
     // perform timed pin actions according to current beat:
-    for (int i = 0; i < Globals::numInputs; i++)
+    for (auto &instrument : instruments)
     {
-      instruments[i]->perform(instruments[i], instruments, MIDI);
+      instrument->perform(instrument, instruments, MIDI);
     }
     ///////////////////////////////////////////////////////////////////
 
@@ -483,7 +457,7 @@ void loop()
     ///////////////////////////////////////////////////////////////////
 
     // TODO:
-    // Globals::topo_array_to_processing(&instruments[Snare]->topography);
+    // Globals::topo_array_to_processing(&snare->topography);
     // Globals::topo_array_to_processing(&Effect::beat_sum);
     // Globals::topo_array_to_processing(&regularity);
 
@@ -554,14 +528,14 @@ void loop()
     //   break;
 
     // case 2: // delay with Swell Effect on Snare
-    //   instruments[Snare]->effect = Swell;
-    //   instruments[Snare]->midi.cc_chan = DelayTime;
+    //   snare->effect = Swell;
+    //   snare->midi.cc_chan = DelayTime;
     //   delayDepth += 1; // fade in of delayDepth
     //   delayDepth = min(delayDepth, 127);
     //   MIDI.sendControlChange(DelayDepth, int(delayDepth), 2);
     //   // Globals::print_to_console("delayDepth = ");
     //   // Globals::println_to_console(delayDepth);
-    //   // score1.crazyDelays(instruments[Snare], MIDI);
+    //   // score1.crazyDelays(snare, MIDI);
     //   break;
 
     // case 3: // rawPin Delay Effect on Snare
@@ -569,18 +543,18 @@ void loop()
     //   delayDepth = max(delayDepth, 0);
 
     //   MIDI.sendControlChange(DelayDepth, 50, 2);
-    //   instruments[Snare]->effect = CC_Effect_rawPin;
+    //   snare->effect = CC_Effect_rawPin;
     //   // score1.envelope_volume(&Effect::beat_sum, MIDI);
     //   break;
 
     // case 4: // note ascend
-    //   instruments[Standtom1]->topography.activation_thresh = 2;
-    //   instruments[Kick]->topography.activation_thresh = 2;
-    //   instruments[Snare]->topography.activation_thresh = 2;
+    //   standtom->topography.activation_thresh = 2;
+    //   kick->topography.activation_thresh = 2;
+    //   snare->topography.activation_thresh = 2;
 
-    //   instruments[Standtom1]->effect = Monitor;
-    //   instruments[Kick]->effect = Monitor;
-    //   instruments[Snare]->effect = Monitor;
+    //   standtom->effect = Monitor;
+    //   kick->effect = Monitor;
+    //   snare->effect = Monitor;
 
     //   for (int i = 0; i < Globals::numInputs; i++)
     //   {
@@ -592,7 +566,7 @@ void loop()
     //   break;
 
     // case 5: // envelope cutoff
-    // instruments[Snare]->effect = TopographyLog;
+    // snare->effect = TopographyLog;
     //   score1.envelope_cutoff(&Effect::beat_sum, MIDI);
     //   break;
     // }
@@ -614,7 +588,7 @@ void loop()
   // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
 
   // tidying up what's left from performing functions..
-  for (int i = 0; i < Globals::numInputs; i++)
-    instruments[i]->tidyUp(instruments[i], MIDI);
+  for (auto &instrument : instruments)
+    instrument->tidyUp(instrument, MIDI);
 }
 // --------------------------------------------------------------------

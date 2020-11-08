@@ -19,33 +19,44 @@ void Instrument::setup_midi(CC_Type cc_type, int cc_max, int cc_min, float cc_in
   midi.cc_decay_factor = cc_decay_factor;
 }
 
+void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean firstStroke_)
+{
+  sensitivity.threshold = threshold_;
+  sensitivity.crossings = crossings_;
+  sensitivity.delayAfterStroke = delayAfterStroke_;
+  timing.countAfterFirstStroke = firstStroke_;
+}
+
 ///////////////////////// STROKE DETECTION /////////////////////////
 ////////////////////////////////////////////////////////////////////
-bool Instrument::stroke_detected(Instrument *instrument)
+bool Instrument::stroke_detected()
 {
-  static unsigned long lastPinActiveTimeCopy[Globals::numInputs];
   // static unsigned long firstPinActiveTimeCopy[Globals::numInputs];
   // static int lastValue[Globals::numInputs];    // for LED toggle
   // static boolean toggleState = false; // for LED toggle
 
   noInterrupts();
-  lastPinActiveTimeCopy[instrument->drumtype] = instrument->timing.lastPinActiveTime;
-  // firstPinActiveTimeCopy[instr] = firstPinActiveTime[instr];
+  timing.lastPinActiveTimeCopy = timing.lastPinActiveTime;
+  timing.firstPinActiveTimeCopy = timing.firstPinActiveTime;
   interrupts();
 
-  if (millis() > lastPinActiveTimeCopy[instrument->drumtype] + instrument->sensitivity.delayAfterStroke) // get counts only X ms after LAST hit
+  boolean stroke_criterion = false;
+  if (!timing.countAfterFirstStroke && millis() > timing.lastPinActiveTimeCopy + sensitivity.delayAfterStroke) // get counts only X ms after LAST hit
+    stroke_criterion = true;
+    
+  if (timing.countAfterFirstStroke && millis() > timing.firstPinActiveTimeCopy + sensitivity.delayAfterStroke) //get counts only X ms after FIRST hit ??
+    stroke_criterion = true;
 
-  //if (millis() > firstPinActiveTimeCopy[instr] + globalDelayAfterStroke)
-  //get counts only X ms after FIRST hit ??
+  if (stroke_criterion)
   {
     static int countsCopy;
     noInterrupts();
-    countsCopy = instrument->timing.counts;
-    instrument->timing.counts = 0;
+    countsCopy = timing.counts;
+    timing.counts = 0;
     interrupts();
 
     // ---------------------------- found significant count!
-    if (countsCopy >= instrument->sensitivity.crossings)
+    if (countsCopy >= sensitivity.crossings)
     {
       // LED blink:
       //if (countsCopy[instr] != lastValue[instr]) toggleState = !toggleState;
@@ -99,23 +110,111 @@ void Instrument::calculateNoiseFloor(Instrument *instrument)
     if (n % 100 == 0)
     {
       Globals::print_to_console(" . ");
-      digitalWrite(Globals::leds[instrument->drumtype], toggleState);
+      digitalWrite(instrument->led, toggleState);
       toggleState = !toggleState;
     }
     totalSamples += analogRead(instrument->pin);
   }
   instrument->sensitivity.noiseFloor = totalSamples / 400;
-  digitalWrite(Globals::leds[instrument->drumtype], LOW);
+  digitalWrite(instrument->led, LOW);
   led_idx++;
   Globals::print_to_console("noiseFloor = ");
   Globals::println_to_console(instrument->sensitivity.noiseFloor);
 
-  for (int i = 0; i < Globals::numInputs; i++) // turn LEDs off again
+  // turn LEDs off again:
+  digitalWrite(instrument->led, LOW);
+  instrument->output_string = "\t";
+}
+// --------------------------------------------------------------------
+
+///////////////////// SET STRING FOR PLAY LOGGING /////////////////////
+///////////////////////////////////////////////////////////////////////
+void Instrument::setInstrumentPrintString()
+{
+  switch (effect)
   {
-    digitalWrite(Globals::leds[i], LOW);
-    Globals::output_string[i] = "\t";
+  case Monitor: // monitor: just print what is being played
+    if (drumtype == Kick)
+      output_string = "■\t"; // Kickdrum
+    else if (drumtype == Cowbell)
+      output_string = "▲\t"; // Crash
+    else if (drumtype == Standtom1)
+      output_string = "□\t"; // Standtom
+    else if (drumtype == Standtom2)
+      output_string = "O\t"; // Standtom
+    else if (drumtype == Hihat)
+      output_string = "x\t"; // Hi-Hat
+    else if (drumtype == Tom1)
+      output_string = "°\t"; // Tom 1
+    else if (drumtype == Snare)
+      output_string = "※\t"; // Snaredrum
+    else if (drumtype == Tom2)
+      output_string = "o\t"; // Tom 2
+    else if (drumtype == Ride)
+      output_string = "xx\t"; // Ride
+    else if (drumtype == Crash1)
+      output_string = "-X-\t"; // Crash
+    else if (drumtype == Crash2)
+      output_string = "-XX-\t"; // Crash
+    break;
+
+  case ToggleRhythmSlot: // toggle beat slot
+    if (drumtype == Kick)
+      output_string = "■\t"; // Kickdrum
+    else if (drumtype == Cowbell)
+      output_string = "▲\t"; // Crash
+    else if (drumtype == Standtom1)
+      output_string = "□\t"; // Standtom
+    else if (drumtype == Standtom2)
+      output_string = "O\t"; // Standtom
+    else if (drumtype == Hihat)
+      output_string = "x\t"; // Hi-Hat
+    else if (drumtype == Tom1)
+      output_string = "°\t"; // Tom 1
+    else if (drumtype == Snare)
+      output_string = "※\t"; // Snaredrum
+    else if (drumtype == Tom2)
+      output_string = "o\t"; // Tom 2
+    else if (drumtype == Ride)
+      output_string = "xx\t"; // Ride
+    else if (drumtype == Crash1)
+      output_string = "-X-\t"; // Crash
+    else if (drumtype == Crash2)
+      output_string = "-XX-\t"; // Crash
+    break;
+
+  case FootSwitchLooper: // add an ! if pinAction == 3 (replay logged rhythm)
+    if (drumtype == Kick)
+      output_string = "!■\t"; // Kickdrum
+    else if (drumtype == Cowbell)
+      output_string = "!▲\t"; // Crash
+    else if (drumtype == Standtom1)
+      output_string = "!□\t"; // Standtom
+    else if (drumtype == Standtom2)
+      output_string = "!O\t"; // Standtom
+    else if (drumtype == Hihat)
+      output_string = "!x\t"; // Hi-Hat
+    else if (drumtype == Tom1)
+      output_string = "!°\t"; // Tom 1
+    else if (drumtype == Snare)
+      output_string = "!※\t"; // Snaredrum
+    else if (drumtype == Tom2)
+      output_string = "!o\t"; // Tom 2
+    else if (drumtype == Ride)
+      output_string = "!xx\t"; // Ride
+    else if (drumtype == Crash1)
+      output_string = "!-X-\t"; // Crash
+    else if (drumtype == Crash2)
+      output_string = "!-XX-\t"; // Crash
+    break;
+
+    // case 5: // print swell_val for repeated MIDI notes in "swell" mode
+    //   Globals::output_string[incoming_i] = swell_val[incoming_i];
+    //   Globals::output_string[incoming_i] += "\t";
+    //   break;
   }
 }
+
 // --------------------------------------------------------------------
 
 ///////////////////////////////////////////////////////////////////////
@@ -179,7 +278,7 @@ void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSer
 ///////////////////////////// TIMED EFFECTS ///////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void Instrument::perform(Instrument *instrument, Instrument *instruments[Globals::numInputs], midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::perform(Instrument *instrument, std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI)
 {
   switch (effect)
   {

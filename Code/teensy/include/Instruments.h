@@ -10,14 +10,20 @@ class Instrument
 {
 
 public:
-    Instrument()
+    Instrument(int pin_, DrumType drumtype_)
     {
+        pin = pin_;
+        drumtype = drumtype_;
     }
 
     int pin;
+    int led = LED_BUILTIN;
 
     EffectsType effect;
+    EffectsType lastEffect; // used to store original effect temporarily (in footswitch functions)
     DrumType drumtype;
+
+    String output_string;
 
     // sensitivity and instrument calibration
     struct SENSITIVITY
@@ -55,35 +61,44 @@ public:
         int active_note;
         int cc_chan;
         float cc_val = 0;
-        int cc_max = 127;       // MIDI values cannot be greater than this
-        int cc_min = 30;        // MIDI values cannot be smaller than this
+        int cc_max = 127;               // MIDI values cannot be greater than this
+        int cc_min = 30;                // MIDI values cannot be smaller than this
         float cc_increase_factor = 0.7; // factor by which MIDI vals will be increased upon hit
-        float cc_decay_factor = 1;    // factor by which MIDI vals decay
+        float cc_decay_factor = 1;      // factor by which MIDI vals decay
     } midi;
 
     struct TIMING
     {
         volatile unsigned long lastPinActiveTime;
         volatile unsigned long firstPinActiveTime;
-        volatile int counts;
+        unsigned long lastPinActiveTimeCopy;
+        unsigned long firstPinActiveTimeCopy;
+        boolean countAfterFirstStroke = false; // start counting after first threshold crossing or using delayAfterStroke
+        volatile int counts = 0;
         boolean stroke_flag = false;
+        int countsCopy;
     } timing;
 
     TOPOGRAPHY topography;
 
     void trigger(Instrument *, midi::MidiInterface<HardwareSerial>);
 
-    void perform(Instrument *, Instrument *instruments[Globals::numInputs], midi::MidiInterface<HardwareSerial>);
+    void perform(Instrument *, std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>);
 
     void tidyUp(Instrument *, midi::MidiInterface<HardwareSerial>); // turn of MIDI notes etc
 
-    bool stroke_detected(Instrument *instrument);
+    bool stroke_detected();
 
     void setup_notes(std::vector<int> list);
 
     void setup_midi(CC_Type cc_type, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor);
 
+    void setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean firstStroke_);
+
     void calculateNoiseFloor(Instrument *);
+
+    void setInstrumentPrintString();
+
 
     // void smoothen_dataArray(Instrument *instrument);
 };

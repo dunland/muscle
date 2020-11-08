@@ -7,6 +7,8 @@
 class Score
 {
 public:
+    static int score_state;
+
     std::vector<int> notes;
 
     void continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI, int note_length);                      // initiates a continuous bass note from score
