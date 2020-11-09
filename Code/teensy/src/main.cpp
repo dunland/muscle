@@ -360,8 +360,8 @@ void loop()
     // -------------------------- full notes: -------------------------
     if (Globals::current_beat_pos == 0)
     {
-      Globals::print_to_console("score_state = ");
-      Globals::println_to_console(Score::score_state);
+      Globals::print_to_console("score_step = ");
+      Globals::println_to_console(score1.step);
       // MIDI.sendRealTime(midi::Continue);
     }
 
@@ -394,18 +394,8 @@ void loop()
     // --------------------------- 16th notes: ------------------------
     if (Globals::current_beat_pos % 2 == 0)
     {
-
       // increase 16th note counter:
       Globals::current_16th_count = (Globals::current_16th_count + 1) % 16;
-
-      // vibrate if new score is ready:
-      if (Score::beat_sum.ready())
-      {
-        digitalWrite(VIBR, HIGH);
-        Globals::println_to_console("ready to go to next score step! hit footswitch!");
-      }
-      else
-        digitalWrite(VIBR, LOW);
     }
 
     // ----------------------------- draw play log to console
@@ -501,58 +491,80 @@ void loop()
     //////////////////////////////// SCORE ////////////////////////////
     ///////////////////////////////////////////////////////////////////
 
-    // state proceeds if footswitch is pressed (in mode RESET_AND_PROCEED_SCORE) when regularity is high enough
-    // static float delayDepth = 0;
-    // switch (Globals::score_state)
-    // {
-    // case 1:
-    static int noteLength = int(random(8) * 4);
-    score1.continuousBassNote(MIDI, noteLength); // will play bass note from score repeatedly
-    //   break;
+    // step proceeds if footswitch is pressed (in mode RESET_AND_PROCEED_SCORE) when regularity is high enough
 
-    // case 2: // delay with Swell Effect on Snare
-    //   snare->effect = Swell;
-    //   snare->midi.cc_chan = DelayTime;
-    //   delayDepth += 1; // fade in of delayDepth
-    //   delayDepth = min(delayDepth, 127);
-    //   MIDI.sendControlChange(DelayDepth, int(delayDepth), 2);
-    //   // Globals::print_to_console("delayDepth = ");
-    //   // Globals::println_to_console(delayDepth);
-    //   // score1.crazyDelays(snare, MIDI);
-    //   break;
+    // vibrate if new score is ready:
+    if (Score::beat_sum.ready())
+    {
+      digitalWrite(VIBR, HIGH);
+      Globals::println_to_console("ready to go to next score step! hit footswitch!");
+    }
+    else
+      digitalWrite(VIBR, LOW);
 
-    // case 3: // rawPin Delay Effect on Snare
-    //   delayDepth -= 3;
-    //   delayDepth = max(delayDepth, 0);
+    switch (score1.step)
+    {
+    case 1:
+      static int noteLength = int(random(8) * 4);
+      score1.continuousBassNote(MIDI, noteLength); // will play bass note from score repeatedly
+      break;
 
-    //   MIDI.sendControlChange(DelayDepth, 50, 2);
-    //   snare->effect = CC_Effect_rawPin;
-    //   // score1.envelope_volume(&Score::beat_sum, MIDI);
-    //   break;
+    case 2:
+      boolean once2 = false;
 
-    // case 4: // note ascend
-    //   standtom->topography.activation_thresh = 2;
-    //   kick->topography.activation_thresh = 2;
-    //   snare->topography.activation_thresh = 2;
+      // add new bass note to score, once:
+      if (once2)
+      {
+        score1.add_bassNote(score1.notes[0] + 3, 0);
+      }
+      once2 = true;
 
-    //   standtom->effect = Monitor;
-    //   kick->effect = Monitor;
-    //   snare->effect = Monitor;
+      break;
 
-    //   for (int i = 0; i < Globals::numInputs; i++)
-    //   {
-    //     if (instruments[i]->topography.average_smooth >= instruments[i]->topography.activation_thresh)
-    //     {
-    //       instruments[i]->midi.active_note += 3;
-    //     }
-    //   }
-    //   break;
+      // static float delayDepth = 0;
+      // case 2: // delay with Swell Effect on Snare
+      //   snare->effect = Swell;
+      //   snare->midi.cc_chan = DelayTime;
+      //   delayDepth += 1; // fade in of delayDepth
+      //   delayDepth = min(delayDepth, 127);
+      //   MIDI.sendControlChange(DelayDepth, int(delayDepth), 2);
+      //   // Globals::print_to_console("delayDepth = ");
+      //   // Globals::println_to_console(delayDepth);
+      //   // score1.crazyDelays(snare, MIDI);
+      //   break;
 
-    // case 5: // envelope cutoff
-    // snare->effect = TopographyLog;
-    //   score1.envelope_cutoff(&Score::beat_sum, MIDI);
-    //   break;
-    // }
+      // case 3: // rawPin Delay Effect on Snare
+      //   delayDepth -= 3;
+      //   delayDepth = max(delayDepth, 0);
+
+      //   MIDI.sendControlChange(DelayDepth, 50, 2);
+      //   snare->effect = CC_Effect_rawPin;
+      //   // score1.envelope_volume(&Score::beat_sum, MIDI);
+      //   break;
+
+      // case 4: // note ascend
+      //   standtom->topography.activation_thresh = 2;
+      //   kick->topography.activation_thresh = 2;
+      //   snare->topography.activation_thresh = 2;
+
+      //   standtom->effect = Monitor;
+      //   kick->effect = Monitor;
+      //   snare->effect = Monitor;
+
+      //   for (int i = 0; i < Globals::numInputs; i++)
+      //   {
+      //     if (instruments[i]->topography.average_smooth >= instruments[i]->topography.activation_thresh)
+      //     {
+      //       instruments[i]->midi.active_note += 3;
+      //     }
+      //   }
+      //   break;
+
+      // case 5: // envelope cutoff
+      // snare->effect = TopographyLog;
+      //   score1.envelope_cutoff(&Score::beat_sum, MIDI);
+      //   break;
+    }
 
     // continuousBassNote, quarterBassNotes, addBassNote,
 
@@ -567,7 +579,7 @@ void loop()
   Globals::last_16th_count = Globals::current_16th_count;
 
   // Hardware:
-  Hardware::checkFootSwitch(instruments, &score1); // check state of footswitch
+  Hardware::checkFootSwitch(instruments, &score1); // check step of footswitch
   // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
 
   // tidying up what's left from performing functions..

@@ -7,10 +7,16 @@
 class Score
 {
 public:
-    static int score_state;
+    int step = 1;
 
     std::vector<int> notes;
+    int note_idx = 0;      // points at active (bass-)note
+    int note_iterator = 0; // defines at what position to increase note_idx
 
+    // SETUP etc:
+    void add_bassNote(int note, int note_iterator_); // adds a NOTE to notes[] and change when to change note in beat
+
+    // MODES:
     void continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI, int note_length);     // initiates a continuous bass note from score
     void envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
     void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for volume filter via topography

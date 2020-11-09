@@ -43,7 +43,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments, Score *s
     if (Score::beat_sum.average_smooth > Score::beat_sum.activation_thresh)
     {
       Globals::println_to_console("regularity height > 10: reset!");
-      Score::score_state++; // go to next score state
+      score->step++; // go to next score step
       for (auto& instrument : instruments)
         for (int j = 0; j < 16; j++)
           instrument->topography.a_16[j] = 0;
