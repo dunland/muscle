@@ -51,8 +51,8 @@ public:
         unsigned long swell_beatPos_sum = 0;
 
         //field recordings
-        int allocated_track; // tracks will be allocated in tsunami_beat_playback
-        int allocated_channel = 0;
+        int tsunami_track; // tracks will be allocated in tsunami_beat_playback
+        int tsunami_channel = 0;
     } score;
 
     struct MIDI
@@ -65,6 +65,8 @@ public:
         int cc_min = 30;                // MIDI values cannot be smaller than this
         float cc_increase_factor = 0.7; // factor by which MIDI vals will be increased upon hit
         float cc_decay_factor = 1;      // factor by which MIDI vals decay
+        MIDI_Instrument instrument; // channel for midi instrument to target
+
     } midi;
 
     struct TIMING
@@ -91,14 +93,13 @@ public:
 
     void setup_notes(std::vector<int> list);
 
-    void setup_midi(CC_Type cc_type, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor);
+    void setup_midi(CC_Type cc_type, MIDI_Instrument midi_instrument, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor);
 
     void setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean firstStroke_);
 
     void calculateNoiseFloor(Instrument *);
 
     void setInstrumentPrintString();
-
 
     // void smoothen_dataArray(Instrument *instrument);
 };

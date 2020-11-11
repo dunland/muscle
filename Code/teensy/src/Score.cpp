@@ -52,7 +52,3 @@ void Score::crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSeri
     delaytime = min(delaytime, 127);                                               // must not be greater than 127
     MIDI.sendControlChange(51, delaytime, 2);
 }
-
-void Score::regularHighNote(Instrument *instrument)
-{
-}

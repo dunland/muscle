@@ -12,7 +12,7 @@ boolean Globals::printStrokes = true;
 boolean Globals::use_responsiveCalibration = false;
 boolean Globals::do_print_to_console = true;
 boolean Globals::do_send_to_processing = false;
-boolean Globals::do_print_beat_sum = false; // prints Score::beat_sum topography array
+boolean Globals::do_print_beat_sum = true; // prints Score::beat_sum topography array
 
 IntervalTimer Globals::masterClock; // 1 bar
 

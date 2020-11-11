@@ -12,7 +12,7 @@ public:
     // trigger effects: -----------------------------------------------
     static void playMidi_rawPin(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
 
-    static void cc_effect_rawPin(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    static void change_cc(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 
     static void playMidi(Instrument *instrument, midi::MidiInterface<HardwareSerial>);
 

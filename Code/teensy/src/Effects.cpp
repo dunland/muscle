@@ -7,36 +7,18 @@
 ///////////////////////////// TRIGGER EFFECTS /////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void Effect::cc_effect_rawPin(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI) // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+void Effect::change_cc(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI) // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 {
-  // if (abs(instrument->sensitivity.noiseFloor - analogRead(instrument->pin)) > instrument->sensitivity.threshold)
-  // {
   instrument->midi.cc_val += instrument->midi.cc_increase_factor;
   instrument->midi.cc_val = min(instrument->midi.cc_val, instrument->midi.cc_max);
-  MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), microKORG);
+  MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), instrument->midi.instrument);
   instrument->output_string = String(instrument->midi.cc_val);
   instrument->output_string += "\t";
-  // }
-  // else
-  // {
-  //   instrument->midi.cc_val -= instrument->midi.cc_decay_factor;
-  //   instrument->midi.cc_val = max(instrument->midi.cc_val, instrument->midi.cc_min);
-  //   MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), 2);
-  //   Globals::output_string[instrument->drumtype] = String(int(instrument->midi.cc_val));
-  // }
-}
-
-void Effect::playMidi_rawPin(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
-{
-  if (abs(instrument->sensitivity.noiseFloor - analogRead(instrument->pin)) > instrument->sensitivity.threshold)
-    MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
-  else
-    MIDI.sendNoteOff(instrument->midi.active_note, 127, 2);
 }
 
 void Effect::playMidi(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
 {
-  MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
+  MIDI.sendNoteOn(instrument->midi.active_note, 127, instrument->midi.instrument);
   instrument->score.last_notePlayed = millis();
 }
 
@@ -96,7 +78,7 @@ void Effect::getTapTempo()
       Globals::tapInterval = clock_sum / num_of_taps;
       Globals::print_to_console("new tap Tempo is ");
 
-      if (Globals::tapInterval >= 333) // quarter notes when BPM <= 180
+      if (Globals::tapInterval >= 300) // quarter notes when slow tapping
       {
         Globals::current_BPM = 60000 / Globals::tapInterval;
         Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
@@ -105,7 +87,7 @@ void Effect::getTapTempo()
         Globals::print_to_console(Globals::tapInterval);
         Globals::println_to_console(" ms interval int quarter-notes)");
       }
-      else // eighth-notes when BPM >= 180
+      else // eighth-notes when fast tapping
       {
         Globals::current_BPM = (60000 / Globals::tapInterval) / 2;                                    // BPM >= 180 → strokes are 8th-notes, BPM half-time
         Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 8 / 128); // 8 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
@@ -173,7 +155,7 @@ void Effect::swell_rec(Instrument *instrument, midi::MidiInterface<HardwareSeria
 
     // start MIDI note and proceed to next state
     instrument->score.swell_state = 2;
-    // MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
+    // MIDI.sendNoteOn(instrument->midi.active_note, 127, instrument->midi.instrument);
 
     // lastSwellRec = millis();
   }
@@ -231,10 +213,10 @@ void Effect::sendMidiNotes_timed(Instrument *instrument, midi::MidiInterface<Har
     {
       instrument->setInstrumentPrintString();
       // TODO: SHOULD BE HANDLED LIKE FOOTSWITCHLOOPER!
-      MIDI.sendNoteOn(instrument->midi.active_note, 127, 2);
+      MIDI.sendNoteOn(instrument->midi.active_note, 127, instrument->midi.instrument);
     }
     else
-      MIDI.sendNoteOff(instrument->midi.active_note, 127, 2);
+      MIDI.sendNoteOff(instrument->midi.active_note, 127, instrument->midi.instrument);
   }
 }
 
@@ -272,23 +254,23 @@ void Effect::swell_perform(Instrument *instrument, midi::MidiInterface<HardwareS
       instrument->output_string += "\t";
 
       if (!Globals::footswitch_is_pressed)
-        MIDI.sendControlChange(instrument->midi.cc_chan, instrument->score.swell_val * instrument->score.swell_factor, 2);
+        MIDI.sendControlChange(instrument->midi.cc_chan, instrument->score.swell_val * instrument->score.swell_factor, instrument->midi.instrument);
       /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
         finding the right CC# on microKORG: (manual p.61):
         1. press SHIFT + 5
         2. choose parameter to find out via EDIT SELECT 1 & 2
         (3. reset that parameter, if you like) */
 
-      // MIDI.sendNoteOn(notes_list[instr], 127, 2); // also play a note on each hit?
+      // MIDI.sendNoteOn(notes_list[instr], 127, instrument->midi.instrument); // also play a note on each hit?
       if (instrument->effect == CymbalSwell)
       {
-        if (Globals::tsunami.isTrackPlaying(instrument->score.allocated_track))
+        if (Globals::tsunami.isTrackPlaying(instrument->score.tsunami_track))
         {
           static int trackLevel = 0;
           static int previousTracklevel = 0;
           trackLevel = min(-40 + instrument->score.swell_val, 0);
           if (trackLevel != previousTracklevel)
-            Globals::tsunami.trackFade(instrument->score.allocated_track, trackLevel, 100, false); // fade smoothly within 100 ms
+            Globals::tsunami.trackFade(instrument->score.tsunami_track, trackLevel, 100, false); // fade smoothly within 100 ms
           previousTracklevel = trackLevel;
         }
       }
@@ -390,7 +372,7 @@ void Effect::tsunami_beat_playback(Instrument *instrument)
           tracknum += 1;
       }
     }
-    instrument->score.allocated_track = tracknum; // save for use in other functions
+    instrument->score.tsunami_track = tracknum; // save for use in other functions
 
     // set loudness and fade:
     //int trackLevel = min(-40 + (instrument->topography.average_smooth * 5), 0);
@@ -425,9 +407,9 @@ void Effect::tsunami_beat_playback(Instrument *instrument)
       }
 
       //int channel = 0;                              // Debug
-      Globals::tsunami.samplerateOffset(instrument->score.allocated_channel, sr_offset); // TODO: link channels to instruments
+      Globals::tsunami.samplerateOffset(instrument->score.tsunami_channel, sr_offset); // TODO: link channels to instruments
       Globals::tsunami.trackGain(tracknum, trackLevel);
-      Globals::tsunami.trackPlayPoly(tracknum, instrument->score.allocated_channel, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
+      Globals::tsunami.trackPlayPoly(tracknum, instrument->score.tsunami_channel, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
       Globals::print_to_console("starting to play track ");
       Globals::println_to_console(tracknum);
     } // track playing end
@@ -484,7 +466,7 @@ void Effect::topography_midi_effects(Instrument *instrument, std::vector<Instrum
     int vol = min(Score::beat_sum.a_16[Globals::current_16th_count] * 13, 255);
 
     if (instrument->topography.a_16[Globals::current_16th_count] > 0)
-      MIDI.sendControlChange(instrument->midi.cc_chan, vol, 2);
+      MIDI.sendControlChange(instrument->midi.cc_chan, vol, instrument->midi.instrument);
 
     // Debug:
     Globals::print_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
@@ -507,7 +489,7 @@ void Effect::topography_midi_effects(Instrument *instrument, std::vector<Instrum
 void Effect::turnMidiNoteOff(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
 {
   if (millis() > instrument->score.last_notePlayed + 200 && instrument->effect != Swell) // Swell effect turns notes off itself
-    MIDI.sendNoteOff(instrument->midi.active_note, 127, 2);
+    MIDI.sendNoteOff(instrument->midi.active_note, 127, instrument->midi.instrument);
 }
 
 // TODO: make this decrease with 32nd-notes.
@@ -515,7 +497,7 @@ void Effect::decay_ccVal(Instrument *instrument, midi::MidiInterface<HardwareSer
 {
   instrument->midi.cc_val -= instrument->midi.cc_decay_factor;
   instrument->midi.cc_val = max(instrument->midi.cc_val, instrument->midi.cc_min);
-  MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), 2);
+  MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), instrument->midi.instrument);
   instrument->output_string = String(instrument->midi.cc_val);
   instrument->output_string += "\t";
 }

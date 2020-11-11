@@ -170,13 +170,13 @@ void setup()
 
   // ------------------------ INSTRUMENT SETUP ------------------------
   // instantiate instruments:
-  snare = new Instrument(A3, Snare);
-  hihat = new Instrument(A4, Hihat);
-  kick = new Instrument(A0, Kick);
-  tom2 = new Instrument(A5, Tom2);
-  standtom = new Instrument(A1, Standtom1);
-  cowbell = new Instrument(A2, Cowbell);
-  crash1 = new Instrument(A6, Crash1);
+  snare = new Instrument(A5, Snare);
+  hihat = new Instrument(A6, Hihat);
+  kick = new Instrument(A1, Kick);
+  tom2 = new Instrument(A7, Tom2);
+  standtom = new Instrument(A2, Standtom1);
+  cowbell = new Instrument(A3, Cowbell);
+  crash1 = new Instrument(A0, Crash1);
 
   instruments = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
 
@@ -195,18 +195,16 @@ void setup()
   }
 
   // set instrument calibration array
-  // values as of 2020-08-27:
 
   // tom1->sensitivity.threshold = 200;
   // tom1->sensitivity.crossings = 20;
-  snare->setup_sensitivity(180, 12, 10, false);
   hihat->setup_sensitivity(80, 15, 10, false);
-  standtom->setup_sensitivity(70, 30, 10, false); // 60, 20
-  tom2->setup_sensitivity(300, 9, 10, false);     // 300, 18
-  kick->setup_sensitivity(100, 16, 10, false);
+  standtom->setup_sensitivity(200, 10, 10, false); // (2020-11-11) // 60, 20 (2020-08-27)
+  tom2->setup_sensitivity(100, 9, 10, false);      // 300, 18
+  kick->setup_sensitivity(200, 12, 10, false);     // (2020-11-11) // 100, 16 (2020-08-27)
   cowbell->setup_sensitivity(80, 15, 10, false);
-  crash1->setup_sensitivity(300, 2, 5, false);
-  snare->setup_sensitivity(180, 12, 10, false);
+  crash1->setup_sensitivity(300, 2, 5, true);
+  snare->setup_sensitivity(120, 10, 10, false); // (2020-11-11) // 180, 12 (2020-08-27)
 
   // calculate noise floor:
   for (auto &instrument : instruments)
@@ -217,14 +215,14 @@ void setup()
   Globals::println_to_console("assigning effects...");
 
   // assign effects to instruments:
-  snare->effect = CC_Effect_rawPin;
+  snare->effect = Change_CC;
   hihat->effect = TapTempo;
-  kick->effect = CC_Effect_rawPin;
-  // tom1->effect = CC_Effect_rawPin;
-  tom2->effect = Monitor;
-  standtom->effect = CC_Effect_rawPin;
-  cowbell->effect = CC_Effect_rawPin;
-  crash1->effect = CC_Effect_rawPin;
+  kick->effect = Change_CC;
+  // tom1->effect = Change_CC;
+  tom2->effect = Change_CC;
+  standtom->effect = Change_CC;
+  cowbell->effect = Change_CC;
+  crash1->effect = Change_CC;
   // instruments[Ride]->effect = Monitor;
 
   // ---------------------------- SCORE -------------------------------
@@ -234,25 +232,16 @@ void setup()
   score1.notes.push_back(int(random(24, 36)));
   Globals::println_to_console(score1.notes[0]);
 
-  snare->midi.active_note = score1.notes[0] + 12 + 4;
-  hihat->midi.active_note = score1.notes[0] + 24;
-  kick->midi.active_note = score1.notes[0];
-  // tom1->midi.active_note = 71;
-  tom2->midi.active_note = 74;
-  standtom->midi.active_note = score1.notes[0] + 3;
-  cowbell->midi.active_note = 60;
-  crash1->midi.active_note = 74;
-
   Globals::println_to_console("setting up midi channels..");
   // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
-  snare->setup_midi(DelayTime, 127, 30, 10, 0.1);
-  hihat->setup_midi(None, 127, 30, 10, 0.1);
-  kick->setup_midi(Release, 127, 0, 50, 0.2);
-  // tom1->setup_midi(Sustain, 127, 0, 5, 0.01);
-  tom2->setup_midi(Resonance, 127, 30, 1, 0.01);
-  standtom->setup_midi(Sustain, 127, 40, 15, 0.01);
-  cowbell->setup_midi(DelayDepth, 90, 0, 30, 0.1);
-  crash1->setup_midi(Cutoff, 127, 40, 4, 0.1);
+  snare->setup_midi(DelayTime, microKORG, 127, 30, 10, 0.1);
+  hihat->setup_midi(None, microKORG, 127, 30, 10, 0.1);
+  kick->setup_midi(Cutoff, Volca, 127, 40, 50, 0.1);
+  // tom1->setup_midi(Sustain, microKORG, 127, 0, 5, 0.01);
+  tom2->setup_midi(Resonance, microKORG, 127, 30, 50, 1);
+  standtom->setup_midi(Sustain, microKORG, 127, 40, 15, 0.01);
+  cowbell->setup_midi(DelayDepth, microKORG, 90, 0, 30, 0.1);
+  crash1->setup_midi(Cutoff, microKORG, 127, 40, 4, 1);
 
   // print startup information:
   Globals::println_to_console("-----------------------------------------------");
@@ -371,14 +360,14 @@ void loop()
       // Hardware::vibrate_motor(50);
     }
     // Debug: play MIDI note on quarter notes
-    if (Globals::current_beat_pos % 8 == 0)
-    {
-      MIDI.sendNoteOn(57, 127, 2);
-    }
-    else
-    {
-      MIDI.sendNoteOff(57, 127, 2);
-    }
+    // if (Globals::current_beat_pos % 8 == 0)
+    // {
+    //   MIDI.sendNoteOn(57, 127, 2);
+    // }
+    // else
+    // {
+    //   MIDI.sendNoteOff(57, 127, 2);
+    // }
 
     // --------------------------- 8th notes: -------------------------
     if (Globals::current_beat_pos % 4 == 0)
@@ -408,12 +397,18 @@ void loop()
       Globals::print_to_console(instrument->output_string);
       instrument->output_string = "\t";
     }
-    Globals::println_to_console("");
+    Globals::print_to_console("sum = [");
+
+    Globals::smoothen_dataArray(&score1.beat_sum);
+
+    Globals::print_to_console(score1.beat_sum.average_smooth);
+    Globals::println_to_console("]");
 
     // print topo arrays:
 
     if (Globals::do_print_beat_sum)
     {
+      for (auto &instrument : instruments) Globals::printTopoArray(&instrument->topography);
       Globals::printTopoArray(&Score::beat_sum); // print volume layer
       // Globals::printTopoArray(&score1.beat_regularity);
     }
@@ -505,21 +500,46 @@ void loop()
     switch (score1.step)
     {
     case 1:
+      static boolean once1 = true;
+      if (once1)
+      {
+        tom2->effect = PlayMidi;
+        standtom->effect = PlayMidi;
+        kick->effect = Change_CC;
+        snare->effect = PlayMidi;
+
+        snare->midi.active_note = score1.notes[0] + 12 + 4;
+        kick->midi.active_note = score1.notes[0] + 12;
+        // tom1->midi.active_note = 71;
+        tom2->midi.active_note = score1.notes[0] + 12 + 5;
+        standtom->midi.active_note = score1.notes[0] + 12 + 3;
+      }
+
       static int noteLength = int(random(8) * 4);
       score1.continuousBassNote(MIDI, noteLength); // will play bass note from score repeatedly
+
+      once1 = false;
       break;
 
     case 2:
-      boolean once2 = false;
+      static boolean once2 = true;
 
       // add new bass note to score, once:
       if (once2)
       {
         score1.add_bassNote(score1.notes[0] + 3, 0);
       }
-      once2 = true;
+      once2 = false;
 
       break;
+
+    case 3:
+      static boolean once3 = true;
+      if (once3)
+      {
+        snare->effect = ToggleRhythmSlot;
+        crash1->effect = PlayMidi;
+      }
 
       // static float delayDepth = 0;
       // case 2: // delay with Swell Effect on Snare

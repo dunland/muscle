@@ -39,8 +39,7 @@ enum EffectsType
   TsunamiLink = 6,
   CymbalSwell = 7,
   TopographyLog = 8,
-  PlayMidi_rawPin = 9, // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
-  CC_Effect_rawPin = 10
+  Change_CC = 9 // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
 };
 
 enum CC_Type // channels on mKORG:
@@ -56,7 +55,7 @@ enum CC_Type // channels on mKORG:
    DelayDepth = 94
 };
 
-enum MIDI_Instruments_Channels
+enum MIDI_Instrument
 {
   Volca = 1,
   microKORG = 2

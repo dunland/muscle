@@ -10,21 +10,22 @@ void Instrument::setup_notes(std::vector<int> list)
   }
 }
 
-void Instrument::setup_midi(CC_Type cc_type, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor)
+void Instrument::setup_midi(CC_Type cc_type, MIDI_Instrument midi_instrument, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor)
 {
   midi.cc_chan = cc_type;
+  midi.instrument = midi_instrument;
   midi.cc_max = cc_max;
   midi.cc_min = cc_min;
   midi.cc_increase_factor = cc_increase_factor;
   midi.cc_decay_factor = cc_decay_factor;
 }
 
-void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean firstStroke_)
+void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean countAfterFirstStroke)
 {
   sensitivity.threshold = threshold_;
   sensitivity.crossings = crossings_;
   sensitivity.delayAfterStroke = delayAfterStroke_;
-  timing.countAfterFirstStroke = firstStroke_;
+  timing.countAfterFirstStroke = countAfterFirstStroke;
 }
 
 ///////////////////////// STROKE DETECTION /////////////////////////
@@ -133,56 +134,6 @@ void Instrument::setInstrumentPrintString()
 {
   switch (effect)
   {
-  case Monitor: // monitor: just print what is being played
-    if (drumtype == Kick)
-      output_string = "■\t"; // Kickdrum
-    else if (drumtype == Cowbell)
-      output_string = "▲\t"; // Crash
-    else if (drumtype == Standtom1)
-      output_string = "□\t"; // Standtom
-    else if (drumtype == Standtom2)
-      output_string = "O\t"; // Standtom
-    else if (drumtype == Hihat)
-      output_string = "x\t"; // Hi-Hat
-    else if (drumtype == Tom1)
-      output_string = "°\t"; // Tom 1
-    else if (drumtype == Snare)
-      output_string = "※\t"; // Snaredrum
-    else if (drumtype == Tom2)
-      output_string = "o\t"; // Tom 2
-    else if (drumtype == Ride)
-      output_string = "xx\t"; // Ride
-    else if (drumtype == Crash1)
-      output_string = "-X-\t"; // Crash
-    else if (drumtype == Crash2)
-      output_string = "-XX-\t"; // Crash
-    break;
-
-  case ToggleRhythmSlot: // toggle beat slot
-    if (drumtype == Kick)
-      output_string = "■\t"; // Kickdrum
-    else if (drumtype == Cowbell)
-      output_string = "▲\t"; // Crash
-    else if (drumtype == Standtom1)
-      output_string = "□\t"; // Standtom
-    else if (drumtype == Standtom2)
-      output_string = "O\t"; // Standtom
-    else if (drumtype == Hihat)
-      output_string = "x\t"; // Hi-Hat
-    else if (drumtype == Tom1)
-      output_string = "°\t"; // Tom 1
-    else if (drumtype == Snare)
-      output_string = "※\t"; // Snaredrum
-    else if (drumtype == Tom2)
-      output_string = "o\t"; // Tom 2
-    else if (drumtype == Ride)
-      output_string = "xx\t"; // Ride
-    else if (drumtype == Crash1)
-      output_string = "-X-\t"; // Crash
-    else if (drumtype == Crash2)
-      output_string = "-XX-\t"; // Crash
-    break;
-
   case FootSwitchLooper: // add an ! if pinAction == 3 (replay logged rhythm)
     if (drumtype == Kick)
       output_string = "!■\t"; // Kickdrum
@@ -208,7 +159,7 @@ void Instrument::setInstrumentPrintString()
       output_string = "!-XX-\t"; // Crash
     break;
 
-  case TopographyLog: // like monitor
+  default: // just print what is being played
     if (drumtype == Kick)
       output_string = "■\t"; // Kickdrum
     else if (drumtype == Cowbell)
@@ -246,10 +197,12 @@ void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSer
 {
   // always count up topography:
   Effect::countup_topography(instrument);
+  Globals::smoothen_dataArray(&instrument->topography);
 
   switch (effect)
   {
   case PlayMidi:
+    Effect::monitor(instrument);
     Effect::playMidi(instrument, MIDI);
     break;
 
@@ -285,12 +238,8 @@ void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSer
     // Effect::countup_topography(instrument);
     break;
 
-  case PlayMidi_rawPin:
-    Effect::playMidi_rawPin(instrument, MIDI);
-    break;
-
-  case CC_Effect_rawPin:
-    Effect::cc_effect_rawPin(instrument, MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+  case Change_CC:
+    Effect::change_cc(instrument, MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
     break;
 
   default:
@@ -352,6 +301,7 @@ void Instrument::tidyUp(Instrument *instrument, midi::MidiInterface<HardwareSeri
   switch (effect)
   {
   case PlayMidi:
+    Effect::turnMidiNoteOff(instrument, MIDI);
     break;
 
   case Monitor:
@@ -379,7 +329,7 @@ void Instrument::tidyUp(Instrument *instrument, midi::MidiInterface<HardwareSeri
   case TopographyLog:
     break;
 
-  case CC_Effect_rawPin:
+  case Change_CC:
     Effect::decay_ccVal(instrument, MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
     break;
 
