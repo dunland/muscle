@@ -53,6 +53,10 @@ public:
         //field recordings
         int tsunami_track; // tracks will be allocated in tsunami_beat_playback
         int tsunami_channel = 0;
+
+        float *var_to_change;     // can hold a variable to change with Increase_input_val Effect
+        float var_increase_factor = 1;
+        float var_decay_factor = 0.1;
     } score;
 
     struct MIDI
@@ -63,9 +67,9 @@ public:
         float cc_val = 0;
         int cc_max = 127;               // MIDI values cannot be greater than this
         int cc_min = 30;                // MIDI values cannot be smaller than this
-        float cc_increase_factor = 0.7; // factor by which MIDI vals will be increased upon hit
-        float cc_decay_factor = 1;      // factor by which MIDI vals decay
-        MIDI_Instrument instrument; // channel for midi instrument to target
+        float cc_increase_factor = 1; // factor by which MIDI vals will be increased upon hit
+        float cc_decay_factor = 0.1;      // factor by which MIDI vals decay
+        MIDI_Instrument instrument;     // channel for midi instrument to target
 
     } midi;
 
@@ -100,6 +104,10 @@ public:
     void calculateNoiseFloor(Instrument *);
 
     void setInstrumentPrintString();
+
+    void set_effect(EffectsType effect_); // just set effect
+
+    void set_effect(EffectsType effect_, float *variable, float increase_factor, float decrease_factor); // set effect and connect instrument to variable (for Increase_input_val)
 
     // void smoothen_dataArray(Instrument *instrument);
 };

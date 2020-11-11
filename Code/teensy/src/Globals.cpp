@@ -12,7 +12,7 @@ boolean Globals::printStrokes = true;
 boolean Globals::use_responsiveCalibration = false;
 boolean Globals::do_print_to_console = true;
 boolean Globals::do_send_to_processing = false;
-boolean Globals::do_print_beat_sum = true; // prints Score::beat_sum topography array
+boolean Globals::do_print_beat_sum = false; // prints Score::beat_sum topography array
 
 IntervalTimer Globals::masterClock; // 1 bar
 
@@ -107,6 +107,19 @@ void Globals::masterClockTimer()
 // ---------------------------------------------------------------------------
 
 // ----------------------------- TOPOGRAPHIES -------------------------
+void TOPOGRAPHY::reset()
+{
+	a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+}
+
+void TOPOGRAPHY::add(TOPOGRAPHY *to_add)
+{
+	// sum up all topographies of all instruments:
+	for (int idx = 0; idx < 16; idx++) // each slot
+	{
+		a_16[idx] += to_add->a_16[idx];
+	}
+}
 // void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
 // {
 // 	if (original->average_smooth < original->activation_thresh)

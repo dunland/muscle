@@ -28,6 +28,21 @@ void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfte
   timing.countAfterFirstStroke = countAfterFirstStroke;
 }
 
+// if setting up with variable to change:
+void Instrument::set_effect(EffectsType effect_, float *variable, float increase_factor, float decay_factor)
+{
+  effect = effect_;
+  score.var_to_change = variable;
+  score.var_increase_factor = increase_factor;
+  score.var_decay_factor = decay_factor;
+}
+
+// without handle for variable:
+void Instrument::set_effect(EffectsType effect_)
+{
+  effect = effect_;
+}
+
 ///////////////////////// STROKE DETECTION /////////////////////////
 ////////////////////////////////////////////////////////////////////
 bool Instrument::stroke_detected()
@@ -240,6 +255,10 @@ void Instrument::trigger(Instrument *instrument, midi::MidiInterface<HardwareSer
 
   case Change_CC:
     Effect::change_cc(instrument, MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    break;
+
+  case Increase_input_val:
+    Effect::increase_variable(instrument);
     break;
 
   default:

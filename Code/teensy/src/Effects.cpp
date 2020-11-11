@@ -110,6 +110,12 @@ void Effect::getTapTempo()
   }
 }
 
+void Effect::increase_variable(Instrument *instrument)
+{
+  // int asd = &instrument->score.var_to_change + instrument->score.var_increase_factor; // TODO: inncrease by factor!
+  instrument->score.var_to_change++;
+}
+
 // -------------------- SOUND SWELL: RECORD STROKES -------------------
 // --------------------------------------------------------------------
 /* SOUND SWELL ALGORITHM: ---------------------------------------------
@@ -448,16 +454,13 @@ void Effect::topography_midi_effects(Instrument *instrument, std::vector<Instrum
     Globals::smoothen_dataArray(&instrument->topography); // erases "noise" from arrays if SNR>snr_threshold
 
     // reset slot for volume
-    Score::beat_sum.a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Score::beat_sum.reset();
 
     // sum up all topographies of all instruments:
-    for (int idx = 0; idx < 16; idx++) // each slot
+    for (Instrument *instr : instruments) // of each instrument
     {
-      for (Instrument *instr : instruments) // of each instrument
-      {
-        if (instr->effect == TopographyLog)
-          Score::beat_sum.a_16[idx] += instrument->topography.a_16[idx];
-      }
+      if (instr->effect == TopographyLog)
+        Score::beat_sum.add(&instrument->topography);
     }
     Globals::smoothen_dataArray(&Score::beat_sum);
 
@@ -496,7 +499,7 @@ void Effect::turnMidiNoteOff(Instrument *instrument, midi::MidiInterface<Hardwar
 void Effect::decay_ccVal(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI) // decreases value of CC effect each loop (!)
 {
   instrument->midi.cc_val -= instrument->midi.cc_decay_factor;
-  instrument->midi.cc_val = max(instrument->midi.cc_val, instrument->midi.cc_min);
+  instrument->midi.cc_val = min(max(instrument->midi.cc_val, instrument->midi.cc_min), instrument->midi.cc_max);
   MIDI.sendControlChange(instrument->midi.cc_chan, int(min(instrument->midi.cc_val, 127)), instrument->midi.instrument);
   instrument->output_string = String(instrument->midi.cc_val);
   instrument->output_string += "\t";

@@ -39,20 +39,27 @@ enum EffectsType
   TsunamiLink = 6,
   CymbalSwell = 7,
   TopographyLog = 8,
-  Change_CC = 9 // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
+  Change_CC = 9,          // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
+  Increase_input_val = 10 // can change an external variable handled by a pointer (score.val_to_change)
 };
 
 enum CC_Type // channels on mKORG:
 {
-   None = -1,
-   Cutoff = 44,
-   Resonance = 71,
-   Amplevel = 50,
-   Attack = 23,
-   Sustain = 25,
-   Release = 26,
-   DelayTime = 51,
-   DelayDepth = 94
+  None = -1,
+  Osc2_semitone = 18,
+  Osc2_tune = 19,
+  Mix_LeveL_1 = 20,
+  Mix_Level_2 = 21,
+  Patch_1_Depth = 28,
+  Patch_3_Depth = 30,
+  Cutoff = 44,
+  Resonance = 71,
+  Amplevel = 50,
+  Attack = 23,
+  Sustain = 25,
+  Release = 26,
+  DelayTime = 51,
+  DelayDepth = 94
 };
 
 enum MIDI_Instrument
@@ -63,15 +70,14 @@ enum MIDI_Instrument
 
 class TOPOGRAPHY
 {
-  public:
-
+public:
   std::vector<int> a_8 = {0, 0, 0, 0, 0, 0, 0, 0};                          // size-8 array for comparison with 8-bit-length sound files
   std::vector<int> a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // size-16 array for abstractions like beat regularity etc
   std::vector<int> a_16_prior = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   int snr_thresh = 3;         // threshold for signal-to-noise-ratio to be smoothened
   int activation_thresh = 10; // threshold in average_smooth to activate next action
-  int average_smooth;
+  int average_smooth = 0;
   int regular_sum = 0;
   String tag; // very short name for topography. also to be sent via Serial to processing
 
@@ -84,6 +90,9 @@ class TOPOGRAPHY
   boolean flag_empty_played = false;       // indicates that an empty slot WAS played → decrease
   boolean flag_occupied_missed = false;    // indicates that an occupied slot has NOT been played → decrease
   // boolean change_expected[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+  void reset();
+  void add(TOPOGRAPHY *to_add);
 };
 
 class Globals

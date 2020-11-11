@@ -16,6 +16,7 @@ void Score::add_bassNote(int note, int note_iterator_)
 ////////////////////////////// MODES //////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
+// play note, repeatedly:
 void Score::continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI, int note_length) // initiates a continuous bass note from score
 {
     if (Globals::current_beat_pos % note_length == 0)
@@ -28,6 +29,12 @@ void Score::continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI, int not
     if (Globals::current_beat_pos == note_iterator) // change bass note each bar
         if (notes.size() > 1)
             note_idx = (note_idx + 1) % notes.size(); // iterate through the bass notes
+}
+
+// play note only once (turn on never off):
+void Score::continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
+{
+    MIDI.sendNoteOn(notes[0], 127, microKORG);
 }
 
 void Score::envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)

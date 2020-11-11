@@ -40,13 +40,13 @@ midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as 
 Instrument *snare;
 Instrument *hihat;
 Instrument *kick;
-// Instrument tom1;
+// Instrument *tom1;
 Instrument *tom2;
 Instrument *standtom;
 Instrument *crash1;
 Instrument *cowbell;
-// Instrument crash2;
-// Instrument ride;
+// Instrument *crash2;
+Instrument *ride;
 
 static std::vector<Instrument *> instruments;
 
@@ -144,6 +144,9 @@ void setup()
 
   Globals::do_print_to_console = true;
   Globals::do_send_to_processing = false;
+  Globals::do_print_beat_sum = false; // prints Score::beat_sum topography array
+
+  randomSeed(analogRead(A0) * analogRead(A19));
 
   Serial.begin(115200);
   // Serial3.begin(57600); // contained in tsunami.begin()
@@ -177,6 +180,7 @@ void setup()
   standtom = new Instrument(A2, Standtom1);
   cowbell = new Instrument(A3, Cowbell);
   crash1 = new Instrument(A0, Crash1);
+  ride = new Instrument(A4, Ride);
 
   instruments = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
 
@@ -214,35 +218,6 @@ void setup()
 
   Globals::println_to_console("assigning effects...");
 
-  // assign effects to instruments:
-  snare->effect = Change_CC;
-  hihat->effect = TapTempo;
-  kick->effect = Change_CC;
-  // tom1->effect = Change_CC;
-  tom2->effect = Change_CC;
-  standtom->effect = Change_CC;
-  cowbell->effect = Change_CC;
-  crash1->effect = Change_CC;
-  // instruments[Ride]->effect = Monitor;
-
-  // ---------------------------- SCORE -------------------------------
-  Globals::println_to_console("setting up variables for score..");
-  Globals::print_to_console("note seed for score = ");
-  randomSeed(analogRead(A0) * analogRead(A19));
-  score1.notes.push_back(int(random(24, 36)));
-  Globals::println_to_console(score1.notes[0]);
-
-  Globals::println_to_console("setting up midi channels..");
-  // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
-  snare->setup_midi(DelayTime, microKORG, 127, 30, 10, 0.1);
-  hihat->setup_midi(None, microKORG, 127, 30, 10, 0.1);
-  kick->setup_midi(Cutoff, Volca, 127, 40, 50, 0.1);
-  // tom1->setup_midi(Sustain, microKORG, 127, 0, 5, 0.01);
-  tom2->setup_midi(Resonance, microKORG, 127, 30, 50, 1);
-  standtom->setup_midi(Sustain, microKORG, 127, 40, 15, 0.01);
-  cowbell->setup_midi(DelayDepth, microKORG, 90, 0, 30, 0.1);
-  crash1->setup_midi(Cutoff, microKORG, 127, 40, 4, 1);
-
   // print startup information:
   Globals::println_to_console("-----------------------------------------------");
   Globals::println_to_console("calibration values set as follows:");
@@ -258,6 +233,12 @@ void setup()
     Globals::println_to_console(instruments[i]->sensitivity.noiseFloor);
   }
   Globals::println_to_console("-----------------------------------------------");
+
+  // ---------------------------------- SCORE -------------------------
+  // assign startup instrument effects:
+  hihat->effect = TapTempo;
+  crash1->effect = Monitor;
+  cowbell->effect = Monitor;
 
   // -------------------------- START TIMERS --------------------------
   pinMonitor.begin(samplePins, 1000); // sample pin every 1 millisecond
@@ -397,18 +378,24 @@ void loop()
       Globals::print_to_console(instrument->output_string);
       instrument->output_string = "\t";
     }
+
+    // sum up all topographies of all instruments:
+    Score::beat_sum.reset();
+    for (auto &instrument : instruments)
+    {
+      Score::beat_sum.add(&instrument->topography);
+    }
+    Globals::smoothen_dataArray(&Score::beat_sum);
+
     Globals::print_to_console("sum = [");
-
-    Globals::smoothen_dataArray(&score1.beat_sum);
-
     Globals::print_to_console(score1.beat_sum.average_smooth);
     Globals::println_to_console("]");
 
     // print topo arrays:
-
     if (Globals::do_print_beat_sum)
     {
-      for (auto &instrument : instruments) Globals::printTopoArray(&instrument->topography);
+      // for (auto &instrument : instruments)
+      // Globals::printTopoArray(&instrument->topography);
       Globals::printTopoArray(&Score::beat_sum); // print volume layer
       // Globals::printTopoArray(&score1.beat_regularity);
     }
@@ -497,40 +484,81 @@ void loop()
     else
       digitalWrite(VIBR, LOW);
 
+    // SCORE, stepwise:
     switch (score1.step)
     {
-    case 1:
-      static boolean once1 = true;
-      if (once1)
+    case 1: // increase cutoff with beat sum until max + some FX
+      static boolean setup_step_1 = true;
+      if (setup_step_1)
       {
-        tom2->effect = PlayMidi;
-        standtom->effect = PlayMidi;
-        kick->effect = Change_CC;
-        snare->effect = PlayMidi;
+        // setup score note seed:
+        score1.notes.push_back(int(random(0, 12)));
 
-        snare->midi.active_note = score1.notes[0] + 12 + 4;
-        kick->midi.active_note = score1.notes[0] + 12;
-        // tom1->midi.active_note = 71;
-        tom2->midi.active_note = score1.notes[0] + 12 + 5;
-        standtom->midi.active_note = score1.notes[0] + 12 + 3;
+        // setup song:
+
+        // assign effects to instruments:
+        snare->effect = Change_CC;
+        kick->effect = Change_CC;
+        tom2->effect = Change_CC;
+        standtom->effect = Change_CC;
+
+        // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
+        snare->setup_midi(Osc2_tune, microKORG, 127, 13, 15, 0.1);
+        crash1->setup_midi(Patch_3_Depth, microKORG, 104, 64, 2, 0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
+        ride->setup_midi(Resonance, microKORG, 127, 64, 2, 0.1);       // TODO: implement oscillation possibility
+        kick->setup_midi(Amplevel, microKORG, 127, 80, -35, -0.1);
+
+        // set start values for microKORG:
+        MIDI.sendControlChange(Mix_LeveL_1, 0, microKORG);
+        MIDI.sendControlChange(Mix_Level_2, 127, microKORG);
+        MIDI.sendControlChange(Osc2_tune, 0, microKORG);
+        MIDI.sendControlChange(Osc2_semitone, 39, microKORG);
+        MIDI.sendControlChange(Cutoff, 50, microKORG);
+        MIDI.sendControlChange(Resonance, 13, microKORG);
+
+        Score::beat_sum.activation_thresh = 25;
+
+        score1.continuousBassNote(MIDI);
+        setup_step_1 = false;
       }
 
-      static int noteLength = int(random(8) * 4);
-      score1.continuousBassNote(MIDI, noteLength); // will play bass note from score repeatedly
+      // change cutoff with overall beat_sum until at max
+      static int cutoff_val;
+      cutoff_val = max(50, (min(127, Score::beat_sum.average_smooth * 8)));
+      MIDI.sendControlChange(Cutoff, cutoff_val, microKORG);
 
-      once1 = false;
+      // fade in Osc2 slowly
+      static int osc2_val;
+      osc2_val = min(127, Score::beat_sum.average_smooth * 4);
+      MIDI.sendControlChange(Cutoff, osc2_val, microKORG);
+
       break;
 
-    case 2:
-      static boolean once2 = true;
+    case 2: // fade in delayDepth and overall resonance
+      static boolean setup_step_2 = true;
+      static float resonance_val;
 
-      // add new bass note to score, once:
-      if (once2)
+      if (setup_step_2)
       {
-        score1.add_bassNote(score1.notes[0] + 3, 0);
-      }
-      once2 = false;
+        // assign effects to instruments:
+        /* ...stay the same... */
 
+        // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
+        snare->effect = Increase_input_val;
+        snare->set_effect(Increase_input_val, &resonance_val, 2, 0.1);
+        setup_step_2 = false;
+      }
+
+      // change cutoff with overall beat_sum until at max
+      static int delay_depth;
+      delay_depth = max(50, (min(127, Score::beat_sum.average_smooth * 8)));
+      MIDI.sendControlChange(DelayDepth, delay_depth, microKORG);
+
+      resonance_val = max(0, min(127, resonance_val));
+
+      Globals::print_to_console("\n -- resonance_val = ");
+      Globals::print_to_console(resonance_val);
+      Globals::println_to_console(" --");
       break;
 
     case 3:

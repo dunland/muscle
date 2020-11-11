@@ -24,6 +24,8 @@ public:
 
     static void getTapTempo();
 
+    static void increase_variable(Instrument *instrument);
+
     static void swell_rec(Instrument *instrument, midi::MidiInterface<HardwareSerial>);
 
     static void countup_topography(Instrument *instrument);

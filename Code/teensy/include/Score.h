@@ -18,6 +18,7 @@ public:
 
     // MODES:
     void continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI, int note_length);     // initiates a continuous bass note from score
+    void continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI);                      // play note only once (turn on never off):
     void envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
     void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for volume filter via topography
     void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI);     // changes the delay times on each 16th-step
