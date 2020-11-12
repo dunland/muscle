@@ -538,10 +538,9 @@ void loop()
       if (setup_step_2)
       {
         // assign effects to instruments:
-        /* ...stay the same... */
-
-        // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
-        snare->effect = Increase_input_val;
+        kick->effect = Monitor;
+        tom2->effect = Monitor;
+        standtom->effect = Monitor;
         snare->set_effect(Increase_input_val, &resonance_val, 127, 13, 2, 0.1);
         setup_step_2 = false;
       }
@@ -558,21 +557,22 @@ void loop()
       Globals::println_to_console(" --");
       break;
 
-    case 3:
+    case 3: // increase osc2_tune with snare and osc2_semitone with beat_sum
       static boolean setup_step_3 = true;
       static float osc2_tune_val;
+      static float osc2_semitone_val;
       if (setup_step_3)
       {
-        snare->effect = Increase_input_val;
         snare->set_effect(Increase_input_val, &osc2_tune_val, 64, 0, 0.1, 0); // does not decrease
         setup_step_3 = false;
       }
 
       // increase osc2_tune with snare until at 0
-      osc2_tune_val = max(50, (min(127, Score::beat_sum.average_smooth * 8)));
       MIDI.sendControlChange(DelayDepth, osc2_tune_val, microKORG);
 
-      osc2_tune_val = max(0, min(127, osc2_tune_val));
+      // increase osc2_semitone with beat_sum until at 0
+      osc2_semitone_val = max(0, (min(64, Score::beat_sum.average_smooth * 8)));
+      osc2_semitone_val = max(0, min(127, osc2_semitone_val));
 
       Globals::print_to_console("\n -- osc2_tune_val = ");
       Globals::print_to_console(osc2_tune_val);
@@ -580,6 +580,19 @@ void loop()
 
       break;
 
+    case 4: // adds new bass note and switches bass once per bar
+      static boolean setup_step_4 = true;
+      
+      if (setup_step_4)
+      {
+        MIDI.sendControlChange(Resonance, 31, microKORG);
+        MIDI.sendControlChange(Cutoff, 28, microKORG);
+        Score::add_bassNote(Score::notes[0] + Score::beat_sum.average_smooth%4, 0);
+        setup_step_4 = false;
+      }
+      
+      Score::continuousBassNote(MIDI);
+      break;
 
       // static float delayDepth = 0;
       // case 2: // delay with Swell Effect on Snare
