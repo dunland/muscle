@@ -179,7 +179,7 @@ void setup()
   crash1 = new Instrument(A0, Crash1);
   ride = new Instrument(A4, Ride);
 
-  instruments = {snare, hihat, kick, tom2, standtom, cowbell, crash1};
+  instruments = {snare, hihat, kick, tom2, standtom, cowbell, crash1, ride};
 
   // initialize arrays:
   for (auto &instrument : instruments)
@@ -205,6 +205,7 @@ void setup()
   kick->setup_sensitivity(200, 12, 10, false);     // (2020-11-11) // 100, 16 (2020-08-27)
   cowbell->setup_sensitivity(80, 15, 10, false);
   crash1->setup_sensitivity(300, 2, 5, true);
+  ride->setup_sensitivity(400, 2, 5, true);
   snare->setup_sensitivity(120, 10, 10, false); // (2020-11-11) // 180, 12 (2020-08-27)
 
   // calculate noise floor:
@@ -219,15 +220,15 @@ void setup()
   Globals::println_to_console("-----------------------------------------------");
   Globals::println_to_console("calibration values set as follows:");
   Globals::println_to_console("instr\tthrshld\tcrosses\tnoiseFloor");
-  for (int i = 0; i < instruments.size(); i++)
+  for (Instrument *instrument : instruments)
   {
-    Globals::print_to_console(Globals::DrumtypeToHumanreadable(DrumType(i)));
+    Globals::print_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
     Globals::print_to_console("\t");
-    Globals::print_to_console(instruments[i]->sensitivity.threshold);
+    Globals::print_to_console(instrument->sensitivity.threshold);
     Globals::print_to_console("\t");
-    Globals::print_to_console(instruments[i]->sensitivity.crossings);
+    Globals::print_to_console(instrument->sensitivity.crossings);
     Globals::print_to_console("\t");
-    Globals::println_to_console(instruments[i]->sensitivity.noiseFloor);
+    Globals::println_to_console(instrument->sensitivity.noiseFloor);
   }
   Globals::println_to_console("-----------------------------------------------");
 
@@ -236,6 +237,7 @@ void setup()
   hihat->effect = TapTempo;
   crash1->effect = Monitor;
   cowbell->effect = Monitor;
+  ride->effect = Monitor;
 
   // -------------------------- START TIMERS --------------------------
   pinMonitor.begin(samplePins, 1000); // sample pin every 1 millisecond
@@ -380,13 +382,17 @@ void loop()
     Score::beat_sum.reset();
     for (auto &instrument : instruments)
     {
-      Score::beat_sum.add(&instrument->topography);
+      if (instrument->drumtype != Ride && instrument->drumtype != Crash1 && instrument->drumtype != Crash2) // cymbals have too many counts
+        Score::beat_sum.add(&instrument->topography);
     }
     Globals::smoothen_dataArray(&Score::beat_sum);
 
-    Globals::print_to_console("sum = [");
+    Globals::print_to_console("sum: ");
     Globals::print_to_console(Score::beat_sum.average_smooth);
-    Globals::println_to_console("]");
+    Globals::print_to_console("/");
+    Globals::print_to_console(Score::beat_sum.activation_thresh);
+    Globals::print_to_console("\tstep:");
+    Globals::println_to_console(Score::step);
 
     // print topo arrays:
     if (Globals::do_print_beat_sum)
@@ -402,70 +408,7 @@ void loop()
     {
       instrument->perform(instruments, MIDI);
     }
-    ///////////////////////////////////////////////////////////////////
-
-    ///////////////////////////////////////////////////////////////////
-    /////////////////////////// ABSTRACTIONS //////////////////////////
-    ///////////////////////////////////////////////////////////////////
-
-    // TODO:
-    // Globals::topo_array_to_processing(&snare->topography);
-    // Globals::topo_array_to_processing(&Score::beat_sum);
-    // Globals::topo_array_to_processing(&regularity);
-
-    //makeTopo();
-    // works like this:
-    // instruments[0]->smoothen_dataArray(instruments[0]);
-    // LOTS OF PSEUDOCODE HERE:
-
-    //    beat_topography_16.smoothen(); // → gives you beat_topography.average_smoothened_height
-    //
-    //    if (beat_topography_16.average_smoothened_height >= beat_topography.threshold)
-    //    {
-    //      // create next abstraction layer
-    //      int[] beat_regularity = new int[16];
-    //
-    //      // update abstraction layer:
-    //      for (int i = 0; i < 16; i++)
-    //        beat_regularity[i] = beat_topography_16[i];
-    //
-    //      // get average height again:
-    //      beat_regularity.smoothen();
-    //    }
-    //
-    //    if (beat_regularity.amplitude >= beat_regularity.threshold)
-    //    {
-    //      // you are playing super regularly. that's awesome. now activate next element in score
-    //      score_next_element_ready = true;
-    //    }
-    //
-    //    // if regularity is held for certain time (threshold reached):
-    //    read_to_break
-    //
-    //    when THEN regularity expectations not fulfilled:
-    //    score: go to next element
-    //
-    //    // elsewhere:
-    //    if (hit_certain_trigger)
-    //    {
-    //
-    //      if (score_next_element_ready)
-    //      {
-    //        /* do whatever is up next in the score */
-    //      }
-    //    }
-
-    /* Score could look like this:
-      intro----------part 1--...-----outro--------
-      1     2     3     4    ...     20    21     step
-      ++    ++    ++                              element_FX
-                  ++    ++   ...     ++    ++     element_notes
-                        ++           ++           element_fieldRecordings
-
-      cool thing: create score dynamically according to how I play
-    */
-
-    // PSEUDOCODE END
+    
 
     //////////////////////////////// SCORE ////////////////////////////
     ///////////////////////////////////////////////////////////////////
@@ -481,68 +424,96 @@ void loop()
     else
       digitalWrite(VIBR, LOW);
 
+    // THIS SONG IS COMPOSED FOR microKORG A.63
     // SCORE, stepwise:
     switch (Score::step)
     {
-    case 1: // increase cutoff with beat sum until max + some FX
-      static boolean setup_step_1 = true;
-      if (setup_step_1)
-      {
-        // setup score note seed:
-        Score::notes.push_back(int(random(0, 12)));
 
-        // setup song:
+    case 0: // init state
+      // setup score note seed:
+      Score::notes.push_back(int(random(12, 24)));
+      Globals::print_to_console("Score::notes[0] = ");
+      Globals::println_to_console(Score::notes[0]);
+      // set start values for microKORG:
+      MIDI.sendControlChange(Mix_LeveL_1, 0, microKORG);
+      MIDI.sendControlChange(Mix_Level_2, 127, microKORG);
+      MIDI.sendControlChange(Osc2_tune, 0, microKORG);
+      MIDI.sendControlChange(Osc2_semitone, 39, microKORG);
+      MIDI.sendControlChange(Cutoff, 50, microKORG);
+      MIDI.sendControlChange(Resonance, 13, microKORG);
 
-        // assign effects to instruments:
-        snare->effect = Change_CC;
-        kick->effect = Change_CC;
-        tom2->effect = Change_CC;
-        standtom->effect = Change_CC;
-
-        // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
-        snare->setup_midi(Osc2_tune, microKORG, 127, 13, 15, 0.1);
-        crash1->setup_midi(Patch_3_Depth, microKORG, 104, 64, 2, 0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
-        ride->setup_midi(Resonance, microKORG, 127, 64, 2, 0.1);       // TODO: implement oscillation possibility
-        kick->setup_midi(Amplevel, microKORG, 127, 80, -35, -0.1);
-
-        // set start values for microKORG:
-        MIDI.sendControlChange(Mix_LeveL_1, 0, microKORG);
-        MIDI.sendControlChange(Mix_Level_2, 127, microKORG);
-        MIDI.sendControlChange(Osc2_tune, 0, microKORG);
-        MIDI.sendControlChange(Osc2_semitone, 39, microKORG);
-        MIDI.sendControlChange(Cutoff, 50, microKORG);
-        MIDI.sendControlChange(Resonance, 13, microKORG);
-
-        Score::beat_sum.activation_thresh = 25;
-
-        Score::continuousBassNote(MIDI);
-        setup_step_1 = false;
-      }
-
-      // change cutoff with overall beat_sum until at max
-      static int cutoff_val;
-      cutoff_val = max(50, (min(127, Score::beat_sum.average_smooth * 8)));
-      MIDI.sendControlChange(Cutoff, cutoff_val, microKORG);
-
-      // fade in Osc2 slowly
-      static int osc2_val;
-      osc2_val = min(127, Score::beat_sum.average_smooth * 4);
-      MIDI.sendControlChange(Cutoff, osc2_val, microKORG);
+      Score::step = 1;
 
       break;
 
-    case 2: // fade in delayDepth and overall resonance
-      static boolean setup_step_2 = true;
+    case 1: // fade in
+      static float ampLevel_val = 0;
+      if (Score::setup)
+      {
+        // assign effects to instruments:
+        standtom->set_effect(Increase_input_val, &ampLevel_val, 127, 0, 1, 0);
+
+        Score::continuousBassNote(MIDI);
+        Score::setup = false;
+      }
+
+      ampLevel_val = min(127, ampLevel_val);
+      MIDI.sendControlChange(Amplevel, int(ampLevel_val), microKORG);
+      Globals::print_to_console("amplevel_val = ");
+      Globals::println_to_console(ampLevel_val);
+
+      if (ampLevel_val >= 127)
+      {
+        Score::beat_sum.activation_thresh = 0; // score step is ready
+      }
+      break;
+
+    case 2: // increase cutoff with beat sum until max + some FX
+      // assign effects to instruments:
+      static float step_factor;
+      if (Score::setup)
+      {
+        Score::beat_sum.activation_thresh = 10;
+        step_factor = 127 / Score::beat_sum.activation_thresh;
+
+        snare->effect = Change_CC;
+        kick->effect = Change_CC;
+        ride->effect = Change_CC;
+        crash1->effect = Change_CC;
+
+        // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
+        snare->setup_midi(Osc2_tune, microKORG, 127, 13, 15, 0.1);
+        crash1->setup_midi(Patch_3_Depth, microKORG, 127, 64, 2, 0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
+        ride->setup_midi(Resonance, microKORG, 127, 13, 0.7, 0.1);     // TODO: implement oscillation possibility
+        kick->setup_midi(Amplevel, microKORG, 127, 80, -35, -0.1);
+
+        Score::setup = false;
+      }
+
+      // change cutoff with overall beat_sum until at max
+      static int cutoff_val = 50;
+
+      cutoff_val = max(50, (min(127, Score::beat_sum.average_smooth * step_factor)));
+      MIDI.sendControlChange(Cutoff, cutoff_val, microKORG);
+
+      // fade in Osc2 slowly
+      static int osc2_level;
+      osc2_level = min(127, Score::beat_sum.average_smooth * 4);
+      MIDI.sendControlChange(Mix_Level_2, osc2_level, microKORG);
+
+      break;
+
+    case 3: // fade in delayDepth and overall resonance
       static float resonance_val;
 
-      if (setup_step_2)
+      if (Score::setup)
       {
         // assign effects to instruments:
         kick->effect = Monitor;
         tom2->effect = Monitor;
         standtom->effect = Monitor;
         snare->set_effect(Increase_input_val, &resonance_val, 127, 13, 2, 0.1);
-        setup_step_2 = false;
+        Score::setup = false;
       }
 
       // change cutoff with overall beat_sum until at max
@@ -551,20 +522,20 @@ void loop()
       MIDI.sendControlChange(DelayDepth, delay_depth, microKORG);
 
       resonance_val = max(0, min(127, resonance_val));
+      MIDI.sendControlChange(DelayDepth, resonance_val, microKORG);
 
       Globals::print_to_console("\n -- resonance_val = ");
       Globals::print_to_console(resonance_val);
       Globals::println_to_console(" --");
       break;
 
-    case 3: // increase osc2_tune with snare and osc2_semitone with beat_sum
-      static boolean setup_step_3 = true;
+    case 4: // increase osc2_tune with snare and osc2_semitone with beat_sum
       static float osc2_tune_val;
       static float osc2_semitone_val;
-      if (setup_step_3)
+      if (Score::setup)
       {
-        snare->set_effect(Increase_input_val, &osc2_tune_val, 64, 0, 0.1, 0); // does not decrease
-        setup_step_3 = false;
+        snare->set_effect(Increase_input_val, &osc2_tune_val, 64, 0, 1, 0); // does not decrease
+        Score::setup = false;
       }
 
       // increase osc2_tune with snare until at 0
@@ -580,18 +551,25 @@ void loop()
 
       break;
 
-    case 4: // adds new bass note and switches bass once per bar
-      static boolean setup_step_4 = true;
-      
-      if (setup_step_4)
+    case 5: // adds new bass note and switches bass once per bar
+
+      if (Score::setup)
       {
+        // cutoff on tom2:
+        tom2->effect = Change_CC;
+        tom2->setup_midi(Cutoff, microKORG, 127, 20, 10, 0.1);
+
         MIDI.sendControlChange(Resonance, 31, microKORG);
         MIDI.sendControlChange(Cutoff, 28, microKORG);
-        Score::add_bassNote(Score::notes[0] + Score::beat_sum.average_smooth%4, 0);
-        setup_step_4 = false;
+        Score::add_bassNote(Score::notes[0] + Score::beat_sum.average_smooth % 4, 0);
+        Score::setup = false;
       }
-      
-      Score::continuousBassNote(MIDI);
+
+      Score::continuousBassNote(MIDI, 0);
+      break;
+
+    default: // go back to beginning...
+      Score::step = 0;
       break;
 
       // static float delayDepth = 0;

@@ -47,6 +47,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments)
     {
       Globals::println_to_console("regularity height > 10: reset!");
       Score::step++; // go to next score step
+      Score::setup = true;
       for (auto& instrument : instruments)
         for (int j = 0; j < 16; j++)
           instrument->topography.a_16[j] = 0;

@@ -16,6 +16,8 @@ public:
     static int note_idx;      // points at active (bass-)note
     static int note_iterator; // defines at what position to increase note_idx
 
+    static boolean setup; // when true, current score_step's setup function is executed.
+
     // SETUP etc:
     static void add_bassNote(int note, int note_iterator_); // adds a NOTE to notes[] and change when to change note in beat
 

@@ -126,7 +126,7 @@ public:
 
   // ----------------------------- Hardware ---------------------------
 
-  static Tsunami tsunami;
+  static Tsunami tsunami; // TODO: make this be part of Hardware
   static boolean footswitch_is_pressed;
 
   // hard-coded list of BPMs of tracks stored on Tsunami's SD card.

@@ -7,10 +7,12 @@
 
 TOPOGRAPHY Score::beat_sum;
 
-int Score::step = 1;
+int Score::step = 0;
 int Score::note_idx = 0;      // points at active (bass-)note
 int Score::note_iterator = 0; // defines at what position to increase note_idx
 std::vector<int> Score::notes;
+
+boolean Score::setup = true; // when true, current score_step's setup function is executed.
 
 void Score::add_bassNote(int note, int note_iterator_)
 {

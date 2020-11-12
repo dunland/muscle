@@ -116,7 +116,7 @@ void Instrument::calculateNoiseFloor()
   if (Globals::use_responsiveCalibration)
   {
     Globals::print_to_console(" ..waiting for stroke");
-    while (analogRead(pin) < 700 + sensitivity.threshold)
+    while (analogRead(pin) < min(1023, 700 + sensitivity.threshold))
       ; // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
     Globals::print_to_console(" >!<");
     delay(1000); // should be long enough for drum not to oscillate anymore
