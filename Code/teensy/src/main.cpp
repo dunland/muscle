@@ -562,12 +562,27 @@ void loop()
       break;
 
     case 3:
-      static boolean once3 = true;
-      if (once3)
+      static boolean setup_step_3 = true;
+      static float osc2_tune_val;
+      if (setup_step_3)
       {
-        snare->effect = ToggleRhythmSlot;
-        crash1->effect = PlayMidi;
+        snare->effect = Increase_input_val;
+        snare->set_effect(Increase_input_val, &osc2_tune_val, 64, 0, 0.1, 0); // does not decrease
+        setup_step_3 = false;
       }
+
+      // increase osc2_tune with snare until at 0
+      osc2_tune_val = max(50, (min(127, Score::beat_sum.average_smooth * 8)));
+      MIDI.sendControlChange(DelayDepth, osc2_tune_val, microKORG);
+
+      osc2_tune_val = max(0, min(127, osc2_tune_val));
+
+      Globals::print_to_console("\n -- osc2_tune_val = ");
+      Globals::print_to_console(osc2_tune_val);
+      Globals::println_to_console(" --");
+
+      break;
+
 
       // static float delayDepth = 0;
       // case 2: // delay with Swell Effect on Snare

@@ -57,6 +57,8 @@ public:
         float *var_to_change;     // can hold a variable to change with Increase_input_val Effect
         float var_increase_factor = 1;
         float var_decay_factor = 0.1;
+        float var_max_val = 127;
+        float var_min_val = 0;
     } score;
 
     struct MIDI
@@ -107,7 +109,7 @@ public:
 
     void set_effect(EffectsType effect_); // just set effect
 
-    void set_effect(EffectsType effect_, float *variable, float increase_factor, float decrease_factor); // set effect and connect instrument to variable (for Increase_input_val)
+    void set_effect(EffectsType effect_, float *variable, float max_val, float min_val, float increase_factor, float decrease_factor); // set effect and connect instrument to variable (for Increase_input_val)
 
     // void smoothen_dataArray(Instrument *instrument);
 };

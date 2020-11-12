@@ -29,12 +29,14 @@ void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfte
 }
 
 // if setting up with variable to change:
-void Instrument::set_effect(EffectsType effect_, float *variable, float increase_factor, float decay_factor)
+void Instrument::set_effect(EffectsType effect_, float *variable, float max_val, float min_val, float increase_factor, float decay_factor)
 {
   effect = effect_;
   score.var_to_change = variable;
   score.var_increase_factor = increase_factor;
   score.var_decay_factor = decay_factor;
+  score.var_max_val = max_val;
+  score.var_min_val = min_val;
 }
 
 // without handle for variable:

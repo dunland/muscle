@@ -112,7 +112,7 @@ void Effect::getTapTempo()
 
 void Effect::increase_variable(Instrument *instrument)
 {
-  // int asd = &instrument->score.var_to_change + instrument->score.var_increase_factor; // TODO: inncrease by factor!
+  // &instrument->score.var_to_change = instrument->score.var_increase_factor; // TODO: inncrease by factor!
   instrument->score.var_to_change++;
 }
 
