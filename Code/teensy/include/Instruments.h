@@ -3,8 +3,8 @@
 #include <Arduino.h>
 #include <vector>
 #include <Globals.h>
-#include <Effects.h>
 #include <Tsunami.h>
+#include <MIDI.h>
 
 class Instrument
 {
@@ -18,21 +18,6 @@ public:
 
     int pin;
     int led = LED_BUILTIN;
-
-    EffectsType effect;
-    EffectsType lastEffect; // used to store original effect temporarily (in footswitch functions)
-    DrumType drumtype;
-
-    String output_string;
-
-    // sensitivity and instrument calibration
-    struct SENSITIVITY
-    {
-        int threshold;
-        int crossings;
-        int noiseFloor;
-        int delayAfterStroke = 10; // TODO: assess best timing for each instrument
-    } sensitivity;
 
     struct SCORE
     {
@@ -54,12 +39,27 @@ public:
         int tsunami_track; // tracks will be allocated in tsunami_beat_playback
         int tsunami_channel = 0;
 
-        float *var_to_change;     // can hold a variable to change with Increase_input_val Effect
+        float *var_to_change; // can hold a variable to change with Increase_input_val Effect
         float var_increase_factor = 1;
         float var_decay_factor = 0.1;
         float var_max_val = 127;
         float var_min_val = 0;
     } score;
+
+    EffectsType effect;
+    EffectsType lastEffect; // used to store original effect temporarily (in footswitch functions)
+    DrumType drumtype;
+
+    String output_string;
+
+    // sensitivity and instrument calibration
+    struct SENSITIVITY
+    {
+        int threshold;
+        int crossings;
+        int noiseFloor;
+        int delayAfterStroke = 10; // TODO: assess best timing for each instrument
+    } sensitivity;
 
     struct MIDI
     {
@@ -67,13 +67,13 @@ public:
         int active_note;
         int cc_chan;
         float cc_val = 0;
-        int cc_max = 127;               // MIDI values cannot be greater than this
-        int cc_min = 30;                // MIDI values cannot be smaller than this
+        int cc_max = 127;             // MIDI values cannot be greater than this
+        int cc_min = 30;              // MIDI values cannot be smaller than this
         float cc_increase_factor = 1; // factor by which MIDI vals will be increased upon hit
-        float cc_decay_factor = 0.1;      // factor by which MIDI vals decay
-        MIDI_Instrument instrument;     // channel for midi instrument to target
+        float cc_decay_factor = 0.1;  // factor by which MIDI vals decay
+        MIDI_Instrument instrument;   // channel for midi instrument to target
 
-    } midi;
+    } midi_settings;
 
     struct TIMING
     {
@@ -89,13 +89,15 @@ public:
 
     TOPOGRAPHY topography;
 
-    void trigger(Instrument *, midi::MidiInterface<HardwareSerial>);
+    void trigger(midi::MidiInterface<HardwareSerial>);
 
-    void perform(Instrument *, std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>);
+    void perform(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>);
 
-    void tidyUp(Instrument *, midi::MidiInterface<HardwareSerial>); // turn of MIDI notes etc
+    void tidyUp(midi::MidiInterface<HardwareSerial>); // turn of MIDI notes etc
 
     bool stroke_detected();
+
+    ////////////////////// SETUP FUNCTIONS ////////////////////////////
 
     void setup_notes(std::vector<int> list);
 
@@ -103,7 +105,7 @@ public:
 
     void setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean firstStroke_);
 
-    void calculateNoiseFloor(Instrument *);
+    void calculateNoiseFloor();
 
     void setInstrumentPrintString();
 
@@ -112,4 +114,46 @@ public:
     void set_effect(EffectsType effect_, float *variable, float max_val, float min_val, float increase_factor, float decrease_factor); // set effect and connect instrument to variable (for Increase_input_val)
 
     // void smoothen_dataArray(Instrument *instrument);
+
+    //////////////////////////// EFFECTS //////////////////////////////
+    // trigger effects: -----------------------------------------------
+    // void playMidi_rawPin(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
+
+    void change_cc(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+
+    void playMidi(midi::MidiInterface<HardwareSerial>);
+
+    void monitor(); // just prints what is being played.
+
+    void toggleRhythmSlot();
+
+    void footswitch_recordSlots();
+
+    void getTapTempo();
+
+    void increase_variable();
+
+    void swell_rec(midi::MidiInterface<HardwareSerial>);
+
+    void countup_topography();
+
+    void tsunamiLink(); // Tsunami beat-linked pattern
+
+    // timed events: --------------------------------------------------
+
+    void swell_perform(midi::MidiInterface<HardwareSerial> MIDI);
+
+    void sendMidiNotes_timed(midi::MidiInterface<HardwareSerial> MIDI);
+
+    void setInstrumentSlots(); // for Footswitchlooper
+
+    void tsunami_beat_playback();
+
+    void topography_midi_effects(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>); // MIDI playback according to beat_topography
+
+    // final tidy up functions: ---------------------------------------
+
+    void turnMidiNoteOff(midi::MidiInterface<HardwareSerial>);
+
+    void decay_ccVal(midi::MidiInterface<HardwareSerial>);
 };

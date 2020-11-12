@@ -1,7 +1,5 @@
 #include <Globals.h>
 #include <Tsunami.h>
-// #include <vector>
-// #include <MIDI.h>
 
 bool TOPOGRAPHY::ready()
 {

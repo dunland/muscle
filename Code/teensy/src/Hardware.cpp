@@ -1,9 +1,12 @@
 #include <Hardware.h>
+#include <Score.h>
+#include <Instruments.h>
+
 
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void Hardware::footswitch_pressed(std::vector<Instrument*> instruments, Score *score)
+void Hardware::footswitch_pressed(std::vector<Instrument*> instruments)
 {
   switch (FOOTSWITCH_MODE)
   {
@@ -43,7 +46,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments, Score *s
     if (Score::beat_sum.average_smooth > Score::beat_sum.activation_thresh)
     {
       Globals::println_to_console("regularity height > 10: reset!");
-      score->step++; // go to next score step
+      Score::step++; // go to next score step
       for (auto& instrument : instruments)
         for (int j = 0; j < 16; j++)
           instrument->topography.a_16[j] = 0;
@@ -87,7 +90,7 @@ void Hardware::footswitch_released(std::vector<Instrument*> instruments)
   }
 }
 
-void Hardware::checkFootSwitch(std::vector<Instrument*> instruments, Score *score)
+void Hardware::checkFootSwitch(std::vector<Instrument*> instruments)
 {
 
   static int switch_state;
@@ -99,7 +102,7 @@ void Hardware::checkFootSwitch(std::vector<Instrument*> instruments, Score *scor
   {
     if (switch_state == LOW)
     {
-      footswitch_pressed(instruments, score);
+      footswitch_pressed(instruments);
       Serial.println("Footswitch pressed.");
     }
     else

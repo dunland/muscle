@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include <Tsunami.h> // in cpp
-// #include <MIDI.h> // in cpp
 #include <vector>
 
 //MIDI_CREATE_DEFAULT_INSTANCE();

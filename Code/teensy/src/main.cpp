@@ -31,7 +31,6 @@
 #include <Tsunami.h>
 #include <Globals.h>
 #include <Instruments.h>
-#include <Effects.h>
 #include <Hardware.h>
 #include <Score.h>
 
@@ -54,8 +53,6 @@ static std::vector<Instrument *> instruments;
 IntervalTimer pinMonitor; // reads pins every 1 ms
 
 // ----------------- MUSICAL AND PERFORMATIVE PARAMETERS --------------
-
-Score score1;
 
 // TOPOGRAPHY regularity;
 
@@ -212,7 +209,7 @@ void setup()
 
   // calculate noise floor:
   for (auto &instrument : instruments)
-    instrument->calculateNoiseFloor(instrument);
+    instrument->calculateNoiseFloor();
 
   Globals::println_to_console("\n..calculating noiseFloor done.");
 
@@ -274,7 +271,7 @@ void loop()
     if (instrument->stroke_detected()) // evaluates pins for activity repeatedly
     {
       // ----------------------- perform pin action -------------------
-      instrument->trigger(instrument, MIDI); // runs trigger function according to instrument's EffectType
+      instrument->trigger(MIDI); // runs trigger function according to instrument's EffectType
       // send instrument stroke to processing:
       // Globals::send_to_processing('i');
     }
@@ -331,7 +328,7 @@ void loop()
     if (Globals::current_beat_pos == 0)
     {
       Globals::print_to_console("score_step = ");
-      Globals::println_to_console(score1.step);
+      Globals::println_to_console(Score::step);
       // MIDI.sendRealTime(midi::Continue);
     }
 
@@ -388,7 +385,7 @@ void loop()
     Globals::smoothen_dataArray(&Score::beat_sum);
 
     Globals::print_to_console("sum = [");
-    Globals::print_to_console(score1.beat_sum.average_smooth);
+    Globals::print_to_console(Score::beat_sum.average_smooth);
     Globals::println_to_console("]");
 
     // print topo arrays:
@@ -397,13 +394,13 @@ void loop()
       // for (auto &instrument : instruments)
       // Globals::printTopoArray(&instrument->topography);
       Globals::printTopoArray(&Score::beat_sum); // print volume layer
-      // Globals::printTopoArray(&score1.beat_regularity);
+      // Globals::printTopoArray(&Score::beat_regularity);
     }
 
     // perform timed pin actions according to current beat:
     for (auto &instrument : instruments)
     {
-      instrument->perform(instrument, instruments, MIDI);
+      instrument->perform(instruments, MIDI);
     }
     ///////////////////////////////////////////////////////////////////
 
@@ -485,14 +482,14 @@ void loop()
       digitalWrite(VIBR, LOW);
 
     // SCORE, stepwise:
-    switch (score1.step)
+    switch (Score::step)
     {
     case 1: // increase cutoff with beat sum until max + some FX
       static boolean setup_step_1 = true;
       if (setup_step_1)
       {
         // setup score note seed:
-        score1.notes.push_back(int(random(0, 12)));
+        Score::notes.push_back(int(random(0, 12)));
 
         // setup song:
 
@@ -518,7 +515,7 @@ void loop()
 
         Score::beat_sum.activation_thresh = 25;
 
-        score1.continuousBassNote(MIDI);
+        Score::continuousBassNote(MIDI);
         setup_step_1 = false;
       }
 
@@ -545,7 +542,7 @@ void loop()
 
         // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
         snare->effect = Increase_input_val;
-        snare->set_effect(Increase_input_val, &resonance_val, 2, 0.1);
+        snare->set_effect(Increase_input_val, &resonance_val, 127, 13, 2, 0.1);
         setup_step_2 = false;
       }
 
@@ -593,7 +590,7 @@ void loop()
       //   MIDI.sendControlChange(DelayDepth, int(delayDepth), 2);
       //   // Globals::print_to_console("delayDepth = ");
       //   // Globals::println_to_console(delayDepth);
-      //   // score1.crazyDelays(snare, MIDI);
+      //   // Score::crazyDelays(snare, MIDI);
       //   break;
 
       // case 3: // rawPin Delay Effect on Snare
@@ -602,7 +599,7 @@ void loop()
 
       //   MIDI.sendControlChange(DelayDepth, 50, 2);
       //   snare->effect = CC_Effect_rawPin;
-      //   // score1.envelope_volume(&Score::beat_sum, MIDI);
+      //   // Score::envelope_volume(&Score::beat_sum, MIDI);
       //   break;
 
       // case 4: // note ascend
@@ -625,7 +622,7 @@ void loop()
 
       // case 5: // envelope cutoff
       // snare->effect = TopographyLog;
-      //   score1.envelope_cutoff(&Score::beat_sum, MIDI);
+      //   Score::envelope_cutoff(&Score::beat_sum, MIDI);
       //   break;
     }
 
@@ -642,11 +639,11 @@ void loop()
   Globals::last_16th_count = Globals::current_16th_count;
 
   // Hardware:
-  Hardware::checkFootSwitch(instruments, &score1); // check step of footswitch
+  Hardware::checkFootSwitch(instruments); // check step of footswitch
   // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
 
   // tidying up what's left from performing functions..
   for (auto &instrument : instruments)
-    instrument->tidyUp(instrument, MIDI);
+    instrument->tidyUp(MIDI);
 }
 // --------------------------------------------------------------------

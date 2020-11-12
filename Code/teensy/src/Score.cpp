@@ -1,10 +1,16 @@
 #include <Score.h>
 #include <MIDI.h>
+#include <Instruments.h>
 
 // TODO:
 //TOPOGRAPHY Score::beat_regularity;
 
 TOPOGRAPHY Score::beat_sum;
+
+int Score::step = 1;
+int Score::note_idx = 0;      // points at active (bass-)note
+int Score::note_iterator = 0; // defines at what position to increase note_idx
+std::vector<int> Score::notes;
 
 void Score::add_bassNote(int note, int note_iterator_)
 {
