@@ -27,6 +27,7 @@ public:
     static void envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
     static void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for volume filter via topography
     static void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI);     // changes the delay times on each 16th-step
+    // static void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
 
     // TODO: automatically assign first random note upon instantiation
     Score()

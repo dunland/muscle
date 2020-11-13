@@ -408,7 +408,6 @@ void loop()
     {
       instrument->perform(instruments, MIDI);
     }
-    
 
     //////////////////////////////// SCORE ////////////////////////////
     ///////////////////////////////////////////////////////////////////
@@ -469,8 +468,8 @@ void loop()
       break;
 
     case 2: // increase cutoff with beat sum until max + some FX
-      // assign effects to instruments:
       static float step_factor;
+
       if (Score::setup)
       {
         Score::beat_sum.activation_thresh = 10;
@@ -503,35 +502,43 @@ void loop()
 
       break;
 
-    case 3: // fade in delayDepth and overall resonance
-      static float resonance_val;
+    case 3: // (skip this)
 
-      if (Score::setup)
-      {
-        // assign effects to instruments:
-        kick->effect = Monitor;
-        tom2->effect = Monitor;
-        standtom->effect = Monitor;
-        snare->set_effect(Increase_input_val, &resonance_val, 127, 13, 2, 0.1);
-        Score::setup = false;
-      }
+      Score::step = 4;
 
-      // change cutoff with overall beat_sum until at max
-      static int delay_depth;
-      delay_depth = max(50, (min(127, Score::beat_sum.average_smooth * 8)));
-      MIDI.sendControlChange(DelayDepth, delay_depth, microKORG);
+      // snare --> resonance
+      // beat_sum --> delay_depth
+      // static float resonance_val;
 
-      resonance_val = max(0, min(127, resonance_val));
-      MIDI.sendControlChange(DelayDepth, resonance_val, microKORG);
+      // if (Score::setup)
+      // {
+      //   // assign effects to instruments:
+      //   kick->effect = Monitor;
+      //   tom2->effect = Monitor;
+      //   standtom->effect = Monitor;
+      //   snare->set_effect(Increase_input_val, &resonance_val, 127, 13, 2, 0.1);
+      //   Score::setup = false;
+      // }
 
-      Globals::print_to_console("\n -- resonance_val = ");
-      Globals::print_to_console(resonance_val);
-      Globals::println_to_console(" --");
+      // // change cutoff with overall beat_sum until at max
+      // static int delay_depth;
+      // delay_depth = max(50, (min(127, Score::beat_sum.average_smooth * 8)));
+      // MIDI.sendControlChange(DelayDepth, delay_depth, microKORG);
+
+      // resonance_val = max(0, min(127, resonance_val));
+      // MIDI.sendControlChange(DelayDepth, resonance_val, microKORG);
+
+      // Globals::print_to_console("\n -- resonance_val = ");
+      // Globals::print_to_console(resonance_val);
+      // Globals::println_to_console(" --");
       break;
 
     case 4: // increase osc2_tune with snare and osc2_semitone with beat_sum
       static float osc2_tune_val;
       static float osc2_semitone_val;
+
+      // Score::set_ramp(...);
+
       if (Score::setup)
       {
         snare->set_effect(Increase_input_val, &osc2_tune_val, 64, 0, 1, 0); // does not decrease
@@ -565,7 +572,7 @@ void loop()
         Score::setup = false;
       }
 
-      Score::continuousBassNote(MIDI, 0);
+      Score::continuousBassNote(MIDI, 32);
       break;
 
     default: // go back to beginning...
