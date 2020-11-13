@@ -1,10 +1,18 @@
 #include <Score.h>
 #include <MIDI.h>
+#include <Instruments.h>
 
 // TODO:
 //TOPOGRAPHY Score::beat_regularity;
 
 TOPOGRAPHY Score::beat_sum;
+
+int Score::step = 0;
+int Score::note_idx = 0;      // points at active (bass-)note
+int Score::note_iterator = 0; // defines at what position to increase note_idx
+std::vector<int> Score::notes;
+
+boolean Score::setup = true; // when true, current score_step's setup function is executed.
 
 void Score::add_bassNote(int note, int note_iterator_)
 {
@@ -59,3 +67,27 @@ void Score::crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSeri
     delaytime = min(delaytime, 127);                                               // must not be greater than 127
     MIDI.sendControlChange(51, delaytime, 2);
 }
+
+// void Score::set_ramp(midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration)
+// {
+//     static boolean ramp_start = true;
+//     static int value;
+//     static unsigned long start_time;
+//     static float factor;
+
+//     if (ramp_start)
+//     {
+//         value = start_value;
+//         start_time = millis();
+//         factor = (start_value - end_value) / duration;
+//         ramp_start = false;
+//     }
+
+//     MIDI.sendControlChange(cc_type, value, midi_instr);
+//     value += factor;
+
+//     if (millis() > start_time + duration)
+//     {
+
+//     }
+// }

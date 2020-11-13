@@ -1,7 +1,5 @@
 #include <Globals.h>
 #include <Tsunami.h>
-// #include <vector>
-// #include <MIDI.h>
 
 bool TOPOGRAPHY::ready()
 {
@@ -120,6 +118,64 @@ void TOPOGRAPHY::add(TOPOGRAPHY *to_add)
 		a_16[idx] += to_add->a_16[idx];
 	}
 }
+
+// TODO:
+//makeTopo();
+// works like this:
+// instruments[0]->smoothen_dataArray(instruments[0]);
+// LOTS OF PSEUDOCODE HERE:
+
+//    beat_topography_16.smoothen(); // → gives you beat_topography.average_smoothened_height
+//
+//    if (beat_topography_16.average_smoothened_height >= beat_topography.threshold)
+//    {
+//      // create next abstraction layer
+//      int[] beat_regularity = new int[16];
+//
+//      // update abstraction layer:
+//      for (int i = 0; i < 16; i++)
+//        beat_regularity[i] = beat_topography_16[i];
+//
+//      // get average height again:
+//      beat_regularity.smoothen();
+//    }
+//
+//    if (beat_regularity.amplitude >= beat_regularity.threshold)
+//    {
+//      // you are playing super regularly. that's awesome. now activate next element in score
+//      score_next_element_ready = true;
+//    }
+//
+//    // if regularity is held for certain time (threshold reached):
+//    read_to_break
+//
+//    when THEN regularity expectations not fulfilled:
+//    score: go to next element
+//
+//    // elsewhere:
+//    if (hit_certain_trigger)
+//    {
+//
+//      if (score_next_element_ready)
+//      {
+//        /* do whatever is up next in the score */
+//      }
+//    }
+
+/* Score could look like this:
+      intro----------part 1--...-----outro--------
+      1     2     3     4    ...     20    21     step
+      ++    ++    ++                              element_FX
+                  ++    ++   ...     ++    ++     element_notes
+                        ++           ++           element_fieldRecordings
+
+      cool thing: create score dynamically according to how I play
+    */
+
+// PSEUDOCODE END
+
+
+// -->
 // void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
 // {
 // 	if (original->average_smooth < original->activation_thresh)

@@ -1,10 +1,9 @@
 #pragma once
 
 #include <Globals.h>
-#include <Effects.h>
-#include <Score.h>
 
 class Score;
+class Instrument;
 
 class Hardware
 {
@@ -18,11 +17,11 @@ public:
   static const int RESET_AND_PROCEED_SCORE = 3;
   static const int FOOTSWITCH_MODE = RESET_AND_PROCEED_SCORE;
 
-  static void footswitch_pressed(std::vector<Instrument*> instruments, Score* score);
+  static void footswitch_pressed(std::vector<Instrument*> instruments);
 
   static void footswitch_released(std::vector<Instrument*> instruments);
 
-  static void checkFootSwitch(std::vector<Instrument*> instruments, Score* score);
+  static void checkFootSwitch(std::vector<Instrument*> instruments);
   // --------------------------------------------------------------------
 
   ////////////////////////////// VIBRATION MOTOR ////////////////////////
