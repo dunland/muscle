@@ -29,17 +29,6 @@ void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfte
   timing.countAfterFirstStroke = countAfterFirstStroke;
 }
 
-// if setting up with variable to change:
-void Instrument::set_effect(EffectsType effect_, float *variable, float max_val, float min_val, float increase_factor, float decay_factor)
-{
-  effect = effect_;
-  score.var_to_change = variable;
-  score.var_increase_factor = increase_factor;
-  score.var_decay_factor = decay_factor;
-  score.var_max_val = max_val;
-  score.var_min_val = min_val;
-}
-
 // without handle for variable:
 void Instrument::set_effect(EffectsType effect_)
 {
@@ -257,11 +246,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
     break;
 
   case Change_CC:
-    change_cc(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
-    break;
-
-  case Increase_input_val:
-    increase_variable();
+    change_cc_in(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
     break;
 
   default:
@@ -352,7 +337,7 @@ void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
     break;
 
   case Change_CC:
-    decay_ccVal(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    change_cc_out(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
     break;
 
   default:
@@ -367,7 +352,7 @@ void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
 
 ///////////////////////////// TRIGGER EFFECTS /////////////////////////
 
-void Instrument::change_cc(midi::MidiInterface<HardwareSerial> MIDI) // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+void Instrument::change_cc_in(midi::MidiInterface<HardwareSerial> MIDI) // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 {
   midi_settings.cc_val += midi_settings.cc_increase_factor;
   midi_settings.cc_val = min(midi_settings.cc_val, midi_settings.cc_max);
@@ -468,13 +453,6 @@ void Instrument::getTapTempo()
     // }
     break;
   }
-}
-
-void Instrument::increase_variable()
-{
-  *score.var_to_change += score.var_increase_factor;
-  *score.var_to_change = min(*score.var_to_change, score.var_max_val);
-  *score.var_to_change = max(*score.var_to_change, score.var_min_val);
 }
 
 // -------------------- SOUND SWELL: RECORD STROKES -------------------
@@ -856,9 +834,9 @@ void Instrument::turnMidiNoteOff(midi::MidiInterface<HardwareSerial> MIDI)
 }
 
 // TODO: make this decrease with 32nd-notes.
-void Instrument::decay_ccVal(midi::MidiInterface<HardwareSerial> MIDI) // decreases value of CC effect each loop (!)
+void Instrument::change_cc_out(midi::MidiInterface<HardwareSerial> MIDI) // changes (mostly decreases) value of CC effect each loop (!)
 {
-  midi_settings.cc_val -= midi_settings.cc_decay_factor;
+  midi_settings.cc_val += midi_settings.cc_decay_factor;
   midi_settings.cc_val = min(max(midi_settings.cc_val, midi_settings.cc_min), midi_settings.cc_max);
   MIDI.sendControlChange(midi_settings.cc_chan, int(min(midi_settings.cc_val, 127)), midi_settings.instrument);
   output_string = String(midi_settings.cc_val);

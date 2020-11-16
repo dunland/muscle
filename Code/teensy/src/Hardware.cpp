@@ -43,7 +43,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments)
     break;
 
   case (RESET_AND_PROCEED_SCORE):
-    if (Score::beat_sum.average_smooth > Score::beat_sum.activation_thresh)
+    if (Score::beat_sum.average_smooth >= Score::beat_sum.activation_thresh)
     {
       Globals::println_to_console("regularity height > 10: reset!");
       Score::step++; // go to next score step

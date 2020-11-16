@@ -8,16 +8,24 @@
 TOPOGRAPHY Score::beat_sum;
 
 int Score::step = 0;
-int Score::note_idx = 0;      // points at active (bass-)note
-int Score::note_iterator = 0; // defines at what position to increase note_idx
+int Score::note_idx = 0;        // points at active (bass-)note
+int Score::note_change_pos = 0; // defines at what position to increase note_idx
 std::vector<int> Score::notes;
 
 boolean Score::setup = true; // when true, current score_step's setup function is executed.
 
-void Score::add_bassNote(int note, int note_iterator_)
+void Score::add_bassNote(int note)
 {
     notes.push_back(note);
-    note_iterator = note_iterator_;
+    Globals::print_to_console("note ");
+    Globals::print_to_console(note);
+    Globals::print_to_console(" has been added to Score::notes [ ");
+    for (int i = 0; i < notes.size(); i++)
+    {
+        Globals::print_to_console(notes[i]);
+        Globals::print_to_console(" ");
+    }
+    Globals::println_to_console("]");
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -25,18 +33,21 @@ void Score::add_bassNote(int note, int note_iterator_)
 ///////////////////////////////////////////////////////////////////////
 
 // play note, repeatedly:
-void Score::continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI, int note_length) // initiates a continuous bass note from score
+void Score::continuousBassNotes(midi::MidiInterface<HardwareSerial> MIDI, MIDI_Instrument midi_instrument) // initiates a continuous bass note from score
 {
-    if (Globals::current_beat_pos % note_length == 0)
-    {
-        MIDI.sendNoteOn(notes[0], 127, Volca);
-    }
-    else
-        MIDI.sendNoteOff(notes[0], 127, Volca);
-
-    if (Globals::current_beat_pos == note_iterator) // change bass note each bar
+    // change note
+    if (Globals::current_beat_pos % note_change_pos == 0) // at beginninng of each bar
         if (notes.size() > 1)
+        {
+            MIDI.sendNoteOff(notes[note_idx], 127, midi_instrument);
             note_idx = (note_idx + 1) % notes.size(); // iterate through the bass notes
+        }
+
+    // play note
+    if (Globals::current_beat_pos == 0)
+    {
+        MIDI.sendNoteOn(notes[note_idx], 127, midi_instrument);
+    }
 }
 
 // play note only once (turn on never off):

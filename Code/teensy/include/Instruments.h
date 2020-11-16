@@ -39,15 +39,10 @@ public:
         int tsunami_track; // tracks will be allocated in tsunami_beat_playback
         int tsunami_channel = 0;
 
-        float *var_to_change; // can hold a variable to change with Increase_input_val Effect
-        float var_increase_factor = 1;
-        float var_decay_factor = 0.1;
-        float var_max_val = 127;
-        float var_min_val = 0;
     } score;
 
-    EffectsType effect;
-    EffectsType lastEffect; // used to store original effect temporarily (in footswitch functions)
+    EffectsType effect = Monitor;
+    EffectsType lastEffect = Monitor; // used to store original effect temporarily (in footswitch functions)
     DrumType drumtype;
 
     String output_string;
@@ -70,7 +65,7 @@ public:
         int cc_max = 127;             // MIDI values cannot be greater than this
         int cc_min = 30;              // MIDI values cannot be smaller than this
         float cc_increase_factor = 1; // factor by which MIDI vals will be increased upon hit
-        float cc_decay_factor = 0.1;  // factor by which MIDI vals decay
+        float cc_decay_factor = -0.1;  // factor by which MIDI vals decay
         MIDI_Instrument instrument;   // channel for midi instrument to target
 
     } midi_settings;
@@ -111,15 +106,13 @@ public:
 
     void set_effect(EffectsType effect_); // just set effect
 
-    void set_effect(EffectsType effect_, float *variable, float max_val, float min_val, float increase_factor, float decrease_factor); // set effect and connect instrument to variable (for Increase_input_val)
-
     // void smoothen_dataArray(Instrument *instrument);
 
     //////////////////////////// EFFECTS //////////////////////////////
     // trigger effects: -----------------------------------------------
     // void playMidi_rawPin(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
 
-    void change_cc(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    void change_cc_in(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 
     void playMidi(midi::MidiInterface<HardwareSerial>);
 
@@ -130,8 +123,6 @@ public:
     void footswitch_recordSlots();
 
     void getTapTempo();
-
-    void increase_variable();
 
     void swell_rec(midi::MidiInterface<HardwareSerial>);
 
@@ -155,5 +146,5 @@ public:
 
     void turnMidiNoteOff(midi::MidiInterface<HardwareSerial>);
 
-    void decay_ccVal(midi::MidiInterface<HardwareSerial>);
+    void change_cc_out(midi::MidiInterface<HardwareSerial>);
 };

@@ -139,6 +139,7 @@ void samplePins()
 void setup()
 {
 
+  Globals::use_responsiveCalibration = false;
   Globals::do_print_to_console = true;
   Globals::do_send_to_processing = false;
   Globals::do_print_beat_sum = false; // prints Score::beat_sum topography array
@@ -233,6 +234,9 @@ void setup()
   Globals::println_to_console("-----------------------------------------------");
 
   // ---------------------------------- SCORE -------------------------
+  // add a bass note to Score
+  Score::notes.push_back(int(random(12, 24)));
+
   // assign startup instrument effects:
   hihat->effect = TapTempo;
   crash1->effect = Monitor;
@@ -430,44 +434,51 @@ void loop()
 
     case 0: // init state
       // setup score note seed:
-      Score::notes.push_back(int(random(12, 24)));
       Globals::print_to_console("Score::notes[0] = ");
       Globals::println_to_console(Score::notes[0]);
       // set start values for microKORG:
-      MIDI.sendControlChange(Mix_LeveL_1, 0, microKORG);
+      MIDI.sendControlChange(Mix_Level_1, 0, microKORG);
       MIDI.sendControlChange(Mix_Level_2, 127, microKORG);
       MIDI.sendControlChange(Osc2_tune, 0, microKORG);
       MIDI.sendControlChange(Osc2_semitone, 39, microKORG);
       MIDI.sendControlChange(Cutoff, 50, microKORG);
       MIDI.sendControlChange(Resonance, 13, microKORG);
+      MIDI.sendControlChange(Amplevel, 0, microKORG);
 
       Score::step = 1;
 
       break;
 
     case 1: // fade in
-      static float ampLevel_val = 0;
       if (Score::setup)
       {
         // assign effects to instruments:
-        standtom->set_effect(Increase_input_val, &ampLevel_val, 127, 0, 1, 0);
+        hihat->effect = Change_CC;
+        hihat->setup_midi(Amplevel, microKORG, 127, 0, 0.65, 0);
+        snare->effect = Monitor;
+        kick->effect = Monitor;
+        tom2->effect = Monitor;
+        ride->effect = Monitor;
+        crash1->effect = Monitor;
+        standtom->effect = Monitor;
 
         Score::continuousBassNote(MIDI);
         Score::setup = false;
       }
 
-      ampLevel_val = min(127, ampLevel_val);
-      MIDI.sendControlChange(Amplevel, int(ampLevel_val), microKORG);
       Globals::print_to_console("amplevel_val = ");
-      Globals::println_to_console(ampLevel_val);
+      Globals::println_to_console(hihat->midi_settings.cc_val);
 
-      if (ampLevel_val >= 127)
+      if (hihat->midi_settings.cc_val >= 127)
       {
         Score::beat_sum.activation_thresh = 0; // score step is ready
       }
       break;
 
-    case 2: // increase cutoff with beat sum until max + some FX
+    case 2:
+      // beat_sum -> increase cutoff
+      // beat_sum -> fade in OSC1
+      // snare, kick, ride, crash = FX
       static float step_factor;
 
       if (Score::setup)
@@ -475,16 +486,18 @@ void loop()
         Score::beat_sum.activation_thresh = 10;
         step_factor = 127 / Score::beat_sum.activation_thresh;
 
+        hihat->effect = TapTempo;
+        standtom->effect = Monitor;
         snare->effect = Change_CC;
         kick->effect = Change_CC;
         ride->effect = Change_CC;
         crash1->effect = Change_CC;
 
         // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
-        snare->setup_midi(Osc2_tune, microKORG, 127, 13, 15, 0.1);
-        crash1->setup_midi(Patch_3_Depth, microKORG, 127, 64, 2, 0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
-        ride->setup_midi(Resonance, microKORG, 127, 13, 0.7, 0.1);     // TODO: implement oscillation possibility
-        kick->setup_midi(Amplevel, microKORG, 127, 80, -35, -0.1);
+        snare->setup_midi(Osc2_tune, microKORG, 127, 13, 15, -0.1);
+        kick->setup_midi(Amplevel, microKORG, 127, 80, -35, 0.1);
+        ride->setup_midi(Resonance, microKORG, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
+        crash1->setup_midi(Patch_3_Depth, microKORG, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
 
         Score::setup = false;
       }
@@ -495,10 +508,10 @@ void loop()
       cutoff_val = max(50, (min(127, Score::beat_sum.average_smooth * step_factor)));
       MIDI.sendControlChange(Cutoff, cutoff_val, microKORG);
 
-      // fade in Osc2 slowly
-      static int osc2_level;
-      osc2_level = min(127, Score::beat_sum.average_smooth * 4);
-      MIDI.sendControlChange(Mix_Level_2, osc2_level, microKORG);
+      // fade in Osc1 slowly
+      static int osc1_level;
+      osc1_level = min(127, Score::beat_sum.average_smooth * 4);
+      MIDI.sendControlChange(Mix_Level_1, osc1_level, microKORG);
 
       break;
 
@@ -534,26 +547,26 @@ void loop()
       break;
 
     case 4: // increase osc2_tune with snare and osc2_semitone with beat_sum
-      static float osc2_tune_val;
       static float osc2_semitone_val;
 
       // Score::set_ramp(...);
 
       if (Score::setup)
       {
-        snare->set_effect(Increase_input_val, &osc2_tune_val, 64, 0, 1, 0); // does not decrease
+        Score::beat_sum.activation_thresh = 15;
+        snare->effect = Change_CC;
+        snare->setup_midi(Osc2_tune, microKORG, 64, 0, 1, 0);      // does not decrease
+        kick->setup_midi(DelayDepth, microKORG, 127, 0, 50, -0.1); // TODO: implement oscillation possibility
+        ride->setup_midi(Cutoff, microKORG, 127, 13, -0.7, 0.1);   // TODO: implement oscillation possibility
         Score::setup = false;
       }
 
-      // increase osc2_tune with snare until at 0
-      MIDI.sendControlChange(DelayDepth, osc2_tune_val, microKORG);
-
       // increase osc2_semitone with beat_sum until at 0
-      osc2_semitone_val = max(0, (min(64, Score::beat_sum.average_smooth * 8)));
+      osc2_semitone_val = max(0, (min(64, Score::beat_sum.average_smooth * (127 / 15))));
       osc2_semitone_val = max(0, min(127, osc2_semitone_val));
 
-      Globals::print_to_console("\n -- osc2_tune_val = ");
-      Globals::print_to_console(osc2_tune_val);
+      Globals::print_to_console("\n -- Osc2-tune = ");
+      Globals::print_to_console(snare->midi_settings.cc_val);
       Globals::println_to_console(" --");
 
       break;
@@ -562,18 +575,47 @@ void loop()
 
       if (Score::setup)
       {
+        Score::beat_sum.activation_thresh = 15;
+
         // cutoff on tom2:
         tom2->effect = Change_CC;
-        tom2->setup_midi(Cutoff, microKORG, 127, 20, 10, 0.1);
+        tom2->setup_midi(Cutoff, microKORG, 127, 20, 30, -0.1);
+        ride->effect = Monitor;
+        snare->effect = Monitor;
 
         MIDI.sendControlChange(Resonance, 31, microKORG);
         MIDI.sendControlChange(Cutoff, 28, microKORG);
-        Score::add_bassNote(Score::notes[0] + Score::beat_sum.average_smooth % 4, 0);
+        MIDI.sendControlChange(Osc2_tune, 0, microKORG);
+        Score::add_bassNote(Score::notes[0] + int(random(6)));
+        // Score::note_change_pos = int(random(8, 16)); // change at a rate between quarter and half notes
         Score::setup = false;
       }
 
-      Score::continuousBassNote(MIDI, 32);
+      Score::continuousBassNotes(MIDI, microKORG);
       break;
+
+    case 6: // play melodies on snare, tom2, standtom
+      if (Score::setup)
+      {
+        Score::add_bassNote(Score::notes[0] + int(random(6)));
+
+        snare->effect = PlayMidi;
+        snare->midi_settings.active_note = Score::notes[0] + 24 + 7;
+        tom2->effect = PlayMidi;
+        tom2->midi_settings.active_note = Score::notes[0] + 24 + 3;
+        standtom->effect = PlayMidi;
+        standtom->midi_settings.active_note = Score::notes[0] + 12 + 4;
+
+        kick->effect = Monitor;
+        Score::setup = false;
+      }
+
+      // static int random_note_change = int(random(32));
+      Score::continuousBassNotes(MIDI, microKORG);
+      break;
+
+      // case 7: // swell effect with notes!
+      // break;
 
     default: // go back to beginning...
       Score::step = 0;

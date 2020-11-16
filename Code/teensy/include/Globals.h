@@ -39,7 +39,6 @@ enum EffectsType
   CymbalSwell = 7,
   TopographyLog = 8,
   Change_CC = 9,          // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
-  Increase_input_val = 10 // can change an external variable handled by a pointer (score.val_to_change)
 };
 
 enum CC_Type // channels on mKORG:
@@ -47,7 +46,7 @@ enum CC_Type // channels on mKORG:
   None = -1,
   Osc2_semitone = 18,
   Osc2_tune = 19,
-  Mix_LeveL_1 = 20,
+  Mix_Level_1 = 20,
   Mix_Level_2 = 21,
   Patch_1_Depth = 28,
   Patch_3_Depth = 30,
