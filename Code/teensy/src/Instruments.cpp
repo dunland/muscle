@@ -630,7 +630,7 @@ void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // upda
         score.swell_val = 10;
         score.swell_beatPos_sum = 0;
         score.swell_beatStep = 0;
-        MIDI.sendNoteOff(midi_settings.active_note, 127, 2);
+        midi_settings.synth->sendNoteOff(midi_settings.active_note, MIDI);
       }
     }
   }

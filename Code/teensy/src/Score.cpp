@@ -54,30 +54,30 @@ void Score::continuousBassNotes(Synthesizer *synth, midi::MidiInterface<Hardware
 // play note only once (turn on never off):
 void Score::continuousBassNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
 {
-        synth->sendNoteOn(notes[note_idx], MIDI);
+    synth->sendNoteOn(notes[note_idx], MIDI);
 }
 
-void Score::envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)
+void Score::envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)
 {
     int cutoff_val = topography->a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
     cutoff_val = max(20, cutoff_val);                                    // must be at least 20
     cutoff_val = min(cutoff_val, 127);                                   // must not be greater than 127
-    MIDI.sendControlChange(44, cutoff_val, 2);
+    synth->sendControlChange(Cutoff, cutoff_val, MIDI);
 }
 
-void Score::envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)
+void Score::envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth)
 {
     int amp_val = topography->a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
     // amp_val = max(0, amp_val);                                    // must be at least 0
-    amp_val = min(amp_val, 127);            // must not be greater than 127
-    MIDI.sendControlChange(50, amp_val, 2); // set loudness
+    amp_val = min(amp_val, 127); // must not be greater than 127
+    synth->sendControlChange(Amplevel, amp_val, MIDI);
 }
 
-void Score::crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI)
+void Score::crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth)
 {
     int delaytime = instrument->topography.a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
     delaytime = min(delaytime, 127);                                               // must not be greater than 127
-    MIDI.sendControlChange(51, delaytime, 2);
+    synth->sendControlChange(DelayTime, delaytime, MIDI);
 }
 
 // void Score::set_ramp(midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration)
