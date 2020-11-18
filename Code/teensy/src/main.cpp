@@ -29,6 +29,7 @@
 #include <vector>
 #include <MIDI.h>
 #include <Tsunami.h>
+#include <ArduinoJson.h>
 #include <Globals.h>
 #include <Instruments.h>
 #include <Hardware.h>
@@ -48,6 +49,9 @@ Instrument *cowbell;
 Instrument *ride;
 
 static std::vector<Instrument *> instruments;
+
+Synthesizer *mKorg;
+Synthesizer *volca;
 
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
@@ -138,6 +142,7 @@ void samplePins()
 
 void setup()
 {
+  //---------------------- Global / Debug values ----------------------
 
   Globals::use_responsiveCalibration = false;
   Globals::do_print_to_console = true;
@@ -145,6 +150,8 @@ void setup()
   Globals::do_print_beat_sum = false; // prints Score::beat_sum topography array
 
   randomSeed(analogRead(A0) * analogRead(A19));
+
+  //-------------------------- Communication --------------------------
 
   Serial.begin(115200);
   // Serial3.begin(57600); // contained in tsunami.begin()
@@ -154,6 +161,9 @@ void setup()
 
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
+  Globals::create_json();
+
+  // -------------------- Hardware initialization ---------------------
   delay(1000);              // wait for Tsunami to finish reset // redundant?
   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
   delay(100);
@@ -162,11 +172,14 @@ void setup()
   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
   delay(100);                          // some time for Tsunami to respond with version string
 
+  mKorg = new Synthesizer(2);
+  volca = new Synthesizer(1);
+
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
   pinMode(FOOTSWITCH, INPUT_PULLUP);
 
-  // setup names of elements for Serial communication (to processing): -------------------
+  // setup names of elements for Serial communication (to processing):
   Score::beat_sum.tag = "v";
 
   // ------------------------ INSTRUMENT SETUP ------------------------
@@ -252,8 +265,6 @@ void setup()
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
   // tracknum, channel
 
-  // send MIDI-RealTime-Start-Message:
-  // MIDI.sendRealTime(midi::Start);
 }
 
 /* --------------------------------------------------------------------- */
@@ -335,7 +346,6 @@ void loop()
     {
       Globals::print_to_console("score_step = ");
       Globals::println_to_console(Score::step);
-      // MIDI.sendRealTime(midi::Continue);
     }
 
     // ------------------------- quarter notes: -----------------------
@@ -391,7 +401,7 @@ void loop()
     }
     Globals::smoothen_dataArray(&Score::beat_sum);
 
-    Globals::print_to_console("sum: ");
+    Globals::print_to_console("avg: ");
     Globals::print_to_console(Score::beat_sum.average_smooth);
     Globals::print_to_console("/");
     Globals::print_to_console(Score::beat_sum.activation_thresh);
@@ -437,13 +447,16 @@ void loop()
       Globals::print_to_console("Score::notes[0] = ");
       Globals::println_to_console(Score::notes[0]);
       // set start values for microKORG:
-      MIDI.sendControlChange(Mix_Level_1, 0, microKORG);
-      MIDI.sendControlChange(Mix_Level_2, 127, microKORG);
-      MIDI.sendControlChange(Osc2_tune, 0, microKORG);
-      MIDI.sendControlChange(Osc2_semitone, 39, microKORG);
-      MIDI.sendControlChange(Cutoff, 50, microKORG);
-      MIDI.sendControlChange(Resonance, 13, microKORG);
-      MIDI.sendControlChange(Amplevel, 0, microKORG);
+
+      // TODO:
+      mKorg->sendControlChange(Cutoff, 50, MIDI); // sets cc_value and sends MIDI-ControlChange
+      mKorg->sendControlChange(Mix_Level_1, 0, MIDI);
+      mKorg->sendControlChange(Mix_Level_2, 127, MIDI);
+      mKorg->sendControlChange(Osc2_tune, 0, MIDI);
+      mKorg->sendControlChange(Osc2_semitone, 39, MIDI);
+      mKorg->sendControlChange(Cutoff, 50, MIDI);
+      mKorg->sendControlChange(Resonance, 13, MIDI);
+      mKorg->sendControlChange(Amplevel, 0, MIDI);
 
       Score::step = 1;
 
@@ -454,7 +467,7 @@ void loop()
       {
         // assign effects to instruments:
         hihat->effect = Change_CC;
-        hihat->setup_midi(Amplevel, microKORG, 127, 0, 0.65, 0);
+        hihat->setup_midi(Amplevel, mKorg, 127, 0, 0.65, 0);
         snare->effect = Monitor;
         kick->effect = Monitor;
         tom2->effect = Monitor;
@@ -462,7 +475,7 @@ void loop()
         crash1->effect = Monitor;
         standtom->effect = Monitor;
 
-        Score::continuousBassNote(MIDI);
+        Score::continuousBassNote(mKorg, MIDI);
         Score::setup = false;
       }
 
@@ -474,6 +487,12 @@ void loop()
         Score::beat_sum.activation_thresh = 0; // score step is ready
       }
       break;
+
+      // TODO:
+      // case 2:
+      // kick->playMidi
+      // snare->playMidi
+      // break;
 
     case 2:
       // beat_sum -> increase cutoff
@@ -494,10 +513,10 @@ void loop()
         crash1->effect = Change_CC;
 
         // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
-        snare->setup_midi(Osc2_tune, microKORG, 127, 13, 15, -0.1);
-        kick->setup_midi(Amplevel, microKORG, 127, 80, -35, 0.1);
-        ride->setup_midi(Resonance, microKORG, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
-        crash1->setup_midi(Patch_3_Depth, microKORG, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
+        snare->setup_midi(Osc2_tune, mKorg, 127, 13, 15, -0.1);
+        kick->setup_midi(Amplevel, mKorg, 127, 80, -35, 0.1);
+        ride->setup_midi(Resonance, mKorg, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
+        crash1->setup_midi(Patch_3_Depth, mKorg, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
 
         Score::setup = false;
       }
@@ -506,12 +525,12 @@ void loop()
       static int cutoff_val = 50;
 
       cutoff_val = max(50, (min(127, Score::beat_sum.average_smooth * step_factor)));
-      MIDI.sendControlChange(Cutoff, cutoff_val, microKORG);
+      mKorg->sendControlChange(Cutoff, cutoff_val, MIDI);
 
       // fade in Osc1 slowly
       static int osc1_level;
       osc1_level = min(127, Score::beat_sum.average_smooth * 4);
-      MIDI.sendControlChange(Mix_Level_1, osc1_level, microKORG);
+      mKorg->sendControlChange(Mix_Level_1, osc1_level, MIDI);
 
       break;
 
@@ -555,9 +574,9 @@ void loop()
       {
         Score::beat_sum.activation_thresh = 15;
         snare->effect = Change_CC;
-        snare->setup_midi(Osc2_tune, microKORG, 64, 0, 1, 0);      // does not decrease
-        kick->setup_midi(DelayDepth, microKORG, 127, 0, 50, -0.1); // TODO: implement oscillation possibility
-        ride->setup_midi(Cutoff, microKORG, 127, 13, -0.7, 0.1);   // TODO: implement oscillation possibility
+        snare->setup_midi(Osc2_tune, mKorg, 64, 0, 1, 0);      // does not decrease
+        kick->setup_midi(DelayDepth, mKorg, 127, 0, 50, -0.1); // TODO: implement oscillation possibility
+        ride->setup_midi(Cutoff, mKorg, 127, 13, -0.7, 0.1);   // TODO: implement oscillation possibility
         Score::setup = false;
       }
 
@@ -579,19 +598,19 @@ void loop()
 
         // cutoff on tom2:
         tom2->effect = Change_CC;
-        tom2->setup_midi(Cutoff, microKORG, 127, 20, 30, -0.1);
+        tom2->setup_midi(Cutoff, mKorg, 127, 20, 30, -0.1);
         ride->effect = Monitor;
         snare->effect = Monitor;
 
-        MIDI.sendControlChange(Resonance, 31, microKORG);
-        MIDI.sendControlChange(Cutoff, 28, microKORG);
-        MIDI.sendControlChange(Osc2_tune, 0, microKORG);
+      mKorg->sendControlChange(Resonance, 31, MIDI);
+        mKorg->sendControlChange(Cutoff, 28, MIDI);
+        mKorg->sendControlChange(Osc2_tune, 0, MIDI);
         Score::add_bassNote(Score::notes[0] + int(random(6)));
         // Score::note_change_pos = int(random(8, 16)); // change at a rate between quarter and half notes
         Score::setup = false;
       }
 
-      Score::continuousBassNotes(MIDI, microKORG);
+      Score::continuousBassNotes(mKorg, MIDI);
       break;
 
     case 6: // play melodies on snare, tom2, standtom
@@ -611,7 +630,7 @@ void loop()
       }
 
       // static int random_note_change = int(random(32));
-      Score::continuousBassNotes(MIDI, microKORG);
+      Score::continuousBassNotes(mKorg, MIDI);
       break;
 
       // case 7: // swell effect with notes!
@@ -620,55 +639,7 @@ void loop()
     default: // go back to beginning...
       Score::step = 0;
       break;
-
-      // static float delayDepth = 0;
-      // case 2: // delay with Swell Effect on Snare
-      //   snare->effect = Swell;
-      //   snare->midi.cc_chan = DelayTime;
-      //   delayDepth += 1; // fade in of delayDepth
-      //   delayDepth = min(delayDepth, 127);
-      //   MIDI.sendControlChange(DelayDepth, int(delayDepth), 2);
-      //   // Globals::print_to_console("delayDepth = ");
-      //   // Globals::println_to_console(delayDepth);
-      //   // Score::crazyDelays(snare, MIDI);
-      //   break;
-
-      // case 3: // rawPin Delay Effect on Snare
-      //   delayDepth -= 3;
-      //   delayDepth = max(delayDepth, 0);
-
-      //   MIDI.sendControlChange(DelayDepth, 50, 2);
-      //   snare->effect = CC_Effect_rawPin;
-      //   // Score::envelope_volume(&Score::beat_sum, MIDI);
-      //   break;
-
-      // case 4: // note ascend
-      //   standtom->topography.activation_thresh = 2;
-      //   kick->topography.activation_thresh = 2;
-      //   snare->topography.activation_thresh = 2;
-
-      //   standtom->effect = Monitor;
-      //   kick->effect = Monitor;
-      //   snare->effect = Monitor;
-
-      //   for (int i = 0; i < Globals::numInputs; i++)
-      //   {
-      //     if (instruments[i]->topography.average_smooth >= instruments[i]->topography.activation_thresh)
-      //     {
-      //       instruments[i]->midi.active_note += 3;
-      //     }
-      //   }
-      //   break;
-
-      // case 5: // envelope cutoff
-      // snare->effect = TopographyLog;
-      //   Score::envelope_cutoff(&Score::beat_sum, MIDI);
-      //   break;
     }
-
-    // continuousBassNote, quarterBassNotes, addBassNote,
-
-    /////////////////////// AUXILIARY FUNCTIONS ///////////////////////
 
   } // end of (32nd-step) TIMED ACTIONS
   // ------------------------------------------------------------------

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Globals.h>
+#include <MIDI.h>
 
 class Score;
 class Instrument;
@@ -17,11 +18,11 @@ public:
   static const int RESET_AND_PROCEED_SCORE = 3;
   static const int FOOTSWITCH_MODE = RESET_AND_PROCEED_SCORE;
 
-  static void footswitch_pressed(std::vector<Instrument*> instruments);
+  static void footswitch_pressed(std::vector<Instrument *> instruments);
 
-  static void footswitch_released(std::vector<Instrument*> instruments);
+  static void footswitch_released(std::vector<Instrument *> instruments);
 
-  static void checkFootSwitch(std::vector<Instrument*> instruments);
+  static void checkFootSwitch(std::vector<Instrument *> instruments);
   // --------------------------------------------------------------------
 
   ////////////////////////////// VIBRATION MOTOR ////////////////////////
@@ -29,9 +30,41 @@ public:
 
   static unsigned long motor_vibration_begin;
   static int motor_vibration_duration;
-  
+
   static void vibrate_motor(unsigned long vibration_duration);
 
   static void request_motor_deactivation();
+};
 
+// TODO:
+class Synthesizer
+{
+public:
+  Synthesizer(int midi_channel_)
+  {
+    midi_channel = midi_channel_;
+  }
+
+  int midi_channel; // the MIDI Channel to adress this instrument by
+
+  int osc2_semitone;
+  int osc2_tune;
+  int mix_level_1;
+  int mix_level_2;
+  int patch1_depth;
+  int patch3_depth;
+  int cutoff;
+  int resonance;
+  int amplevel;
+  int attack;
+  int sustain;
+  int release;
+  int delaytime;
+  int delaydepth;
+
+  void sendControlChange(CC_Type cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI); // sets cc_value (used for JSON comm) and sends MIDI-ControlChange
+
+  void sendNoteOn(int note, midi::MidiInterface<HardwareSerial> MIDI);
+
+  void sendNoteOff(int note, midi::MidiInterface<HardwareSerial> MIDI);
 };

@@ -1,6 +1,7 @@
 #include <Score.h>
 #include <MIDI.h>
 #include <Instruments.h>
+#include <Hardware.h>
 
 // TODO:
 //TOPOGRAPHY Score::beat_regularity;
@@ -33,27 +34,27 @@ void Score::add_bassNote(int note)
 ///////////////////////////////////////////////////////////////////////
 
 // play note, repeatedly:
-void Score::continuousBassNotes(midi::MidiInterface<HardwareSerial> MIDI, MIDI_Instrument midi_instrument) // initiates a continuous bass note from score
+void Score::continuousBassNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
 {
     // change note
     if (Globals::current_beat_pos % note_change_pos == 0) // at beginninng of each bar
         if (notes.size() > 1)
         {
-            MIDI.sendNoteOff(notes[note_idx], 127, midi_instrument);
+            synth->sendNoteOff(notes[note_idx], MIDI);
             note_idx = (note_idx + 1) % notes.size(); // iterate through the bass notes
         }
 
     // play note
     if (Globals::current_beat_pos == 0)
     {
-        MIDI.sendNoteOn(notes[note_idx], 127, midi_instrument);
+        synth->sendNoteOn(notes[note_idx], MIDI);
     }
 }
 
 // play note only once (turn on never off):
-void Score::continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
+void Score::continuousBassNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
 {
-    MIDI.sendNoteOn(notes[0], 127, microKORG);
+        synth->sendNoteOn(notes[note_idx], MIDI);
 }
 
 void Score::envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)

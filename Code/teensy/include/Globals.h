@@ -60,11 +60,11 @@ enum CC_Type // channels on mKORG:
   DelayDepth = 94
 };
 
-enum MIDI_Instrument
-{
-  Volca = 1,
-  microKORG = 2
-};
+// enum MIDI_Instrument
+// {
+//   Volca = 1,
+//   microKORG = 2
+// };
 
 class TOPOGRAPHY
 {
@@ -185,6 +185,8 @@ public:
   static void printTopoArray(TOPOGRAPHY *topography);
   static void topo_array_to_processing(TOPOGRAPHY *topo);
   // --------------------------------------------------------------------
+
+  static void create_json();
 };
 
 #endif

@@ -2,17 +2,16 @@
 #include <Score.h>
 #include <Instruments.h>
 
-
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void Hardware::footswitch_pressed(std::vector<Instrument*> instruments)
+void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
 {
   switch (FOOTSWITCH_MODE)
   {
   case (LOG_BEATS):
     // set pinMode of all instruments to 3 (record what is being played)
-    for (auto& instrument : instruments)
+    for (auto &instrument : instruments)
     {
       instrument->lastEffect = instrument->effect;
       instrument->effect = FootSwitchLooper; // TODO: not for Cowbell?
@@ -26,7 +25,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments)
     break;
 
   case (RESET_TOPO): // resets beat_topography (for all instruments)
-    for (auto& instrument : instruments)
+    for (auto &instrument : instruments)
     {
       // reset 8th-note-topography:
       for (int j = 0; j < 8; j++)
@@ -48,7 +47,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments)
       Globals::println_to_console("regularity height > 10: reset!");
       Score::step++; // go to next score step
       Score::setup = true;
-      for (auto& instrument : instruments)
+      for (auto &instrument : instruments)
         for (int j = 0; j < 16; j++)
           instrument->topography.a_16[j] = 0;
 
@@ -58,7 +57,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments)
         Score::beat_sum.a_16[j] = 0; // reset topography
       Score::beat_sum.average_smooth = 0;
     }
-    
+
     else
     {
       Globals::print_to_console("regularity too low to proceed.. is at ");
@@ -71,14 +70,13 @@ void Hardware::footswitch_pressed(std::vector<Instrument*> instruments)
     break;
   }
 }
-// --------------------------------------------------------------------
 
-void Hardware::footswitch_released(std::vector<Instrument*> instruments)
+void Hardware::footswitch_released(std::vector<Instrument *> instruments)
 {
   switch (FOOTSWITCH_MODE)
   {
   case (LOG_BEATS):
-    for (auto& instrument : instruments)
+    for (auto &instrument : instruments)
       instrument->effect = instrument->lastEffect;
     break;
 
@@ -91,7 +89,7 @@ void Hardware::footswitch_released(std::vector<Instrument*> instruments)
   }
 }
 
-void Hardware::checkFootSwitch(std::vector<Instrument*> instruments)
+void Hardware::checkFootSwitch(std::vector<Instrument *> instruments)
 {
 
   static int switch_state;
@@ -115,9 +113,9 @@ void Hardware::checkFootSwitch(std::vector<Instrument*> instruments)
     last_switch_toggle = millis();
   }
 }
+
 ////////////////////////////// VIBRATION MOTOR ////////////////////////
 ///////////////////////////////////////////////////////////////////////
-
 unsigned long Hardware::motor_vibration_begin = 0;
 int Hardware::motor_vibration_duration = 0;
 
@@ -132,4 +130,85 @@ void Hardware::request_motor_deactivation() // turn off vibration and MIDI notes
 {
   if (millis() > motor_vibration_begin + motor_vibration_duration)
     digitalWrite(VIBR, LOW);
+}
+
+//////////////////////// SYNTHESIZER CLASS ////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+// sets cc_value (for JSON communication) and sends MIDI-ControlChange:
+void Synthesizer::sendControlChange(CC_Type cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI)
+{
+  switch (cc_type)
+  {
+  case Osc2_semitone:
+    osc2_semitone = val;
+    break;
+
+  case Osc2_tune:
+    osc2_tune = val;
+    break;
+
+  case Mix_Level_1:
+    mix_level_1 = val;
+    break;
+
+  case Mix_Level_2:
+    mix_level_2 = val;
+    break;
+
+  case Patch_1_Depth:
+    patch1_depth = val;
+    break;
+
+  case Patch_3_Depth:
+    patch3_depth = val;
+    break;
+
+  case Cutoff:
+    cutoff = val;
+    break;
+
+  case Resonance:
+    resonance = val;
+    break;
+
+  case Amplevel:
+    amplevel = val;
+    break;
+
+  case Attack:
+    attack = val;
+    break;
+
+  case Sustain:
+    sustain = val;
+    break;
+
+  case Release:
+    release = val;
+    break;
+
+  case DelayTime:
+    delaytime = val;
+    break;
+
+  case DelayDepth:
+    delaydepth = val;
+    break;
+
+  default:
+    break;
+  }
+
+  MIDI.sendControlChange(int(cc_type), val, midi_channel);
+}
+
+void Synthesizer::sendNoteOn(int note, midi::MidiInterface<HardwareSerial> MIDI)
+{
+  MIDI.sendNoteOn(note, 127, midi_channel);
+}
+
+void Synthesizer::sendNoteOff(int note, midi::MidiInterface<HardwareSerial> MIDI)
+{
+  MIDI.sendNoteOff(note, 127, midi_channel);
 }

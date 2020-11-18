@@ -6,6 +6,7 @@
 #include <MIDI.h>
 
 class Instrument;
+class Synthesizer;
 
 class Score
 {
@@ -22,8 +23,8 @@ public:
     static void add_bassNote(int note); // adds a NOTE to notes[]
 
     // MODES:
-    static void continuousBassNotes(midi::MidiInterface<HardwareSerial> MIDI, MIDI_Instrument midi_instrument); // initiates a continuous bass note from score
-    static void continuousBassNote(midi::MidiInterface<HardwareSerial> MIDI);                                                   // play note only once (turn on never off):
+    static void continuousBassNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // initiates a continuous bass note from score
+    static void continuousBassNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);                                                   // play note only once (turn on never off):
     static void envelope_cutoff(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI);                              // creates an envelope for cutoff filter via topography
     static void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI);                              // creates an envelope for volume filter via topography
     static void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI);                                  // changes the delay times on each 16th-step

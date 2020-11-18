@@ -6,6 +6,8 @@
 #include <Tsunami.h>
 #include <MIDI.h>
 
+class Synthesizer;
+
 class Instrument
 {
 
@@ -60,13 +62,13 @@ public:
     {
         std::vector<int> notes;
         int active_note;
-        int cc_chan;
+        CC_Type cc_chan;
         float cc_val = 0;
         int cc_max = 127;             // MIDI values cannot be greater than this
         int cc_min = 30;              // MIDI values cannot be smaller than this
         float cc_increase_factor = 1; // factor by which MIDI vals will be increased upon hit
         float cc_decay_factor = -0.1;  // factor by which MIDI vals decay
-        MIDI_Instrument instrument;   // channel for midi instrument to target
+        Synthesizer *synth;   // associated midi-instrument to address
 
     } midi_settings;
 
@@ -96,7 +98,7 @@ public:
 
     void setup_notes(std::vector<int> list);
 
-    void setup_midi(CC_Type cc_type, MIDI_Instrument midi_instrument, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor);
+    void setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor);
 
     void setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean firstStroke_);
 

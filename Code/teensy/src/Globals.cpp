@@ -1,5 +1,6 @@
 #include <Globals.h>
 #include <Tsunami.h>
+#include <ArduinoJson.h>
 
 bool TOPOGRAPHY::ready()
 {
@@ -173,7 +174,6 @@ void TOPOGRAPHY::add(TOPOGRAPHY *to_add)
     */
 
 // PSEUDOCODE END
-
 
 // -->
 // void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
@@ -369,4 +369,216 @@ void Globals::topo_array_to_processing(TOPOGRAPHY *topo)
 			Serial.write(topo->a_16[j]);
 		Serial.write("\n");
 	}
+}
+
+void Globals::create_json()
+{
+
+	const size_t capacity = JSON_ARRAY_SIZE(5) + 8 * JSON_ARRAY_SIZE(16) + JSON_OBJECT_SIZE(3) + 8 * JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9);
+	DynamicJsonDocument doc(capacity);
+
+	JsonObject score_json = doc.createNestedObject("score_json");
+	score_json["step"] = 1;
+
+	JsonArray score_json_notes = score_json.createNestedArray("notes");
+	score_json_notes.add(1);
+	score_json_notes.add(2);
+	score_json_notes.add(3);
+	score_json_notes.add(4);
+	score_json_notes.add(5);
+	score_json["note"] = 5;
+
+	JsonObject instrument1 = doc.createNestedObject("instrument1");
+
+	JsonArray instrument1_topo = instrument1.createNestedArray("topo");
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1_topo.add(0);
+	instrument1["stroke"] = 0;
+	instrument1["cc_val"] = 127;
+	instrument1["cc_increase"] = 1;
+	instrument1["cc_decay"] = 0.1;
+
+	JsonObject instrument2 = doc.createNestedObject("instrument2");
+
+	JsonArray instrument2_topo = instrument2.createNestedArray("topo");
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2_topo.add(0);
+	instrument2["stroke"] = 0;
+	instrument2["cc_val"] = 127;
+	instrument2["cc_increase"] = 1;
+	instrument2["cc_decay"] = 0.1;
+
+	JsonObject instrument3 = doc.createNestedObject("instrument3");
+
+	JsonArray instrument3_topo = instrument3.createNestedArray("topo");
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3_topo.add(0);
+	instrument3["stroke"] = 0;
+	instrument3["cc_val"] = 127;
+	instrument3["cc_increase"] = 1;
+	instrument3["cc_decay"] = 0.1;
+
+	JsonObject instrument4 = doc.createNestedObject("instrument4");
+
+	JsonArray instrument4_topo = instrument4.createNestedArray("topo");
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4_topo.add(0);
+	instrument4["stroke"] = 0;
+	instrument4["cc_val"] = 127;
+	instrument4["cc_increase"] = 1;
+	instrument4["cc_decay"] = 0.1;
+
+	JsonObject instrument5 = doc.createNestedObject("instrument5");
+
+	JsonArray instrument5_topo = instrument5.createNestedArray("topo");
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5_topo.add(0);
+	instrument5["stroke"] = 0;
+	instrument5["cc_val"] = 127;
+	instrument5["cc_increase"] = 1;
+	instrument5["cc_decay"] = 0.1;
+
+	JsonObject instrument6 = doc.createNestedObject("instrument6");
+
+	JsonArray instrument6_topo = instrument6.createNestedArray("topo");
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6_topo.add(0);
+	instrument6["stroke"] = 0;
+	instrument6["cc_val"] = 127;
+	instrument6["cc_increase"] = 1;
+	instrument6["cc_decay"] = 0.1;
+
+	JsonObject instrument7 = doc.createNestedObject("instrument7");
+
+	JsonArray instrument7_topo = instrument7.createNestedArray("topo");
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7_topo.add(0);
+	instrument7["stroke"] = 0;
+	instrument7["cc_val"] = 127;
+	instrument7["cc_increase"] = 1;
+	instrument7["cc_decay"] = 0.1;
+
+	JsonObject instrument8 = doc.createNestedObject("instrument8");
+
+	JsonArray instrument8_topo = instrument8.createNestedArray("topo");
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8_topo.add(0);
+	instrument8["stroke"] = 0;
+	instrument8["cc_val"] = 127;
+	instrument8["cc_increase"] = 1;
+	instrument8["cc_decay"] = 0.1;
+
+	serializeJson(doc, Serial);
 }
