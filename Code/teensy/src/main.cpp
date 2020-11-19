@@ -20,6 +20,8 @@
     6 = Tsunami beat-linked playback: finds patterns within 1 bar for each instrument and plays an according rhythmic sample from tsunami database
     7 = using swell effect for tsunami playback loudness (arhythmic field recordings for cymbals)
     8 = 16th-note-topography with MIDI playback and volume change
+    9 = PlayMidi_rawPin: instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
+    10 = CC_Effect_rawPin: instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 */
 
 /* --------------------------------------------------------------------- */
@@ -60,26 +62,7 @@ IntervalTimer pinMonitor; // reads pins every 1 ms
 
 // TOPOGRAPHY regularity;
 
-/*
-    0 = play MIDI note upon stroke
-    1 = binary beat logger (print beat)
-    2 = toggle rhythm_slot
-    3 = footswitch looper: records what is being played for one bar while footswitch is pressed and repeats it after release.
-    4 = tapTempo: a standard tapTempo to change the overall pace. to be used on one instrument only.
-    5 = "swell" effect: all instruments have a tap tempo that will change MIDI CC values when played a lot (values decrease automatically)
-    6 = Tsunami beat-linked playback: finds patterns within 1 bar for each instrument and plays an according rhythmic sample from tsunami database
-    7 = using swell effect for tsunami playback loudness (arhythmic field recordings for cymbals)
-    8 = 16th-note-topography with ControlChange of instrument-specific MIDI CC
-    9 = PlayMidi_rawPin: instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
-    10 = CC_Effect_rawPin: instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
-*/
-// int initialPinAction[Globals::numInputs];
-// int allocated_track[Globals::numInputs];                   // tracks will be allocated in tsunami_beat_playback
-// int allocated_channels[] = {0, 0, 0, 0, 0, 0, 0}; // channels to send audio from tsunami to
-
 /////////////////////////// general pin reading ///////////////////////
-///////////////////////////////////////////////////////////////////////
-
 int pinValue(Instrument *instrument)
 {
   return abs(instrument->sensitivity.noiseFloor - analogRead(instrument->pin));
@@ -87,7 +70,6 @@ int pinValue(Instrument *instrument)
 // --------------------------------------------------------------------
 
 //////////////////////////// PRINT NORMALIZED VALUES //////////////////
-///////////////////////////////////////////////////////////////////////
 void printNormalizedValues(boolean printNorm_criterion)
 {
   // useful debugger for column-wise output of raw/normalised values:
@@ -115,9 +97,8 @@ void printNormalizedValues(boolean printNorm_criterion)
     lastMillis = millis();
   }
 }
-// --------------------------------------------------------------------
 
-// interrupt for sensor reading ---------------------------------------
+//////////////////// interrupt for sensor reading /////////////////////
 void samplePins()
 {
   // read all pins:
@@ -134,11 +115,10 @@ void samplePins()
   }
 }
 
-// --------------------------------------------------------------------
 
-/* --------------------------------------------------------------------- */
-/* ---------------------------------- SETUP ---------------------------- */
-/* --------------------------------------------------------------------- */
+///////////////////////////////////////////////////////////////////////////
+////////////////////////////////// SETUP //////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
 void setup()
 {
@@ -264,7 +244,6 @@ void setup()
   // Debug:
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
   // tracknum, channel
-
 }
 
 /* --------------------------------------------------------------------- */
@@ -602,7 +581,7 @@ void loop()
         ride->effect = Monitor;
         snare->effect = Monitor;
 
-      mKorg->sendControlChange(Resonance, 31, MIDI);
+        mKorg->sendControlChange(Resonance, 31, MIDI);
         mKorg->sendControlChange(Cutoff, 28, MIDI);
         mKorg->sendControlChange(Osc2_tune, 0, MIDI);
         Score::add_bassNote(Score::notes[0] + int(random(6)));

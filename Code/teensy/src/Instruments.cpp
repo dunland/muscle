@@ -6,7 +6,7 @@
 
 void Instrument::setup_notes(std::vector<int> list)
 {
-  for (int i = 0; i < list.size(); i++)
+  for (uint8_t i = 0; i < list.size(); i++)
   {
     midi_settings.notes.push_back(list[i]);
   }

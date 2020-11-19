@@ -21,7 +21,7 @@ void Score::add_bassNote(int note)
     Globals::print_to_console("note ");
     Globals::print_to_console(note);
     Globals::print_to_console(" has been added to Score::notes [ ");
-    for (int i = 0; i < notes.size(); i++)
+    for (uint8_t i = 0; i < notes.size(); i++)
     {
         Globals::print_to_console(notes[i]);
         Globals::print_to_console(" ");
