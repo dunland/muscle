@@ -21,13 +21,18 @@ boolean selected = false;
 ArrayList<PVector> values = new ArrayList<PVector>();
 ArrayList<PVector> values2 = new ArrayList<PVector>(); // TODO: conclude all values in one list of lists
 ArrayList<Integer> int_values = new ArrayList<Integer>(); // plain integer values. TODO: make function to transfrom ints to vectors
+ArrayList<Float> float_values = new ArrayList<Float>(); // plain float values. TODO: make function to transfrom ints to vectors
 
 // ----------------------------------- style
 // determines style of graph display
 int LINES = 0, POINTS = 1, BARPLOT = 2;
 int drawMode = BARPLOT;
 boolean drawConnectionBetweenPoints = false;
-boolean draw_graphs = true;
+boolean draw_axes = true;
+boolean draw_title = true;
+boolean draw_labels = true;
+boolean draw_xticks = true;
+boolean draw_yticks = true;
 
 color axisColor = color(255, 255, 255);
 color pointsColor = color(47, 169, 222);
@@ -130,7 +135,7 @@ void draw(int x, int y)
         }
         popMatrix();
         // ---------------------------------- axes
-        if (draw_graphs)
+        if (draw_axes)
         {
 
                 stroke(axisColor);
@@ -140,7 +145,7 @@ void draw(int x, int y)
 
         /* ---------------------------- TICKS --------------------------------*/
         // ------------------------------ ticks:
-        if (draw_graphs)
+        if (draw_xticks)
         {
                 for (int i = 0; i<number_of_xticks+1; i++)
                 {
@@ -167,7 +172,7 @@ void draw(int x, int y)
         }
 
         // ----------------------------- y-ticks
-        if (draw_graphs)
+        if (draw_yticks)
         {
 
                 for (int i = 0; i<number_of_yticks+1; i++)
@@ -190,7 +195,7 @@ void draw(int x, int y)
         }
 
         /* -------------------------- AXIS LABELS --------------------------- */
-        if (draw_graphs)
+        if (draw_labels)
         {
 
                 textAlign(CENTER,BOTTOM);
@@ -205,7 +210,7 @@ void draw(int x, int y)
         }
 
         /* ---------------------------- TITLE ------------------------------- */
-        if (draw_graphs)
+        if (draw_title)
         {
                 pushMatrix();
                 translate(x, y);
@@ -279,7 +284,7 @@ void add_values2(float x_value, float y_value)
         // }
 }
 
-void updateValues(ArrayList<Integer> list, boolean adjust_ticks) // updates values by input list and automatically adjusts ticks if wanted
+void updateValues(ArrayList<Integer> list, boolean adjust_ticks) // updates integer by input list and automatically adjusts ticks if wanted
 {
         int max_val = 0;
         // print("[");
@@ -294,6 +299,38 @@ void updateValues(ArrayList<Integer> list, boolean adjust_ticks) // updates valu
                 {
                         int_values.add(list.get(i)); // or append value
                         ints_to_vectors(int_values);
+                }
+                // print(int_values.get(i));
+                // if (i < list.size()-1) print(", ");
+
+                if (list.get(i) > max_val) max_val = list.get(i);
+        }
+        // println("]");
+
+
+        if (adjust_ticks)
+        {
+                y_max = max_val;
+                number_of_xticks = list.size();
+                // number_of_yticks = int(max_val);
+        }
+}
+
+void updateFloatValues(ArrayList<Float> list, boolean adjust_ticks) // updates float values by input list and automatically adjusts ticks if wanted
+{
+        float max_val = 0;
+        // print("[");
+        for (int i = 0; i<list.size(); i++)
+        {
+                if (float_values.size() > i)
+                {
+                        float_values.set(i, list.get(i)); // either set value
+                        floats_to_vectors(float_values);
+                }
+                else
+                {
+                        float_values.add(list.get(i)); // or append value
+                        floats_to_vectors(float_values);
                 }
                 // print(int_values.get(i));
                 // if (i < list.size()-1) print(", ");
@@ -357,6 +394,18 @@ void ints_to_vectors(ArrayList<Integer> list_of_integers)
                         values.get(i).set(i, list_of_integers.get(i)); // either set value
                 }
                 else values.add(new PVector(i, list_of_integers.get(i))); // or append value  }
+        }
+}
+
+void floats_to_vectors(ArrayList<Float> list_of_floats)
+{
+        for (int i = 0; i < list_of_floats.size(); i++)
+        {
+                if (values.size() > i)
+                {
+                        values.get(i).set(i, list_of_floats.get(i)); // either set value
+                }
+                else values.add(new PVector(i, int(list_of_floats.get(i)))); // or append value  }
         }
 }
 

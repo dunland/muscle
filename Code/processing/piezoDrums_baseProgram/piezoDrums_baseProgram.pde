@@ -22,7 +22,6 @@ String incoming_millis_str = "";
 int[] topo = new int[16];
 boolean collect_r = false; // enables data recording for "regularity" array
 boolean collect_m = false; // enables storage of incoming millis
-int n = 0;
 
 Plot plot = new Plot(0, 16, 0, 1, 320, 100);
 Score score = new Score();
@@ -37,6 +36,9 @@ Instrument crash1 = new Instrument("CRASH 1");
 
 Instrument list_of_instruments[] = {snare, kick, hihat, standtom1, tom2, ride, cowbell, crash1};
 
+Grid grid;
+
+
 ///////////////////////////////////////////////////////////////
 ////////////////////////// SETUP //////////////////////////////
 ///////////////////////////////////////////////////////////////
@@ -44,6 +46,7 @@ Instrument list_of_instruments[] = {snare, kick, hihat, standtom1, tom2, ride, c
 
 void setup()
 {
+
         size(1600, 800);
         printArray(Serial.list());
         String portName = Serial.list()[0]; // find right Serial port from list
@@ -70,13 +73,16 @@ void setup()
                 instr.plot.pointsColor = color(i * (255/list_of_instruments.length), 100, 100);
 
                 // cc_plot:
-                instr.cc_plot.set_ticks(200,127);
+                instr.cc_plot.set_ticks(200,1);
                 instr.cc_plot.drawMode = instr.plot.LINES;
-                instr.cc_plot.draw_graphs = false;
+                instr.cc_plot.draw_title = false;
+                instr.cc_plot.draw_labels = false;
+                instr.cc_plot.draw_xticks = false;
+                // instr.cc_plot.draw_yticks = false;
                 instr.cc_plot.pointsColor = color(i * (255/list_of_instruments.length), 100, 100);
 
         }
-
+        grid = new Grid(width/2, 0);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -114,7 +120,6 @@ void draw()
                         }
                 }
         }
-
         //----------------------- DRAW LINES ---------------------
         if (list_of_lines.size() > 0) {
                 // draw signals
@@ -133,6 +138,16 @@ void draw()
                 }
         }
 
+        // initialize grid once:
+        if (snare.topo.size() == 16 && grid.init)
+        {
+                grid.create_vertices(16, 16);
+                grid.init = false;
+        }
+
+        // draw vertices:
+        if (snare.topo.size() == 16) grid.draw();
+
         // ------------------------ draw plots ---------------------------
         int dist_left = 50;
         int dist_top = 30;
@@ -149,11 +164,13 @@ void draw()
                 instr.cc_plot.draw(dist_left + 350, dist_top+ i* (height-200)/list_of_instruments.length);
 
                 textAlign(LEFT,LEFT);
-                textSize(20);
+                textSize(16);
                 colorMode(HSB);
                 fill(instr.cc_plot.pointsColor);
                 text("ø:\t" + instr.average_smooth
                      + "/" + instr.activation_thresh
+                     + " " + instr.title
+                     + "\t ― " + instr.effect
                      + "\nCC:\t" + instr.cc_val
                      + " | " + instr.cc_increase
                      + " | " + instr.cc_decay,
@@ -198,155 +215,5 @@ void draw()
         textSize(14);
         fill(255);
         text(incoming_millis_str, 0, height);
-
-}
-
-// ------------------------ KEYS ---------------------------
-void keyPressed()
-{
-        switch (key) {
-        case 'a':
-                list_of_circles.add(new Circle(width*2/3, height*1/5));
-                println("a pressed.");
-                //println("remaining objects: " + (list_of_circles.size() + list_of_lines.size()));
-                break;
-
-        case 's':
-                list_of_lines.add(new Line(width*2/3));
-                println("s pressed.");
-                //println("remaining objects: " + (list_of_circles.size() + list_of_lines.size()));
-                for (Circle circle : list_of_circles)
-                {
-                        circle.stopped = true;
-                }
-                break;
-
-        case 'd':
-                println("d pressed.");
-                break;
-
-        case 'e':
-                println("e pressed.");
-
-                break;
-        }
-}
-
-void serialEvent(Serial myPort)
-{
-        if (serial_available) // using Serial at all
-        {
-                if (myPort.available() > 0)
-                {
-                        String inBuffer = myPort.readString();
-
-                        // string to JSON object:
-                        JSONObject json = parseJSONObject(inBuffer);
-                        if (json == null) println("JSONObject could not be parsed");
-                        else
-                        {
-                                score.json = json.getJSONObject("score");
-
-                                snare.json = json.getJSONObject("snare");
-                                kick.json = json.getJSONObject("kick");
-                                hihat.json = json.getJSONObject("hihat");
-                                crash1.json = json.getJSONObject("crash1");
-                                ride.json = json.getJSONObject("ride");
-                                standtom1.json = json.getJSONObject("standtom1");
-                                tom2.json = json.getJSONObject("tom2");
-                                cowbell.json = json.getJSONObject("cowbell");
-
-                                parseScore(score.json);
-
-                                for (Instrument instrument : list_of_instruments)
-                                {
-                                        try {
-                                                parseInstrument(instrument);
-                                        } catch(Exception e) {
-                                                println(e);
-                                        }
-                                }
-                        }
-                }
-        }
-
-        else // instead read from file
-        {
-                JSONObject json = loadJSONObject("test.json");
-                if (json == null) println("JSONObject could not be parsed");
-                else
-                {
-                        score.json = json.getJSONObject("score");
-
-                        snare.json = json.getJSONObject("snare");
-                        kick.json = json.getJSONObject("kick");
-                        hihat.json = json.getJSONObject("hihat");
-                        crash1.json = json.getJSONObject("crash1");
-                        ride.json = json.getJSONObject("ride");
-                        standtom1.json = json.getJSONObject("standtom1");
-                        tom2.json = json.getJSONObject("tom2");
-                        cowbell.json = json.getJSONObject("cowbell");
-
-                        parseScore(score.json);
-
-                        for (Instrument instrument : list_of_instruments)
-                        {
-                                try {
-                                        parseInstrument(instrument);
-                                } catch(Exception e) {
-                                        println(e);
-                                }
-                        }
-                }
-        }
-}
-
-void parseScore(JSONObject json)
-{
-        score.elapsedMillis = json.getInt("millis");
-        score.current_beat_pos = json.getInt("current_beat_pos");
-        score.step = json.getInt("score_step");
-        score.note = json.getInt("note");
-        score.average_smooth = json.getInt("average_smooth");
-        score.activation_thresh = json.getInt("activation_thresh");
-
-        // notes:
-        JSONArray notes = json.getJSONArray("notes");
-        for (int i = 0; i<notes.size(); i++)
-        {
-                if (score.notes.size()>i)
-                        score.notes.set(i, notes.getInt(i));
-        }
-
-        // topography:
-        JSONArray topo = json.getJSONArray("topo");
-        for (int i = 0; i<topo.size(); i++)
-        {
-                if (score.topo.size()>i)
-                        score.topo.set(i, topo.getInt(i));
-                else score.topo.add(topo.getInt(i));
-        }
-
-}
-
-void parseInstrument(Instrument instrument)
-{
-
-
-        instrument.average_smooth = instrument.json.getInt("average_smooth");
-        instrument.activation_thresh = instrument.json.getInt("activation_thresh");
-        instrument.cc_val = instrument.json.getInt("cc_val");
-        instrument.cc_increase = instrument.json.getFloat("cc_increase");
-        instrument.cc_decay = instrument.json.getFloat("cc_decay");
-
-
-        // topography:
-        JSONArray topo = instrument.json.getJSONArray("topo");
-        for (int i = 0; i<topo.size(); i++)
-        {
-                if (instrument.topo.size()>i)
-                        instrument.topo.set(i, topo.getInt(i));
-                else instrument.topo.add(topo.getInt(i));
-        }
 
 }

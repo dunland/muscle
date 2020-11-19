@@ -10,6 +10,8 @@ class Score
   int average_smooth;
   int activation_thresh;
 
+  boolean ready = false;
+
   JSONObject json;
 
 Score()
