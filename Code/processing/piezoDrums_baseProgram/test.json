@@ -1,0 +1,77 @@
+{
+"score":
+	{
+	"millis": 7000,
+	"current_beat_pos": 32,
+	"score_step": 1,
+	"notes": [1,2,3,4,5],
+	"note": 5,
+	"topo": [1,7,0,0,1,0,0,0,1,0,0,1,0,0,2,1],
+	"average_smooth":100,
+	"activation_thresh": 15
+	},
+"snare": {
+	"topo": [0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0],
+	"average_smooth":100,
+	"activation_thresh": 15,
+	"cc_val": 127,
+	"cc_increase": 1,
+	"cc_decay": 0.1
+},
+"kick": {
+	"topo": [0,1,0,0,0,0,0,0,0,0,0,8,0,0,0,0],
+	"average_smooth":100,
+	"activation_thresh": 12,
+	"cc_val": 125,
+	"cc_increase": 1,
+	"cc_decay": 0.1
+},
+"hihat": {
+	"topo": [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],
+	"average_smooth":100,
+	"activation_thresh": 15,
+	"cc_val": 12,
+	"cc_increase": 1,
+	"cc_decay": 0.1
+},
+"crash1": {
+	"topo": [0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	"average_smooth":100,
+	"activation_thresh": 15,
+	"cc_val": 0,
+	"cc_increase": 1,
+	"cc_decay": 0.1
+},
+"ride": {
+	"topo": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	"average_smooth":100,
+	"activation_thresh": 15,
+	"cc_val": 127,
+	"cc_increase": 1,
+	"cc_decay": 0.1
+},
+"standtom1": {
+	"topo": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	"average_smooth":100,
+	"activation_thresh": 15,
+	"cc_val": 100,
+	"cc_increase": 1,
+	"cc_decay": 0.1
+},
+"tom2": {
+	"topo": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	"average_smooth":100,
+	"activation_thresh": 15,
+	"cc_val": 2,
+	"cc_increase": 1,
+	"cc_decay": 0.1
+},
+"cowbell": {
+	"topo": [0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0],
+	"average_smooth":100,
+	"activation_thresh": 15,
+	"cc_val": 127,
+	"cc_increase": 1,
+	"cc_decay": 0.1
+	}
+}

@@ -24,9 +24,27 @@ boolean collect_r = false; // enables data recording for "regularity" array
 boolean collect_m = false; // enables storage of incoming millis
 int n = 0;
 
+Plot plot = new Plot(0, 16, 0, 1, 320, 100);
+Score score = new Score();
+Instrument snare = new Instrument("SNARE");
+Instrument kick = new Instrument("KICK");
+Instrument hihat = new Instrument("HIHAT");
+Instrument standtom1 = new Instrument("STANDTOM 1");
+Instrument tom2 = new Instrument("TOM 2");
+Instrument ride = new Instrument("RIDE");
+Instrument cowbell = new Instrument("COWBELL");
+Instrument crash1 = new Instrument("CRASH 1");
+
+Instrument list_of_instruments[] = {snare, kick, hihat, standtom1, tom2, ride, cowbell, crash1};
+
+///////////////////////////////////////////////////////////////
+////////////////////////// SETUP //////////////////////////////
+///////////////////////////////////////////////////////////////
+
+
 void setup()
 {
-        size(500, 500);
+        size(1600, 800);
         printArray(Serial.list());
         String portName = Serial.list()[0]; // find right Serial port from list
         try {
@@ -35,9 +53,35 @@ void setup()
                 println(e);
                 serial_available = false;
         }
+
+        plot.drawMode = plot.BARPLOT;
+        plot.set_ticks(1, 3);
+        plot.set_title("BEAT SUM");
+
+        for (int i = 0; i<list_of_instruments.length; i++)
+        {
+                Instrument instr = list_of_instruments[i];
+
+                // stroke plot:
+                instr.plot.drawMode = instr.plot.BARPLOT;
+                instr.plot.set_ticks(16,2);
+                instr.plot.set_title(instr.title);
+                colorMode(HSB);
+                instr.plot.pointsColor = color(i * (255/list_of_instruments.length), 100, 100);
+
+                // cc_plot:
+                instr.cc_plot.set_ticks(200,127);
+                instr.cc_plot.drawMode = instr.plot.LINES;
+                instr.cc_plot.draw_graphs = false;
+                instr.cc_plot.pointsColor = color(i * (255/list_of_instruments.length), 100, 100);
+
+        }
+
 }
 
-int a = 100, b= 220, c = 200, g = 0;
+///////////////////////////////////////////////////////////////
+////////////////////////// LOOP ///////////////////////////////
+///////////////////////////////////////////////////////////////
 
 void draw()
 {
@@ -50,7 +94,6 @@ void draw()
            //println(b);
          */
 
-        objectsFromSerial();
         //----------------------- DRAW CIRCLES ---------------------
         if (list_of_circles.size() > 0) {
                 // draw signals
@@ -85,15 +128,51 @@ void draw()
                 {
                         if (list_of_lines.get(i).xPos < -height) {
                                 list_of_lines.remove(i);
-                                println("remaining objects: " +  list_of_circles.size() + list_of_lines.size());
+                                println("remaining objects: " +  int(list_of_circles.size() + list_of_lines.size()));
                         }
                 }
         }
 
+        // ------------------------ draw plots ---------------------------
+        int dist_left = 50;
+        int dist_top = 30;
+        plot.updateValues(score.topo, true);
+        plot.draw(dist_left, 650);
+
+        for (int i = 0; i<list_of_instruments.length; i++)
+        {
+                Instrument instr = list_of_instruments[i];
+
+                instr.plot.updateValues(instr.topo, true);
+                instr.plot.draw(dist_left, dist_top+ i* (height-200)/list_of_instruments.length);
+
+                instr.cc_plot.draw(dist_left + 350, dist_top+ i* (height-200)/list_of_instruments.length);
+
+                textAlign(LEFT,LEFT);
+                textSize(20);
+                colorMode(HSB);
+                fill(instr.cc_plot.pointsColor);
+                text("ø:\t" + instr.average_smooth
+                     + "/" + instr.activation_thresh
+                     + "\nCC:\t" + instr.cc_val
+                     + " | " + instr.cc_increase
+                     + " | " + instr.cc_decay,
+                     instr.plot.axis_width + instr.cc_plot.axis_width + dist_left*2, dist_top + i* (height-200)/list_of_instruments.length);
+
+                instr.record_value(instr.cc_val, 200);
+        }
+
+        // ------------------------ Auxiliary Info -----------------------
+
+        // mouse position and circles
         textAlign(RIGHT, BOTTOM);
         textSize(14);
         fill(255);
-        text(list_of_circles.size() + "\n" + mouseX + " " + mouseY, width, height);
+        text("circles: " + list_of_circles.size() + "\n" + mouseX + " " + mouseY, width, height);
+
+        // millis:
+        textAlign(LEFT, BOTTOM);
+        text(score.elapsedMillis, 0, height);
 
 
         // ------------------------ Read Serial ---------------------------
@@ -101,8 +180,8 @@ void draw()
 
         // ------------------------ print beat step -------------------
         textAlign(CENTER,BOTTOM);
-        int current_16th_step = current_16ths_step();
-        if (current_16th_step % 4 == 0)
+        // int current_16th_step = current_16ths_step();
+        if (score.current_beat_pos % 4 == 0)
         {
                 textSize(24);
                 fill(255,0,0);
@@ -112,7 +191,7 @@ void draw()
                 textSize(16);
                 fill(255);
         }
-        text(str(current_16th_step), width/2, height);
+        text(str(score.current_beat_pos), width/2, height);
 
         // --------------------- print incoming millis -------------------
         textAlign(LEFT,BOTTOM);
@@ -129,14 +208,12 @@ void keyPressed()
         case 'a':
                 list_of_circles.add(new Circle(width*2/3, height*1/5));
                 println("a pressed.");
-                a+=10;
                 //println("remaining objects: " + (list_of_circles.size() + list_of_lines.size()));
                 break;
 
         case 's':
                 list_of_lines.add(new Line(width*2/3));
                 println("s pressed.");
-                b+=10;
                 //println("remaining objects: " + (list_of_circles.size() + list_of_lines.size()));
                 for (Circle circle : list_of_circles)
                 {
@@ -146,7 +223,6 @@ void keyPressed()
 
         case 'd':
                 println("d pressed.");
-                c+=10;
                 break;
 
         case 'e':
@@ -156,90 +232,121 @@ void keyPressed()
         }
 }
 
-void objectsFromSerial()
-{
-
-
-        //if (serialInArray[0] > globalThreshold)
-        //{
-        //  list_of_circles.add(new Circle(width*2/3, height*1/5));
-        //  println("remaining objects: " + list_of_circles.size() + list_of_lines.size());
-        //}
-        //if (serialInArray[1] > globalThreshold)
-        //{
-        //  list_of_lines.add(new Line(width*2/3));
-        //  println("remaining objects: " + list_of_circles.size() + list_of_lines.size());
-        //  for (Circle circle : list_of_circles)
-        //  {
-        //    circle.stopped = true;
-        //  }
-        //}
-}
-
 void serialEvent(Serial myPort)
 {
-        if (serial_available)
+        if (serial_available) // using Serial at all
         {
                 if (myPort.available() > 0)
                 {
-                        int serialVal = myPort.read();
-                        // general char reading:
-                        printstr += char(serialVal);
-                        if (char(serialVal) == '\n')
+                        String inBuffer = myPort.readString();
+
+                        // string to JSON object:
+                        JSONObject json = parseJSONObject(inBuffer);
+                        if (json == null) println("JSONObject could not be parsed");
+                        else
                         {
-                                // print(printstr);
-                                decode_incoming_string(printstr);
-                                printstr = "";
+                                score.json = json.getJSONObject("score");
+
+                                snare.json = json.getJSONObject("snare");
+                                kick.json = json.getJSONObject("kick");
+                                hihat.json = json.getJSONObject("hihat");
+                                crash1.json = json.getJSONObject("crash1");
+                                ride.json = json.getJSONObject("ride");
+                                standtom1.json = json.getJSONObject("standtom1");
+                                tom2.json = json.getJSONObject("tom2");
+                                cowbell.json = json.getJSONObject("cowbell");
+
+                                parseScore(score.json);
+
+                                for (Instrument instrument : list_of_instruments)
+                                {
+                                        try {
+                                                parseInstrument(instrument);
+                                        } catch(Exception e) {
+                                                println(e);
+                                        }
+                                }
                         }
                 }
         }
-        //println();
-        //int inByte = myPort.read();
-        //serialInArray[serialCount] = inByte;
-        //serialCount++;
 
-        //if (serialCount > 1)
-        //{
-        //  serialCount = 0;
-        //  print(millis() + " ");
-        //  printArray(serialInArray);
-        //}
+        else // instead read from file
+        {
+                JSONObject json = loadJSONObject("test.json");
+                if (json == null) println("JSONObject could not be parsed");
+                else
+                {
+                        score.json = json.getJSONObject("score");
+
+                        snare.json = json.getJSONObject("snare");
+                        kick.json = json.getJSONObject("kick");
+                        hihat.json = json.getJSONObject("hihat");
+                        crash1.json = json.getJSONObject("crash1");
+                        ride.json = json.getJSONObject("ride");
+                        standtom1.json = json.getJSONObject("standtom1");
+                        tom2.json = json.getJSONObject("tom2");
+                        cowbell.json = json.getJSONObject("cowbell");
+
+                        parseScore(score.json);
+
+                        for (Instrument instrument : list_of_instruments)
+                        {
+                                try {
+                                        parseInstrument(instrument);
+                                } catch(Exception e) {
+                                        println(e);
+                                }
+                        }
+                }
+        }
 }
 
-void decode_incoming_string(String decode_message)
+void parseScore(JSONObject json)
 {
-        // TODO: decode incoming topographies
-        // for (int i = 0; i < decode_message.length(); i++)
-        // {
-        //         char c = decode_message.charAt(i);
-        //
-        //         // decode incoming topographies:
-        //         if (c == 'r') // 'r' initiates collection of vals from array
-        //         {
-        //                 collect_r = true;
-        //         }
-        //         if (c != 'r' && collect_r && n < 16) // add incoming val to array
-        //         {
-        //                 // topo[n] = serialVal;
-        //                 print_topo += c;
-        //                 n++;
-        //         }
-        //         if (c == '\n' && collect_r) // end of topo array
-        //         {
-        //                 // println(print_topo);
-        //                 print_topo = "";
-        //                 collect_r = false;
-        //                 n = 0;
-        //                 printArray(topo);
-        //         }
-        // }
+        score.elapsedMillis = json.getInt("millis");
+        score.current_beat_pos = json.getInt("current_beat_pos");
+        score.step = json.getInt("score_step");
+        score.note = json.getInt("note");
+        score.average_smooth = json.getInt("average_smooth");
+        score.activation_thresh = json.getInt("activation_thresh");
 
-        // store incoming millis:
-        if (decode_message.charAt(0) == 'm')
+        // notes:
+        JSONArray notes = json.getJSONArray("notes");
+        for (int i = 0; i<notes.size(); i++)
         {
-                incoming_millis_str = "";
-                for (int i = 1; i< decode_message.length()-1; i++)
-                        incoming_millis_str += decode_message.charAt(i);
-                println("incoming_millis = " + incoming_millis_str);
+                if (score.notes.size()>i)
+                        score.notes.set(i, notes.getInt(i));
         }
+
+        // topography:
+        JSONArray topo = json.getJSONArray("topo");
+        for (int i = 0; i<topo.size(); i++)
+        {
+                if (score.topo.size()>i)
+                        score.topo.set(i, topo.getInt(i));
+                else score.topo.add(topo.getInt(i));
+        }
+
+}
+
+void parseInstrument(Instrument instrument)
+{
+
+
+        instrument.average_smooth = instrument.json.getInt("average_smooth");
+        instrument.activation_thresh = instrument.json.getInt("activation_thresh");
+        instrument.cc_val = instrument.json.getInt("cc_val");
+        instrument.cc_increase = instrument.json.getFloat("cc_increase");
+        instrument.cc_decay = instrument.json.getFloat("cc_decay");
+
+
+        // topography:
+        JSONArray topo = instrument.json.getJSONArray("topo");
+        for (int i = 0; i<topo.size(); i++)
+        {
+                if (instrument.topo.size()>i)
+                        instrument.topo.set(i, topo.getInt(i));
+                else instrument.topo.add(topo.getInt(i));
+        }
+
 }
