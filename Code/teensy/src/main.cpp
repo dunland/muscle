@@ -39,6 +39,7 @@
 
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
+// define instruments:
 Instrument *snare;
 Instrument *hihat;
 Instrument *kick;
@@ -50,17 +51,13 @@ Instrument *cowbell;
 // Instrument *crash2;
 Instrument *ride;
 
-static std::vector<Instrument *> instruments;
+static std::vector<Instrument *> instruments; // all instruments go in here
 
 Synthesizer *mKorg;
 Synthesizer *volca;
 
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
-
-// ----------------- MUSICAL AND PERFORMATIVE PARAMETERS --------------
-
-// TOPOGRAPHY regularity;
 
 /////////////////////////// general pin reading ///////////////////////
 int pinValue(Instrument *instrument)
@@ -115,7 +112,6 @@ void samplePins()
   }
 }
 
-
 ///////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// SETUP //////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -129,7 +125,6 @@ void setup()
   Globals::do_send_to_processing = false;
   Globals::do_print_beat_sum = false; // prints Score::beat_sum topography array
 
-
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
   pinMode(FOOTSWITCH, INPUT_PULLUP);
@@ -140,15 +135,22 @@ void setup()
 
   Serial.begin(115200);
   // Serial3.begin(57600); // contained in tsunami.begin()
-  while (!Serial)
-    ; // prevents Serial flow from just stopping at some (early) point.
+  unsigned long wait_for_Serial = millis();
+
+  while (!Serial) // prevents Serial flow from just stopping at some (early) point.
+  {
+    if (millis() > wait_for_Serial + 5000)
+    {
+      Globals::use_usb_communication = false;
+    }
+  }
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
   Globals::create_json();
 
-   // setup names of elements for Serial communication (to processing):
+  // setup names of elements for Serial communication (to processing):
   Score::beat_sum.tag = "v";
   Score::beat_regularity.tag = "r";
 
@@ -388,7 +390,6 @@ void loop()
     Globals::print_to_console(Score::beat_sum.activation_thresh);
     Globals::print_to_console("\tstep:");
     Globals::println_to_console(Score::step);
-
 
     Globals::derive_topography(&Score::beat_sum, &Score::beat_regularity); // TODO: also do this for all instruments
 
