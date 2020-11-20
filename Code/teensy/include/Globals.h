@@ -102,6 +102,7 @@ public:
   static boolean printStrokes;
   static boolean use_responsiveCalibration;
   static boolean do_print_beat_sum; // prints Score::beat_sum topography array
+  static boolean use_usb_communication; // determines whether to use USB Serial communication for monitoring via processing/console or not
 
   static int tapInterval;
   static int current_BPM;
@@ -164,12 +165,40 @@ public:
     return "";
   }
 
+    static String EffectstypeToHumanReadable(EffectsType type)
+  {
+    switch (type)
+    {
+    case PlayMidi:
+      return "PlayMidi";
+    case Monitor:
+      return "Monitor";
+    case ToggleRhythmSlot:
+      return "ToggleRhythmSlot";
+    case FootSwitchLooper:
+      return "FootSwitchLooper";
+    case TapTempo:
+      return "TapTempo";
+    case Swell:
+      return "Swell";
+    case TsunamiLink:
+      return "TsunamiLink";
+    case CymbalSwell:
+      return "CymbalSwell";
+    case TopographyLog:
+      return "TopographyLog";
+    case Change_CC:
+      return "Change_CC";
+    }
+    return "";
+  }
+
   // TOPOGRAPHIES: ------------------------------------------------------
   static void smoothen_dataArray(TOPOGRAPHY *topography); // there is a double of this in Instruments to perform instrument-specific operations
   static void derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction);
 
   // DEBUG FUNCTIONS: ---------------------------------------------------
-  // print the play log to Arduino console:
+  // print the play log to Serial monitor:
   static void print_to_console(String message_to_print);
   static void print_to_console(int int_to_print);
   static void print_to_console(float float_to_print);
@@ -178,15 +207,10 @@ public:
   static void println_to_console(int int_to_print);
   static void println_to_console(float float_to_print);
 
-  // or send stuff to processing:
-  static void send_to_processing(int message_to_send);
-  static void send_to_processing(char message_to_send);
-
   static void printTopoArray(TOPOGRAPHY *topography);
   static void topo_array_to_processing(TOPOGRAPHY *topo);
   // --------------------------------------------------------------------
 
-  static void create_json();
 };
 
 #endif

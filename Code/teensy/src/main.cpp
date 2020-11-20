@@ -36,6 +36,7 @@
 #include <Instruments.h>
 #include <Hardware.h>
 #include <Score.h>
+#include <Serial.h>
 
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
@@ -121,8 +122,6 @@ void setup()
   //---------------------- Global / Debug values ----------------------
 
   Globals::use_responsiveCalibration = false;
-  Globals::do_print_to_console = true;
-  Globals::do_send_to_processing = false;
   Globals::do_print_beat_sum = false; // prints Score::beat_sum topography array
 
   //------------------------ initialize pins --------------------------
@@ -142,15 +141,15 @@ void setup()
     if (millis() > wait_for_Serial + 5000)
     {
       Globals::use_usb_communication = false;
+      Globals::do_print_to_console = true;
+      break;
     }
   }
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
-  Globals::create_json();
-
-  // setup names of elements for Serial communication (to processing):
+  // setup names of elements for display on Serial Monitor:
   Score::beat_sum.tag = "v";
   Score::beat_regularity.tag = "r";
 
@@ -274,6 +273,8 @@ void loop()
       instrument->trigger(MIDI); // runs trigger function according to instrument's EffectType
       // send instrument stroke to processing:
       // Globals::send_to_processing('i');
+      if (Globals::use_usb_communication)
+        Serial.print(Globals::EffectstypeToHumanReadable(instrument->effect));
     }
   }
 
@@ -310,6 +311,9 @@ void loop()
     // tidy up with previous beat position ----------------------------
     // apply topography derivations from previous beats
     // → problem: if there was any stroke at all, it was probably not on the very first run BEFORE derivation was executed
+
+    if (Globals::use_usb_communication)
+      JSON::compose_and_send_json(instruments);
 
     // -------------------------- 32nd-notes --------------------------
 
@@ -433,7 +437,6 @@ void loop()
       Globals::println_to_console(Score::notes[0]);
       // set start values for microKORG:
 
-      // TODO:
       mKorg->sendControlChange(Cutoff, 50, MIDI); // sets cc_value and sends MIDI-ControlChange
       mKorg->sendControlChange(Mix_Level_1, 0, MIDI);
       mKorg->sendControlChange(Mix_Level_2, 127, MIDI);
@@ -473,7 +476,7 @@ void loop()
       }
       break;
 
-      // TODO:
+      // TODO: 20.11.2020
       // case 2:
       // kick->playMidi
       // snare->playMidi
