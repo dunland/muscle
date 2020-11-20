@@ -174,51 +174,64 @@ void TOPOGRAPHY::add(TOPOGRAPHY *to_add)
     */
 
 // PSEUDOCODE END
-
 // -->
-// void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
-// {
-// 	if (original->average_smooth < original->activation_thresh)
-// 		abstraction->a_16[Globals::current_16th_count] = original->a_16[Globals::current_16th_count]; // sync both arrays
+void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
+{
+	if (original->average_smooth < original->activation_thresh)
+		abstraction->a_16[Globals::current_16th_count] = original->a_16[Globals::current_16th_count]; // sync both arrays
 
-// 	else if (original->average_smooth >= original->activation_thresh) // only execute if threshold of original topography
-// 	{
+	else if (original->average_smooth >= original->activation_thresh) // only execute if threshold of original topography
+	{
 
-// 		// reset flags:
-// 		abstraction->flag_empty_increased = false;
-// 		abstraction->flag_empty_played = false;
-// 		abstraction->flag_occupied_increased = false;
-// 		abstraction->flag_occupied_missed = false;
+		// always check for previous beat position:
+		int beat_position;
+		if (Globals::current_16th_count > 0)
+			beat_position = Globals::current_16th_count - 1;
+		else
+			beat_position = 15;
 
-// 		// CASES:
-// 		if (original->a_16[Globals::current_16th_count] == 0 && original->a_16_prior[Globals::current_16th_count] == 0) // empty slot repeatedly not played: increase
-// 		{
-// 			abstraction->a_16[Globals::current_16th_count]++;
-// 			abstraction->flag_empty_increased = true;
-// 		}
+		// reset flags (for console output)
+		abstraction->flag_empty_increased[beat_position] = false;
+		abstraction->flag_empty_played[beat_position] = false;
+		abstraction->flag_occupied_increased[beat_position] = false;
+		abstraction->flag_occupied_missed[beat_position] = false;
 
-// 		else if (original->a_16[Globals::current_16th_count] > 0 && original->a_16[Globals::current_16th_count] > original->a_16_prior[Globals::current_16th_count]) // occupied slot repeatedly played: increase
-// 		{
-// 			abstraction->a_16[Globals::current_16th_count]++;
-// 			abstraction->flag_occupied_increased = true;
-// 		}
+		// CASES:
 
-// 		else if (original->a_16[Globals::current_16th_count] > 0 && original->a_16[Globals::current_16th_count] == original->a_16_prior[Globals::current_16th_count]) // occupied slot NOT played : decrease
-// 		{
-// 			abstraction->a_16[Globals::current_16th_count]--;
-// 			abstraction->a_16[Globals::current_16th_count] = max(0, abstraction->a_16[Globals::current_16th_count]);
-// 			abstraction->flag_occupied_missed = true;
-// 		}
+		// empty slot repeatedly not played: increase:
+		if (original->a_16[beat_position] == 0 && abstraction->a_16[beat_position] == 0)
+		{
+			abstraction->regularity++;
+			abstraction->flag_empty_increased[beat_position] = true;
+		}
 
-// 		else if (original->a_16_prior[Globals::current_16th_count] == 0 && original->a_16[Globals::current_16th_count] > 0) // empty slot PLAYED: decrease
-// 		{
-// 			abstraction->a_16[Globals::current_16th_count]--;
-// 			abstraction->a_16[Globals::current_16th_count] = max(0, abstraction->a_16[Globals::current_16th_count]);
-// 			abstraction->flag_empty_played = true;
-// 		}
-// 		original->a_16_prior[Globals::current_16th_count] = original->a_16[Globals::current_16th_count];
-// 	}
-// }
+		// occupied slot repeatedly played: increase
+		else if (original->a_16[beat_position] > 0 && original->a_16[beat_position] > abstraction->a_16[beat_position])
+		{
+			abstraction->regularity++;
+			abstraction->flag_occupied_increased[beat_position] = true;
+		}
+
+		// occupied slot NOT played : decrease
+		else if (original->a_16[beat_position] > 0 && original->a_16[beat_position] <= abstraction->a_16[beat_position])
+		{
+			abstraction->regularity--;
+			abstraction->regularity = max(0, abstraction->regularity);
+			abstraction->flag_occupied_missed[beat_position] = true;
+		}
+
+		// empty slot PLAYED: decrease
+		else if (abstraction->a_16[beat_position] == 0 && original->a_16[beat_position] > 0)
+		{
+			abstraction->regularity--;
+			abstraction->regularity = max(0, abstraction->regularity);
+			abstraction->flag_empty_played[beat_position] = true;
+		}
+
+		// copy contents:
+		abstraction->a_16[beat_position] = original->a_16[beat_position];
+	}
+}
 
 // ---------------- smoothen 16-bit array using struct ----------------
 void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
@@ -341,6 +354,11 @@ void Globals::printTopoArray(TOPOGRAPHY *topography)
 
 	if (topography->flag_entry_dismissed)
 		print_to_console("\tentries dismissed!");
+	if (topography->tag == "r")
+	{
+		print_to_console("regularity = ");
+		print_to_console(topography->regularity);
+	}
 	if (topography->flag_empty_increased)
 		print_to_console("\tempty slot repeatedly not played; regularity++");
 	if (topography->flag_occupied_increased)

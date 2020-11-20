@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 // TODO:
-//TOPOGRAPHY Score::beat_regularity;
+TOPOGRAPHY Score::beat_regularity;
 
 TOPOGRAPHY Score::beat_sum;
 

@@ -85,6 +85,7 @@ public:
     } timing;
 
     TOPOGRAPHY topography;
+    TOPOGRAPHY regularity;
 
     void trigger(midi::MidiInterface<HardwareSerial>);
 

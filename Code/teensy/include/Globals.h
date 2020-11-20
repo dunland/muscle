@@ -5,9 +5,6 @@
 #include <Tsunami.h> // in cpp
 #include <vector>
 
-//MIDI_CREATE_DEFAULT_INSTANCE();
-// MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI); // for Serial-specific usage
-
 #define VIBR 0
 #define FOOTSWITCH 2
 
@@ -38,7 +35,7 @@ enum EffectsType
   TsunamiLink = 6,
   CymbalSwell = 7,
   TopographyLog = 8,
-  Change_CC = 9,          // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
+  Change_CC = 9, // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
 };
 
 enum CC_Type // channels on mKORG:
@@ -60,15 +57,11 @@ enum CC_Type // channels on mKORG:
   DelayDepth = 94
 };
 
-// enum MIDI_Instrument
-// {
-//   Volca = 1,
-//   microKORG = 2
-// };
-
 class TOPOGRAPHY
 {
 public:
+  String tag;          // very short name for topography. also to be sent via Serial to processing
+  
   std::vector<int> a_8 = {0, 0, 0, 0, 0, 0, 0, 0};                          // size-8 array for comparison with 8-bit-length sound files
   std::vector<int> a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // size-16 array for abstractions like beat regularity etc
   std::vector<int> a_16_prior = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -76,23 +69,30 @@ public:
   int snr_thresh = 3;         // threshold for signal-to-noise-ratio to be smoothened
   int activation_thresh = 10; // threshold in average_smooth to activate next action
   int average_smooth = 0;
-  int regular_sum = 0;
-  String tag; // very short name for topography. also to be sent via Serial to processing
-
+  int regular_sum = 0; 
+  
   bool ready(); // holds whether average_smooth has reached activation_thresh
 
   boolean flag_entry_dismissed = false; // indicates that an entry has been dropped due to too high topography difference
 
-  boolean flag_empty_increased = false;    // indicates that an empty slot has repeatedly NOT been played → increase
-  boolean flag_occupied_increased = false; // indicates that an occupied slot has repeatedly been played → increase
-  boolean flag_empty_played = false;       // indicates that an empty slot WAS played → decrease
-  boolean flag_occupied_missed = false;    // indicates that an occupied slot has NOT been played → decrease
-  // boolean change_expected[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  // -------------------------- regularity ----------------------------
+  int regularity = 0; // the regularity of a played instrument boiled down to one value
+  
+  bool flag_empty_increased[16] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};    // indicates that an empty slot has repeatedly NOT been played → increase
+  bool flag_occupied_increased[16] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}; // indicates that an occupied slot has repeatedly been played → increase
+  bool flag_empty_played[16] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};       // indicates that an empty slot WAS played → decrease
+  bool flag_occupied_missed[16] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};    // indicates that an occupied slot has NOT been played → decrease
 
+  // ---------------------------- functions ---------------------------
   void reset();
   void add(TOPOGRAPHY *to_add);
 };
 
+
+
+///////////////////////////////////////////////////////////////////////
+////////////////////////////////// GLOBALS ////////////////////////////
+///////////////////////////////////////////////////////////////////////
 class Globals
 {
 public:

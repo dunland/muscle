@@ -129,6 +129,11 @@ void setup()
   Globals::do_send_to_processing = false;
   Globals::do_print_beat_sum = false; // prints Score::beat_sum topography array
 
+
+  //------------------------ initialize pins --------------------------
+  pinMode(VIBR, OUTPUT);
+  pinMode(FOOTSWITCH, INPUT_PULLUP);
+
   randomSeed(analogRead(A0) * analogRead(A19));
 
   //-------------------------- Communication --------------------------
@@ -143,6 +148,10 @@ void setup()
 
   Globals::create_json();
 
+   // setup names of elements for Serial communication (to processing):
+  Score::beat_sum.tag = "v";
+  Score::beat_regularity.tag = "r";
+
   // -------------------- Hardware initialization ---------------------
   delay(1000);              // wait for Tsunami to finish reset // redundant?
   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
@@ -154,13 +163,6 @@ void setup()
 
   mKorg = new Synthesizer(2);
   volca = new Synthesizer(1);
-
-  //------------------------ initialize pins --------------------------
-  pinMode(VIBR, OUTPUT);
-  pinMode(FOOTSWITCH, INPUT_PULLUP);
-
-  // setup names of elements for Serial communication (to processing):
-  Score::beat_sum.tag = "v";
 
   // ------------------------ INSTRUMENT SETUP ------------------------
   // instantiate instruments:
@@ -189,7 +191,7 @@ void setup()
     }
   }
 
-  // set instrument calibration array
+  // set instrument calibration array:
 
   // tom1->sensitivity.threshold = 200;
   // tom1->sensitivity.crossings = 20;
@@ -206,11 +208,11 @@ void setup()
   for (auto &instrument : instruments)
     instrument->calculateNoiseFloor();
 
+  // print startup information:
   Globals::println_to_console("\n..calculating noiseFloor done.");
 
   Globals::println_to_console("assigning effects...");
 
-  // print startup information:
   Globals::println_to_console("-----------------------------------------------");
   Globals::println_to_console("calibration values set as follows:");
   Globals::println_to_console("instr\tthrshld\tcrosses\tnoiseFloor");
@@ -386,6 +388,9 @@ void loop()
     Globals::print_to_console(Score::beat_sum.activation_thresh);
     Globals::print_to_console("\tstep:");
     Globals::println_to_console(Score::step);
+
+
+    Globals::derive_topography(&Score::beat_sum, &Score::beat_regularity); // TODO: also do this for all instruments
 
     // print topo arrays:
     if (Globals::do_print_beat_sum)

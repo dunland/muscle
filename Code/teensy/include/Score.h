@@ -39,4 +39,5 @@ public:
     }
 
     static TOPOGRAPHY beat_sum; // for TopographyLog
+    static TOPOGRAPHY beat_regularity; // for TopographyLog
 };
