@@ -1,10 +1,6 @@
 import processing.serial.*;
 
 Serial myPort;
-int serialVal;
-
-//int[] serialInArray = new int[2];    // Where we'll put what we receive
-int serialCount = 0;                 // A count of how many bytes we receive
 
 //SIGNAL VARIABLES
 ArrayList<Circle> list_of_circles = new ArrayList<Circle>();
@@ -20,10 +16,7 @@ String printstr = "";
 String print_topo = "";
 String incoming_millis_str = "";
 int[] topo = new int[16];
-boolean collect_r = false; // enables data recording for "regularity" array
-boolean collect_m = false; // enables storage of incoming millis
 
-Plot plot = new Plot(0, 16, 0, 1, 320, 100);
 Score score = new Score();
 Instrument snare = new Instrument("SNARE");
 Instrument kick = new Instrument("KICK");
@@ -57,9 +50,12 @@ void setup()
                 serial_available = false;
         }
 
-        plot.drawMode = plot.BARPLOT;
-        plot.set_ticks(1, 3);
-        plot.set_title("BEAT SUM");
+        read_json_from_file();
+
+        score.beat_plot.drawMode = score.beat_plot.BARPLOT;
+        score.beat_plot.set_ticks(1, 3);
+        score.beat_plot.set_title("BEAT SUM");
+
 
         for (int i = 0; i<list_of_instruments.length; i++)
         {
@@ -142,7 +138,7 @@ void draw()
         if (snare.topo.size() == 16 && grid.init)
         {
                 grid.create_vertices(16, 16);
-                grid.init = false;
+                // grid.init = false;
         }
 
         // draw vertices:
@@ -151,17 +147,19 @@ void draw()
         // ------------------------ draw plots ---------------------------
         int dist_left = 50;
         int dist_top = 30;
-        plot.updateValues(score.topo, true);
-        plot.draw(dist_left, 650);
+
+        score.beat_plot.updateValues(score.topo, true);
+        if (json_was_initialized) score.beat_plot.draw(dist_left, 650);
+
 
         for (int i = 0; i<list_of_instruments.length; i++)
         {
                 Instrument instr = list_of_instruments[i];
 
                 instr.plot.updateValues(instr.topo, true);
-                instr.plot.draw(dist_left, dist_top+ i* (height-200)/list_of_instruments.length);
+                if (json_was_initialized) instr.plot.draw(dist_left, dist_top+ i* (height-200)/list_of_instruments.length);
 
-                instr.cc_plot.draw(dist_left + 350, dist_top+ i* (height-200)/list_of_instruments.length);
+                if (json_was_initialized) instr.cc_plot.draw(dist_left + 350, dist_top+ i* (height-200)/list_of_instruments.length);
 
                 textAlign(LEFT,LEFT);
                 textSize(16);
@@ -179,6 +177,19 @@ void draw()
                 instr.record_value(instr.cc_val, 200);
         }
 
+        // ------------------------ Area for Strokes -----------------------
+        stroke(180);
+        noFill();
+        rect(400, 600, 785, height-10);
+        // draw strokes:
+        for (int i = 0; i<list_of_instruments.length; i++)
+        {
+
+                list_of_instruments[i].draw_strings(400+i*50, 4);
+                list_of_instruments[i].record_String(" ", (height-600-20)/4);
+        }
+
+
         // ------------------------ Auxiliary Info -----------------------
 
         // mouse position and circles
@@ -190,8 +201,6 @@ void draw()
         // millis:
         textAlign(LEFT, BOTTOM);
         text(score.elapsedMillis, 0, height);
-
-
         // ------------------------ Read Serial ---------------------------
         serialEvent(myPort);
 
@@ -215,5 +224,6 @@ void draw()
         textSize(14);
         fill(255);
         text(incoming_millis_str, 0, height);
+
 
 }

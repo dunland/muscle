@@ -27,5 +27,10 @@ void keyPressed()
                 grid.y_offset = max(grid.y_offset, score.average_smooth);
                 grid.y_offset += 30;
                 break;
+
+        case 'q':
+                println("q pressed.");
+                snare.record_String("※", (height-20-600)/4);
+                break;
         }
 }

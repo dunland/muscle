@@ -35,9 +35,9 @@ void create_vertices(int num_of_colums, int num_of_rows)
         {
                 int x = xPos + i * horizontal_spacing;         // draw from right to left
                 if (i % 2 == 0)                 // even numbers: take values from snare
-                        vertical_spacing = (height+2*vertical_spacing)/num_of_rows + snare.topo.get(i) * y_distort_factor;
+                        vertical_spacing = (height+2*vertical_spacing)/num_of_rows + score.topo.get(i) * y_distort_factor;
                 else                         // odd numbers: take values from hihat:
-                        vertical_spacing = (height+2*vertical_spacing)/num_of_rows + hihat.topo.get(i) * y_distort_factor;
+                        vertical_spacing = (height+2*vertical_spacing)/num_of_rows + score.topo.get(i) * y_distort_factor;
 
                 for (int j = 0; j<num_of_rows; j++)
                 {
@@ -61,6 +61,7 @@ void draw()
         {
                 for (int y = 0; y<15; y++)
                 {
+                        // define color, alternatingly:
                         colorMode(HSB);
                         if (score.ready) field_hue = (field_hue+10) % 249;           // makes crazy color effects
                         if (!score.ready) field_hue = (field_hue+125) % 250;           // two-colored pattern
@@ -72,6 +73,7 @@ void draw()
                         fill(field_hue, field_sat, field_bri);
                         noStroke();
 
+                        // draw vertices:
                         beginShape();
                         vertex(vertices[x][y].x-x_offset, vertices[x][y].y-y_offset);
                         vertex(vertices[x+1][y].x-x_offset, vertices[x+1][y].y);
@@ -85,5 +87,15 @@ void draw()
         }
         if (!score.ready) field_hue = (field_hue+125) % 250;         // do this one more time to have it repeat evenly
 }
+
+}
+
+
+// field elements to be stored in Grid:
+class Field{
+
+  PVector[][] vertices = new PVector[16][16];
+
+  Field(){}
 
 }

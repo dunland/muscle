@@ -14,6 +14,9 @@ class Score
 
   JSONObject json;
 
+  Plot beat_plot = new Plot(0, 16, 0, 1, 320, 100);
+
+
 Score()
 {
 }
