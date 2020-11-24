@@ -40,7 +40,7 @@ Grid grid;
 void setup()
 {
 
-        size(1600, 800);
+        size(1600, 800, FX2D); // TODO: use FX2D
         printArray(Serial.list());
         String portName = Serial.list()[0]; // find right Serial port from list
         try {
