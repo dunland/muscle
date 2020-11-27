@@ -16,14 +16,19 @@ IntervalTimer myTimer; // Create an IntervalTimer object
 static const uint8_t pins[] = {A0, A1, A2, A3, A4, A5, A6, A7};
 const int numInputs = 7;
 
+const int ALL = 0; // prints all instruments crossings
+const int CHANNEL = 1; // prints only selected channel's crossings
+const int channel = 4; // and then decide which channel to sample...
+const int MODE = CHANNEL; // choose whether to print all instruments or just one (channel)
+
 const int ledPin = LED_BUILTIN;  // the pin with a LED
 
 // ---------------- calibration- and sensitive-variant variables ---------------
 // const int threshold[] = {30, 170, 170, 60}; // hihat, crash1, ride, Standtom
-const int threshold[] = {180, 60, 100, 200, 300, 70, 80};
+const int threshold[] = {180, 60, 300, 200, 400, 120, 80};
 int noiseFloor[numInputs]; // to be set in setup
 int min_crossings_for_signature[] = {1, 1, 1, 1, 1, 1, 1, 1}; // TODO: find characteristic signatures and insert here
-int globalStrokeDelay = 10;
+int globalStrokeDelay = 2;
 
 // ------------------ volatile variables forinterrupt timers ------------------
 volatile int crossings[numInputs];
@@ -125,41 +130,82 @@ void loop() {
 
   //if (millis() != lastMillis) Serial.println(millis());
 
-  for (int i = 0; i < numInputs; i++)
+  if (MODE == ALL)
+  {
+    for (int i = 0; i < numInputs; i++)
+    {
+      noInterrupts();
+      lastPinActiveTimeCopy[i] = lastPinActiveTime[i];
+      interrupts();
+
+      if (millis() > lastPinActiveTimeCopy[i] + globalStrokeDelay) // get crossings only X ms after last hit
+      {
+
+        noInterrupts();
+        crossingsCopy[i] = crossings[i];
+        crossings[i] = 0;
+        interrupts();
+
+        if (crossingsCopy[i] >= min_crossings_for_signature[i])
+        {
+          //Serial.println(n++);
+          if (crossingsCopy[i] != lastValue[i]) toggleState = !toggleState;
+          digitalWrite(LED_BUILTIN, toggleState);
+          Serial.print(millis());
+          Serial.print("\t");
+          //Serial.print(" pin ");
+          Serial.print(pins[i]);
+          Serial.print("\t");
+          //Serial.print(": ");
+          Serial.print(crossingsCopy[i]);
+          //Serial.print(" zero-crossings. \t(");
+          //Serial.print("threshold = ");
+          Serial.print("\t");
+          Serial.print(threshold[i]);
+          Serial.print("\t");
+          Serial.println(noiseFloor[i]);
+          //Serial.println(")");
+        }
+        lastValue[i] = crossingsCopy[i];
+      }
+    }
+  }
+
+  else if (MODE == CHANNEL)
   {
     noInterrupts();
-    lastPinActiveTimeCopy[i] = lastPinActiveTime[i];
+    lastPinActiveTimeCopy[channel] = lastPinActiveTime[channel];
     interrupts();
 
-    if (millis() > lastPinActiveTimeCopy[i] + globalStrokeDelay) // get crossings only X ms after last hit
+    if (millis() > lastPinActiveTimeCopy[channel] + globalStrokeDelay) // get crossings only X ms after last hit
     {
 
       noInterrupts();
-      crossingsCopy[i] = crossings[i];
-      crossings[i] = 0;
+      crossingsCopy[channel] = crossings[channel];
+      crossings[channel] = 0;
       interrupts();
 
-      if (crossingsCopy[i] >= min_crossings_for_signature[i])
+      if (crossingsCopy[channel] >= min_crossings_for_signature[channel])
       {
         //Serial.println(n++);
-        if (crossingsCopy[i] != lastValue[i]) toggleState = !toggleState;
+        if (crossingsCopy[channel] != lastValue[channel]) toggleState = !toggleState;
         digitalWrite(LED_BUILTIN, toggleState);
         Serial.print(millis());
         Serial.print("\t");
         //Serial.print(" pin ");
-        Serial.print(pins[i]);
+        Serial.print(pins[channel]);
         Serial.print("\t");
         //Serial.print(": ");
-        Serial.print(crossingsCopy[i]);
+        Serial.print(crossingsCopy[channel]);
         //Serial.print(" zero-crossings. \t(");
         //Serial.print("threshold = ");
         Serial.print("\t");
-        Serial.print(threshold[i]);
+        Serial.print(threshold[channel]);
         Serial.print("\t");
-        Serial.println(noiseFloor[i]);
+        Serial.println(noiseFloor[channel]);
         //Serial.println(")");
       }
-      lastValue[i] = crossingsCopy[i];
+      lastValue[channel] = crossingsCopy[channel];
     }
   }
   lastMillis = millis();

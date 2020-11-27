@@ -4,6 +4,9 @@
 *.code-workspace
 Samples/
 Code/archive/
+Code/muscle_teensy_4.1/
+Code/mega_simulation/
+Code/teensy4.1_test/
 .vscode/
 *.java
 *.class
