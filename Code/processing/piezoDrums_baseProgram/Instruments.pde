@@ -47,15 +47,41 @@ void record_String(String new_String, int num_of_values) // appends new value to
 // draw a vertical line of strings from strokes:
 void draw_strings(int x_position, int vertical_spacing)
 {
-  for (int i = 0; i<list_of_strings.size(); i++)
-  {
-    int y = (height-10 - i * vertical_spacing);
-    int x = x_position;
+        for (int i = 0; i<list_of_strings.size(); i++)
+        {
+                int y = (height-10 - i * vertical_spacing);
+                int x = x_position;
 
-    textAlign(TOP, LEFT);
-    fill(255);
-    text(list_of_strings.get(i), x, y);
-  }
+                textAlign(TOP, LEFT);
+                fill(255);
+                text(list_of_strings.get(i), x, y);
+        }
 }
+
+
+void parseJSON()
+{
+        // JSONObject json = parseJSONObject(json_string);
+        println(title + ": " + json);
+
+        average_smooth = json.getInt("average_smooth");
+        activation_thresh = json.getInt("activation_thresh");
+        cc_val = json.getFloat("cc_val");
+        cc_increase = json.getFloat("cc_increase");
+        cc_decay = json.getFloat("cc_decay");
+        effect = json.getString("effect");
+
+
+        // topography:
+        JSONArray incoming_topo = json.getJSONArray("topo");
+        for (int i = 0; i<topo.size(); i++)
+        {
+                if (topo.size()>i)
+                        topo.set(i, incoming_topo.getInt(i));
+                else topo.add(incoming_topo.getInt(i));
+        }
+
+}
+
 
 }

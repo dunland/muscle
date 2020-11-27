@@ -1,7 +1,7 @@
 {
 "score":
 	{
-	"millis": 7000,
+	"millis": 300,
 	"current_beat_pos": 32,
 	"score_step": 1,
 	"notes": [1,2,3,4,5],

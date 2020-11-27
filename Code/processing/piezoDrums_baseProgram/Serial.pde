@@ -2,26 +2,26 @@ boolean json_was_initialized = false; // tells program whether json is ok to be 
 
 void serialEvent(Serial myPort)
 {
-        if (serial_available) // using Serial at all
-                read_serial_stream(myPort);
+        // if (serial_available) // using Serial at all
+        read_serial_stream(myPort);
 
-        else // instead read from file
-                read_json_from_file();
+        // else // instead read from file
+        //         read_json_from_file();
 }
 
 void read_serial_stream(Serial myPort)
 {
         if (myPort.available() > 0)
         {
-                String inBuffer = myPort.readStringUntil(10); // ATTENTION: does this still work with JSON???
+                String inBuffer = myPort.readStringUntil(10); // parsing at "\n"
 
                 if (inBuffer != null)
                 {
-
-                        if (str(inBuffer.charAt(0)) == "{") // message is JSON
+                        // println(inBuffer);
+                        println(inBuffer.charAt(0));
+                        if (str(inBuffer.charAt(0)).equals("{")) // message is JSON
                         {
 
-                                if (inBuffer != null) print(inBuffer);
                                 JSONObject json;
 
                                 // string to JSON object:
@@ -32,19 +32,19 @@ void read_serial_stream(Serial myPort)
                                         json = null;
                                 }
 
-
-                                if (json == null)
+                                if (json != null)
                                 {
-                                        println("JSON could not be parsed");
+                                        parseJSON(json);
                                 }
-                                if (!json_was_initialized) json_was_initialized = true; // tell program that json can be used
-                                parseJSON(json);
-                        }
-                        else // message is not JSON
-                        {
-                                // inBuffer = myPort.readStringUntil(10); // 10 stands for \n → use Serial.println in MCU!
-                                println("→ treating incoming message as String");
-                                parse_incoming_string(inBuffer); // message is probably not a json format. try treating as String
+                                // }
+                                else // message is not JSON
+                                {
+                                  if (!json_was_initialized) json_was_initialized = true; // tell program that json can be used
+
+                                        inBuffer = myPort.readStringUntil(10); // 10 stands for \n → use Serial.println in MCU!
+                                        println("→ treating incoming message as String");
+                                        parse_incoming_string(inBuffer); // message is probably not a json format. try treating as String
+                                }
                         }
 
                 }
@@ -61,21 +61,21 @@ void read_json_from_file()
 
                 score.json = json.getJSONObject("score");
 
-                snare.json = json.getJSONObject("snare");
-                kick.json = json.getJSONObject("kick");
-                hihat.json = json.getJSONObject("hihat");
-                crash1.json = json.getJSONObject("crash1");
-                ride.json = json.getJSONObject("ride");
-                standtom1.json = json.getJSONObject("standtom1");
-                tom2.json = json.getJSONObject("tom2");
-                cowbell.json = json.getJSONObject("cowbell");
+                snare.json = json.getJSONObject("Snare");
+                kick.json = json.getJSONObject("Kick");
+                hihat.json = json.getJSONObject("Hihat");
+                crash1.json = json.getJSONObject("Crash1");
+                ride.json = json.getJSONObject("Ride");
+                standtom1.json = json.getJSONObject("S_Tom1");
+                tom2.json = json.getJSONObject("Tom2");
+                cowbell.json = json.getJSONObject("Cowbell");
 
                 parseScore(score.json);
 
                 for (Instrument instrument : list_of_instruments)
                 {
                         try {
-                                parseInstrument(instrument);
+                                instrument.parseJSON();
                         } catch(Exception e) {
                                 println(e);
                         }
@@ -85,23 +85,24 @@ void read_json_from_file()
 
 void parseJSON(JSONObject json)
 {
+        println("parsing!");
         score.json = json.getJSONObject("score");
 
-        snare.json = json.getJSONObject("snare");
-        kick.json = json.getJSONObject("kick");
-        hihat.json = json.getJSONObject("hihat");
-        crash1.json = json.getJSONObject("crash1");
-        ride.json = json.getJSONObject("ride");
-        standtom1.json = json.getJSONObject("standtom1");
-        tom2.json = json.getJSONObject("tom2");
-        cowbell.json = json.getJSONObject("cowbell");
+        snare.json = json.getJSONObject("Snare");
+        kick.json = json.getJSONObject("Kick");
+        hihat.json = json.getJSONObject("Hihat");
+        crash1.json = json.getJSONObject("Crash1");
+        ride.json = json.getJSONObject("Ride");
+        standtom1.json = json.getJSONObject("S_Tom1");
+        tom2.json = json.getJSONObject("Tom2");
+        cowbell.json = json.getJSONObject("Cowbell");
 
         parseScore(score.json);
 
         for (Instrument instrument : list_of_instruments)
         {
                 try {
-                        parseInstrument(instrument);
+                        instrument.parseJSON();
                 } catch(Exception e) {
                         println(e);
                 }
@@ -110,6 +111,7 @@ void parseJSON(JSONObject json)
 
 void parseScore(JSONObject json)
 {
+        print("parsing score...");
         score.elapsedMillis = json.getInt("millis");
         score.current_beat_pos = json.getInt("current_beat_pos");
         score.step = json.getInt("score_step");
@@ -134,34 +136,12 @@ void parseScore(JSONObject json)
                         score.topo.set(i, topo.getInt(i));
                 else score.topo.add(topo.getInt(i));
         }
-
-}
-
-void parseInstrument(Instrument instrument)
-{
-
-
-        instrument.average_smooth = instrument.json.getInt("average_smooth");
-        instrument.activation_thresh = instrument.json.getInt("activation_thresh");
-        instrument.cc_val = instrument.json.getFloat("cc_val");
-        instrument.cc_increase = instrument.json.getFloat("cc_increase");
-        instrument.cc_decay = instrument.json.getFloat("cc_decay");
-        instrument.effect = instrument.json.getString("effect");
-
-
-        // topography:
-        JSONArray topo = instrument.json.getJSONArray("topo");
-        for (int i = 0; i<topo.size(); i++)
-        {
-                if (instrument.topo.size()>i)
-                        instrument.topo.set(i, topo.getInt(i));
-                else instrument.topo.add(topo.getInt(i));
-        }
-
+        println("done!");
 }
 
 void parse_incoming_string(String message)
 {
+  println("non-JSON-message is: " + message);
         message = message.substring(0, message.length()-2); // ATTENTION: could be different in teensy
 
         if (message.equals("※")) snare.record_String("※", (height-20-600)/4); // Snaredrum

@@ -43,6 +43,8 @@ public:
   Synthesizer(int midi_channel_)
   {
     midi_channel = midi_channel_;
+    Globals::print_to_console("initialized synthesizer with midi channel ");
+    Globals::println_to_console(midi_channel);
   }
 
   int midi_channel; // the MIDI Channel to adress this instrument by

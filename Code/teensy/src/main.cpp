@@ -44,13 +44,13 @@ midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as 
 Instrument *snare;
 Instrument *hihat;
 Instrument *kick;
-// Instrument *tom1;
 Instrument *tom2;
 Instrument *standtom;
 Instrument *crash1;
 Instrument *cowbell;
-// Instrument *crash2;
 Instrument *ride;
+// Instrument *tom1;
+// Instrument *crash2;
 
 static std::vector<Instrument *> instruments; // all instruments go in here
 
@@ -123,6 +123,8 @@ void setup()
 
   Globals::use_responsiveCalibration = false;
   Globals::do_print_beat_sum = false; // prints Score::beat_sum topography array
+  Globals::do_print_to_console = true;
+  Globals::do_print_JSON = false;
 
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
@@ -140,8 +142,8 @@ void setup()
   {
     if (millis() > wait_for_Serial + 5000)
     {
-      Globals::use_usb_communication = false;
-      Globals::do_print_to_console = true;
+      Globals::do_print_JSON = false;
+      Globals::do_print_to_console = false;
       break;
     }
   }
@@ -169,8 +171,8 @@ void setup()
   // instantiate instruments:
   snare = new Instrument(A5, Snare);
   hihat = new Instrument(A6, Hihat);
-  kick = new Instrument(A1, Kick);
-  tom2 = new Instrument(A7, Tom2);
+  kick = new Instrument(A7, Kick);
+  tom2 = new Instrument(A1, Tom2);
   standtom = new Instrument(A2, Standtom1);
   cowbell = new Instrument(A3, Cowbell);
   crash1 = new Instrument(A0, Crash1);
@@ -233,6 +235,16 @@ void setup()
   // add a bass note to Score
   Score::notes.push_back(int(random(12, 24)));
 
+  // link midi synth to instruments:
+  snare->midi_settings.synth = mKorg;
+  kick->midi_settings.synth = mKorg;
+  hihat->midi_settings.synth = mKorg;
+  crash1->midi_settings.synth = mKorg;
+  ride->midi_settings.synth = mKorg;
+  tom2->midi_settings.synth = mKorg;
+  standtom->midi_settings.synth = mKorg;
+  cowbell->midi_settings.synth = mKorg;
+
   // assign startup instrument effects:
   hihat->effect = TapTempo;
   crash1->effect = Monitor;
@@ -273,7 +285,7 @@ void loop()
       instrument->trigger(MIDI); // runs trigger function according to instrument's EffectType
       // send instrument stroke to processing:
       // Globals::send_to_processing('i');
-      if (Globals::use_usb_communication)
+      if (Globals::do_print_JSON)
         Serial.print(Globals::EffectstypeToHumanReadable(instrument->effect));
     }
   }
@@ -312,7 +324,7 @@ void loop()
     // apply topography derivations from previous beats
     // → problem: if there was any stroke at all, it was probably not on the very first run BEFORE derivation was executed
 
-    if (Globals::use_usb_communication)
+    if (Globals::do_print_JSON)
       JSON::compose_and_send_json(instruments);
 
     // -------------------------- 32nd-notes --------------------------
@@ -476,13 +488,38 @@ void loop()
       }
       break;
 
-      // TODO: 20.11.2020
-      // case 2:
-      // kick->playMidi
-      // snare->playMidi
-      // break;
-
     case 2:
+      /* kick -> play note
+         snare -> play note
+      */
+
+      if (Score::setup)
+      {
+        // assign effects to instruments:
+        kick->set_effect(PlayMidi);
+        kick->setup_midi(None, volca, 127, 0, 1, 0.1);
+        kick->midi_settings.notes.push_back(Score::notes[0] + 12 + 7);
+        kick->midi_settings.active_note = kick->midi_settings.notes[0];
+
+        Globals::print_to_console("note for kick is: ");
+        Globals::print_to_console(kick->midi_settings.notes[0]);
+        Globals::print_to_console(" active note:");
+        Globals::println_to_console(kick->midi_settings.active_note);
+
+        snare->set_effect(PlayMidi);
+        snare->setup_midi(None, volca, 127, 0, 1, 0.1);
+        snare->midi_settings.notes.push_back(Score::notes[0] + 24);
+        snare->midi_settings.active_note = snare->midi_settings.notes[0];
+
+        Globals::print_to_console("note for snare is: ");
+        Globals::print_to_console(snare->midi_settings.notes[0]);
+        Globals::print_to_console(" active note:");
+        Globals::println_to_console(snare->midi_settings.active_note);
+        Score::setup = false;
+      }
+      break;
+
+    case 3:
       // beat_sum -> increase cutoff
       // beat_sum -> fade in OSC1
       // snare, kick, ride, crash = FX
@@ -520,37 +557,6 @@ void loop()
       osc1_level = min(127, Score::beat_sum.average_smooth * 4);
       mKorg->sendControlChange(Mix_Level_1, osc1_level, MIDI);
 
-      break;
-
-    case 3: // (skip this)
-
-      Score::step = 4;
-
-      // snare --> resonance
-      // beat_sum --> delay_depth
-      // static float resonance_val;
-
-      // if (Score::setup)
-      // {
-      //   // assign effects to instruments:
-      //   kick->effect = Monitor;
-      //   tom2->effect = Monitor;
-      //   standtom->effect = Monitor;
-      //   snare->set_effect(Increase_input_val, &resonance_val, 127, 13, 2, 0.1);
-      //   Score::setup = false;
-      // }
-
-      // // change cutoff with overall beat_sum until at max
-      // static int delay_depth;
-      // delay_depth = max(50, (min(127, Score::beat_sum.average_smooth * 8)));
-      // MIDI.sendControlChange(DelayDepth, delay_depth, microKORG);
-
-      // resonance_val = max(0, min(127, resonance_val));
-      // MIDI.sendControlChange(DelayDepth, resonance_val, microKORG);
-
-      // Globals::print_to_console("\n -- resonance_val = ");
-      // Globals::print_to_console(resonance_val);
-      // Globals::println_to_console(" --");
       break;
 
     case 4: // increase osc2_tune with snare and osc2_semitone with beat_sum

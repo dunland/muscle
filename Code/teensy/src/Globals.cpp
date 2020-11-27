@@ -12,7 +12,7 @@ boolean Globals::use_responsiveCalibration = false;
 boolean Globals::do_print_to_console = true;
 boolean Globals::do_send_to_processing = false;
 boolean Globals::do_print_beat_sum = false;	   // prints Score::beat_sum topography array
-boolean Globals::use_usb_communication = true; // will be deactivated if no USB answer for 5 seconds
+boolean Globals::do_print_JSON = true; // will be deactivated if no USB answer for 5 seconds
 
 IntervalTimer Globals::masterClock; // 1 bar
 

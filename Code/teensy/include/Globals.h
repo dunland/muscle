@@ -102,7 +102,7 @@ public:
   static boolean printStrokes;
   static boolean use_responsiveCalibration;
   static boolean do_print_beat_sum; // prints Score::beat_sum topography array
-  static boolean use_usb_communication; // determines whether to use USB Serial communication for monitoring via processing/console or not
+  static boolean do_print_JSON; // determines whether to use USB Serial communication for monitoring via processing/console or not
 
   static int tapInterval;
   static int current_BPM;

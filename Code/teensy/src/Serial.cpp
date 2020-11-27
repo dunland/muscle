@@ -11,7 +11,7 @@
 
 void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 {
-    size_t capacity = JSON_ARRAY_SIZE(Score::notes.size()) + 9 * JSON_ARRAY_SIZE(16) + 8 * JSON_OBJECT_SIZE(7) + 2 * JSON_OBJECT_SIZE(9);
+    size_t capacity = JSON_ARRAY_SIZE(Score::notes.size()) + 9 * JSON_ARRAY_SIZE(16) + 9 * JSON_OBJECT_SIZE(7) + 2 * JSON_OBJECT_SIZE(9);
     DynamicJsonDocument doc(capacity);
 
     // ---------------------- Global values ---------------------------
@@ -22,7 +22,7 @@ void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 
     // -------------------------- Score -------------------------------
     JsonArray score_notes = score.createNestedArray("notes");
-    for (int i = 0; i < Score::notes.size(); i++)
+    for (uint8_t i = 0; i < Score::notes.size(); i++)
     {
         score_notes.add(Score::notes[i]);
     }
@@ -30,7 +30,7 @@ void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 
     // Score topographies:
     JsonArray score_topo = score.createNestedArray("topo");
-    for (int i = 0; i < Score::beat_sum.a_16.size(); i++)
+    for (uint8_t i = 0; i < Score::beat_sum.a_16.size(); i++)
     {
         score_topo.add(Score::beat_sum.a_16[i]);
     }
@@ -48,7 +48,7 @@ void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
         JsonArray topo = instr.createNestedArray("topo");
 
         // instrument topography:
-        for (int i = 0; i < instrument->topography.a_16.size(); i++)
+        for (uint8_t i = 0; i < instrument->topography.a_16.size(); i++)
         {
             topo.add(instrument->topography.a_16[i]);
         }
@@ -66,4 +66,5 @@ void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 
     // transmit information:
     serializeJson(doc, Serial);
+    Serial.println("");
 }

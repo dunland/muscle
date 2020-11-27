@@ -111,11 +111,7 @@ public:
 
     // void smoothen_dataArray(Instrument *instrument);
 
-    //////////////////////////// EFFECTS //////////////////////////////
     // trigger effects: -----------------------------------------------
-    // void playMidi_rawPin(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
-
-    void change_cc_in(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 
     void playMidi(midi::MidiInterface<HardwareSerial>);
 
@@ -126,6 +122,8 @@ public:
     void footswitch_recordSlots();
 
     void getTapTempo();
+
+    void change_cc_in(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 
     void swell_rec(midi::MidiInterface<HardwareSerial>);
 

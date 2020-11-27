@@ -40,7 +40,7 @@ Grid grid;
 void setup()
 {
 
-        size(1600, 800, FX2D); // TODO: use FX2D
+        size(1600, 800, FX2D);
         printArray(Serial.list());
         String portName = Serial.list()[0]; // find right Serial port from list
         try {
@@ -50,7 +50,7 @@ void setup()
                 serial_available = false;
         }
 
-        read_json_from_file();
+        // read_json_from_file();
 
         score.beat_plot.drawMode = score.beat_plot.BARPLOT;
         score.beat_plot.set_ticks(1, 3);
@@ -148,33 +148,38 @@ void draw()
         int dist_left = 50;
         int dist_top = 30;
 
-        score.beat_plot.updateValues(score.topo, true);
-        if (json_was_initialized) score.beat_plot.draw(dist_left, 650);
-
-
-        for (int i = 0; i<list_of_instruments.length; i++)
+        if (json_was_initialized)
         {
-                Instrument instr = list_of_instruments[i];
+                score.beat_plot.updateValues(score.topo, true);
+                score.beat_plot.draw(dist_left, 650);
+        }
 
-                instr.plot.updateValues(instr.topo, true);
-                if (json_was_initialized) instr.plot.draw(dist_left, dist_top+ i* (height-200)/list_of_instruments.length);
+        if (json_was_initialized)
+        {
+                for (int i = 0; i<list_of_instruments.length; i++)
+                {
+                        Instrument instr = list_of_instruments[i];
 
-                if (json_was_initialized) instr.cc_plot.draw(dist_left + 350, dist_top+ i* (height-200)/list_of_instruments.length);
+                        instr.plot.updateValues(instr.topo, true);
+                        if (json_was_initialized) instr.plot.draw(dist_left, dist_top+ i* (height-200)/list_of_instruments.length);
 
-                textAlign(LEFT,LEFT);
-                textSize(16);
-                colorMode(HSB);
-                fill(instr.cc_plot.pointsColor);
-                text("ø:\t" + instr.average_smooth
-                     + "/" + instr.activation_thresh
-                     + " " + instr.title
-                     + "\t ― " + instr.effect
-                     + "\nCC:\t" + instr.cc_val
-                     + " | " + instr.cc_increase
-                     + " | " + instr.cc_decay,
-                     instr.plot.axis_width + instr.cc_plot.axis_width + dist_left*2, dist_top + i* (height-200)/list_of_instruments.length);
+                        if (json_was_initialized) instr.cc_plot.draw(dist_left + 350, dist_top+ i* (height-200)/list_of_instruments.length);
 
-                instr.record_value(instr.cc_val, 200);
+                        textAlign(LEFT,LEFT);
+                        textSize(16);
+                        colorMode(HSB);
+                        fill(instr.cc_plot.pointsColor);
+                        text("ø:\t" + instr.average_smooth
+                             + "/" + instr.activation_thresh
+                             + " " + instr.title
+                             + "\t ― " + instr.effect
+                             + "\nCC:\t" + instr.cc_val
+                             + " | " + instr.cc_increase
+                             + " | " + instr.cc_decay,
+                             instr.plot.axis_width + instr.cc_plot.axis_width + dist_left*2, dist_top + i* (height-200)/list_of_instruments.length);
+
+                        instr.record_value(instr.cc_val, 200);
+                }
         }
 
         // ------------------------ Area for Strokes -----------------------
@@ -184,7 +189,6 @@ void draw()
         // draw strokes:
         for (int i = 0; i<list_of_instruments.length; i++)
         {
-
                 list_of_instruments[i].draw_strings(400+i*50, 4);
                 list_of_instruments[i].record_String(" ", (height-600-20)/4);
         }
@@ -224,6 +228,4 @@ void draw()
         textSize(14);
         fill(255);
         text(incoming_millis_str, 0, height);
-
-
 }
