@@ -189,6 +189,12 @@ void draw()
         // draw strokes:
         for (int i = 0; i<list_of_instruments.length; i++)
         {
+                if (list_of_instruments[i].wasHit)
+                {
+                        list_of_instruments[i].record_String("※", (height-20-600)/4);
+                        list_of_instruments[i].wasHit = false;
+                }
+
                 list_of_instruments[i].draw_strings(400+i*50, 4);
                 list_of_instruments[i].record_String(" ", (height-600-20)/4);
         }
@@ -214,6 +220,7 @@ void draw()
         if (score.current_beat_pos % 4 == 0)
         {
                 textSize(24);
+                colorMode(RGB);
                 fill(255,0,0);
         }
         else

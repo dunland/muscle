@@ -11,7 +11,7 @@
 
 void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 {
-    size_t capacity = JSON_ARRAY_SIZE(Score::notes.size()) + 9 * JSON_ARRAY_SIZE(16) + 9 * JSON_OBJECT_SIZE(7) + 2 * JSON_OBJECT_SIZE(9);
+    size_t capacity = JSON_ARRAY_SIZE(Score::notes.size()) + 9 * JSON_ARRAY_SIZE(16) + 9 * JSON_OBJECT_SIZE(8) + 2 * JSON_OBJECT_SIZE(9);
     DynamicJsonDocument doc(capacity);
 
     // ---------------------- Global values ---------------------------
@@ -58,6 +58,7 @@ void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
         instr["activation_thresh"] = instrument->topography.activation_thresh;
 
         // instrument values:
+        instr["wasHit"] = instrument->wasHit;
         instr["cc_val"] = instrument->midi_settings.cc_val;
         instr["cc_increase"] = instrument->midi_settings.cc_increase_factor;
         instr["cc_decay"] = instrument->midi_settings.cc_decay_factor;

@@ -283,10 +283,7 @@ void loop()
     {
       // ----------------------- perform pin action -------------------
       instrument->trigger(MIDI); // runs trigger function according to instrument's EffectType
-      // send instrument stroke to processing:
-      // Globals::send_to_processing('i');
-      if (Globals::do_print_JSON)
-        Serial.print(Globals::EffectstypeToHumanReadable(instrument->effect));
+      instrument->wasHit = true; // a flag to show that the instrument was hit (for transmission via JSON)
     }
   }
 
@@ -648,6 +645,11 @@ void loop()
       Score::step = 0;
       break;
     }
+
+  for (auto &instrument : instruments)
+  {
+    instrument->wasHit = false;
+  }
 
   } // end of (32nd-step) TIMED ACTIONS
   // ------------------------------------------------------------------

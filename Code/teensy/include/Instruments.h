@@ -21,6 +21,8 @@ public:
     int pin;
     int led = LED_BUILTIN;
 
+    boolean wasHit = false;
+
     struct SCORE
     {
         unsigned long last_notePlayed;
