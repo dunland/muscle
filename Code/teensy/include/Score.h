@@ -19,25 +19,24 @@ public:
 
     static boolean setup; // when true, current score_step's setup function is executed.
 
+    static TOPOGRAPHY beat_sum;         // sum of all instrument topographies
+    static TOPOGRAPHY beat_regularity;  // for advance of Score::step
+    static TOPOGRAPHY topo_midi_effect; // for TopographyMidiEffect
+
     // SETUP etc:
     static void add_bassNote(int note); // adds a NOTE to notes[]
 
     // MODES:
-    static void continuousBassNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);                     // initiates a continuous bass note from score
-    static void continuousBassNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);                      // play note only once (turn on never off):
+    static void continuousBassNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
+
+    static void continuousBassNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on never off):
+
     static void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
+
     static void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // creates an envelope for volume filter via topography
-    static void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth);     // changes the delay times on each 16th-step
+
+    static void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // changes the delay times on each 16th-step
+
     // static void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
 
-    // TODO: automatically assign first random note upon instantiation
-    Score()
-    {
-        // notes.push_back(random(48, 60));
-        //     Globals::print_to_console("note seed for score = ");
-        //     Globals::print_to_console(notes[0]);
-    }
-
-    static TOPOGRAPHY beat_sum; // for TopographyLog
-    static TOPOGRAPHY beat_regularity; // for TopographyLog
 };

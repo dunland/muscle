@@ -234,6 +234,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
     swell_rec(MIDI);
     break;
 
+  //TODO:
   case TsunamiLink:
     // countup_topography(instrument);
     break;
@@ -242,7 +243,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
     // TODO: UNTESTED! (2020-10-09)
     swell_rec(MIDI);
     break;
-  case TopographyLog:
+  case TopographyMidiEffect:
     // countup_topography(instrument);
     break;
 
@@ -291,7 +292,7 @@ void Instrument::perform(std::vector<Instrument *> instruments, midi::MidiInterf
   case CymbalSwell:
 
     break;
-  case TopographyLog:
+  case TopographyMidiEffect:
     topography_midi_effects(instruments, MIDI);
     break;
 
@@ -334,7 +335,7 @@ void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
   case CymbalSwell:
 
     break;
-  case TopographyLog:
+  case TopographyMidiEffect:
     break;
 
   case Change_CC:
@@ -782,6 +783,7 @@ void Instrument::tsunami_beat_playback()
 }
 // --------------------------------------------------------------------
 
+// TODO: make this a static function of Score
 // ---------- MIDI playback according to beat_topography --------
 void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI)
 {
@@ -791,19 +793,19 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, 
     Globals::smoothen_dataArray(&topography); // erases "noise" from arrays if SNR>snr_threshold
 
     // reset slot for volume
-    Score::beat_sum.reset();
+    Score::topo_midi_effect.reset();
 
     // sum up all topographies of all instruments:
     for (Instrument *instr : instruments) // of each instrument
     {
-      if (instr->effect == TopographyLog)
-        Score::beat_sum.add(&topography);
+      if (instr->effect == TopographyMidiEffect)
+        Score::topo_midi_effect.add(&topography);
     }
-    Globals::smoothen_dataArray(&Score::beat_sum);
+    Globals::smoothen_dataArray(&Score::topo_midi_effect);
 
     // ------------ result-> change volume and play MIDI --------
     // ----------------------------------------------------------
-    int vol = min(Score::beat_sum.a_16[Globals::current_16th_count] * 13, 255);
+    int vol = min(Score::topo_midi_effect.a_16[Globals::current_16th_count] * 13, 255);
 
     if (topography.a_16[Globals::current_16th_count] > 0)
       midi_settings.synth->sendControlChange(midi_settings.cc_chan, vol, MIDI);

@@ -34,8 +34,8 @@ enum EffectsType
   Swell = 5,
   TsunamiLink = 6,
   CymbalSwell = 7,
-  TopographyLog = 8,
-  Change_CC = 9, // instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
+  TopographyMidiEffect = 8,
+  Change_CC = 9, 
 };
 
 enum CC_Type // channels on mKORG:
@@ -185,8 +185,8 @@ public:
       return "TsunamiLink";
     case CymbalSwell:
       return "CymbalSwell";
-    case TopographyLog:
-      return "TopographyLog";
+    case TopographyMidiEffect:
+      return "TopographyMidiEffect";
     case Change_CC:
       return "Change_CC";
     }

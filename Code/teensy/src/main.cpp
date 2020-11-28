@@ -54,8 +54,8 @@ Instrument *ride;
 
 static std::vector<Instrument *> instruments; // all instruments go in here
 
-Synthesizer *mKorg;
-Synthesizer *volca;
+Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
+Synthesizer *volca; // create a KORG Volca Keys instrument called volca
 
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
@@ -462,12 +462,15 @@ void loop()
 
       break;
 
-    case 1: // fade in
-      if (Score::setup)
+    case 1:             // fade in the synth's amplitude
+      if (Score::setup) // score setup is run once and reset when next score step is activated.
       {
         // assign effects to instruments:
+        // the hihat will change the allocated (AmpLevel) value on the synth, whenever hit:
         hihat->effect = Change_CC;
         hihat->setup_midi(Amplevel, mKorg, 127, 0, 0.65, 0);
+
+        // these instruments do not play a role here. just print out what they do:
         snare->effect = Monitor;
         kick->effect = Monitor;
         tom2->effect = Monitor;
@@ -475,8 +478,8 @@ void loop()
         crash1->effect = Monitor;
         standtom->effect = Monitor;
 
-        Score::continuousBassNote(mKorg, MIDI);
-        Score::setup = false;
+        Score::continuousBassNote(mKorg, MIDI); // start playing a bass note on synth
+        Score::setup = false;                   // leave setup section
       }
 
       Globals::print_to_console("amplevel_val = ");
@@ -520,6 +523,17 @@ void loop()
       break;
 
     case 3:
+      static int note_iterator;
+      if (Score::setup)
+      {
+        note_iterator = int(random(32));
+      }
+        Score::continuousBassNotes(mKorg, MIDI, note_iterator); // random rhythmic beatz
+
+  break;
+
+    case 4:
+
       // beat_sum -> increase cutoff
       // beat_sum -> fade in OSC1
       // snare, kick, ride, crash = FX
@@ -559,7 +573,7 @@ void loop()
 
       break;
 
-    case 4: // increase osc2_tune with snare and osc2_semitone with beat_sum
+    case 5: // increase osc2_tune with snare and osc2_semitone with beat_sum
       static float osc2_semitone_val;
 
       // Score::set_ramp(...);
@@ -584,7 +598,7 @@ void loop()
 
       break;
 
-    case 5: // adds new bass note and switches bass once per bar
+    case 6: // adds new bass note and switches bass once per bar
 
       if (Score::setup)
       {
@@ -607,7 +621,7 @@ void loop()
       Score::continuousBassNotes(mKorg, MIDI);
       break;
 
-    case 6: // play melodies on snare, tom2, standtom
+    case 7: // play melodies on snare, tom2, standtom
       if (Score::setup)
       {
         Score::add_bassNote(Score::notes[0] + int(random(6)));

@@ -3,10 +3,9 @@
 #include <Instruments.h>
 #include <Hardware.h>
 
-// TODO:
-TOPOGRAPHY Score::beat_regularity;
-
+TOPOGRAPHY Score::beat_regularity; // TODO: fully implement this.
 TOPOGRAPHY Score::beat_sum;
+TOPOGRAPHY Score::topo_midi_effect;
 
 int Score::step = 0;
 int Score::note_idx = 0;        // points at active (bass-)note
@@ -34,8 +33,11 @@ void Score::add_bassNote(int note)
 ///////////////////////////////////////////////////////////////////////
 
 // play note, repeatedly:
-void Score::continuousBassNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
+void Score::continuousBassNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_) // initiates a continuous bass note from score
 {
+    if (note_change_pos_ != 0)
+        note_change_pos = note_change_pos_;
+
     // change note
     if (Globals::current_beat_pos % note_change_pos == 0) // at beginninng of each bar
         if (notes.size() > 1)
@@ -60,8 +62,9 @@ void Score::continuousBassNote(Synthesizer *synth, midi::MidiInterface<HardwareS
 void Score::envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)
 {
     int cutoff_val = topography->a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
-    cutoff_val = max(20, cutoff_val);                                    // must be at least 20
-    cutoff_val = min(cutoff_val, 127);                                   // must not be greater than 127
+
+    cutoff_val = max(20, cutoff_val);  // must be at least 20
+    cutoff_val = min(cutoff_val, 127); // must not be greater than 127
     synth->sendControlChange(Cutoff, cutoff_val, MIDI);
 }
 

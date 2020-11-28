@@ -36,7 +36,6 @@ public:
   static void request_motor_deactivation();
 };
 
-// TODO:
 class Synthesizer
 {
 public:
