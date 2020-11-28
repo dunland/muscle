@@ -17,8 +17,6 @@ void read_serial_stream(Serial myPort)
 
                 if (inBuffer != null)
                 {
-                        // println(inBuffer);
-                        println(inBuffer.charAt(0));
                         if (str(inBuffer.charAt(0)).equals("{")) // message is JSON
                         {
 
@@ -28,7 +26,7 @@ void read_serial_stream(Serial myPort)
                                 try{
                                         json = parseJSONObject(inBuffer);
                                 } catch (Exception e) {
-                                        println(e);
+                                        println("parsing JSON object: " + e);
                                         json = null;
                                 }
 
@@ -37,14 +35,23 @@ void read_serial_stream(Serial myPort)
                                         parseJSON(json);
                                 }
                                 // }
-                                else // message is not JSON
-                                {
-                                  if (!json_was_initialized) json_was_initialized = true; // tell program that json can be used
-
-                                        inBuffer = myPort.readStringUntil(10); // 10 stands for \n → use Serial.println in MCU!
-                                        println("→ treating incoming message as String");
-                                        parse_incoming_string(inBuffer); // message is probably not a json format. try treating as String
-                                }
+                                // WORKING..
+                                // else // message is not JSON
+// {
+//         if (!json_was_initialized) json_was_initialized = true; // tell program that json can be used
+//
+//         print("→ treating incoming message as String:");
+//         println(inBuffer);
+//
+//         inBuffer = myPort.readStringUntil(10); // 10 stands for \n → use Serial.println in MCU!
+//
+//         println("non-JSON-message is: " + inBuffer);
+//
+//         if (inBuffer != null) {
+//                 inBuffer = inBuffer.substring(0, inBuffer.length()-2); // ATTENTION: could be different in teensy
+//                 parse_incoming_string(inBuffer);
+//         }
+// }
                         }
 
                 }
@@ -77,7 +84,7 @@ void read_json_from_file()
                         try {
                                 instrument.parseJSON();
                         } catch(Exception e) {
-                                println(e);
+                                println("trying to read from json file: " + e);
                         }
                 }
         }
@@ -104,9 +111,12 @@ void parseJSON(JSONObject json)
                 try {
                         instrument.parseJSON();
                 } catch(Exception e) {
-                        println(e);
+                        println("trying to parse JSON for " + instrument.title + ": " + e);
                 }
         }
+
+        if (!json_was_initialized) json_was_initialized = true; // tell program that json can be used
+
 }
 
 void parseScore(JSONObject json)
@@ -141,18 +151,15 @@ void parseScore(JSONObject json)
 
 void parse_incoming_string(String message)
 {
-  println("non-JSON-message is: " + message);
-        message = message.substring(0, message.length()-2); // ATTENTION: could be different in teensy
-
-        if (message.equals("※")) snare.record_String("※", (height-20-600)/4); // Snaredrum
-        if (message.equals("■")) kick.record_String("■", (height-20-600)/4); // Kickdrum
-        if (message.equals("▲")) cowbell.record_String("▲", (height-20-600)/4); // Cowbell
-        if (message.equals("□")) standtom1.record_String("□", (height-20-600)/4); // Standtom1
+        if (message.equals("Snare")) snare.record_String("※", (height-20-600)/4); // Snaredrum
+        if (message.equals("Kick")) kick.record_String("■", (height-20-600)/4); // Kickdrum
+        if (message.equals("Cowbell")) cowbell.record_String("▲", (height-20-600)/4); // Cowbell
+        if (message.equals("S_Tom1")) standtom1.record_String("□", (height-20-600)/4); // Standtom1
         // if (message.equals("O") standtom2.record_String("O", (height-20-600)/4); // Standtom2
-        if (message.equals("x")) hihat.record_String("x", (height-20-600)/4); // Hi-Hat
+        if (message.equals("Hihat")) hihat.record_String("x", (height-20-600)/4); // Hi-Hat
         // if (message.equals("°") tom1.record_String("°", (height-20-600)/4); // Tom 1
-        if (message.equals("o")) tom2.record_String("o", (height-20-600)/4); // Tom 2
-        if (message.equals("xx")) ride.record_String("xx", (height-20-600)/4); // Ride
-        if (message.equals("-X-")) crash1.record_String("-X-", (height-20-600)/4); // Crash1
+        if (message.equals("Tom2")) tom2.record_String("o", (height-20-600)/4); // Tom 2
+        if (message.equals("Ride")) ride.record_String("xx", (height-20-600)/4); // Ride
+        if (message.equals("Crash1")) crash1.record_String("-X-", (height-20-600)/4); // Crash1
         // if (message == "-XX-") crash2.record_String("-XX-", height/10); // Crash2
 }

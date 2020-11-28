@@ -13,9 +13,9 @@ PVector[][] vertices = new PVector[16][16];
 int y_distort_factor = 1;
 
 // color:
-int field_hue = 0;
-int field_sat = 200;
-int field_bri = 200;
+int field_hue = int(random(255));
+int field_sat = int(random(200));
+int field_bri = int(random(200));
 
 float y_offset = 0;
 float x_offset = 0;
@@ -53,6 +53,7 @@ void create_vertices(int num_of_colums, int num_of_rows)
 
 void draw()
 {
+  println("Drawing");
         y_offset = kick.cc_val;
         x_offset = sin(radians(ride.cc_val/127*180)) * crash1.cc_val;
 

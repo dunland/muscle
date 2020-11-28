@@ -12,6 +12,7 @@ float cc_val;
 float cc_increase;
 float cc_decay;
 String effect;
+boolean wasHit = false;
 
 JSONObject json;
 
@@ -21,11 +22,12 @@ Plot cc_plot = new Plot(0, 200, 0, 127, 150, 20);
 Instrument(String title_)
 {
         title = title_;
+        // while(topo.size() < 16) topo.add(0); // make topo have size 16
 }
 
 Instrument()
 {
-
+        // while(topo.size() < 16) topo.add(0); // make topo have size 16
 }
 
 void record_value(float new_value, int num_of_values) // appends new value to list of values and shifts list
@@ -61,8 +63,7 @@ void draw_strings(int x_position, int vertical_spacing)
 
 void parseJSON()
 {
-        // JSONObject json = parseJSONObject(json_string);
-        println(title + ": " + json);
+        // println(title + ": " + json);
 
         average_smooth = json.getInt("average_smooth");
         activation_thresh = json.getInt("activation_thresh");
@@ -70,17 +71,18 @@ void parseJSON()
         cc_increase = json.getFloat("cc_increase");
         cc_decay = json.getFloat("cc_decay");
         effect = json.getString("effect");
+        wasHit = json.getBoolean("wasHit");
 
 
         // topography:
         JSONArray incoming_topo = json.getJSONArray("topo");
-        for (int i = 0; i<topo.size(); i++)
+
+        for (int i = 0; i<incoming_topo.size(); i++)
         {
-                if (topo.size()>i)
+                if (topo.size()>=i+1)
                         topo.set(i, incoming_topo.getInt(i));
                 else topo.add(incoming_topo.getInt(i));
         }
-
 }
 
 
