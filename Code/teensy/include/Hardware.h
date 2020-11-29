@@ -65,6 +65,8 @@ public:
 
   void sendControlChange(CC_Type cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI); // sets cc_value (used for JSON comm) and sends MIDI-ControlChange
 
+   void sendControlChange(int cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI); // sets cc_value using an integer and sends MIDI-ControlChange // for Random_CC_Effect
+
   void sendNoteOn(int note, midi::MidiInterface<HardwareSerial> MIDI);
 
   void sendNoteOff(int note, midi::MidiInterface<HardwareSerial> MIDI);

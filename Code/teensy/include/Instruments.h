@@ -43,6 +43,8 @@ public:
         int tsunami_track; // tracks will be allocated in tsunami_beat_playback
         int tsunami_channel = 0;
 
+        boolean ready_to_shuffle = false; // a flag for Random_CC_Effect: resets midi_settings.cc_chan to random (once) when true
+
     } score;
 
     EffectsType effect = Monitor;
@@ -65,12 +67,14 @@ public:
         std::vector<int> notes;
         int active_note;
         CC_Type cc_chan;
+        int random_cc_chan = 0; // integer standing for CC_Type in Random_CC_Effects
         float cc_val = 0;
-        int cc_max = 127;             // MIDI values cannot be greater than this
-        int cc_min = 30;              // MIDI values cannot be smaller than this
-        float cc_increase_factor = 1; // factor by which MIDI vals will be increased upon hit
-        float cc_decay_factor = -0.1;  // factor by which MIDI vals decay
-        Synthesizer *synth;   // associated midi-instrument to address
+        int cc_max = 127;              // MIDI values cannot be greater than this
+        int cc_min = 30;               // MIDI values cannot be smaller than this
+        int cc_standard = 30;          // a standard value to fall back to before changing Random_CC_Effect
+        float cc_increase_factor = 1;  // factor by which MIDI vals will be increased upon hit
+        float cc_tidyUp_factor = -0.1; // factor by which MIDI vals decay/increase each loop
+        Synthesizer *synth;            // associated midi-instrument to address
 
     } midi_settings;
 
@@ -101,7 +105,9 @@ public:
 
     void setup_notes(std::vector<int> list);
 
-    void setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor);
+    void setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor);
+
+    void setup_midi(CC_Type cc_type, Synthesizer *synth); // setup midi without CC params
 
     void setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean firstStroke_);
 
@@ -126,6 +132,8 @@ public:
     void getTapTempo();
 
     void change_cc_in(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    
+    void random_change_cc_in(midi::MidiInterface<HardwareSerial> MIDI); // changes CC using integer, not CC_Type.
 
     void swell_rec(midi::MidiInterface<HardwareSerial>);
 
@@ -150,4 +158,6 @@ public:
     void turnMidiNoteOff(midi::MidiInterface<HardwareSerial>);
 
     void change_cc_out(midi::MidiInterface<HardwareSerial>);
+
+    void shuffle_cc();
 };

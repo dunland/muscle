@@ -42,7 +42,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
     break;
 
   case (RESET_AND_PROCEED_SCORE):
-    if (Score::beat_sum.average_smooth >= Score::beat_sum.activation_thresh)
+    if (Score::beat_sum.average_smooth >= Score::beat_sum.activation_thresh) // score proceed criterion reached
     {
       Globals::println_to_console("regularity height > 10: reset!");
       Score::step++; // go to next score step
@@ -58,15 +58,23 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
       Score::beat_sum.average_smooth = 0;
     }
 
-    else
+    else // not enough strokes to proceed yet.
     {
       Globals::print_to_console("regularity too low to proceed.. is at ");
       Globals::println_to_console(Score::beat_sum.average_smooth);
     }
+
+    // either way, shuffle instruments with Random_CC_Effect:
+    for (auto &instrument : instruments)
+    {
+      if (instrument->effect == Random_CC_Effect)
+        instrument->score.ready_to_shuffle = true;
+    }
+
     break;
 
   default:
-    Serial.println("Footswitch mode not defined!");
+    Globals::println_to_console("Footswitch mode not defined!");
     break;
   }
 }
@@ -200,7 +208,90 @@ void Synthesizer::sendControlChange(CC_Type cc_type, int val, midi::MidiInterfac
     break;
   }
 
-  MIDI.sendControlChange(int(cc_type), val, midi_channel);
+  if (cc_type < 0)
+  {
+    Globals::println_to_console("could not send MIDI CC Command: CC_Type not defined.");
+  }
+  else
+  {
+    MIDI.sendControlChange(int(cc_type), val, midi_channel);
+  }
+}
+
+void Synthesizer::sendControlChange(int cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI)
+{
+
+  // TODO: complete this list. May lead to incomplete monitoring otherwise..
+  switch (cc_type)
+  {
+  case Osc2_semitone:
+    osc2_semitone = val;
+    break;
+
+  case Osc2_tune:
+    osc2_tune = val;
+    break;
+
+  case Mix_Level_1:
+    mix_level_1 = val;
+    break;
+
+  case Mix_Level_2:
+    mix_level_2 = val;
+    break;
+
+  case Patch_1_Depth:
+    patch1_depth = val;
+    break;
+
+  case Patch_3_Depth:
+    patch3_depth = val;
+    break;
+
+  case Cutoff:
+    cutoff = val;
+    break;
+
+  case Resonance:
+    resonance = val;
+    break;
+
+  case Amplevel:
+    amplevel = val;
+    break;
+
+  case Attack:
+    attack = val;
+    break;
+
+  case Sustain:
+    sustain = val;
+    break;
+
+  case Release:
+    release = val;
+    break;
+
+  case DelayTime:
+    delaytime = val;
+    break;
+
+  case DelayDepth:
+    delaydepth = val;
+    break;
+
+  default:
+    break;
+  }
+
+  if (cc_type < 0)
+  {
+    Globals::println_to_console("could not send MIDI CC Command: CC_Type not defined.");
+  }
+  else
+  {
+    MIDI.sendControlChange(int(cc_type), val, midi_channel);
+  }
 }
 
 void Synthesizer::sendNoteOn(int note, midi::MidiInterface<HardwareSerial> MIDI)

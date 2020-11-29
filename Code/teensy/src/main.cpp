@@ -171,8 +171,8 @@ void setup()
   // instantiate instruments:
   snare = new Instrument(A5, Snare);
   hihat = new Instrument(A6, Hihat);
-  kick = new Instrument(A7, Kick);
-  tom2 = new Instrument(A1, Tom2);
+  kick = new Instrument(A1, Kick);
+  tom2 = new Instrument(A7, Tom2);
   standtom = new Instrument(A2, Standtom1);
   cowbell = new Instrument(A3, Cowbell);
   crash1 = new Instrument(A0, Crash1);
@@ -233,7 +233,9 @@ void setup()
 
   // ---------------------------------- SCORE -------------------------
   // add a bass note to Score
-  Score::notes.push_back(int(random(12, 24)));
+  Score::notes.push_back(int(random(36, 48)));
+  Globals::print_to_console("Score::note[0] = ");
+  Globals::println_to_console(Score::notes[0]);
 
   // link midi synth to instruments:
   snare->midi_settings.synth = mKorg;
@@ -244,6 +246,16 @@ void setup()
   tom2->midi_settings.synth = mKorg;
   standtom->midi_settings.synth = mKorg;
   cowbell->midi_settings.synth = mKorg;
+
+  // an initial midi note must be defined, otherwise there is a problem with the tidyUp function
+  // snare->midi_settings.active_note = 50;
+  // kick->midi_settings.active_note = 50;
+  // hihat->midi_settings.active_note = 50;
+  // crash1->midi_settings.active_note = 50;
+  // ride->midi_settings.active_note = 50;
+  // tom2->midi_settings.active_note = 50;
+  // standtom->midi_settings.active_note = 50;
+  // cowbell->midi_settings.active_note = 50;
 
   // assign startup instrument effects:
   hihat->effect = TapTempo;
@@ -340,14 +352,14 @@ void loop()
     // -------------------------- full notes: -------------------------
     if (Globals::current_beat_pos == 0)
     {
-      Globals::print_to_console("score_step = ");
-      Globals::println_to_console(Score::step);
     }
 
     // ------------------------- quarter notes: -----------------------
     if (Globals::current_beat_pos % 8 == 0) // Globals::current_beat_pos holds 32 → %8 makes 4.
     {
       // Hardware::vibrate_motor(50);
+      // mKorg->sendNoteOn(50, MIDI);
+      // MIDI.sendNoteOn(50, 127, 2);
     }
     // Debug: play MIDI note on quarter notes
     // if (Globals::current_beat_pos % 8 == 0)
@@ -437,219 +449,273 @@ void loop()
 
     // THIS SONG IS COMPOSED FOR microKORG A.63
     // SCORE, stepwise:
+    static int lokrische_tonfolge[] = {Score::notes[0] + 1, Score::notes[0] + 3, Score::notes[0] + 5, Score::notes[0] + 6, Score::notes[0] + 8, Score::notes[0] + 11};
+    static int note_idx = 0;
+    static int rhythmic_iterator;
     switch (Score::step)
     {
 
-    case 0: // init state
-      // setup score note seed:
-      Globals::print_to_console("Score::notes[0] = ");
-      Globals::println_to_console(Score::notes[0]);
-      // set start values for microKORG:
-
-      mKorg->sendControlChange(Cutoff, 50, MIDI); // sets cc_value and sends MIDI-ControlChange
-      mKorg->sendControlChange(Mix_Level_1, 0, MIDI);
-      mKorg->sendControlChange(Mix_Level_2, 127, MIDI);
-      mKorg->sendControlChange(Osc2_tune, 0, MIDI);
-      mKorg->sendControlChange(Osc2_semitone, 39, MIDI);
-      mKorg->sendControlChange(Cutoff, 50, MIDI);
-      mKorg->sendControlChange(Resonance, 13, MIDI);
-      mKorg->sendControlChange(Amplevel, 0, MIDI);
-
-      Score::step = 1;
-
-      break;
-
-    case 1:             // fade in the synth's amplitude
-      if (Score::setup) // score setup is run once and reset when next score step is activated.
-      {
-        // assign effects to instruments:
-        // the hihat will change the allocated (AmpLevel) value on the synth, whenever hit:
-        hihat->effect = Change_CC;
-        hihat->setup_midi(Amplevel, mKorg, 127, 0, 0.65, 0);
-
-        // these instruments do not play a role here. just print out what they do:
-        snare->effect = Monitor;
-        kick->effect = Monitor;
-        tom2->effect = Monitor;
-        ride->effect = Monitor;
-        crash1->effect = Monitor;
-        standtom->effect = Monitor;
-
-        Score::continuousBassNote(mKorg, MIDI); // start playing a bass note on synth
-        Score::setup = false;                   // leave setup section
-      }
-
-      Globals::print_to_console("amplevel_val = ");
-      Globals::println_to_console(hihat->midi_settings.cc_val);
-
-      if (hihat->midi_settings.cc_val >= 127)
-      {
-        Score::beat_sum.activation_thresh = 0; // score step is ready
-      }
-      break;
-
-    case 2:
-      /* kick -> play note
-         snare -> play note
-      */
-
+    case 0:
       if (Score::setup)
       {
-        // assign effects to instruments:
-        kick->set_effect(PlayMidi);
-        kick->setup_midi(None, volca, 127, 0, 1, 0.1);
-        kick->midi_settings.notes.push_back(Score::notes[0] + 12 + 7);
+        crash1->setup_midi(None, mKorg);
+        crash1->set_effect(Random_CC_Effect);
+        ride->setup_midi(None, mKorg);
+        ride->set_effect(Random_CC_Effect);
+
+        kick->midi_settings.notes.push_back(Score::notes[0] + 12 + 3);
         kick->midi_settings.active_note = kick->midi_settings.notes[0];
+        kick->set_effect(PlayMidi);
+        kick->setup_midi(None, volca);
 
-        Globals::print_to_console("note for kick is: ");
-        Globals::print_to_console(kick->midi_settings.notes[0]);
-        Globals::print_to_console(" active note:");
-        Globals::println_to_console(kick->midi_settings.active_note);
-
-        snare->set_effect(PlayMidi);
-        snare->setup_midi(None, volca, 127, 0, 1, 0.1);
-        snare->midi_settings.notes.push_back(Score::notes[0] + 24);
+        snare->midi_settings.notes.push_back(Score::notes[0] + 12 + 12);
         snare->midi_settings.active_note = snare->midi_settings.notes[0];
+        snare->setup_midi(None, volca);
+        snare->set_effect(PlayMidi);
 
-        Globals::print_to_console("note for snare is: ");
-        Globals::print_to_console(snare->midi_settings.notes[0]);
-        Globals::print_to_console(" active note:");
-        Globals::println_to_console(snare->midi_settings.active_note);
-        Score::setup = false;
-      }
-      break;
+        tom2->midi_settings.notes.push_back(Score::notes[0] + 12 + 7);
+        tom2->midi_settings.active_note = tom2->midi_settings.notes[0];
+        tom2->setup_midi(None, volca);
+        tom2->set_effect(PlayMidi);
 
-    case 3:
-      static int note_iterator;
-      if (Score::setup)
-      {
-        note_iterator = int(random(32));
-      }
-        Score::continuousBassNotes(mKorg, MIDI, note_iterator); // random rhythmic beatz
+        standtom->midi_settings.notes.push_back(Score::notes[0] + 12 + 5);
+        standtom->midi_settings.active_note = standtom->midi_settings.notes[0];
+        standtom->setup_midi(None, volca);
+        standtom->set_effect(PlayMidi);
 
-  break;
+        Score::notes.push_back(lokrische_tonfolge[note_idx]);
+        note_idx++;
 
-    case 4:
+        Globals::print_to_console("Score::notes:");
+        for (uint8_t i = 0; i < Score::notes.size(); i++)
+        {
+          Globals::print_to_console(" ");
+          Globals::print_to_console(Score::notes[i]);
+        }
+        Globals::println_to_console("");
 
-      // beat_sum -> increase cutoff
-      // beat_sum -> fade in OSC1
-      // snare, kick, ride, crash = FX
-      static float step_factor;
+        rhythmic_iterator = int(random(32));
+        Globals::print_to_console("rhythmic_iterator = ");
+        Globals::println_to_console(rhythmic_iterator);
 
-      if (Score::setup)
-      {
-        Score::beat_sum.activation_thresh = 10;
-        step_factor = 127 / Score::beat_sum.activation_thresh;
-
-        hihat->effect = TapTempo;
-        standtom->effect = Monitor;
-        snare->effect = Change_CC;
-        kick->effect = Change_CC;
-        ride->effect = Change_CC;
-        crash1->effect = Change_CC;
-
-        // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
-        snare->setup_midi(Osc2_tune, mKorg, 127, 13, 15, -0.1);
-        kick->setup_midi(Amplevel, mKorg, 127, 80, -35, 0.1);
-        ride->setup_midi(Resonance, mKorg, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
-        crash1->setup_midi(Patch_3_Depth, mKorg, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
-
+        Score::playSingleNote(mKorg, MIDI);
         Score::setup = false;
       }
 
-      // change cutoff with overall beat_sum until at max
-      static int cutoff_val = 50;
-
-      cutoff_val = max(50, (min(127, Score::beat_sum.average_smooth * step_factor)));
-      mKorg->sendControlChange(Cutoff, cutoff_val, MIDI);
-
-      // fade in Osc1 slowly
-      static int osc1_level;
-      osc1_level = min(127, Score::beat_sum.average_smooth * 4);
-      mKorg->sendControlChange(Mix_Level_1, osc1_level, MIDI);
+      // Score::playRhythmicNotes(mKorg, MIDI, rhythmic_iterator);
 
       break;
 
-    case 5: // increase osc2_tune with snare and osc2_semitone with beat_sum
-      static float osc2_semitone_val;
+      //   case 0: // init state
+      //     // setup score note seed:
+      //     Globals::print_to_console("Score::notes[0] = ");
+      //     Globals::println_to_console(Score::notes[0]);
+      //     // set start values for microKORG:
 
-      // Score::set_ramp(...);
+      //     mKorg->sendControlChange(Cutoff, 50, MIDI); // sets cc_value and sends MIDI-ControlChange
+      //     mKorg->sendControlChange(Mix_Level_1, 0, MIDI);
+      //     mKorg->sendControlChange(Mix_Level_2, 127, MIDI);
+      //     mKorg->sendControlChange(Osc2_tune, 0, MIDI);
+      //     mKorg->sendControlChange(Osc2_semitone, 39, MIDI);
+      //     mKorg->sendControlChange(Cutoff, 50, MIDI);
+      //     mKorg->sendControlChange(Resonance, 13, MIDI);
+      //     mKorg->sendControlChange(Amplevel, 0, MIDI);
 
-      if (Score::setup)
-      {
-        Score::beat_sum.activation_thresh = 15;
-        snare->effect = Change_CC;
-        snare->setup_midi(Osc2_tune, mKorg, 64, 0, 1, 0);      // does not decrease
-        kick->setup_midi(DelayDepth, mKorg, 127, 0, 50, -0.1); // TODO: implement oscillation possibility
-        ride->setup_midi(Cutoff, mKorg, 127, 13, -0.7, 0.1);   // TODO: implement oscillation possibility
-        Score::setup = false;
-      }
+      //     Score::step = 1;
 
-      // increase osc2_semitone with beat_sum until at 0
-      osc2_semitone_val = max(0, (min(64, Score::beat_sum.average_smooth * (127 / 15))));
-      osc2_semitone_val = max(0, min(127, osc2_semitone_val));
+      //     break;
 
-      Globals::print_to_console("\n -- Osc2-tune = ");
-      Globals::print_to_console(snare->midi_settings.cc_val);
-      Globals::println_to_console(" --");
+      //   case 1:             // fade in the synth's amplitude
+      //     if (Score::setup) // score setup is run once and reset when next score step is activated.
+      //     {
+      //       // assign effects to instruments:
+      //       // the hihat will change the allocated (AmpLevel) value on the synth, whenever hit:
+      //       hihat->effect = Change_CC;
+      //       hihat->setup_midi(Amplevel, mKorg, 127, 0, 0.65, 0);
 
-      break;
+      //       // these instruments do not play a role here. just print out what they do:
+      //       snare->effect = Monitor;
+      //       kick->effect = Monitor;
+      //       tom2->effect = Monitor;
+      //       ride->effect = Monitor;
+      //       crash1->effect = Monitor;
+      //       standtom->effect = Monitor;
 
-    case 6: // adds new bass note and switches bass once per bar
+      //       Score::playSingleNote(mKorg, MIDI); // start playing a bass note on synth
+      //       Score::setup = false;                   // leave setup section
+      //     }
 
-      if (Score::setup)
-      {
-        Score::beat_sum.activation_thresh = 15;
+      //     Globals::print_to_console("amplevel_val = ");
+      //     Globals::println_to_console(hihat->midi_settings.cc_val);
 
-        // cutoff on tom2:
-        tom2->effect = Change_CC;
-        tom2->setup_midi(Cutoff, mKorg, 127, 20, 30, -0.1);
-        ride->effect = Monitor;
-        snare->effect = Monitor;
+      //     if (hihat->midi_settings.cc_val >= 127)
+      //     {
+      //       Score::beat_sum.activation_thresh = 0; // score step is ready
+      //     }
+      //     break;
 
-        mKorg->sendControlChange(Resonance, 31, MIDI);
-        mKorg->sendControlChange(Cutoff, 28, MIDI);
-        mKorg->sendControlChange(Osc2_tune, 0, MIDI);
-        Score::add_bassNote(Score::notes[0] + int(random(6)));
-        // Score::note_change_pos = int(random(8, 16)); // change at a rate between quarter and half notes
-        Score::setup = false;
-      }
+      //   case 2:
+      //     /* kick -> play note
+      //        snare -> play note
+      //     */
 
-      Score::continuousBassNotes(mKorg, MIDI);
-      break;
+      //     if (Score::setup)
+      //     {
+      //       // assign effects to instruments:
+      //       kick->set_effect(PlayMidi);
+      //       kick->setup_midi(None, volca, 127, 0, 1, 0.1);
+      //       kick->midi_settings.notes.push_back(Score::notes[0] + 12 + 7);
+      //       kick->midi_settings.active_note = kick->midi_settings.notes[0];
 
-    case 7: // play melodies on snare, tom2, standtom
-      if (Score::setup)
-      {
-        Score::add_bassNote(Score::notes[0] + int(random(6)));
+      //       Globals::print_to_console("note for kick is: ");
+      //       Globals::print_to_console(kick->midi_settings.notes[0]);
+      //       Globals::print_to_console(" active note:");
+      //       Globals::println_to_console(kick->midi_settings.active_note);
 
-        snare->effect = PlayMidi;
-        snare->midi_settings.active_note = Score::notes[0] + 24 + 7;
-        tom2->effect = PlayMidi;
-        tom2->midi_settings.active_note = Score::notes[0] + 24 + 3;
-        standtom->effect = PlayMidi;
-        standtom->midi_settings.active_note = Score::notes[0] + 12 + 4;
+      //       snare->set_effect(PlayMidi);
+      //       snare->setup_midi(None, volca, 127, 0, 1, 0.1);
+      //       snare->midi_settings.notes.push_back(Score::notes[0] + 24);
+      //       snare->midi_settings.active_note = snare->midi_settings.notes[0];
 
-        kick->effect = Monitor;
-        Score::setup = false;
-      }
+      //       Globals::print_to_console("note for snare is: ");
+      //       Globals::print_to_console(snare->midi_settings.notes[0]);
+      //       Globals::print_to_console(" active note:");
+      //       Globals::println_to_console(snare->midi_settings.active_note);
+      //       Score::setup = false;
+      //     }
+      //     break;
 
-      // static int random_note_change = int(random(32));
-      Score::continuousBassNotes(mKorg, MIDI);
-      break;
+      //   case 3:
+      //     static int note_iterator;
+      //     if (Score::setup)
+      //     {
+      //       note_iterator = int(random(32));
+      //     }
+      //       Score::playRhythmicNotes(mKorg, MIDI, note_iterator); // random rhythmic beatz
 
-      // case 7: // swell effect with notes!
       // break;
+
+      //   case 4:
+
+      //     // beat_sum -> increase cutoff
+      //     // beat_sum -> fade in OSC1
+      //     // snare, kick, ride, crash = FX
+      //     static float step_factor;
+
+      //     if (Score::setup)
+      //     {
+      //       Score::beat_sum.activation_thresh = 10;
+      //       step_factor = 127 / Score::beat_sum.activation_thresh;
+
+      //       hihat->effect = TapTempo;
+      //       standtom->effect = Monitor;
+      //       snare->effect = Change_CC;
+      //       kick->effect = Change_CC;
+      //       ride->effect = Change_CC;
+      //       crash1->effect = Change_CC;
+
+      //       // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
+      //       snare->setup_midi(Osc2_tune, mKorg, 127, 13, 15, -0.1);
+      //       kick->setup_midi(Amplevel, mKorg, 127, 80, -35, 0.1);
+      //       ride->setup_midi(Resonance, mKorg, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
+      //       crash1->setup_midi(Patch_3_Depth, mKorg, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
+
+      //       Score::setup = false;
+      //     }
+
+      //     // change cutoff with overall beat_sum until at max
+      //     static int cutoff_val = 50;
+
+      //     cutoff_val = max(50, (min(127, Score::beat_sum.average_smooth * step_factor)));
+      //     mKorg->sendControlChange(Cutoff, cutoff_val, MIDI);
+
+      //     // fade in Osc1 slowly
+      //     static int osc1_level;
+      //     osc1_level = min(127, Score::beat_sum.average_smooth * 4);
+      //     mKorg->sendControlChange(Mix_Level_1, osc1_level, MIDI);
+
+      //     break;
+
+      //   case 5: // increase osc2_tune with snare and osc2_semitone with beat_sum
+      //     static float osc2_semitone_val;
+
+      //     // Score::set_ramp(...);
+
+      //     if (Score::setup)
+      //     {
+      //       Score::beat_sum.activation_thresh = 15;
+      //       snare->effect = Change_CC;
+      //       snare->setup_midi(Osc2_tune, mKorg, 64, 0, 1, 0);      // does not decrease
+      //       kick->setup_midi(DelayDepth, mKorg, 127, 0, 50, -0.1); // TODO: implement oscillation possibility
+      //       ride->setup_midi(Cutoff, mKorg, 127, 13, -0.7, 0.1);   // TODO: implement oscillation possibility
+      //       Score::setup = false;
+      //     }
+
+      //     // increase osc2_semitone with beat_sum until at 0
+      //     osc2_semitone_val = max(0, (min(64, Score::beat_sum.average_smooth * (127 / 15))));
+      //     osc2_semitone_val = max(0, min(127, osc2_semitone_val));
+
+      //     Globals::print_to_console("\n -- Osc2-tune = ");
+      //     Globals::print_to_console(snare->midi_settings.cc_val);
+      //     Globals::println_to_console(" --");
+
+      //     break;
+
+      //   case 6: // adds new bass note and switches bass once per bar
+
+      //     if (Score::setup)
+      //     {
+      //       Score::beat_sum.activation_thresh = 15;
+
+      //       // cutoff on tom2:
+      //       tom2->effect = Change_CC;
+      //       tom2->setup_midi(Cutoff, mKorg, 127, 20, 30, -0.1);
+      //       ride->effect = Monitor;
+      //       snare->effect = Monitor;
+
+      //       mKorg->sendControlChange(Resonance, 31, MIDI);
+      //       mKorg->sendControlChange(Cutoff, 28, MIDI);
+      //       mKorg->sendControlChange(Osc2_tune, 0, MIDI);
+      //       Score::add_bassNote(Score::notes[0] + int(random(6)));
+      //       // Score::note_change_pos = int(random(8, 16)); // change at a rate between quarter and half notes
+      //       Score::setup = false;
+      //     }
+
+      //     Score::playRhythmicNotes(mKorg, MIDI);
+      //     break;
+
+      //   case 7: // play melodies on snare, tom2, standtom
+      //     if (Score::setup)
+      //     {
+      //       Score::add_bassNote(Score::notes[0] + int(random(6)));
+
+      //       snare->effect = PlayMidi;
+      //       snare->midi_settings.active_note = Score::notes[0] + 24 + 7;
+      //       tom2->effect = PlayMidi;
+      //       tom2->midi_settings.active_note = Score::notes[0] + 24 + 3;
+      //       standtom->effect = PlayMidi;
+      //       standtom->midi_settings.active_note = Score::notes[0] + 12 + 4;
+
+      //       kick->effect = Monitor;
+      //       Score::setup = false;
+      //     }
+
+      //     // static int random_note_change = int(random(32));
+      //     Score::playRhythmicNotes(mKorg, MIDI);
+      //     break;
+
+      //     // case 7: // swell effect with notes!
+      //     // break;
 
     default: // go back to beginning...
       Score::step = 0;
       break;
     }
 
-  for (auto &instrument : instruments)
-  {
-    instrument->wasHit = false;
-  }
+    for (auto &instrument : instruments)
+    {
+      instrument->wasHit = false;
+    }
 
   } // end of (32nd-step) TIMED ACTIONS
   // ------------------------------------------------------------------
@@ -666,5 +732,8 @@ void loop()
   // tidying up what's left from performing functions..
   for (auto &instrument : instruments)
     instrument->tidyUp(MIDI);
+
+      // MIDI.sendControlChange(50, 100, 2);
+
 }
 // --------------------------------------------------------------------

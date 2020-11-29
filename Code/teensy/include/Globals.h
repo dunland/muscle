@@ -35,7 +35,8 @@ enum EffectsType
   TsunamiLink = 6,
   CymbalSwell = 7,
   TopographyMidiEffect = 8,
-  Change_CC = 9, 
+  Change_CC = 9,
+  Random_CC_Effect = 10
 };
 
 enum CC_Type // channels on mKORG:
@@ -60,8 +61,8 @@ enum CC_Type // channels on mKORG:
 class TOPOGRAPHY
 {
 public:
-  String tag;          // very short name for topography. also to be sent via Serial to processing
-  
+  String tag; // very short name for topography. also to be sent via Serial to processing
+
   std::vector<int> a_8 = {0, 0, 0, 0, 0, 0, 0, 0};                          // size-8 array for comparison with 8-bit-length sound files
   std::vector<int> a_16 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // size-16 array for abstractions like beat regularity etc
   std::vector<int> a_16_prior = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -69,15 +70,15 @@ public:
   int snr_thresh = 3;         // threshold for signal-to-noise-ratio to be smoothened
   int activation_thresh = 10; // threshold in average_smooth to activate next action
   int average_smooth = 0;
-  int regular_sum = 0; 
-  
+  int regular_sum = 0;
+
   bool ready(); // holds whether average_smooth has reached activation_thresh
 
   boolean flag_entry_dismissed = false; // indicates that an entry has been dropped due to too high topography difference
 
   // -------------------------- regularity ----------------------------
   int regularity = 0; // the regularity of a played instrument boiled down to one value
-  
+
   bool flag_empty_increased[16] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};    // indicates that an empty slot has repeatedly NOT been played → increase
   bool flag_occupied_increased[16] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}; // indicates that an occupied slot has repeatedly been played → increase
   bool flag_empty_played[16] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};       // indicates that an empty slot WAS played → decrease
@@ -87,8 +88,6 @@ public:
   void reset();
   void add(TOPOGRAPHY *to_add);
 };
-
-
 
 ///////////////////////////////////////////////////////////////////////
 ////////////////////////////////// GLOBALS ////////////////////////////
@@ -102,7 +101,7 @@ public:
   static boolean printStrokes;
   static boolean use_responsiveCalibration;
   static boolean do_print_beat_sum; // prints Score::beat_sum topography array
-  static boolean do_print_JSON; // determines whether to use USB Serial communication for monitoring via processing/console or not
+  static boolean do_print_JSON;     // determines whether to use USB Serial communication for monitoring via processing/console or not
 
   static int tapInterval;
   static int current_BPM;
@@ -165,7 +164,7 @@ public:
     return "";
   }
 
-    static String EffectstypeToHumanReadable(EffectsType type)
+  static String EffectstypeToHumanReadable(EffectsType type)
   {
     switch (type)
     {
@@ -189,9 +188,13 @@ public:
       return "TopographyMidiEffect";
     case Change_CC:
       return "Change_CC";
+    case Random_CC_Effect:
+      return "Random_CC_Effect";
     }
     return "";
   }
+
+  static CC_Type int_to_cc_type(int);
 
   // TOPOGRAPHIES: ------------------------------------------------------
   static void smoothen_dataArray(TOPOGRAPHY *topography); // there is a double of this in Instruments to perform instrument-specific operations
@@ -210,7 +213,6 @@ public:
   static void printTopoArray(TOPOGRAPHY *topography);
   static void topo_array_to_processing(TOPOGRAPHY *topo);
   // --------------------------------------------------------------------
-
 };
 
 #endif

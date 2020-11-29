@@ -11,12 +11,13 @@ boolean Globals::printStrokes = true;
 boolean Globals::use_responsiveCalibration = false;
 boolean Globals::do_print_to_console = true;
 boolean Globals::do_send_to_processing = false;
-boolean Globals::do_print_beat_sum = false;	   // prints Score::beat_sum topography array
-boolean Globals::do_print_JSON = true; // will be deactivated if no USB answer for 5 seconds
+boolean Globals::do_print_beat_sum = false; // prints Score::beat_sum topography array
+boolean Globals::do_print_JSON = true;		// will be deactivated if no USB answer for 5 seconds
 
 IntervalTimer Globals::masterClock; // 1 bar
 
 Tsunami Globals::tsunami;
+
 float Globals::track_bpm[256] =
 	{
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -370,4 +371,48 @@ void Globals::printTopoArray(TOPOGRAPHY *topography)
 		print_to_console("\tempty slot PLAYED!; regularity--");
 
 	println_to_console("");
+}
+
+CC_Type Globals::int_to_cc_type(int integer)
+{
+	switch (integer)
+	{
+	case 18:
+		return Osc2_semitone;
+	case 19:
+		return Osc2_tune;
+	case 20:
+		return Mix_Level_1;
+	case 21:
+		return Mix_Level_2;
+	case 28:
+		return Patch_1_Depth;
+	case 30:
+		return Patch_3_Depth;
+	case 44:
+		return Cutoff;
+	case 71:
+		return Resonance;
+	case 50:
+		return Amplevel;
+	case 23:
+		return Attack;
+	case 25:
+		return Sustain;
+	case 26:
+		return Release;
+	case 51:
+		return DelayTime;
+	case 94:
+		return DelayDepth;
+
+	// ATTENTION: 
+	// IMPORTANT:
+	// TODO: define all CC channels, otherwise this procedure can take forever in the while loop!
+	default:
+		Globals::print_to_console("could not convert integer ");
+		Globals::print_to_console(integer);
+		Globals::println_to_console("to CC_Type. Reset to None.");
+		return None;
+	}
 }

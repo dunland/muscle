@@ -33,30 +33,46 @@ void Score::add_bassNote(int note)
 ///////////////////////////////////////////////////////////////////////
 
 // play note, repeatedly:
-void Score::continuousBassNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_) // initiates a continuous bass note from score
+void Score::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int rhythmic_iterator) // initiates a continuous bass note from score
 {
-    if (note_change_pos_ != 0)
-        note_change_pos = note_change_pos_;
+    if (rhythmic_iterator != 0)
+        note_change_pos = rhythmic_iterator;
 
-    // change note
-    if (Globals::current_beat_pos % note_change_pos == 0) // at beginninng of each bar
+    if ((Globals::current_beat_pos + 1) % note_change_pos == 0)
+    {
+        // play note
+        synth->sendNoteOff(notes[note_idx], MIDI);
+        synth->sendNoteOn(notes[note_idx], MIDI);
+        Globals::print_to_console("\tplaying Score::note:");
+        Globals::println_to_console(notes[note_idx]);
+
+        // change note
         if (notes.size() > 1)
         {
-            synth->sendNoteOff(notes[note_idx], MIDI);
-            note_idx = (note_idx + 1) % notes.size(); // iterate through the bass notes
+            note_idx++;
+            if (note_idx > int(notes.size()) - 1)
+                note_idx = 0;
+            //  = (note_idx + 1) % notes.size(); // iterate through the bass notes
+            Globals::print_to_console("\tnote_idx = ");
+            Globals::println_to_console(note_idx);
         }
-
-    // play note
-    if (Globals::current_beat_pos == 0)
-    {
-        synth->sendNoteOn(notes[note_idx], MIDI);
     }
+    // else
+
+    // if (Globals::current_beat_pos == 0) // at beginninng of each bar
+    // {
+    //     Globals::print_to_console("\tnotes.size() = ");
+    //     Globals::println_to_console(int(notes.size()));
+    // }
 }
 
 // play note only once (turn on never off):
-void Score::continuousBassNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
+void Score::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
 {
-    synth->sendNoteOn(notes[note_idx], MIDI);
+    if (notes.size() > 0)
+        synth->sendNoteOn(notes[note_idx], MIDI);
+    else
+        Globals::println_to_console("cannot play MIDI note, because Score::notes is empty.");
 }
 
 void Score::envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)

@@ -12,14 +12,22 @@ void Instrument::setup_notes(std::vector<int> list)
   }
 }
 
-void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_decay_factor)
+void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor)
 {
   midi_settings.cc_chan = cc_type;
   midi_settings.synth = synth;
   midi_settings.cc_max = cc_max;
   midi_settings.cc_min = cc_min;
   midi_settings.cc_increase_factor = cc_increase_factor;
-  midi_settings.cc_decay_factor = cc_decay_factor;
+  midi_settings.cc_tidyUp_factor = cc_tidyUp_factor;
+
+  midi_settings.cc_standard = (cc_tidyUp_factor > 0) ? midi_settings.cc_min : midi_settings.cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
+}
+
+void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth) // setup midi without params
+{
+  midi_settings.cc_chan = cc_type;
+  midi_settings.synth = synth;
 }
 
 void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean countAfterFirstStroke)
@@ -33,7 +41,38 @@ void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfte
 // without handle for variable:
 void Instrument::set_effect(EffectsType effect_)
 {
-  effect = effect_;
+  Globals::print_to_console("Setting effect for ");
+  Globals::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
+  Globals::print_to_console(" to ");
+  Globals::print_to_console(Globals::EffectstypeToHumanReadable(effect_));
+  Globals::print_to_console("... ");
+
+  switch (effect_)
+  {
+  case PlayMidi:
+    if (midi_settings.notes.size() > 0 && midi_settings.active_note > 0)
+    {
+      effect = effect_;
+      Globals::println_to_console("done.");
+    }
+    else
+    {
+      Globals::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
+    }
+    break;
+
+  case Random_CC_Effect:
+    score.ready_to_shuffle = true;
+    shuffle_cc();
+    effect = effect_;
+    Globals::println_to_console("done.");
+    break;
+
+  default:
+    effect = effect_;
+    Globals::println_to_console("done.");
+    break;
+  }
 }
 
 ///////////////////////// STROKE DETECTION /////////////////////////
@@ -251,6 +290,9 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
     change_cc_in(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
     break;
 
+  case Random_CC_Effect:
+    random_change_cc_in(MIDI);
+    break;
   default:
     break;
   }
@@ -263,11 +305,6 @@ void Instrument::perform(std::vector<Instrument *> instruments, midi::MidiInterf
 {
   switch (effect)
   {
-  case PlayMidi:
-    break;
-
-  case Monitor:
-    break;
 
   case ToggleRhythmSlot:
     sendMidiNotes_timed(MIDI);
@@ -278,20 +315,10 @@ void Instrument::perform(std::vector<Instrument *> instruments, midi::MidiInterf
     sendMidiNotes_timed(MIDI);
     break;
 
-  case TapTempo:
-    break;
-
   case Swell:
     swell_perform(MIDI);
     break;
 
-  case TsunamiLink:
-
-    break;
-
-  case CymbalSwell:
-
-    break;
   case TopographyMidiEffect:
     topography_midi_effects(instruments, MIDI);
     break;
@@ -307,39 +334,20 @@ void Instrument::perform(std::vector<Instrument *> instruments, midi::MidiInterf
 
 void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
 {
+  // Globals::println_to_console("tidying up");
   switch (effect)
   {
   case PlayMidi:
     turnMidiNoteOff(MIDI);
     break;
 
-  case Monitor:
-    break;
-
-  case ToggleRhythmSlot:
-    break;
-
-  case FootSwitchLooper:
-    break;
-
-  case TapTempo:
-    break;
-
-  case Swell:
-    break;
-
-  case TsunamiLink:
-
-    break;
-
-  case CymbalSwell:
-
-    break;
-  case TopographyMidiEffect:
-    break;
-
   case Change_CC:
     change_cc_out(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    break;
+
+  case Random_CC_Effect:
+    change_cc_out(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    shuffle_cc();
     break;
 
   default:
@@ -358,6 +366,15 @@ void Instrument::change_cc_in(midi::MidiInterface<HardwareSerial> MIDI) // inste
   midi_settings.cc_val += midi_settings.cc_increase_factor;
   midi_settings.cc_val = min(midi_settings.cc_val, midi_settings.cc_max);
   midi_settings.synth->sendControlChange(midi_settings.cc_chan, int(min(midi_settings.cc_val, 127)), MIDI);
+  output_string = String(midi_settings.cc_val);
+  output_string += "\t";
+}
+
+void Instrument::random_change_cc_in(midi::MidiInterface<HardwareSerial> MIDI) // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+{
+  midi_settings.cc_val += midi_settings.cc_increase_factor;
+  midi_settings.cc_val = min(midi_settings.cc_val, midi_settings.cc_max);
+  midi_settings.synth->sendControlChange(midi_settings.random_cc_chan, int(min(midi_settings.cc_val, 127)), MIDI);
   output_string = String(midi_settings.cc_val);
   output_string += "\t";
 }
@@ -597,7 +614,7 @@ void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // upda
       output_string += "\t";
 
       if (!Globals::footswitch_is_pressed)
-            midi_settings.synth->sendControlChange(midi_settings.cc_chan, score.swell_val * score.swell_factor, MIDI);
+        midi_settings.synth->sendControlChange(midi_settings.cc_chan, score.swell_val * score.swell_factor, MIDI);
 
       /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
         finding the right CC# on microKORG: (manual p.61):
@@ -830,16 +847,55 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, 
 
 void Instrument::turnMidiNoteOff(midi::MidiInterface<HardwareSerial> MIDI)
 {
-  if (millis() > score.last_notePlayed + 200 && effect != Swell) // Swell effect turns notes off itself
-  midi_settings.synth->sendNoteOff(midi_settings.active_note, MIDI);
+  if (millis() > score.last_notePlayed + 200) // Swell effect turns notes off itself
+  {
+    midi_settings.synth->sendNoteOff(midi_settings.active_note, MIDI);
+    // Globals::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
+    // Globals::print_to_console(": turning midi note ");
+    // Globals::print_to_console(midi_settings.active_note);
+    // Globals::println_to_console(" off.");
+  }
 }
 
 // TODO: make this decrease with 32nd-notes.
 void Instrument::change_cc_out(midi::MidiInterface<HardwareSerial> MIDI) // changes (mostly decreases) value of CC effect each loop (!)
 {
-  midi_settings.cc_val += midi_settings.cc_decay_factor;
+  midi_settings.cc_val += midi_settings.cc_tidyUp_factor;
   midi_settings.cc_val = min(max(midi_settings.cc_val, midi_settings.cc_min), midi_settings.cc_max);
   midi_settings.synth->sendControlChange(midi_settings.cc_chan, int(min(midi_settings.cc_val, 127)), MIDI);
   output_string = String(midi_settings.cc_val);
   output_string += "\t";
+}
+
+void Instrument::shuffle_cc()
+{
+  if (score.ready_to_shuffle)
+  {
+    if (midi_settings.cc_val == midi_settings.cc_standard)
+    {
+
+      // ATTENTION:
+      // IMPORTANT:
+      // TODO: define all CC channels, otherwise this procedure can take forever in the while loop!
+
+      do
+      {
+        midi_settings.random_cc_chan = int(random(127));
+        midi_settings.cc_chan = Globals::int_to_cc_type(midi_settings.random_cc_chan);
+      } while (midi_settings.cc_chan == None);
+
+      score.ready_to_shuffle = false;
+      Globals::print_to_console("cc_chan of ");
+      Globals::print_to_console(drumtype);
+      Globals::print_to_console(" is ");
+      Globals::println_to_console(midi_settings.cc_chan);
+    }
+    else
+    {
+      Globals::print_to_console("waiting for cc_val to be at standard: ");
+      Globals::print_to_console(midi_settings.cc_val);
+      Globals::print_to_console("/");
+      Globals::println_to_console(midi_settings.cc_standard);
+    }
+  }
 }
