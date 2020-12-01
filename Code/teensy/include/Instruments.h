@@ -21,7 +21,48 @@ public:
     int pin;
     int led = LED_BUILTIN;
 
-    boolean wasHit = false;
+    EffectsType effect = Monitor;
+    EffectsType lastEffect = Monitor; // used to store original effect temporarily (in footswitch functions)
+    DrumType drumtype;
+
+    // sensitivity and instrument calibration
+    struct SENSITIVITY
+    {
+        int threshold;
+        int crossings;
+        int noiseFloor;
+        int delayAfterStroke = 10; // TODO: assess best timing for each instrument
+    } sensitivity;
+
+    struct TIMING
+    {
+        volatile unsigned long lastPinActiveTime;
+        volatile unsigned long firstPinActiveTime;
+        unsigned long lastPinActiveTimeCopy;
+        unsigned long firstPinActiveTimeCopy;
+        boolean countAfterFirstStroke = false; // start counting after first threshold crossing or using delayAfterStroke
+        volatile int counts = 0;
+        boolean stroke_flag = false;
+        int countsCopy;
+        boolean wasHit = false;
+
+    } timing;
+
+    struct MIDI
+    {
+        std::vector<int> notes;
+        int active_note;
+        CC_Type cc_chan;
+        int random_cc_chan = 0; // integer standing for CC_Type in Random_CC_Effects
+        float cc_val = 0;
+        int cc_max = 127;              // MIDI values cannot be greater than this
+        int cc_min = 30;               // MIDI values cannot be smaller than this
+        int cc_standard = 30;          // a standard value to fall back to before changing Random_CC_Effect
+        float cc_increase_factor = 1;  // factor by which MIDI vals will be increased upon hit
+        float cc_tidyUp_factor = -0.1; // factor by which MIDI vals decay/increase each loop
+        Synthesizer *synth;            // associated midi-instrument to address
+
+    } midi_settings;
 
     struct SCORE
     {
@@ -47,48 +88,7 @@ public:
 
     } score;
 
-    EffectsType effect = Monitor;
-    EffectsType lastEffect = Monitor; // used to store original effect temporarily (in footswitch functions)
-    DrumType drumtype;
-
     String output_string;
-
-    // sensitivity and instrument calibration
-    struct SENSITIVITY
-    {
-        int threshold;
-        int crossings;
-        int noiseFloor;
-        int delayAfterStroke = 10; // TODO: assess best timing for each instrument
-    } sensitivity;
-
-    struct MIDI
-    {
-        std::vector<int> notes;
-        int active_note;
-        CC_Type cc_chan;
-        int random_cc_chan = 0; // integer standing for CC_Type in Random_CC_Effects
-        float cc_val = 0;
-        int cc_max = 127;              // MIDI values cannot be greater than this
-        int cc_min = 30;               // MIDI values cannot be smaller than this
-        int cc_standard = 30;          // a standard value to fall back to before changing Random_CC_Effect
-        float cc_increase_factor = 1;  // factor by which MIDI vals will be increased upon hit
-        float cc_tidyUp_factor = -0.1; // factor by which MIDI vals decay/increase each loop
-        Synthesizer *synth;            // associated midi-instrument to address
-
-    } midi_settings;
-
-    struct TIMING
-    {
-        volatile unsigned long lastPinActiveTime;
-        volatile unsigned long firstPinActiveTime;
-        unsigned long lastPinActiveTimeCopy;
-        unsigned long firstPinActiveTimeCopy;
-        boolean countAfterFirstStroke = false; // start counting after first threshold crossing or using delayAfterStroke
-        volatile int counts = 0;
-        boolean stroke_flag = false;
-        int countsCopy;
-    } timing;
 
     TOPOGRAPHY topography;
     TOPOGRAPHY regularity;
@@ -132,7 +132,7 @@ public:
     void getTapTempo();
 
     void change_cc_in(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
-    
+
     void random_change_cc_in(midi::MidiInterface<HardwareSerial> MIDI); // changes CC using integer, not CC_Type.
 
     void swell_rec(midi::MidiInterface<HardwareSerial>);

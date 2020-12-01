@@ -244,7 +244,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
 {
   // always count up topography:
   countup_topography();
-  Globals::smoothen_dataArray(&topography);
+  topography.smoothen_dataArray();
 
   switch (effect)
   {
@@ -690,7 +690,7 @@ void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // upda
 void Instrument::tsunami_beat_playback()
 {
   // smoothen 16-bit topography to erase sites with noise:
-  Globals::smoothen_dataArray(&topography);
+  topography.smoothen_dataArray();
 
   // translate 16-bit to 8-bit topography for track footprint:
   int j = 0;
@@ -807,7 +807,7 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, 
   if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
   {
     // smoothen array:
-    Globals::smoothen_dataArray(&topography); // erases "noise" from arrays if SNR>snr_threshold
+      topography.smoothen_dataArray(); // erases "noise" from arrays if SNR>snr_threshold
 
     // reset slot for volume
     Score::topo_midi_effect.reset();
@@ -818,7 +818,7 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, 
       if (instr->effect == TopographyMidiEffect)
         Score::topo_midi_effect.add(&topography);
     }
-    Globals::smoothen_dataArray(&Score::topo_midi_effect);
+    Score::topo_midi_effect.smoothen_dataArray();
 
     // ------------ result-> change volume and play MIDI --------
     // ----------------------------------------------------------

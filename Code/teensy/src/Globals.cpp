@@ -177,10 +177,10 @@ void TOPOGRAPHY::add(TOPOGRAPHY *to_add)
 
 // PSEUDOCODE END
 // -->
-void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
+void TOPOGRAPHY::derive_from(TOPOGRAPHY *original)
 {
 	if (original->average_smooth < original->activation_thresh)
-		abstraction->a_16[Globals::current_16th_count] = original->a_16[Globals::current_16th_count]; // sync both arrays
+		a_16[Globals::current_16th_count] = original->a_16[Globals::current_16th_count]; // sync both arrays
 
 	else if (original->average_smooth >= original->activation_thresh) // only execute if threshold of original topography
 	{
@@ -193,50 +193,50 @@ void Globals::derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction)
 			beat_position = 15;
 
 		// reset flags (for console output)
-		abstraction->flag_empty_increased[beat_position] = false;
-		abstraction->flag_empty_played[beat_position] = false;
-		abstraction->flag_occupied_increased[beat_position] = false;
-		abstraction->flag_occupied_missed[beat_position] = false;
+		flag_empty_increased[beat_position] = false;
+		flag_empty_played[beat_position] = false;
+		flag_occupied_increased[beat_position] = false;
+		flag_occupied_missed[beat_position] = false;
 
 		// CASES:
 
 		// empty slot repeatedly not played: increase:
-		if (original->a_16[beat_position] == 0 && abstraction->a_16[beat_position] == 0)
+		if (original->a_16[beat_position] == 0 && a_16[beat_position] == 0)
 		{
-			abstraction->regularity++;
-			abstraction->flag_empty_increased[beat_position] = true;
+			regularity++;
+			flag_empty_increased[beat_position] = true;
 		}
 
 		// occupied slot repeatedly played: increase
-		else if (original->a_16[beat_position] > 0 && original->a_16[beat_position] > abstraction->a_16[beat_position])
+		else if (original->a_16[beat_position] > 0 && original->a_16[beat_position] > a_16[beat_position])
 		{
-			abstraction->regularity++;
-			abstraction->flag_occupied_increased[beat_position] = true;
+			regularity++;
+			flag_occupied_increased[beat_position] = true;
 		}
 
 		// occupied slot NOT played : decrease
-		else if (original->a_16[beat_position] > 0 && original->a_16[beat_position] <= abstraction->a_16[beat_position])
+		else if (original->a_16[beat_position] > 0 && original->a_16[beat_position] <= a_16[beat_position])
 		{
-			abstraction->regularity--;
-			abstraction->regularity = max(0, abstraction->regularity);
-			abstraction->flag_occupied_missed[beat_position] = true;
+			regularity--;
+			regularity = max(0, regularity);
+			flag_occupied_missed[beat_position] = true;
 		}
 
 		// empty slot PLAYED: decrease
-		else if (abstraction->a_16[beat_position] == 0 && original->a_16[beat_position] > 0)
+		else if (a_16[beat_position] == 0 && original->a_16[beat_position] > 0)
 		{
-			abstraction->regularity--;
-			abstraction->regularity = max(0, abstraction->regularity);
-			abstraction->flag_empty_played[beat_position] = true;
+			regularity--;
+			regularity = max(0, regularity);
+			flag_empty_played[beat_position] = true;
 		}
 
 		// copy contents:
-		abstraction->a_16[beat_position] = original->a_16[beat_position];
+		a_16[beat_position] = original->a_16[beat_position];
 	}
 }
 
 // ---------------- smoothen 16-bit array using struct ----------------
-void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
+void TOPOGRAPHY::smoothen_dataArray()
 {
 	/* input an array of size 16
 1. count entries and create squared sum of each entry
@@ -246,29 +246,29 @@ void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
 ->
 */
 
-	int len = topography->a_16.size(); // TODO: use dynamic vector topography.a instead
+	int len = a_16.size(); // TODO: use dynamic vector topography.a instead
 	int entries = 0;
 	int squared_sum = 0;
-	topography->regular_sum = 0;
+	regular_sum = 0;
 
 	// count entries and create squared sum:
 	for (int j = 0; j < len; j++)
 	{
-		if (topography->a_16[j] > 0)
+		if (a_16[j] > 0)
 		{
 			entries++;
-			squared_sum += topography->a_16[j] * topography->a_16[j];
-			topography->regular_sum += topography->a_16[j];
+			squared_sum += a_16[j] * a_16[j];
+			regular_sum += a_16[j];
 		}
 	}
 
-	topography->regular_sum = topography->regular_sum / entries;
+	regular_sum = regular_sum / entries;
 
 	// calculate site-specific (squared) fractions of total:
 	float squared_frac[len];
 	for (int j = 0; j < len; j++)
 		squared_frac[j] =
-			float(topography->a_16[j]) / float(squared_sum);
+			float(a_16[j]) / float(squared_sum);
 
 	// get highest frac:
 	float highest_squared_frac = 0;
@@ -277,21 +277,21 @@ void Globals::smoothen_dataArray(TOPOGRAPHY *topography)
 
 	// SMOOTHEN ARRAY / get "topography height":
 	// divide highest with other entries and reset entries if ratio > threshold:
-	topography->flag_entry_dismissed = false;
+	flag_entry_dismissed = false;
 	for (int j = 0; j < len; j++)
 		if (squared_frac[j] > 0)
-			if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > topography->snr_thresh)
+			if (highest_squared_frac / squared_frac[j] > 3 || squared_frac[j] / highest_squared_frac > snr_thresh)
 			{
-				topography->a_16[j] = 0;
+				a_16[j] = 0;
 				entries -= 1;
-				topography->flag_entry_dismissed = true;
+				flag_entry_dismissed = true;
 			}
 
-	topography->average_smooth = 0;
+	average_smooth = 0;
 	// assess average topo sum for loudness
 	for (int j = 0; j < 16; j++)
-		topography->average_smooth += topography->a_16[j];
-	topography->average_smooth = int((float(topography->average_smooth) / float(entries)) + 0.5);
+		average_smooth += a_16[j];
+	average_smooth = int((float(average_smooth) / float(entries)) + 0.5);
 }
 
 // ---------------------------- DEBUG FUNCTIONS ------------------------------
@@ -373,6 +373,68 @@ void Globals::printTopoArray(TOPOGRAPHY *topography)
 	println_to_console("");
 }
 
+// ----------------------------- Auxiliary --------------------------
+
+String Globals::DrumtypeToHumanreadable(DrumType type)
+{
+	switch (type)
+	{
+	case Snare:
+		return "Snare";
+	case Hihat:
+		return "Hihat";
+	case Kick:
+		return "Kick";
+	case Tom1:
+		return "Tom1";
+	case Tom2:
+		return "Tom2";
+	case Standtom1:
+		return "S_Tom1";
+	case Standtom2:
+		return "S_Tom2";
+	case Ride:
+		return "Ride";
+	case Crash1:
+		return "Crash1";
+	case Crash2:
+		return "Crash2";
+	case Cowbell:
+		return "Cowbell";
+	}
+	return "";
+}
+
+String Globals::EffectstypeToHumanReadable(EffectsType type)
+{
+	switch (type)
+	{
+	case PlayMidi:
+		return "PlayMidi";
+	case Monitor:
+		return "Monitor";
+	case ToggleRhythmSlot:
+		return "ToggleRhythmSlot";
+	case FootSwitchLooper:
+		return "FootSwitchLooper";
+	case TapTempo:
+		return "TapTempo";
+	case Swell:
+		return "Swell";
+	case TsunamiLink:
+		return "TsunamiLink";
+	case CymbalSwell:
+		return "CymbalSwell";
+	case TopographyMidiEffect:
+		return "TopographyMidiEffect";
+	case Change_CC:
+		return "Change_CC";
+	case Random_CC_Effect:
+		return "Random_CC_Effect";
+	}
+	return "";
+}
+
 CC_Type Globals::int_to_cc_type(int integer)
 {
 	switch (integer)
@@ -406,7 +468,7 @@ CC_Type Globals::int_to_cc_type(int integer)
 	case 94:
 		return DelayDepth;
 
-	// ATTENTION: 
+	// ATTENTION:
 	// IMPORTANT:
 	// TODO: define all CC channels, otherwise this procedure can take forever in the while loop!
 	default:

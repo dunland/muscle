@@ -101,7 +101,6 @@ void samplePins()
 {
   // read all pins:
   for (auto &instrument : instruments)
-  // Using a for loop with iterator
   {
     if (pinValue(instrument) > instrument->sensitivity.threshold)
     {
@@ -164,10 +163,11 @@ void setup()
   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
   delay(100);                          // some time for Tsunami to respond with version string
 
-  mKorg = new Synthesizer(2);
-  volca = new Synthesizer(1);
 
   // ------------------------ INSTRUMENT SETUP ------------------------
+  // instantiate external MIDI devices:
+  mKorg = new Synthesizer(2);
+  volca = new Synthesizer(1);
   // instantiate instruments:
   snare = new Instrument(A5, Snare);
   hihat = new Instrument(A6, Hihat);
@@ -295,7 +295,7 @@ void loop()
     {
       // ----------------------- perform pin action -------------------
       instrument->trigger(MIDI); // runs trigger function according to instrument's EffectType
-      instrument->wasHit = true; // a flag to show that the instrument was hit (for transmission via JSON)
+      instrument->timing.wasHit = true; // a flag to show that the instrument was hit (for transmission via JSON)
     }
   }
 
@@ -407,7 +407,7 @@ void loop()
       if (instrument->drumtype != Ride && instrument->drumtype != Crash1 && instrument->drumtype != Crash2) // cymbals have too many counts
         Score::beat_sum.add(&instrument->topography);
     }
-    Globals::smoothen_dataArray(&Score::beat_sum);
+    Score::beat_sum.smoothen_dataArray();
 
     Globals::print_to_console("avg: ");
     Globals::print_to_console(Score::beat_sum.average_smooth);
@@ -416,7 +416,7 @@ void loop()
     Globals::print_to_console("\tstep:");
     Globals::println_to_console(Score::step);
 
-    Globals::derive_topography(&Score::beat_sum, &Score::beat_regularity); // TODO: also do this for all instruments
+    Score::beat_regularity.derive_from(&Score::beat_sum); // TODO: also do this for all instruments
 
     // print topo arrays:
     if (Globals::do_print_beat_sum)
@@ -463,22 +463,22 @@ void loop()
         ride->setup_midi(None, mKorg);
         ride->set_effect(Random_CC_Effect);
 
-        kick->midi_settings.notes.push_back(Score::notes[0] + 12 + 3);
+        kick->midi_settings.notes.push_back(Score::notes[0] + 3);
         kick->midi_settings.active_note = kick->midi_settings.notes[0];
         kick->set_effect(PlayMidi);
         kick->setup_midi(None, volca);
 
-        snare->midi_settings.notes.push_back(Score::notes[0] + 12 + 12);
+        snare->midi_settings.notes.push_back(Score::notes[0] + 12);
         snare->midi_settings.active_note = snare->midi_settings.notes[0];
         snare->setup_midi(None, volca);
         snare->set_effect(PlayMidi);
 
-        tom2->midi_settings.notes.push_back(Score::notes[0] + 12 + 7);
+        tom2->midi_settings.notes.push_back(Score::notes[0] + 7);
         tom2->midi_settings.active_note = tom2->midi_settings.notes[0];
         tom2->setup_midi(None, volca);
         tom2->set_effect(PlayMidi);
 
-        standtom->midi_settings.notes.push_back(Score::notes[0] + 12 + 5);
+        standtom->midi_settings.notes.push_back(Score::notes[0] + 5);
         standtom->midi_settings.active_note = standtom->midi_settings.notes[0];
         standtom->setup_midi(None, volca);
         standtom->set_effect(PlayMidi);
@@ -714,7 +714,7 @@ void loop()
 
     for (auto &instrument : instruments)
     {
-      instrument->wasHit = false;
+      instrument->timing.wasHit = false;
     }
 
   } // end of (32nd-step) TIMED ACTIONS

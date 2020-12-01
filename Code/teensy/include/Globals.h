@@ -87,6 +87,8 @@ public:
   // ---------------------------- functions ---------------------------
   void reset();
   void add(TOPOGRAPHY *to_add);
+  void smoothen_dataArray(); // there is a double of this in Instruments to perform instrument-specific operations
+  void derive_from(TOPOGRAPHY *original);
 };
 
 ///////////////////////////////////////////////////////////////////////
@@ -134,71 +136,11 @@ public:
 
   // ----------------------------- Auxiliary --------------------------
 
-  static String DrumtypeToHumanreadable(DrumType type)
-  {
-    switch (type)
-    {
-    case Snare:
-      return "Snare";
-    case Hihat:
-      return "Hihat";
-    case Kick:
-      return "Kick";
-    case Tom1:
-      return "Tom1";
-    case Tom2:
-      return "Tom2";
-    case Standtom1:
-      return "S_Tom1";
-    case Standtom2:
-      return "S_Tom2";
-    case Ride:
-      return "Ride";
-    case Crash1:
-      return "Crash1";
-    case Crash2:
-      return "Crash2";
-    case Cowbell:
-      return "Cowbell";
-    }
-    return "";
-  }
+  static String DrumtypeToHumanreadable(DrumType type);
 
-  static String EffectstypeToHumanReadable(EffectsType type)
-  {
-    switch (type)
-    {
-    case PlayMidi:
-      return "PlayMidi";
-    case Monitor:
-      return "Monitor";
-    case ToggleRhythmSlot:
-      return "ToggleRhythmSlot";
-    case FootSwitchLooper:
-      return "FootSwitchLooper";
-    case TapTempo:
-      return "TapTempo";
-    case Swell:
-      return "Swell";
-    case TsunamiLink:
-      return "TsunamiLink";
-    case CymbalSwell:
-      return "CymbalSwell";
-    case TopographyMidiEffect:
-      return "TopographyMidiEffect";
-    case Change_CC:
-      return "Change_CC";
-    case Random_CC_Effect:
-      return "Random_CC_Effect";
-    }
-    return "";
-  }
+  static String EffectstypeToHumanReadable(EffectsType type);
 
   static CC_Type int_to_cc_type(int);
-
-  // TOPOGRAPHIES: ------------------------------------------------------
-  static void smoothen_dataArray(TOPOGRAPHY *topography); // there is a double of this in Instruments to perform instrument-specific operations
-  static void derive_topography(TOPOGRAPHY *original, TOPOGRAPHY *abstraction);
 
   // DEBUG FUNCTIONS: ---------------------------------------------------
   // print the play log to Serial monitor:
