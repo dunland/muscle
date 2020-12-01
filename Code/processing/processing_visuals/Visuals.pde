@@ -14,8 +14,10 @@ int y_distort_factor = 1;
 
 // color:
 int field_hue = int(random(255));
-int field_sat = int(random(200));
-int field_bri = int(random(200));
+int field_sat = int((200));
+int field_bri = int((200));
+// int field_sat = int(random(200));
+// int field_bri = int(random(200));
 
 float y_offset = 0;
 float x_offset = 0;
@@ -34,10 +36,7 @@ void create_vertices(int num_of_colums, int num_of_rows)
         for (int i = 0; i<num_of_colums; i++)
         {
                 int x = xPos + i * horizontal_spacing;         // draw from right to left
-                if (i % 2 == 0)                 // even numbers: take values from snare
-                        vertical_spacing = (height+2*vertical_spacing)/num_of_rows + score.topo.get(i) * y_distort_factor;
-                else                         // odd numbers: take values from hihat:
-                        vertical_spacing = (height+2*vertical_spacing)/num_of_rows + score.topo.get(i) * y_distort_factor;
+                vertical_spacing = (height+2*vertical_spacing)/num_of_rows + score.topo.get(i) * y_distort_factor;
 
                 for (int j = 0; j<num_of_rows; j++)
                 {
@@ -53,7 +52,6 @@ void create_vertices(int num_of_colums, int num_of_rows)
 
 void draw()
 {
-  println("Drawing");
         y_offset = kick.cc_val;
         x_offset = sin(radians(ride.cc_val/127*180)) * crash1.cc_val;
 
@@ -69,10 +67,9 @@ void draw()
                         color col;
                         if (iterator_ % 2 == 0) col = color(200);
                         else col = color(0);
-                        // noFill();
                         // fill(col);
-                        fill(field_hue, field_sat, field_bri);
-                        noStroke();
+                        stroke(field_hue, field_sat, field_bri);
+                        noFill();
 
                         // draw vertices:
                         beginShape();
@@ -93,10 +90,11 @@ void draw()
 
 
 // field elements to be stored in Grid:
-class Field{
+class Field {
 
-  PVector[][] vertices = new PVector[16][16];
+PVector[][] vertices = new PVector[16][16];
 
-  Field(){}
+Field(){
+}
 
 }

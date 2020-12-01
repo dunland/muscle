@@ -96,44 +96,6 @@ void draw()
            //println(b);
          */
 
-        //----------------------- DRAW CIRCLES ---------------------
-        if (list_of_circles.size() > 0) {
-                // draw signals
-                for (Circle circle : list_of_circles) {
-                        if (!circle.stopped)
-                                circle.propagateSignal();
-                        // circle.checkIntersection();
-                        circle.drawSignal();
-                        circle.xPos--;
-                }
-
-                // destroy signals that have reached limit
-                for (int i = 0; i<list_of_circles.size(); i++)
-                {
-                        if (list_of_circles.get(i).signal_magnitude > maxSignalExtent) {
-                                list_of_circles.remove(i);
-                                println("remaining objects: " + list_of_circles.size() + list_of_lines.size());
-                        }
-                }
-        }
-        //----------------------- DRAW LINES ---------------------
-        if (list_of_lines.size() > 0) {
-                // draw signals
-                for (Line line : list_of_lines) {
-                        line.draw();
-                        line.xPos--;
-                }
-
-                // destroy signals that have reached limit
-                for (int i = 0; i<list_of_lines.size(); i++)
-                {
-                        if (list_of_lines.get(i).xPos < -height) {
-                                list_of_lines.remove(i);
-                                println("remaining objects: " +  int(list_of_circles.size() + list_of_lines.size()));
-                        }
-                }
-        }
-
         // initialize grid once:
         if (snare.topo.size() == 16 && grid.init)
         {
@@ -166,13 +128,13 @@ void draw()
                         if (json_was_initialized) instr.cc_plot.draw(dist_left + 350, dist_top+ i* (height-200)/list_of_instruments.length);
 
                         textAlign(LEFT,LEFT);
-                        textSize(16);
+                        textSize(14);
                         colorMode(HSB);
                         fill(instr.cc_plot.pointsColor);
-                        text("ø:\t" + instr.average_smooth
+                        text(instr.title + ": "
+                             + instr.effect + "\n"
+                             + "ø:\t" + instr.average_smooth
                              + "/" + instr.activation_thresh
-                             + " " + instr.title
-                             + "\t ― " + instr.effect
                              + "\nCC:\t" + instr.cc_val
                              + " | " + instr.cc_increase
                              + " | " + instr.cc_decay,
@@ -206,7 +168,7 @@ void draw()
         textAlign(RIGHT, BOTTOM);
         textSize(14);
         fill(255);
-        text("circles: " + list_of_circles.size() + "\n" + mouseX + " " + mouseY, width, height);
+        // text("circles: " + list_of_circles.size() + "\n" + mouseX + " " + mouseY, width, height);
 
         // millis:
         textAlign(LEFT, BOTTOM);

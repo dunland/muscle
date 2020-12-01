@@ -122,8 +122,8 @@ public:
   static int current_beat_pos;     // always stores the current position in the beat
   static int current_eighth_count; // overflows at current_beat_pos % 8
   static int current_16th_count;   // overflows at current_beat_pos % 2
-  static int last_eighth_count;    // stores last eightNoteCount for comparison
-  static int last_16th_count;      // stores last eightNoteCount for comparison
+  static int last_eighth_count;    // stores last eighthNoteCount for comparison
+  static int last_16th_count;      // stores last 16thNoteCount for comparison
 
   // ----------------------------- Hardware ---------------------------
 
@@ -153,7 +153,6 @@ public:
   static void println_to_console(float float_to_print);
 
   static void printTopoArray(TOPOGRAPHY *topography);
-  static void topo_array_to_processing(TOPOGRAPHY *topo);
   // --------------------------------------------------------------------
 };
 

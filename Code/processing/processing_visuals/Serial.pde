@@ -2,11 +2,11 @@ boolean json_was_initialized = false; // tells program whether json is ok to be 
 
 void serialEvent(Serial myPort)
 {
-        // if (serial_available) // using Serial at all
+        if (serial_available) // using Serial at all
         read_serial_stream(myPort);
 
-        // else // instead read from file
-        //         read_json_from_file();
+        else // instead read from file
+                read_json_from_file();
 }
 
 void read_serial_stream(Serial myPort)

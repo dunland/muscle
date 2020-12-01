@@ -11,76 +11,84 @@
 	"average_smooth":0,
 	"activation_thresh": 15
 	},
-"snare": {
+"Snare": {
 	"topo": [1,3,3,2,0,0,4,0,9,8,11,0,0,0,5,0],
 	"average_smooth":3,
 	"activation_thresh": 15,
 	"cc_val": 5,
 	"cc_increase": 1,
 	"cc_decay": 0.1,
-	"effect": "string"
+	"effect": "PlayMidi",
+	"wasHit": false
 },
-"kick": {
+"Kick": {
 	"topo": [0,1,0,0,0,0,0,0,0,0,0,8,0,0,0,0],
 	"average_smooth":100,
 	"activation_thresh": 12,
 	"cc_val": 0,
 	"cc_increase": 1,
 	"cc_decay": 0.1,
-	"effect": "string"
+	"effect": "PlayMidi",
+	"wasHit": false
 },
-"hihat": {
+"Hihat": {
 	"topo": [0,14,7,0,0,0,0,1,0,0,10,0,0,3,0,7],
 	"average_smooth":100,
 	"activation_thresh": 15,
 	"cc_val": 12,
 	"cc_increase": 1,
 	"cc_decay": 0.1,
-	"effect": "string"
+	"effect": "TapTempo",
+	"wasHit": false
 },
-"crash1": {
+"Crash1": {
 	"topo": [0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	"average_smooth":100,
 	"activation_thresh": 15,
 	"cc_val": 50,
 	"cc_increase": 1,
 	"cc_decay": 0.1,
-	"effect": "string"
+	"effect": "Random_CC_Effect",
+	"wasHit": false
 },
-"ride": {
+"Ride": {
 	"topo": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	"average_smooth":100,
 	"activation_thresh": 15,
 	"cc_val": 100,
 	"cc_increase": 1,
 	"cc_decay": 0.1,
-	"effect": "string"
+	"effect": "Random_CC_Effect",
+	"wasHit": false
 },
-"standtom1": {
+"S_Tom1": {
 	"topo": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	"average_smooth":100,
 	"activation_thresh": 15,
 	"cc_val": 100,
 	"cc_increase": 1,
 	"cc_decay": 0.1,
-	"effect": "string"
+	"effect": "Monitor",
+	"wasHit": false
 },
-"tom2": {
+"Tom2": {
 	"topo": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	"average_smooth":100,
 	"activation_thresh": 15,
 	"cc_val": 2,
 	"cc_increase": 1,
 	"cc_decay": 0.1,
-	"effect": "string"
+	"effect": "Monitor",
+	"wasHit": false
 },
-"cowbell": {
+"Cowbell": {
 	"topo": [0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0],
 	"average_smooth":100,
 	"activation_thresh": 15,
 	"cc_val": 127,
 	"cc_increase": 1,
 	"cc_decay": 0.1,
-	"effect": "string"
+	"effect": "Monitor",
+	"wasHit": false
 	}
 }
