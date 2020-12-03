@@ -139,8 +139,6 @@ public:
 
     void countup_topography();
 
-    void tsunamiLink(); // Tsunami beat-linked pattern
-
     // timed events: --------------------------------------------------
 
     void swell_perform(midi::MidiInterface<HardwareSerial> MIDI);
@@ -149,9 +147,9 @@ public:
 
     void setInstrumentSlots(); // for Footswitchlooper
 
-    void tsunami_beat_playback();
-
     void topography_midi_effects(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>); // MIDI playback according to beat_topography
+
+    void tsunamiLink(); // Tsunami beat-linked pattern
 
     // final tidy up functions: ---------------------------------------
 

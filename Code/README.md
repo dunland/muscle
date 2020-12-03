@@ -8,7 +8,7 @@ Sketches for sensor calibration (can be compiled with Arduino IDE and) can be fo
 ## folder structure
 
 ```
-project
+Code
 └───debug
 │       holds Arduino-style sketches used to evaluate calibration values
 │	for contact mics / stroke detection

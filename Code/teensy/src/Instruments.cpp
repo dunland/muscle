@@ -687,7 +687,9 @@ void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // upda
 
   ---------------------------------------------------------------------*/
 
-void Instrument::tsunami_beat_playback()
+// TODO: also make this a Score function applying to the overall_beat
+// matches the instrument's topo to a sound sample stored on the tsunami 
+void Instrument::tsunamiLink()
 {
   // smoothen 16-bit topography to erase sites with noise:
   topography.smoothen_dataArray();
