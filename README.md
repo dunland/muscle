@@ -1,5 +1,6 @@
 ## folder structure
 
+```
 project
 └───Code
 │       code folder. contains subfolders 
@@ -22,7 +23,9 @@ project
 │	while playing the instruments
 └───misc
 	miscellaneous.
+```
 
 ## project management
+![overview of the SUPER MUSCLE platform with all its external components](Doc/MA_progress-Overview.png)
 
 ![overview of my Master Project Progress. Working Title: "SUPER MUSCLE"](Doc/MA_progress-current.png)
