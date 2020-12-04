@@ -140,6 +140,8 @@ public:
 
     void countup_topography();
 
+    void mainNoteIteration(Synthesizer*, midi::MidiInterface<HardwareSerial>); // increase note_index of Score and play it
+
     // timed events: --------------------------------------------------
 
     void swell_perform(midi::MidiInterface<HardwareSerial> MIDI);

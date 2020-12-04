@@ -215,6 +215,11 @@ void setup()
   Globals::println_to_console("-----------------------------------------------");
 
   // ---------------------------------- SCORE -------------------------
+  // add a bass note to Score
+  Score::notes.push_back(int(random(36, 48)));
+  Globals::print_to_console("Score::note[0] = ");
+  Globals::println_to_console(Score::notes[0]);
+
   // turn off all currently playing MIDI notes:
   for (int channel = 1; channel < 3; channel++)
   {
@@ -223,11 +228,6 @@ void setup()
       MIDI.sendNoteOff(note_number, 127, channel);
     }
   }
-
-  // add a bass note to Score
-  Score::notes.push_back(int(random(36, 48)));
-  Globals::print_to_console("Score::note[0] = ");
-  Globals::println_to_console(Score::notes[0]);
 
   // link midi synth to instruments:
   snare->midi_settings.synth = mKorg;
@@ -430,27 +430,18 @@ void loop()
 
     // step proceeds if footswitch is pressed (in mode RESET_AND_PROCEED_SCORE) when regularity is high enough
 
-    // vibrate if new score is ready:
-    if (Score::beat_sum.ready())
-    {
-      digitalWrite(VIBR, HIGH);
-      Globals::println_to_console("ready to go to next score step! hit footswitch!");
-    }
-    else
-      digitalWrite(VIBR, LOW);
-
     // THIS SONG IS COMPOSED FOR microKORG A.63
     // SCORE, stepwise:
+
     static int rhythmic_iterator;
+    static std::vector<int> locrian_mode = {Score::notes[0] + 1, Score::notes[0] + 3, Score::notes[0] + 5, Score::notes[0] + 6, Score::notes[0] + 8, Score::notes[0] + 11};
+    static int note_idx = -1;
 
     switch (Score::step)
     {
 
     case 0: // notesAndEffects_locrianMode
     {
-      static std::vector<int> locrian_mode = {Score::notes[0] + 1, Score::notes[0] + 3, Score::notes[0] + 5, Score::notes[0] + 6, Score::notes[0] + 8, Score::notes[0] + 11};
-      static int note_idx = -1;
-
       if (Score::setup)
       {
         // Cymbals → random CC (mKorg)
@@ -491,11 +482,7 @@ void loop()
         standtom->set_effect(PlayMidi);
 
         // add locrian mode
-        Score::set_notes(locrian_mode);
-
-        // rhythmic_iterator = int(random(32));
-        // Globals::print_to_console("rhythmic_iterator = ");
-        // Globals::println_to_console(rhythmic_iterator);
+        Score::set_notes({locrian_mode[0], locrian_mode[1], locrian_mode[2]});
 
         // start bass note:
         Score::playSingleNote(mKorg, MIDI);
@@ -504,7 +491,6 @@ void loop()
         Score::setup = false;
       }
 
-      // static int prior_beat_sum = 0;
       // change volca, with minimum of 50:
       // if (volca->cutoff >= 50 && Globals::current_beat_pos )
       // {
@@ -514,10 +500,39 @@ void loop()
       //   volca->sendControlChange(LFO_Rate, cutoff_val, MIDI);
       // }
       // }
-      // Score::playRhythmicNotes(mKorg, MIDI, rhythmic_iterator);
-      // prior_beat_sum = Score::beat_sum.average_smooth;
     }
     break;
+
+    case 1: // cymbalNoteIteration
+
+      if (Score::setup)
+      {
+        // add locrian mode
+        Score::set_notes({locrian_mode[0], locrian_mode[1], locrian_mode[2]});
+
+        // set crash1 to change main note:
+        crash1->setup_midi(None, mKorg);
+        crash1->set_effect(MainNoteIteration);
+
+        // define interval when to change notes:
+        // rhythmic_iterator = int(random(32));
+        // Globals::print_to_console("rhythmic_iterator = ");
+        // Globals::println_to_console(rhythmic_iterator);
+
+        // proceed in note lists:
+        note_idx = (note_idx + 1) % locrian_mode.size();
+        Score::note_idx = (Score::note_idx + 1) % Score::notes.size();
+
+        // start bass note:
+        Score::playSingleNote(mKorg, MIDI);
+
+        // leave setup:
+        Score::setup = false;
+      }
+
+      // Score::playRhythmicNotes(mKorg, MIDI, rhythmic_iterator);
+
+      break;
 
       //   case 0: // init state
       //     // setup score note seed:
@@ -724,6 +739,17 @@ void loop()
       Score::step = 0;
       break;
     }
+
+    // vibrate if new score is ready:
+    if (Score::beat_sum.ready())
+    {
+      digitalWrite(VIBR, HIGH);
+      Globals::println_to_console("ready to go to next score step! hit footswitch!");
+    }
+    else
+      digitalWrite(VIBR, LOW);
+
+    //----------------------- SCORE END -------------------------------
 
     for (auto &instrument : instruments)
     {

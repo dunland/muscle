@@ -431,6 +431,8 @@ String Globals::EffectstypeToHumanReadable(EffectsType type)
 		return "Change_CC";
 	case Random_CC_Effect:
 		return "Random_CC_Effect";
+	case MainNoteIteration:
+		return "MainNoteIteration";
 	}
 	return "";
 }
@@ -454,7 +456,7 @@ CC_Type Globals::int_to_cc_type(int integer)
 	case 44:
 		return Cutoff;
 	case 46:
-		return LFO_Rate;		
+		return LFO_Rate;
 	case 71:
 		return Resonance;
 	case 50:

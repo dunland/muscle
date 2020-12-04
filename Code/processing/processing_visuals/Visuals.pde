@@ -67,9 +67,9 @@ void draw()
                         color col;
                         if (iterator_ % 2 == 0) col = color(200);
                         else col = color(0);
-                        // fill(col);
+                        fill(field_hue, field_sat, field_bri, score.step * 40);
                         stroke(field_hue, field_sat, field_bri);
-                        noFill();
+                        // noFill();
 
                         // draw vertices:
                         beginShape();

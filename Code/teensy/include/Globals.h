@@ -5,9 +5,6 @@
 #include <Tsunami.h> // in cpp
 #include <vector>
 
-#define VIBR 0
-#define FOOTSWITCH 2
-
 // instrument naming for human-readable console outputs:
 enum DrumType
 {
@@ -36,7 +33,8 @@ enum EffectsType
   CymbalSwell = 7,
   TopographyMidiEffect = 8,
   Change_CC = 9,
-  Random_CC_Effect = 10
+  Random_CC_Effect = 10,
+  MainNoteIteration = 11 
 };
 
 enum CC_Type // channels on mKORG:

@@ -296,10 +296,12 @@ void Synthesizer::sendControlChange(int cc_type, int val, midi::MidiInterface<Ha
 
 void Synthesizer::sendNoteOn(int note, midi::MidiInterface<HardwareSerial> MIDI)
 {
+  notes[note] = true; // remember that note is turned on
   MIDI.sendNoteOn(note, 127, midi_channel);
 }
 
 void Synthesizer::sendNoteOff(int note, midi::MidiInterface<HardwareSerial> MIDI)
 {
+  notes[note] = false; // remember that note is turned off
   MIDI.sendNoteOff(note, 127, midi_channel);
 }

@@ -69,8 +69,9 @@ void setup()
                 instr.plot.pointsColor = color(i * (255/list_of_instruments.length), 100, 100);
 
                 // cc_plot:
+                instr.cc_plot.drawMode = instr.plot.BARPLOT;
                 instr.cc_plot.set_ticks(200,1);
-                instr.cc_plot.drawMode = instr.plot.LINES;
+                // instr.cc_plot.drawMode = instr.plot.LINES;
                 instr.cc_plot.draw_title = false;
                 instr.cc_plot.draw_labels = false;
                 instr.cc_plot.draw_xticks = false;
@@ -168,7 +169,7 @@ void draw()
         textAlign(RIGHT, BOTTOM);
         textSize(14);
         fill(255);
-        // text("circles: " + list_of_circles.size() + "\n" + mouseX + " " + mouseY, width, height);
+        text(score.step, width, height);
 
         // millis:
         textAlign(LEFT, BOTTOM);
