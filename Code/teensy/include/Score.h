@@ -24,7 +24,10 @@ public:
     static TOPOGRAPHY topo_midi_effect; // for TopographyMidiEffect
 
     // SETUP etc:
+    static void set_notes(std::vector<int> list);
+
     static void add_bassNote(int note); // adds a NOTE to notes[]
+
 
     // MODES:
     static void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score

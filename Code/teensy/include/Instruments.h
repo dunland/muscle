@@ -103,7 +103,8 @@ public:
 
     ////////////////////// SETUP FUNCTIONS ////////////////////////////
 
-    void setup_notes(std::vector<int> list);
+    // set MIDI notes according to a vector list:
+    void set_notes(std::vector<int> list);
 
     void setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor);
 

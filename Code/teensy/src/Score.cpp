@@ -28,6 +28,22 @@ void Score::add_bassNote(int note)
     Globals::println_to_console("]");
 }
 
+void Score::set_notes(std::vector<int> list)
+{
+    for (uint8_t i = 0; i < list.size(); i++)
+    {
+        notes.push_back(list[i]);
+    }
+
+    Globals::print_to_console("Score::notes:");
+    for (uint8_t i = 0; i < notes.size(); i++)
+    {
+        Globals::print_to_console(" ");
+        Globals::print_to_console(notes[i]);
+    }
+    Globals::println_to_console("");
+}
+
 ///////////////////////////////////////////////////////////////////////
 ////////////////////////////// MODES //////////////////////////////////
 ///////////////////////////////////////////////////////////////////////

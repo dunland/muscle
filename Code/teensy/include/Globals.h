@@ -49,6 +49,7 @@ enum CC_Type // channels on mKORG:
   Patch_1_Depth = 28,
   Patch_3_Depth = 30,
   Cutoff = 44,
+  LFO_Rate = 46,
   Resonance = 71,
   Amplevel = 50,
   Attack = 23,

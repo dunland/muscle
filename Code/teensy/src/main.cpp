@@ -1,27 +1,11 @@
 /*
+   SUPER MUSCLE v.0.2.0
    ------------------------------------
-   November 2020
+   December 2020
    by David Unland david[at]unland[dot]eu
+   github.com/dunland/muscle
    ------------------------------------
    ------------------------------------
-  0. calibrate sensors
-  1. set calibration[instrument][0/1] values. (in setup())
-    0:threshold, 1:min num of threshold crossings
-  2. set mode for instruments:
-
-    pinActions:
-    -----------
-    0 = play MIDI note upon stroke
-    1 = binary beat logger (print beat)
-    2 = toggle rhythm_slot
-    3 = footswitch looper: records what is being played for one bar while footswitch is pressed and repeats it after release.
-    4 = tapTempo: a standard tapTempo to change the overall pace. to be used on one instrument only.
-    5 = "swell" effect: all instruments have a tap tempo that will change MIDI CC values when played a lot (values decrease automatically)
-    6 = Tsunami beat-linked playback: finds patterns within 1 bar for each instrument and plays an according rhythmic sample from tsunami database
-    7 = using swell effect for tsunami playback loudness (arhythmic field recordings for cymbals)
-    8 = 16th-note-topography with MIDI playback and volume change
-    9 = PlayMidi_rawPin: instead of stroke detection, MIDI notes are sent directly when sensitivity threshold is crossed. may sound nice on cymbals..
-    10 = CC_Effect_rawPin: instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 */
 
 /* --------------------------------------------------------------------- */
@@ -123,7 +107,7 @@ void setup()
   Globals::use_responsiveCalibration = false;
   Globals::do_print_beat_sum = false; // prints Score::beat_sum topography array
   Globals::do_print_to_console = true;
-  Globals::do_print_JSON = false;
+  Globals::do_print_JSON = true;
 
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
@@ -162,7 +146,6 @@ void setup()
   Globals::tsunami.samplerateOffset(0, 0);
   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
   delay(100);                          // some time for Tsunami to respond with version string
-
 
   // ------------------------ INSTRUMENT SETUP ------------------------
   // instantiate external MIDI devices:
@@ -232,6 +215,15 @@ void setup()
   Globals::println_to_console("-----------------------------------------------");
 
   // ---------------------------------- SCORE -------------------------
+  // turn off all currently playing MIDI notes:
+  for (int channel = 1; channel < 3; channel++)
+  {
+    for (int note_number = 0; note_number < 127; note_number++)
+    {
+      MIDI.sendNoteOff(note_number, 127, channel);
+    }
+  }
+
   // add a bass note to Score
   Score::notes.push_back(int(random(36, 48)));
   Globals::print_to_console("Score::note[0] = ");
@@ -294,7 +286,7 @@ void loop()
     if (instrument->stroke_detected()) // evaluates pins for activity repeatedly
     {
       // ----------------------- perform pin action -------------------
-      instrument->trigger(MIDI); // runs trigger function according to instrument's EffectType
+      instrument->trigger(MIDI);        // runs trigger function according to instrument's EffectType
       instrument->timing.wasHit = true; // a flag to show that the instrument was hit (for transmission via JSON)
     }
   }
@@ -424,8 +416,8 @@ void loop()
       // for (auto &instrument : instruments)
       // Globals::printTopoArray(&instrument->topography);
       Globals::printTopoArray(&Score::beat_sum); // print volume layer
-      // Globals::printTopoArray(&Score::beat_regularity);
     }
+    // Globals::printTopoArray(&Score::beat_regularity);
 
     // perform timed pin actions according to current beat:
     for (auto &instrument : instruments)
@@ -449,62 +441,83 @@ void loop()
 
     // THIS SONG IS COMPOSED FOR microKORG A.63
     // SCORE, stepwise:
-    static int lokrische_tonfolge[] = {Score::notes[0] + 1, Score::notes[0] + 3, Score::notes[0] + 5, Score::notes[0] + 6, Score::notes[0] + 8, Score::notes[0] + 11};
-    static int note_idx = 0;
     static int rhythmic_iterator;
+
     switch (Score::step)
     {
 
-    case 0:
+    case 0: // notesAndEffects_locrianMode
+    {
+      static std::vector<int> locrian_mode = {Score::notes[0] + 1, Score::notes[0] + 3, Score::notes[0] + 5, Score::notes[0] + 6, Score::notes[0] + 8, Score::notes[0] + 11};
+      static int note_idx = -1;
+
       if (Score::setup)
       {
+        // Cymbals → random CC (mKorg)
+        // drums → playMidi (Volca)
+
+        // assign random-cc-effect to cymbals:
         crash1->setup_midi(None, mKorg);
         crash1->set_effect(Random_CC_Effect);
         ride->setup_midi(None, mKorg);
         ride->set_effect(Random_CC_Effect);
 
-        kick->midi_settings.notes.push_back(Score::notes[0] + 3);
-        kick->midi_settings.active_note = kick->midi_settings.notes[0];
-        kick->set_effect(PlayMidi);
-        kick->setup_midi(None, volca);
+        // set list of notes for kick, snare, tom, standtom
+        kick->set_notes(locrian_mode);
+        snare->set_notes(locrian_mode);
+        tom2->set_notes(locrian_mode);
+        standtom->set_notes(locrian_mode);
 
-        snare->midi_settings.notes.push_back(Score::notes[0] + 12);
-        snare->midi_settings.active_note = snare->midi_settings.notes[0];
+        // drums play on Volca:
+        kick->setup_midi(None, volca);
         snare->setup_midi(None, volca);
+        tom2->setup_midi(None, volca);
+        standtom->setup_midi(None, volca);
+
+        // proceed in note lists:
+        note_idx = (note_idx + 1) % locrian_mode.size();
+        Score::note_idx = (Score::note_idx + 1) % Score::notes.size();
+
+        kick->midi_settings.active_note = kick->midi_settings.notes[note_idx];
+        kick->set_effect(PlayMidi);
+
+        snare->midi_settings.active_note = snare->midi_settings.notes[note_idx] + 12;
         snare->set_effect(PlayMidi);
 
-        tom2->midi_settings.notes.push_back(Score::notes[0] + 7);
-        tom2->midi_settings.active_note = tom2->midi_settings.notes[0];
-        tom2->setup_midi(None, volca);
+        tom2->midi_settings.active_note = tom2->midi_settings.notes[(note_idx + 1) % tom2->midi_settings.notes.size()];
         tom2->set_effect(PlayMidi);
 
-        standtom->midi_settings.notes.push_back(Score::notes[0] + 5);
-        standtom->midi_settings.active_note = standtom->midi_settings.notes[0];
-        standtom->setup_midi(None, volca);
+        standtom->midi_settings.active_note = standtom->midi_settings.notes[(note_idx + 2) % standtom->midi_settings.notes.size()];
         standtom->set_effect(PlayMidi);
 
-        Score::notes.push_back(lokrische_tonfolge[note_idx]);
-        note_idx++;
+        // add locrian mode
+        Score::set_notes(locrian_mode);
 
-        Globals::print_to_console("Score::notes:");
-        for (uint8_t i = 0; i < Score::notes.size(); i++)
-        {
-          Globals::print_to_console(" ");
-          Globals::print_to_console(Score::notes[i]);
-        }
-        Globals::println_to_console("");
+        // rhythmic_iterator = int(random(32));
+        // Globals::print_to_console("rhythmic_iterator = ");
+        // Globals::println_to_console(rhythmic_iterator);
 
-        rhythmic_iterator = int(random(32));
-        Globals::print_to_console("rhythmic_iterator = ");
-        Globals::println_to_console(rhythmic_iterator);
-
+        // start bass note:
         Score::playSingleNote(mKorg, MIDI);
+
+        // leave setup:
         Score::setup = false;
       }
 
+      // static int prior_beat_sum = 0;
+      // change volca, with minimum of 50:
+      // if (volca->cutoff >= 50 && Globals::current_beat_pos )
+      // {
+      // if (Score::beat_sum.average_smooth > 3)
+      // {
+      //   int cutoff_val = min(Score::beat_sum.average_smooth * 7, 127);
+      //   volca->sendControlChange(LFO_Rate, cutoff_val, MIDI);
+      // }
+      // }
       // Score::playRhythmicNotes(mKorg, MIDI, rhythmic_iterator);
-
-      break;
+      // prior_beat_sum = Score::beat_sum.average_smooth;
+    }
+    break;
 
       //   case 0: // init state
       //     // setup score note seed:
@@ -733,7 +746,6 @@ void loop()
   for (auto &instrument : instruments)
     instrument->tidyUp(MIDI);
 
-      // MIDI.sendControlChange(50, 100, 2);
-
+  // MIDI.sendControlChange(50, 100, 2);
 }
 // --------------------------------------------------------------------

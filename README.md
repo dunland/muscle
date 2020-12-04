@@ -1,5 +1,7 @@
 ## folder structure
 
+**[>>FIND THE PROJECT MANUAL HERE<<](Doc/SUPER_MUSCLE_MANUAL-0.2.0.pdf)**
+
 ```
 project
 └───Code

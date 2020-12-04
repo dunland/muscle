@@ -110,12 +110,12 @@ void Hardware::checkFootSwitch(std::vector<Instrument *> instruments)
     if (switch_state == LOW)
     {
       footswitch_pressed(instruments);
-      Serial.println("Footswitch pressed.");
+      Globals::println_to_console("Footswitch pressed.");
     }
     else
     {
       footswitch_released(instruments);
-      Serial.println("Footswitch released.");
+      Globals::println_to_console("Footswitch released.");
     }
     last_switch_state = switch_state;
     last_switch_toggle = millis();

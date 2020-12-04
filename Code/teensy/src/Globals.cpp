@@ -453,6 +453,8 @@ CC_Type Globals::int_to_cc_type(int integer)
 		return Patch_3_Depth;
 	case 44:
 		return Cutoff;
+	case 46:
+		return LFO_Rate;		
 	case 71:
 		return Resonance;
 	case 50:

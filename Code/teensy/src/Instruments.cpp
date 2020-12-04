@@ -4,7 +4,7 @@
 #include <Score.h>
 #include <Hardware.h>
 
-void Instrument::setup_notes(std::vector<int> list)
+void Instrument::set_notes(std::vector<int> list)
 {
   for (uint8_t i = 0; i < list.size(); i++)
   {
