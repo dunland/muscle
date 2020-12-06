@@ -75,7 +75,7 @@ void read_json_from_file()
                 ride.json = json.getJSONObject("Ride");
                 standtom1.json = json.getJSONObject("S_Tom1");
                 tom2.json = json.getJSONObject("Tom2");
-                cowbell.json = json.getJSONObject("Cowbell");
+                // cowbell.json = json.getJSONObject("Cowbell");
 
                 parseScore(score.json);
 
@@ -102,7 +102,7 @@ void parseJSON(JSONObject json)
         ride.json = json.getJSONObject("Ride");
         standtom1.json = json.getJSONObject("S_Tom1");
         tom2.json = json.getJSONObject("Tom2");
-        cowbell.json = json.getJSONObject("Cowbell");
+        // cowbell.json = json.getJSONObject("Cowbell");
 
         parseScore(score.json);
 
@@ -153,7 +153,7 @@ void parse_incoming_string(String message)
 {
         if (message.equals("Snare")) snare.record_String("※", (height-20-600)/4); // Snaredrum
         if (message.equals("Kick")) kick.record_String("■", (height-20-600)/4); // Kickdrum
-        if (message.equals("Cowbell")) cowbell.record_String("▲", (height-20-600)/4); // Cowbell
+        // if (message.equals("Cowbell")) cowbell.record_String("▲", (height-20-600)/4); // Cowbell
         if (message.equals("S_Tom1")) standtom1.record_String("□", (height-20-600)/4); // Standtom1
         // if (message.equals("O") standtom2.record_String("O", (height-20-600)/4); // Standtom2
         if (message.equals("Hihat")) hihat.record_String("x", (height-20-600)/4); // Hi-Hat

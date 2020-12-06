@@ -24,10 +24,10 @@ Instrument hihat = new Instrument("HIHAT");
 Instrument standtom1 = new Instrument("STANDTOM 1");
 Instrument tom2 = new Instrument("TOM 2");
 Instrument ride = new Instrument("RIDE");
-Instrument cowbell = new Instrument("COWBELL");
+// Instrument cowbell = new Instrument("COWBELL");
 Instrument crash1 = new Instrument("CRASH 1");
 
-Instrument list_of_instruments[] = {snare, kick, hihat, standtom1, tom2, ride, cowbell, crash1};
+Instrument list_of_instruments[] = {snare, kick, hihat, standtom1, tom2, ride, crash1};
 
 Grid grid;
 
@@ -70,6 +70,8 @@ void setup()
 
                 // cc_plot:
                 instr.cc_plot.drawMode = instr.plot.BARPLOT;
+                instr.cc_plot.strokeColor = color(i * (255/list_of_instruments.length), 100, 100);
+
                 instr.cc_plot.set_ticks(200,1);
                 // instr.cc_plot.drawMode = instr.plot.LINES;
                 instr.cc_plot.draw_title = false;
