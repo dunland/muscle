@@ -27,8 +27,8 @@ void keyPressed()
                 ride.wasHit = true;
                 break;
         case 'E':
-                cowbell.record_String("※", (height-20-600)/4);
-                cowbell.wasHit = true;
+                // cowbell.record_String("※", (height-20-600)/4);
+                // cowbell.wasHit = true;
                 break;
 
         case 'Y':

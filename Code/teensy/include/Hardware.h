@@ -3,6 +3,9 @@
 #include <Globals.h>
 #include <MIDI.h>
 
+#define VIBR 0
+#define FOOTSWITCH 2
+
 class Score;
 class Instrument;
 
@@ -44,9 +47,17 @@ public:
     midi_channel = midi_channel_;
     Globals::print_to_console("initialized synthesizer with midi channel ");
     Globals::println_to_console(midi_channel);
+
+    // set all notes to false:
+    for (int i = 0; i<127; i++)
+    {
+      notes[i] = false;
+    }
   }
 
   int midi_channel; // the MIDI Channel to adress this instrument by
+
+  boolean notes[127];
 
   int osc2_semitone;
   int osc2_tune;

@@ -30,11 +30,16 @@ void Score::add_bassNote(int note)
 
 void Score::set_notes(std::vector<int> list)
 {
+    // clear notes list:
+    notes.clear();
+
+    // add notes from list:
     for (uint8_t i = 0; i < list.size(); i++)
     {
         notes.push_back(list[i]);
     }
 
+    // print list:
     Globals::print_to_console("Score::notes:");
     for (uint8_t i = 0; i < notes.size(); i++)
     {

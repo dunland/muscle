@@ -293,6 +293,10 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
   case Random_CC_Effect:
     random_change_cc_in(MIDI);
     break;
+  case MainNoteIteration:
+    mainNoteIteration(midi_settings.synth, MIDI);
+    break;  
+    
   default:
     break;
   }
@@ -354,6 +358,8 @@ void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
     break;
   }
 }
+
+// TODO: split these to different header files
 
 ///////////////////////////////////////////////////////////////////////
 ////////////////////////////// EFFECTS ////////////////////////////////
@@ -554,13 +560,29 @@ void Instrument::swell_rec(midi::MidiInterface<HardwareSerial> MIDI) // remember
   // --------------------------------------------------------------------
 }
 
-void Instrument::countup_topography() // increases slot position of current 16th beat when instrument hit
+// increase slot position of current 16th beat when instrument hit:
+void Instrument::countup_topography()
 {
   if (Globals::printStrokes)
   {
     setInstrumentPrintString();
   }
   topography.a_16[Globals::current_16th_count]++; // will be translated to topography.a_8 when evoked by tsunamiPlayback(?)
+}
+
+// increase note_idx of Score class:
+void Instrument::mainNoteIteration(Synthesizer *synth_, midi::MidiInterface<HardwareSerial> MIDI)
+{
+  static unsigned long lastNoteChange = 0;
+
+  if (millis() > lastNoteChange + 4000) // only do this once in an interval of 4 seconds, because there are always many hits on a cymbal..
+  {
+    synth_->sendNoteOff(Score::notes[Score::note_idx], MIDI);      // turn previous note off
+    Score::note_idx = (Score::note_idx + 1) % Score::notes.size(); // iterate note pointer
+    synth_->sendNoteOn(Score::notes[Score::note_idx], MIDI);       // turn next note on
+
+    lastNoteChange = millis();
+  }
 }
 
 ///////////////////////////// TIMED EFFECTS ///////////////////////////
@@ -688,7 +710,7 @@ void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // upda
   ---------------------------------------------------------------------*/
 
 // TODO: also make this a Score function applying to the overall_beat
-// matches the instrument's topo to a sound sample stored on the tsunami 
+// matches the instrument's topo to a sound sample stored on the tsunami
 void Instrument::tsunamiLink()
 {
   // smoothen 16-bit topography to erase sites with noise:
@@ -809,7 +831,7 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, 
   if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
   {
     // smoothen array:
-      topography.smoothen_dataArray(); // erases "noise" from arrays if SNR>snr_threshold
+    topography.smoothen_dataArray(); // erases "noise" from arrays if SNR>snr_threshold
 
     // reset slot for volume
     Score::topo_midi_effect.reset();
