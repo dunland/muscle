@@ -9,36 +9,36 @@
 #include <Hardware.h>
 #include <Score.h>
 
-void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
+void JSON::compose_and_send_json(std::vector<Instrument *> instruments, Score *active_score)
 {
-    size_t capacity = JSON_ARRAY_SIZE(Score::notes.size()) + 9 * JSON_ARRAY_SIZE(16) + 9 * JSON_OBJECT_SIZE(8) + 2 * JSON_OBJECT_SIZE(9);
+    size_t capacity = JSON_ARRAY_SIZE(active_score->notes.size()) + 9 * JSON_ARRAY_SIZE(16) + 9 * JSON_OBJECT_SIZE(8) + 2 * JSON_OBJECT_SIZE(9);
     DynamicJsonDocument doc(capacity);
 
     // ---------------------- Global values ---------------------------
     JsonObject score = doc.createNestedObject("score");
     score["millis"] = millis();
     score["current_beat_pos"] = Globals::current_beat_pos;
-    score["score_step"] = Score::step;
+    score["score_step"] = active_score->step;
 
     // -------------------------- Score -------------------------------
     JsonArray score_notes = score.createNestedArray("notes");
-    for (uint8_t i = 0; i < Score::notes.size(); i++)
+    for (uint8_t i = 0; i < active_score->notes.size(); i++)
     {
-        score_notes.add(Score::notes[i]);
+        score_notes.add(active_score->notes[i]);
     }
-    score["note"] = Score::notes[Score::note_idx];
+    score["note"] = active_score->notes[active_score->note_idx];
 
     // Score topographies:
     JsonArray score_topo = score.createNestedArray("topo");
-    for (uint8_t i = 0; i < Score::beat_sum.a_16.size(); i++)
+    for (uint8_t i = 0; i < active_score->beat_sum.a_16.size(); i++)
     {
-        score_topo.add(Score::beat_sum.a_16[i]);
+        score_topo.add(active_score->beat_sum.a_16[i]);
     }
 
     // Score topography values:
-    score["topo_ready"] = Score::beat_sum.ready();                  // TODO: replace with beat_regularity at some point
-    score["average_smooth"] = Score::beat_sum.average_smooth;       // TODO: replace with beat_regularity at some point
-    score["activation_thresh"] = Score::beat_sum.activation_thresh; // TODO: replace with beat_regularity at some point
+    score["topo_ready"] = active_score->beat_sum.ready();                  // TODO: replace with beat_regularity at some point
+    score["average_smooth"] = active_score->beat_sum.average_smooth;       // TODO: replace with beat_regularity at some point
+    score["activation_thresh"] = active_score->beat_sum.activation_thresh; // TODO: replace with beat_regularity at some point
 
     // --------------------------- Instruments ------------------------
     for (auto &instrument : instruments)

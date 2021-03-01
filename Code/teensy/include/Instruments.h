@@ -5,6 +5,7 @@
 #include <Globals.h>
 #include <Tsunami.h>
 #include <MIDI.h>
+#include <Score.h>
 
 class Synthesizer;
 
@@ -93,9 +94,9 @@ public:
     TOPOGRAPHY topography;
     TOPOGRAPHY regularity;
 
-    void trigger(midi::MidiInterface<HardwareSerial>);
+    void trigger(midi::MidiInterface<HardwareSerial>, Score *score);
 
-    void perform(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>);
+    void perform(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>, Score *active_score);
 
     void tidyUp(midi::MidiInterface<HardwareSerial>); // turn of MIDI notes etc
 
@@ -140,7 +141,7 @@ public:
 
     void countup_topography();
 
-    void mainNoteIteration(Synthesizer*, midi::MidiInterface<HardwareSerial>); // increase note_index of Score and play it
+    void mainNoteIteration(Synthesizer*, midi::MidiInterface<HardwareSerial>, Score *active_score); // increase note_index of Score and play it
 
     // timed events: --------------------------------------------------
 
@@ -150,7 +151,7 @@ public:
 
     void setInstrumentSlots(); // for Footswitchlooper
 
-    void topography_midi_effects(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>); // MIDI playback according to beat_topography
+    void topography_midi_effects(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>, Score *active_score); // MIDI playback according to beat_topography
 
     void tsunamiLink(); // Tsunami beat-linked pattern
 

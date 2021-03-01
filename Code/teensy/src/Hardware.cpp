@@ -5,7 +5,7 @@
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
+void Hardware::footswitch_pressed(std::vector<Instrument *> instruments, Score *active_score)
 {
   switch (FOOTSWITCH_MODE)
   {
@@ -42,11 +42,11 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
     break;
 
   case (RESET_AND_PROCEED_SCORE):
-    if (Score::beat_sum.average_smooth >= Score::beat_sum.activation_thresh) // score proceed criterion reached
+    if (active_score->beat_sum.average_smooth >= active_score->beat_sum.activation_thresh) // score proceed criterion reached
     {
       Globals::println_to_console("regularity height > 10: reset!");
-      Score::step++; // go to next score step
-      Score::setup = true;
+      active_score->step++; // go to next score step
+      active_score->setup = true;
       for (auto &instrument : instruments)
         for (int j = 0; j < 16; j++)
           instrument->topography.a_16[j] = 0;
@@ -54,14 +54,14 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
       Globals::println_to_console("all instrument topographies were reset.");
 
       for (int j = 0; j < 16; j++)
-        Score::beat_sum.a_16[j] = 0; // reset topography
-      Score::beat_sum.average_smooth = 0;
+        active_score->beat_sum.a_16[j] = 0; // reset topography
+      active_score->beat_sum.average_smooth = 0;
     }
 
     else // not enough strokes to proceed yet.
     {
       Globals::print_to_console("regularity too low to proceed.. is at ");
-      Globals::println_to_console(Score::beat_sum.average_smooth);
+      Globals::println_to_console(active_score->beat_sum.average_smooth);
     }
 
     // either way, shuffle instruments with Random_CC_Effect:
@@ -97,7 +97,7 @@ void Hardware::footswitch_released(std::vector<Instrument *> instruments)
   }
 }
 
-void Hardware::checkFootSwitch(std::vector<Instrument *> instruments)
+void Hardware::checkFootSwitch(std::vector<Instrument *> instruments, Score *active_score)
 {
 
   static int switch_state;
@@ -109,7 +109,7 @@ void Hardware::checkFootSwitch(std::vector<Instrument *> instruments)
   {
     if (switch_state == LOW)
     {
-      footswitch_pressed(instruments);
+      footswitch_pressed(instruments, active_score);
       Globals::println_to_console("Footswitch pressed.");
     }
     else

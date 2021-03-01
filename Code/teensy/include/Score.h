@@ -11,35 +11,45 @@ class Synthesizer;
 class Score
 {
 public:
-    static int step;
+    Score()
+    {
+        // setup names of elements for display on Serial Monitor:
+        beat_sum.tag = "v";
+        beat_regularity.tag = "r";
+    }
 
-    static std::vector<int> notes;
-    static int note_idx;        // points at active (bass-)note
-    static int note_change_pos; // defines at what position to increase note_idx
+    int step = 0;
+    int note_idx = 0;        // points at active (bass-)note
+    int note_change_pos = 0; // defines at what position to increase note_idx
+    std::vector<int> notes;
 
-    static boolean setup; // when true, current score_step's setup function is executed.
+    boolean setup = true; // when true, current score_step's setup function is executed.
 
-    static TOPOGRAPHY beat_sum;         // sum of all instrument topographies
-    static TOPOGRAPHY beat_regularity;  // for advance of Score::step
-    static TOPOGRAPHY topo_midi_effect; // for TopographyMidiEffect
+    TOPOGRAPHY beat_sum;         // sum of all instrument topographies
+    TOPOGRAPHY beat_regularity;  // for advance of step
+    TOPOGRAPHY topo_midi_effect; // for TopographyMidiEffect
+
+
 
     // SETUP etc:
-    static void set_notes(std::vector<int> list);
+    void set_step_function(int trigger_step, String function); // TODO: set score-step-functions here
+    void set_notes(std::vector<int> list);
+    void add_bassNote(int note); // adds a NOTE to notes[]
 
-    static void add_bassNote(int note); // adds a NOTE to notes[]
-
+    // STANDARD RUN:
+    void run(); // iterates through all score steps, executing the current step functions
+    void run_doubleSquirrel(Score *active_score, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca, Instrument *hihat, Instrument *snare, Instrument *kick, Instrument *tom2, Instrument *ride, Instrument *crash1, Instrument *standtom); // TODO: tentative, as this should be dynamic later..
 
     // MODES:
-    static void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
+    void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
 
-    static void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on never off):
+    void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on never off):
 
-    static void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
+    void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
 
-    static void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // creates an envelope for volume filter via topography
+    void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // creates an envelope for volume filter via topography
 
-    static void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // changes the delay times on each 16th-step
+    void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // changes the delay times on each 16th-step
 
-    // static void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
-
+    // void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
 };

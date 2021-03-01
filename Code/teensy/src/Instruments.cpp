@@ -240,7 +240,7 @@ void Instrument::setInstrumentPrintString()
 ///////////////////////////////////////////////////////////////////////
 
 ////////////////////////////// TRIGGERS ///////////////////////////////
-void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI, Score *active_score)
 {
   // always count up topography:
   countup_topography();
@@ -294,7 +294,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
     random_change_cc_in(MIDI);
     break;
   case MainNoteIteration:
-    mainNoteIteration(midi_settings.synth, MIDI);
+    mainNoteIteration(midi_settings.synth, MIDI, active_score);
     break;  
     
   default:
@@ -305,7 +305,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
 ///////////////////////////// TIMED EFFECTS ///////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void Instrument::perform(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::perform(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI, Score *active_score)
 {
   switch (effect)
   {
@@ -324,7 +324,7 @@ void Instrument::perform(std::vector<Instrument *> instruments, midi::MidiInterf
     break;
 
   case TopographyMidiEffect:
-    topography_midi_effects(instruments, MIDI);
+    topography_midi_effects(instruments, MIDI, active_score);
     break;
 
   default:
@@ -571,15 +571,15 @@ void Instrument::countup_topography()
 }
 
 // increase note_idx of Score class:
-void Instrument::mainNoteIteration(Synthesizer *synth_, midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::mainNoteIteration(Synthesizer *synth_, midi::MidiInterface<HardwareSerial> MIDI, Score *active_score)
 {
   static unsigned long lastNoteChange = 0;
 
   if (millis() > lastNoteChange + 4000) // only do this once in an interval of 4 seconds, because there are always many hits on a cymbal..
   {
-    synth_->sendNoteOff(Score::notes[Score::note_idx], MIDI);      // turn previous note off
-    Score::note_idx = (Score::note_idx + 1) % Score::notes.size(); // iterate note pointer
-    synth_->sendNoteOn(Score::notes[Score::note_idx], MIDI);       // turn next note on
+    synth_->sendNoteOff(active_score->notes[active_score->note_idx], MIDI);      // turn previous note off
+    active_score->note_idx = (active_score->note_idx + 1) % active_score->notes.size(); // iterate note pointer
+    synth_->sendNoteOn(active_score->notes[active_score->note_idx], MIDI);       // turn next note on
 
     lastNoteChange = millis();
   }
@@ -826,7 +826,7 @@ void Instrument::tsunamiLink()
 
 // TODO: make this a static function of Score
 // ---------- MIDI playback according to beat_topography --------
-void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI, Score *active_score)
 {
   if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
   {
@@ -834,19 +834,19 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, 
     topography.smoothen_dataArray(); // erases "noise" from arrays if SNR>snr_threshold
 
     // reset slot for volume
-    Score::topo_midi_effect.reset();
+    active_score->topo_midi_effect.reset();
 
     // sum up all topographies of all instruments:
     for (Instrument *instr : instruments) // of each instrument
     {
       if (instr->effect == TopographyMidiEffect)
-        Score::topo_midi_effect.add(&topography);
+        active_score->topo_midi_effect.add(&topography);
     }
-    Score::topo_midi_effect.smoothen_dataArray();
+    active_score->topo_midi_effect.smoothen_dataArray();
 
     // ------------ result-> change volume and play MIDI --------
     // ----------------------------------------------------------
-    int vol = min(Score::topo_midi_effect.a_16[Globals::current_16th_count] * 13, 255);
+    int vol = min(active_score->topo_midi_effect.a_16[Globals::current_16th_count] * 13, 255);
 
     if (topography.a_16[Globals::current_16th_count] > 0)
       midi_settings.synth->sendControlChange(midi_settings.cc_chan, vol, MIDI);
