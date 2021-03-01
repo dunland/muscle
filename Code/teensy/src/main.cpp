@@ -21,6 +21,7 @@
 #include <Hardware.h>
 #include <Score.h>
 #include <Serial.h>
+#include <Rhythmics.h>
 
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
@@ -40,6 +41,8 @@ static std::vector<Instrument *> instruments; // all instruments go in here
 
 Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
 Synthesizer *volca; // create a KORG Volca Keys instrument called volca
+
+Rhythmics *rhythmics;
 
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
@@ -162,6 +165,8 @@ void setup()
   ride = new Instrument(A4, Ride);
 
   instruments = {snare, hihat, kick, tom2, standtom, crash1, ride};
+
+  rhythmics = new Rhythmics();
 
   // initialize arrays:
   for (auto &instrument : instruments)
@@ -294,7 +299,6 @@ void loop()
   ///////////////////////////// TIMED ACTIONS /////////////////////////
   // (automatically invoke rhythm-linked actions)
   static int last_beat_pos = 0;
-  static boolean toggleLED = true;
   static boolean sendMidiCopy = false;
 
   // get current beat position:
@@ -317,126 +321,22 @@ void loop()
   }
 
   //----------------------- DO THINGS ONCE PER 32nd-step:--------------
-  //-------------------------------------------------------------------
+  rhythmics->run_beat(last_beat_pos, instruments, MIDI);
+
+  //////////////////////////////// SCORE ////////////////////////////
+  ///////////////////////////////////////////////////////////////////
+
+  // step proceeds if footswitch is pressed (in mode RESET_AND_PROCEED_SCORE) when regularity is high enough
+
+  // THIS SONG IS COMPOSED FOR microKORG A.63
+  // SCORE, stepwise:
+
+  static int rhythmic_iterator;
+  static std::vector<int> locrian_mode = {Score::notes[0] + 1, Score::notes[0] + 3, Score::notes[0] + 5, Score::notes[0] + 6, Score::notes[0] + 8, Score::notes[0] + 11};
+  static int note_idx = -1;
 
   if (Globals::current_beat_pos != last_beat_pos)
   {
-    // tidy up with previous beat position ----------------------------
-    // apply topography derivations from previous beats
-    // → problem: if there was any stroke at all, it was probably not on the very first run BEFORE derivation was executed
-
-    if (Globals::do_print_JSON)
-      JSON::compose_and_send_json(instruments);
-
-    // -------------------------- 32nd-notes --------------------------
-
-    // print millis and current beat:
-    if (Globals::do_send_to_processing)
-      Globals::print_to_console("m");
-    Globals::print_to_console(String(millis()));
-    Globals::print_to_console("\t");
-    // Globals::print_to_console(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
-    if (Globals::do_send_to_processing)
-      Globals::print_to_console("b");
-    Globals::print_to_console(Globals::current_beat_pos);
-    Globals::print_to_console("\t");
-
-    // -------------------------- full notes: -------------------------
-    if (Globals::current_beat_pos == 0)
-    {
-    }
-
-    // ------------------------- quarter notes: -----------------------
-    if (Globals::current_beat_pos % 8 == 0) // Globals::current_beat_pos holds 32 → %8 makes 4.
-    {
-      // Hardware::vibrate_motor(50);
-      // mKorg->sendNoteOn(50, MIDI);
-      // MIDI.sendNoteOn(50, 127, 2);
-    }
-    // Debug: play MIDI note on quarter notes
-    // if (Globals::current_beat_pos % 8 == 0)
-    // {
-    //   MIDI.sendNoteOn(57, 127, 2);
-    // }
-    // else
-    // {
-    //   MIDI.sendNoteOff(57, 127, 2);
-    // }
-
-    // --------------------------- 8th notes: -------------------------
-    if (Globals::current_beat_pos % 4 == 0)
-    {
-      // increase 8th note counter:
-      Globals::current_eighth_count = (Globals::current_eighth_count + 1) % 8;
-      toggleLED = !toggleLED;
-
-      // blink LED rhythmically:
-      digitalWrite(LED_BUILTIN, toggleLED);
-    }
-
-    // --------------------------- 16th notes: ------------------------
-    if (Globals::current_beat_pos % 2 == 0)
-    {
-      // increase 16th note counter:
-      Globals::current_16th_count = (Globals::current_16th_count + 1) % 16;
-    }
-
-    // ----------------------------- draw play log to console
-
-    // Globals::print_to_console(Globals::current_beat_pos / 4);
-    // Globals::print_to_console("\t");
-    // Globals::print_to_console(Globals::current_eighth_count);
-    for (auto &instrument : instruments)
-    {
-      Globals::print_to_console(instrument->output_string);
-      instrument->output_string = "\t";
-    }
-
-    // sum up all topographies of all instruments:
-    Score::beat_sum.reset();
-    for (auto &instrument : instruments)
-    {
-      if (instrument->drumtype != Ride && instrument->drumtype != Crash1 && instrument->drumtype != Crash2) // cymbals have too many counts
-        Score::beat_sum.add(&instrument->topography);
-    }
-    Score::beat_sum.smoothen_dataArray();
-
-    Globals::print_to_console("avg: ");
-    Globals::print_to_console(Score::beat_sum.average_smooth);
-    Globals::print_to_console("/");
-    Globals::print_to_console(Score::beat_sum.activation_thresh);
-    Globals::print_to_console("\tstep:");
-    Globals::println_to_console(Score::step);
-
-    Score::beat_regularity.derive_from(&Score::beat_sum); // TODO: also do this for all instruments
-
-    // print topo arrays:
-    if (Globals::do_print_beat_sum)
-    {
-      // for (auto &instrument : instruments)
-      // Globals::printTopoArray(&instrument->topography);
-      Globals::printTopoArray(&Score::beat_sum); // print volume layer
-    }
-    // Globals::printTopoArray(&Score::beat_regularity);
-
-    // perform timed pin actions according to current beat:
-    for (auto &instrument : instruments)
-    {
-      instrument->perform(instruments, MIDI);
-    }
-
-    //////////////////////////////// SCORE ////////////////////////////
-    ///////////////////////////////////////////////////////////////////
-
-    // step proceeds if footswitch is pressed (in mode RESET_AND_PROCEED_SCORE) when regularity is high enough
-
-    // THIS SONG IS COMPOSED FOR microKORG A.63
-    // SCORE, stepwise:
-
-    static int rhythmic_iterator;
-    static std::vector<int> locrian_mode = {Score::notes[0] + 1, Score::notes[0] + 3, Score::notes[0] + 5, Score::notes[0] + 6, Score::notes[0] + 8, Score::notes[0] + 11};
-    static int note_idx = -1;
-
     switch (Score::step)
     {
 
