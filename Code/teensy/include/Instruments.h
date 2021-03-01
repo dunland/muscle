@@ -135,6 +135,8 @@ public:
 
     void change_cc_in(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 
+    void reflex_and_playMidi(midi::MidiInterface<HardwareSerial> MIDI); // plays note when hit and changes CC
+
     void random_change_cc_in(midi::MidiInterface<HardwareSerial> MIDI); // changes CC using integer, not CC_Type.
 
     void swell_rec(midi::MidiInterface<HardwareSerial>);

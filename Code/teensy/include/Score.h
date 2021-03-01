@@ -40,6 +40,10 @@ public:
     void run(); // iterates through all score steps, executing the current step functions
     void run_doubleSquirrel(Score *active_score, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca, Instrument *hihat, Instrument *snare, Instrument *kick, Instrument *tom2, Instrument *ride, Instrument *crash1, Instrument *standtom); // TODO: tentative, as this should be dynamic later..
 
+    void run_elektrosmoff();
+
+    void run_experimental();
+
     // MODES:
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
 

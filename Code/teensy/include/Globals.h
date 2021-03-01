@@ -34,7 +34,8 @@ enum EffectsType
   TopographyMidiEffect = 8,
   Change_CC = 9,
   Random_CC_Effect = 10,
-  MainNoteIteration = 11 
+  MainNoteIteration = 11, 
+  Reflex_and_PlayMidi = 12
 };
 
 enum CC_Type // channels on mKORG:

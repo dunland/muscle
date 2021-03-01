@@ -41,26 +41,46 @@ void Score::set_notes(std::vector<int> list)
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////// STANDARD RUN //////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-
 void Score::run()
+{
+}
+
+void Score::run_elektrosmoff()
+{
+}
+
+void Score::run_experimental()
 {
     switch (step)
     {
-    case 1:
+    case 1: // change CC ("Reflex") + PlayMidi
         if (setup)
         {
-            // Drumset::kick->set_effect(EffectsType )
-            // Drumset::snare->
-            // Drumset::tom2->
-            // Drumset::standtom->
+            Hardware::FOOTSWITCH_MODE = Hardware::EXPERIMENTAL;
+            Drumset::kick->set_effect(Reflex_and_PlayMidi);
+            Drumset::snare->set_effect(Reflex_and_PlayMidi);
+            Drumset::tom2->set_effect(Reflex_and_PlayMidi);
+            Drumset::standtom->set_effect(Reflex_and_PlayMidi);
+            Drumset::hihat->set_effect(TapTempo);
             setup = false;
         }
-
         break;
-    case 2:
 
+    case 2: // change CC only
+        if (setup)
+        {
+            Hardware::FOOTSWITCH_MODE = Hardware::EXPERIMENTAL;
+            Drumset::kick->set_effect(Change_CC);
+            Drumset::snare->set_effect(Change_CC);
+            Drumset::tom2->set_effect(Change_CC);
+            Drumset::standtom->set_effect(Change_CC);
+            Drumset::hihat->set_effect(TapTempo);
+            setup = false;
+        }
         break;
+
     default:
+        step = 1;
         break;
     }
 }
@@ -377,7 +397,7 @@ void Score::run_doubleSquirrel(Score *active_score, midi::MidiInterface<Hardware
         //     // break;
 
     default: // go back to beginning...
-        active_score->step = 0;
+        step = 0;
         break;
     }
 }

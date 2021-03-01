@@ -19,7 +19,8 @@ public:
   static const int HOLD_CC = 1;
   static const int RESET_TOPO = 2; // resets beat_topography (of all instruments)
   static const int RESET_AND_PROCEED_SCORE = 3;
-  static const int FOOTSWITCH_MODE = RESET_AND_PROCEED_SCORE;
+  static const int EXPERIMENTAL = 4; // hold = mute, release = randomize and increase score step
+  static int FOOTSWITCH_MODE;
 
   static void footswitch_pressed(std::vector<Instrument *> instruments, Score *score);
 

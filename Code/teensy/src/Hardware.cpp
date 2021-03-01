@@ -5,6 +5,8 @@
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
+int Hardware::FOOTSWITCH_MODE = RESET_AND_PROCEED_SCORE;
+
 void Hardware::footswitch_pressed(std::vector<Instrument *> instruments, Score *active_score)
 {
   switch (FOOTSWITCH_MODE)
@@ -73,6 +75,14 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments, Score *
 
     break;
 
+  case (EXPERIMENTAL):
+    active_score->step++; // go to next score step
+    active_score->setup = true;
+
+    for (auto &instrument : instruments)
+      instrument->set_effect(Change_CC);
+    break;
+
   default:
     Globals::println_to_console("Footswitch mode not defined!");
     break;
@@ -90,6 +100,14 @@ void Hardware::footswitch_released(std::vector<Instrument *> instruments)
 
   case (HOLD_CC):
     Globals::footswitch_is_pressed = false;
+    break;
+
+  case (EXPERIMENTAL):
+    for (auto &instrument : instruments)
+    {
+      instrument->shuffle_cc();
+      instrument->set_effect(Change_CC);
+    }
     break;
 
   default:

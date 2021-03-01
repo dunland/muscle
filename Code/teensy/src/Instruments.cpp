@@ -297,6 +297,11 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI, Score *active
     mainNoteIteration(midi_settings.synth, MIDI, active_score);
     break;
 
+  case Reflex_and_PlayMidi: // combines PlayMidi and Change_CC
+    playMidi(MIDI);
+    change_cc_in(MIDI);
+    break;
+
   default:
     break;
   }
