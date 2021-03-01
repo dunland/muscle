@@ -44,6 +44,25 @@ void Score::set_notes(std::vector<int> list)
 
 void Score::run()
 {
+    switch (step)
+    {
+    case 1:
+        if (setup)
+        {
+            // Drumset::kick->set_effect(EffectsType )
+            // Drumset::snare->
+            // Drumset::tom2->
+            // Drumset::standtom->
+            setup = false;
+        }
+
+        break;
+    case 2:
+
+        break;
+    default:
+        break;
+    }
 }
 
 void Score::run_doubleSquirrel(Score *active_score, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca, Instrument *hihat, Instrument *snare, Instrument *kick, Instrument *tom2, Instrument *ride, Instrument *crash1, Instrument *standtom) // TODO: make this much more automatic!!

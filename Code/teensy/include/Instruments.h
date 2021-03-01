@@ -141,7 +141,7 @@ public:
 
     void countup_topography();
 
-    void mainNoteIteration(Synthesizer*, midi::MidiInterface<HardwareSerial>, Score *active_score); // increase note_index of Score and play it
+    void mainNoteIteration(Synthesizer *, midi::MidiInterface<HardwareSerial>, Score *active_score); // increase note_index of Score and play it
 
     // timed events: --------------------------------------------------
 
@@ -162,4 +162,19 @@ public:
     void change_cc_out(midi::MidiInterface<HardwareSerial>);
 
     void shuffle_cc();
+};
+
+class Drumset
+{
+    public:
+    static Instrument *snare;
+    static Instrument *hihat;
+    static Instrument *kick;
+    static Instrument *tom2;
+    static Instrument *standtom;
+    static Instrument *crash1;
+    static Instrument *cowbell;
+    static Instrument *ride;
+    static Instrument *tom1;
+    static Instrument *crash2;
 };

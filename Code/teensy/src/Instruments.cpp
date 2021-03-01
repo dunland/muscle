@@ -295,8 +295,8 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI, Score *active
     break;
   case MainNoteIteration:
     mainNoteIteration(midi_settings.synth, MIDI, active_score);
-    break;  
-    
+    break;
+
   default:
     break;
   }
@@ -385,6 +385,7 @@ void Instrument::random_change_cc_in(midi::MidiInterface<HardwareSerial> MIDI) /
   output_string += "\t";
 }
 
+// plays a Midi note:
 void Instrument::playMidi(midi::MidiInterface<HardwareSerial> MIDI)
 {
   midi_settings.synth->sendNoteOn(midi_settings.active_note, MIDI);
@@ -577,9 +578,9 @@ void Instrument::mainNoteIteration(Synthesizer *synth_, midi::MidiInterface<Hard
 
   if (millis() > lastNoteChange + 4000) // only do this once in an interval of 4 seconds, because there are always many hits on a cymbal..
   {
-    synth_->sendNoteOff(active_score->notes[active_score->note_idx], MIDI);      // turn previous note off
+    synth_->sendNoteOff(active_score->notes[active_score->note_idx], MIDI);             // turn previous note off
     active_score->note_idx = (active_score->note_idx + 1) % active_score->notes.size(); // iterate note pointer
-    synth_->sendNoteOn(active_score->notes[active_score->note_idx], MIDI);       // turn next note on
+    synth_->sendNoteOn(active_score->notes[active_score->note_idx], MIDI);              // turn next note on
 
     lastNoteChange = millis();
   }
@@ -923,3 +924,13 @@ void Instrument::shuffle_cc()
     }
   }
 }
+
+// instantiate instruments:
+Instrument *Drumset::snare = new Instrument(A5, Snare);
+Instrument *Drumset::hihat = new Instrument(A6, Hihat);
+Instrument *Drumset::kick = new Instrument(A1, Kick);
+Instrument *Drumset::tom2 = new Instrument(A7, Tom2);
+Instrument *Drumset::standtom = new Instrument(A2, Standtom1);
+Instrument *Drumset::cowbell = new Instrument(A3, Cowbell);
+Instrument *Drumset::crash1 = new Instrument(A0, Crash1);
+Instrument *Drumset::ride = new Instrument(A4, Ride);

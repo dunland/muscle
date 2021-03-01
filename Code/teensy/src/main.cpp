@@ -26,16 +26,6 @@
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
 // define instruments:
-Instrument *snare;
-Instrument *hihat;
-Instrument *kick;
-Instrument *tom2;
-Instrument *standtom;
-Instrument *crash1;
-Instrument *cowbell;
-Instrument *ride;
-// Instrument *tom1;
-// Instrument *crash2;
 
 static std::vector<Instrument *> instruments; // all instruments go in here
 
@@ -154,17 +144,9 @@ void setup()
   // instantiate external MIDI devices:
   mKorg = new Synthesizer(2);
   volca = new Synthesizer(1);
-  // instantiate instruments:
-  snare = new Instrument(A5, Snare);
-  hihat = new Instrument(A6, Hihat);
-  kick = new Instrument(A1, Kick);
-  tom2 = new Instrument(A7, Tom2);
-  standtom = new Instrument(A2, Standtom1);
-  cowbell = new Instrument(A3, Cowbell);
-  crash1 = new Instrument(A0, Crash1);
-  ride = new Instrument(A4, Ride);
 
-  instruments = {snare, hihat, kick, tom2, standtom, crash1, ride};
+
+  instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::crash1, Drumset::ride};
 
   rhythmics = new Rhythmics();
 
@@ -186,14 +168,14 @@ void setup()
 
   // tom1->sensitivity.threshold = 200;
   // tom1->sensitivity.crossings = 20;
-  hihat->setup_sensitivity(80, 15, 10, false);
-  standtom->setup_sensitivity(200, 10, 10, false); // (2020-11-11) // 60, 20 (2020-08-27)
-  tom2->setup_sensitivity(100, 9, 10, false);      // 300, 18
-  kick->setup_sensitivity(200, 12, 10, false);     // (2020-11-11) // 100, 16 (2020-08-27)
-  cowbell->setup_sensitivity(80, 15, 10, false);
-  crash1->setup_sensitivity(300, 2, 5, true);
-  ride->setup_sensitivity(400, 2, 5, true);
-  snare->setup_sensitivity(120, 10, 10, false); // (2020-11-11) // 180, 12 (2020-08-27)
+  Drumset::hihat->setup_sensitivity(80, 15, 10, false);
+  Drumset::standtom->setup_sensitivity(200, 10, 10, false); // (2020-11-11) // 60, 20 (2020-08-27)
+  Drumset::tom2->setup_sensitivity(100, 9, 10, false);      // 300, 18
+  Drumset::kick->setup_sensitivity(200, 12, 10, false);     // (2020-11-11) // 100, 16 (2020-08-27)
+  Drumset::cowbell->setup_sensitivity(80, 15, 10, false);
+  Drumset::crash1->setup_sensitivity(300, 2, 5, true);
+  Drumset::ride->setup_sensitivity(400, 2, 5, true);
+  Drumset::snare->setup_sensitivity(120, 10, 10, false); // (2020-11-11) // 180, 12 (2020-08-27)
 
   // calculate noise floor:
   for (auto &instrument : instruments)
@@ -239,30 +221,30 @@ void setup()
   }
 
   // link midi synth to instruments:
-  snare->midi_settings.synth = mKorg;
-  kick->midi_settings.synth = mKorg;
-  hihat->midi_settings.synth = mKorg;
-  crash1->midi_settings.synth = mKorg;
-  ride->midi_settings.synth = mKorg;
-  tom2->midi_settings.synth = mKorg;
-  standtom->midi_settings.synth = mKorg;
-  cowbell->midi_settings.synth = mKorg;
+  Drumset::snare->midi_settings.synth = mKorg;
+  Drumset::kick->midi_settings.synth = mKorg;
+  Drumset::hihat->midi_settings.synth = mKorg;
+  Drumset::crash1->midi_settings.synth = mKorg;
+  Drumset::ride->midi_settings.synth = mKorg;
+  Drumset::tom2->midi_settings.synth = mKorg;
+  Drumset::standtom->midi_settings.synth = mKorg;
+  Drumset::cowbell->midi_settings.synth = mKorg;
 
   // an initial midi note must be defined, otherwise there is a problem with the tidyUp function
-  // snare->midi_settings.active_note = 50;
-  // kick->midi_settings.active_note = 50;
-  // hihat->midi_settings.active_note = 50;
-  // crash1->midi_settings.active_note = 50;
-  // ride->midi_settings.active_note = 50;
-  // tom2->midi_settings.active_note = 50;
-  // standtom->midi_settings.active_note = 50;
-  // cowbell->midi_settings.active_note = 50;
+  // Drumset::snare->midi_settings.active_note = 50;
+  // Drumset::kick->midi_settings.active_note = 50;
+  // Drumset::hihat->midi_settings.active_note = 50;
+  // Drumset::crash1->midi_settings.active_note = 50;
+  // Drumset::ride->midi_settings.active_note = 50;
+  // Drumset::tom2->midi_settings.active_note = 50;
+  // Drumset::standtom->midi_settings.active_note = 50;
+  // Drumset::cowbell->midi_settings.active_note = 50;
 
   // assign startup instrument effects:
-  hihat->effect = TapTempo;
-  crash1->effect = Monitor;
-  cowbell->effect = Monitor;
-  ride->effect = Monitor;
+  Drumset::hihat->effect = TapTempo;
+  Drumset::crash1->effect = Monitor;
+  Drumset::cowbell->effect = Monitor;
+  Drumset::ride->effect = Monitor;
 
   // -------------------------- START TIMERS --------------------------
   pinMonitor.begin(samplePins, 1000); // sample pin every 1 millisecond
@@ -339,7 +321,7 @@ void loop()
 
   if (Globals::current_beat_pos != last_beat_pos)
   {
-    active_score->run_doubleSquirrel(active_score, MIDI, mKorg, volca, hihat, snare, kick, tom2, ride, crash1, standtom); // TODO: manual assignment of functions, automatic access to instruments etc!!!
+    active_score->run_doubleSquirrel(active_score, MIDI, mKorg, volca, Drumset::hihat, Drumset::snare, Drumset::kick, Drumset::tom2, Drumset::ride, Drumset::crash1, Drumset::standtom); // TODO: manual assignment of functions, automatic access to instruments etc!!!
 
     // active_score->run();
 
