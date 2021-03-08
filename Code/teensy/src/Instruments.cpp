@@ -61,6 +61,20 @@ void Instrument::set_effect(EffectsType effect_)
     }
     break;
 
+  case Reflex_and_PlayMidi:
+    score.ready_to_shuffle = true;
+    shuffle_cc();
+    if (midi_settings.notes.size() > 0 && midi_settings.active_note > 0)
+    {
+      effect = effect_;
+      Globals::println_to_console("done.");
+    }
+    else
+    {
+      Globals::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
+    }
+    break;
+
   case Random_CC_Effect:
     score.ready_to_shuffle = true;
     shuffle_cc();
@@ -348,6 +362,11 @@ void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
   {
   case PlayMidi:
     turnMidiNoteOff(MIDI);
+    break;
+
+  case Reflex_and_PlayMidi:
+    turnMidiNoteOff(MIDI);
+    shuffle_cc();
     break;
 
   case Change_CC:
@@ -897,6 +916,7 @@ void Instrument::change_cc_out(midi::MidiInterface<HardwareSerial> MIDI) // chan
   output_string += "\t";
 }
 
+// sets the midi channel to a random value of all implemented channels
 void Instrument::shuffle_cc()
 {
   if (score.ready_to_shuffle)
@@ -910,7 +930,7 @@ void Instrument::shuffle_cc()
 
       do
       {
-        midi_settings.random_cc_chan = int(random(127));
+        midi_settings.random_cc_chan = int(random(128));
         midi_settings.cc_chan = Globals::int_to_cc_type(midi_settings.random_cc_chan);
       } while (midi_settings.cc_chan == None);
 

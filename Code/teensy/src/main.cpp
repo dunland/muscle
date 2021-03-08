@@ -101,10 +101,10 @@ void setup()
 {
   //---------------------- Global / Debug values ----------------------
 
-  Globals::use_responsiveCalibration = true;
+  Globals::use_responsiveCalibration = false;
   Globals::do_print_beat_sum = false; // prints active_score->beat_sum topography array
   Globals::do_print_to_console = true;
-  Globals::do_print_JSON = true;
+  Globals::do_print_JSON = false;
 
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
@@ -205,11 +205,6 @@ void setup()
   doubleSquirrel = new Score();
   elektrosmoff = new Score();
   active_score = doubleSquirrel;
-
-  // add a bass note to Score
-  active_score->notes.push_back(int(random(36, 48)));
-  Globals::print_to_console("active_score->note[0] = ");
-  Globals::println_to_console(active_score->notes[0]);
 
   // turn off all currently playing MIDI notes:
   for (int channel = 1; channel < 3; channel++)
@@ -321,9 +316,10 @@ void loop()
 
   if (Globals::current_beat_pos != last_beat_pos)
   {
-    active_score->run_doubleSquirrel(active_score, MIDI, mKorg, volca, Drumset::hihat, Drumset::snare, Drumset::kick, Drumset::tom2, Drumset::ride, Drumset::crash1, Drumset::standtom); // TODO: manual assignment of functions, automatic access to instruments etc!!!
+    // active_score->run_doubleSquirrel(active_score, MIDI, mKorg, volca, Drumset::hihat, Drumset::snare, Drumset::kick, Drumset::tom2, Drumset::ride, Drumset::crash1, Drumset::standtom); // TODO: manual assignment of functions, automatic access to instruments etc!!!
 
     // active_score->run();
+    active_score->run_experimental(mKorg, volca);
 
     // vibrate if new score is ready:
     if (active_score->beat_sum.ready())

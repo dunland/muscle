@@ -38,6 +38,10 @@ void Score::set_notes(std::vector<int> list)
     Globals::println_to_console("");
 }
 
+void Score::set_step_function(int trigger_step, Instrument *instrument, EffectsType effect_)
+{
+}
+
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////// STANDARD RUN //////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -49,18 +53,48 @@ void Score::run_elektrosmoff()
 {
 }
 
-void Score::run_experimental()
+// 1: playMidi+CC_Change; 2: change_cc only
+void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca)
 {
     switch (step)
     {
     case 1: // change CC ("Reflex") + PlayMidi
         if (setup)
         {
+            // Drumset::snare->midi_settings.active_note = notes[note_idx] + 18;
+            // Drumset::kick->midi_settings.active_note = notes[note_idx] + 6;
+            // Drumset::tom2->midi_settings.active_note = notes[note_idx] + 16;
+            // Drumset::standtom->midi_settings.active_note = notes[note_idx] + 12;
+
+            Drumset::kick->set_effect(PlayMidi);
+            Drumset::kick->setup_midi(None, mKorg, 127, 0, 1, 0.1);
+            Drumset::kick->shuffle_cc(); // set a random midi CC channel
+            Drumset::kick->midi_settings.notes.push_back(notes[0] + 12 + 7);
+            Drumset::kick->midi_settings.active_note = Drumset::kick->midi_settings.notes[0];
+
+            Drumset::snare->set_effect(PlayMidi);
+            Drumset::snare->setup_midi(None, mKorg, 127, 0, 1, 0.1);
+            Drumset::snare->shuffle_cc(); // set a random midi CC channel
+            Drumset::snare->midi_settings.notes.push_back(notes[0] + 12 + 12);
+            Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[0];
+
+            Drumset::tom2->set_effect(PlayMidi);
+            Drumset::tom2->setup_midi(None, mKorg, 127, 0, 1, 0.1);
+            Drumset::tom2->shuffle_cc(); // set a random midi CC channel
+            Drumset::tom2->midi_settings.notes.push_back(notes[0] + 12 + 5);
+            Drumset::tom2->midi_settings.active_note = Drumset::tom2->midi_settings.notes[0];
+
+            Drumset::standtom->set_effect(PlayMidi);
+            Drumset::standtom->setup_midi(None, mKorg, 127, 0, 1, 0.1);
+            Drumset::standtom->shuffle_cc(); // set a random midi CC channel
+            Drumset::standtom->midi_settings.notes.push_back(notes[0] + 12 + 7);
+            Drumset::standtom->midi_settings.active_note = Drumset::standtom->midi_settings.notes[0];
+
             Hardware::FOOTSWITCH_MODE = Hardware::EXPERIMENTAL;
-            Drumset::kick->set_effect(Reflex_and_PlayMidi);
-            Drumset::snare->set_effect(Reflex_and_PlayMidi);
-            Drumset::tom2->set_effect(Reflex_and_PlayMidi);
-            Drumset::standtom->set_effect(Reflex_and_PlayMidi);
+            Drumset::kick->set_effect(PlayMidi);
+            Drumset::snare->set_effect(PlayMidi);
+            Drumset::tom2->set_effect(PlayMidi);
+            Drumset::standtom->set_effect(PlayMidi);
             Drumset::hihat->set_effect(TapTempo);
             setup = false;
         }
@@ -85,6 +119,7 @@ void Score::run_experimental()
     }
 }
 
+// old routine from master thesis presentation:
 void Score::run_doubleSquirrel(Score *active_score, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca, Instrument *hihat, Instrument *snare, Instrument *kick, Instrument *tom2, Instrument *ride, Instrument *crash1, Instrument *standtom) // TODO: make this much more automatic!!
 {
     //   static int note_idx = -1;

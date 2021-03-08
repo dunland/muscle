@@ -16,9 +16,15 @@ public:
         // setup names of elements for display on Serial Monitor:
         beat_sum.tag = "v";
         beat_regularity.tag = "r";
+
+        // add a bass note to Score
+        notes.push_back(int(random(36, 48)));
+        Globals::print_to_console("active_score->note[0] = ");
+        Globals::println_to_console(notes[0]);
     }
 
     int step = 0;
+    std::vector<int> steps;
     int note_idx = 0;        // points at active (bass-)note
     int note_change_pos = 0; // defines at what position to increase note_idx
     std::vector<int> notes;
@@ -29,20 +35,18 @@ public:
     TOPOGRAPHY beat_regularity;  // for advance of step
     TOPOGRAPHY topo_midi_effect; // for TopographyMidiEffect
 
-
-
     // SETUP etc:
-    void set_step_function(int trigger_step, String function); // TODO: set score-step-functions here
+    void set_step_function(int trigger_step, Instrument *instrument, EffectsType); // TODO: set score-step-functions here
     void set_notes(std::vector<int> list);
     void add_bassNote(int note); // adds a NOTE to notes[]
 
     // STANDARD RUN:
-    void run(); // iterates through all score steps, executing the current step functions
+    void run();                                                                                                                                                                                                                                                           // iterates through all score steps, executing the current step functions
     void run_doubleSquirrel(Score *active_score, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca, Instrument *hihat, Instrument *snare, Instrument *kick, Instrument *tom2, Instrument *ride, Instrument *crash1, Instrument *standtom); // TODO: tentative, as this should be dynamic later..
 
     void run_elektrosmoff();
 
-    void run_experimental();
+    void run_experimental(Synthesizer *mKorg, Synthesizer *volca);
 
     // MODES:
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
