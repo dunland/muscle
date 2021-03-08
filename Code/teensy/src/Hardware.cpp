@@ -140,6 +140,66 @@ void Hardware::checkFootSwitch(std::vector<Instrument *> instruments, Score *act
   }
 }
 
+////////////////////////////////// LCD ////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+LiquidCrystal *Hardware::lcd = new LiquidCrystal(RS, EN, D4, D5, D6, D7);
+
+void Hardware::update_lcd_display()
+{
+
+  // LCD SETUP:
+  lcd->setCursor(0, 0);      // move cursor to   (0, 0)
+  lcd->print(encoder_count); // print message at (0, 0)
+
+  lcd->setCursor(4, 0);
+  lcd->print(encoder_value);
+}
+
+// --------------------------------------------------------------------
+
+///////////////////////////// ROTARY ENCODER //////////////////////////
+///////////////////////////////////////////////////////////////////////
+Encoder *Hardware::myEnc = new Encoder(ENCODER1, ENCODER2);
+int Hardware::encoder_value;
+int Hardware::encoder_count = 0;
+
+void Hardware::checkEncoder()
+{
+  static long encoder_oldPosition = -999;
+  static int encoder_previous_count = 0;
+  long encoder_newPosition = myEnc->read();
+
+  // ROTARY ENCODER:
+  if (encoder_oldPosition != encoder_newPosition)
+  {
+    
+    // value rising:
+    if (encoder_oldPosition > encoder_newPosition)
+    {
+      if (encoder_count > 0)
+        encoder_count--;
+      encoder_oldPosition = encoder_newPosition;
+      if (encoder_count < 100 && encoder_previous_count >= 100)
+        lcd->clear();
+      encoder_previous_count = encoder_count;
+    }
+
+    // value sinking:
+    else
+    {
+      if (encoder_count < 127)
+        encoder_count++;
+      encoder_oldPosition = encoder_newPosition;
+    }
+  }
+
+  // PUSH BUTTON:
+  if (digitalRead(6) == LOW)
+    encoder_value = encoder_count;
+}
+
+// --------------------------------------------------------------------
+
 ////////////////////////////// VIBRATION MOTOR ////////////////////////
 ///////////////////////////////////////////////////////////////////////
 unsigned long Hardware::motor_vibration_begin = 0;

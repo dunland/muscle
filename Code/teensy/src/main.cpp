@@ -109,6 +109,7 @@ void setup()
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
   pinMode(FOOTSWITCH, INPUT_PULLUP);
+  pinMode(PUSHBUTTON, INPUT_PULLUP);
 
   randomSeed(analogRead(A0) * analogRead(A19));
 
@@ -132,6 +133,8 @@ void setup()
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
   // -------------------- Hardware initialization ---------------------
+  // Hardware::lcd(Hardware::RS, Hardware::EN, Hardware::D4, Hardware::D5, Hardware::D6, Hardware::D7);
+
   delay(1000);              // wait for Tsunami to finish reset // redundant?
   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
   delay(100);
@@ -139,6 +142,9 @@ void setup()
   Globals::tsunami.samplerateOffset(0, 0);
   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
   delay(100);                          // some time for Tsunami to respond with version string
+
+  // LCD
+  Hardware::lcd->begin(16, 2);
 
   // ------------------------ INSTRUMENT SETUP ------------------------
   // instantiate external MIDI devices:
@@ -348,6 +354,8 @@ void loop()
   // Hardware:
   Hardware::checkFootSwitch(instruments, active_score); // check step of footswitch
   // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
+  // rotary encoder:
+  Hardware::checkEncoder();
 
   // tidying up what's left from performing functions..
   for (auto &instrument : instruments)

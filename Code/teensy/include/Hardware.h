@@ -2,9 +2,24 @@
 
 #include <Globals.h>
 #include <MIDI.h>
+#include <LiquidCrystal.h>
+#include <Encoder.h>
 
 #define VIBR 0
 #define FOOTSWITCH 2
+
+// LCD Pins:
+#define RS 11
+#define EN 12
+#define D4 8
+#define D5 9
+#define D6 4
+#define D7 5
+
+// Encoder Pins:
+#define ENCODER1 3
+#define ENCODER2 6
+#define PUSHBUTTON 7
 
 class Score;
 class Instrument;
@@ -26,7 +41,24 @@ public:
 
   static void footswitch_released(std::vector<Instrument *> instruments);
 
-  static void checkFootSwitch(std::vector<Instrument *> instruments, Score* active_score);
+  static void checkFootSwitch(std::vector<Instrument *> instruments, Score *active_score);
+  // --------------------------------------------------------------------
+
+  ////////////////////////////////// LCD ////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////
+  static LiquidCrystal *lcd;
+  static void update_lcd_display();
+
+  // --------------------------------------------------------------------
+
+  ///////////////////////////// ROTARY ENCODER //////////////////////////
+  ///////////////////////////////////////////////////////////////////////
+  static Encoder *myEnc;
+  static int encoder_value;
+  static int encoder_count;
+
+  static void checkEncoder();
+
   // --------------------------------------------------------------------
 
   ////////////////////////////// VIBRATION MOTOR ////////////////////////
@@ -50,7 +82,7 @@ public:
     Globals::println_to_console(midi_channel);
 
     // set all notes to false:
-    for (int i = 0; i<127; i++)
+    for (int i = 0; i < 127; i++)
     {
       notes[i] = false;
     }
@@ -77,7 +109,7 @@ public:
 
   void sendControlChange(CC_Type cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI); // sets cc_value (used for JSON comm) and sends MIDI-ControlChange
 
-   void sendControlChange(int cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI); // sets cc_value using an integer and sends MIDI-ControlChange // for Random_CC_Effect
+  void sendControlChange(int cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI); // sets cc_value using an integer and sends MIDI-ControlChange // for Random_CC_Effect
 
   void sendNoteOn(int note, midi::MidiInterface<HardwareSerial> MIDI);
 
