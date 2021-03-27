@@ -83,12 +83,6 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
       instrument->set_effect(Change_CC);
     break;
 
-  // increment score:
-  case (INCREMENT_SCORE):
-    Globals::active_score->step++; // go to next score step
-    Globals::active_score->setup = true;
-    break;
-
   default:
     Globals::println_to_console("Footswitch mode not defined!");
     break;
@@ -114,6 +108,11 @@ void Hardware::footswitch_released(std::vector<Instrument *> instruments)
       instrument->shuffle_cc();
       instrument->set_effect(Change_CC);
     }
+    break;
+
+  // increment score:
+  case (INCREMENT_SCORE):
+    Globals::active_score->increase_step(); // go to next score step
     break;
 
   default:
@@ -162,6 +161,9 @@ void Hardware::display_scores()
   // active score display:
   lcd->setCursor(0, 1);
   lcd->print(Globals::score_list[Globals::active_score_pointer]->name);
+
+  lcd->setCursor(14, 1);
+  lcd->print(Globals::active_score->step);
 }
 
 // --------------------------------------------------------------------
@@ -202,9 +204,14 @@ void Hardware::checkEncoder()
     }
   }
 
-  // PUSH BUTTON:
-  if (digitalRead(PUSHBUTTON) == LOW)
+  ///////////////////////////// PUSH BUTTON ///////////////////////////
+  static unsigned long lastPush = 0;
+  if (digitalRead(PUSHBUTTON) == LOW && millis() > lastPush + 200)
+  {
     encoder_value = encoder_count;
+    Globals::active_score->increase_step();
+    lastPush = millis();
+  }
 }
 
 // --------------------------------------------------------------------

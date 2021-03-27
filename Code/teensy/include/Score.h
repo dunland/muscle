@@ -38,20 +38,23 @@ public:
     TOPOGRAPHY beat_regularity;  // for advance of step
     TOPOGRAPHY topo_midi_effect; // for TopographyMidiEffect
 
-    // SETUP etc:
+    // --------------------------- SETUP etc: -------------------------
     void set_step_function(int trigger_step, Instrument *instrument, EffectsType); // TODO: set score-step-functions here
     void set_notes(std::vector<int> list);
     void add_bassNote(int note); // adds a NOTE to notes[]
+    void increase_step();
+    void proceed_to_next_score();
 
     // STANDARD RUN: select according to score->name
-    void run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);                                                                                                                                                                                                                                                           // iterates through all score steps, executing the current step functions
+    void run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);                                    // iterates through all score steps, executing the current step functions
+
     void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca); // TODO: tentative, as this should be dynamic later..
 
-    void run_elektrosmoff(Synthesizer* mKorg, midi::MidiInterface<HardwareSerial> MIDI);
+    void run_elektrosmoff(Synthesizer *mKorg, midi::MidiInterface<HardwareSerial> MIDI);
 
     void run_experimental(Synthesizer *mKorg, Synthesizer *volca);
 
-    // MODES:
+    // ------------------------------- MODES: (deprecated) ------------
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
 
     void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on never off):

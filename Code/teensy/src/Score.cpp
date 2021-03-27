@@ -3,19 +3,9 @@
 #include <Instruments.h>
 #include <Hardware.h>
 
-void Score::add_bassNote(int note)
-{
-    notes.push_back(note);
-    Globals::print_to_console("note ");
-    Globals::print_to_console(note);
-    Globals::print_to_console(" has been added to Score::notes [ ");
-    for (uint8_t i = 0; i < notes.size(); i++)
-    {
-        Globals::print_to_console(notes[i]);
-        Globals::print_to_console(" ");
-    }
-    Globals::println_to_console("]");
-}
+
+/////////////////////////////////// SETUP FUNCTIONS /////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 
 void Score::set_notes(std::vector<int> list)
 {
@@ -42,6 +32,42 @@ void Score::set_step_function(int trigger_step, Instrument *instrument, EffectsT
 {
 }
 
+void Score::increase_step()
+{
+    step++;
+    setup = true;
+}
+
+void Score::proceed_to_next_score()
+{
+	Globals::println_to_console("End of score reached! Proceeding to next score!");
+	// proceed to next score in list:
+	Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::score_list.size();
+	// ...and begin at step 0:
+	Globals::score_list[Globals::active_score_pointer]->step = 0;
+	Globals::score_list[Globals::active_score_pointer]->setup = true;
+	Globals::active_score = Globals::score_list[Globals::active_score_pointer];
+
+    Hardware::lcd->clear();
+
+}
+
+//////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////
+void Score::add_bassNote(int note)
+{
+    notes.push_back(note);
+    Globals::print_to_console("note ");
+    Globals::print_to_console(note);
+    Globals::print_to_console(" has been added to Score::notes [ ");
+    for (uint8_t i = 0; i < notes.size(); i++)
+    {
+        Globals::print_to_console(notes[i]);
+        Globals::print_to_console(" ");
+    }
+    Globals::println_to_console("]");
+}
+
+
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////// STANDARD RUN //////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -55,14 +81,22 @@ void Score::run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
     {
         // run_doubleSquirrel(Synthesizer *mKorg, Synthesizer *volca, midi::MidiInterface<HardwareSerial> MIDI);
         Globals::println_to_console("running 'doubleSquirrel' -- but nothing to do yet..");
+        run_doubleSquirrel(MIDI, synth, synth);
     }
     else if (name == "experimental")
     {
         // run_experimental(Synthesizer* mKorg, Synthesizer* volca);
         Globals::println_to_console("running 'experimenal' -- but nothing to do yet..");
+        run_experimental(synth, synth);
     }
 }
 
+///////////////////////////////////////////////////////////////////////
+/////////////////////////////// SONGS /////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////// ELEKTROSMOFF /////////////////////////////
 void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
 {
     // THIS SONG IS COMPOSED FOR microKORG A.81
@@ -71,7 +105,8 @@ void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSer
     case 0:
         /* vocoder not activated */
         break;
-    case 1:
+
+    case 1: // Snare → Vocoder fade in
         if (setup)
         {
             Drumset::snare->set_effect(Monitor);
@@ -93,7 +128,7 @@ void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSer
         }
         break;
 
-    case 2:
+    case 2: // Snare → increas delay depth
         if (setup)
         {
             synth->amplevel = 127; // keep amp at maxLevel
@@ -102,16 +137,14 @@ void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSer
 
     default:
 
-        // proceed to next score in list:
-        Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::score_list.size();
-        // ...and begin at step 0:
-        Globals::score_list[Globals::active_score_pointer]->step = 0;
+        proceed_to_next_score();
         break;
     }
 
     // SCORE END -------------------------------
 }
 
+//////////////////////////// EXPERIMENTAL /////////////////////////////
 // 1: playMidi+CC_Change; 2: change_cc only
 void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca)
 {
@@ -173,14 +206,12 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca)
         break;
 
     default:
-        // proceed to next score in list:
-        Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::score_list.size();
-        // ...and begin at step 0:
-        Globals::score_list[Globals::active_score_pointer]->step = 0;
+        proceed_to_next_score();
         break;
     }
 }
 
+//////////////////////////// DOUBLE SQUIRREL /////////////////////////////
 // old routine from master thesis presentation:
 void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca) // TODO: make this much more automatic!!
 {
@@ -503,10 +534,7 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI, Synthes
         //     // break;
 
     default:
-        // proceed to next score in list:
-        Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::score_list.size();
-        // ...and begin at step 0:
-        Globals::score_list[Globals::active_score_pointer]->step = 0;
+        proceed_to_next_score();
         break;
     }
 }

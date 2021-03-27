@@ -33,10 +33,13 @@ static std::vector<Instrument *> instruments; // all instruments go in here
 Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
 Synthesizer *volca; // create a KORG Volca Keys instrument called volca
 
-Rhythmics *rhythmics;
 
+// Songs:
 Score *doubleSquirrel;
 Score *elektrosmoff;
+Score *experimental;
+
+Rhythmics *rhythmics;
 
 // ------------------------- interrupt timers -------------------------
 IntervalTimer pinMonitor; // reads pins every 1 ms
@@ -119,7 +122,6 @@ void setup()
   // Serial3.begin(57600); // contained in tsunami.begin()
   unsigned long wait_for_Serial = millis();
 
-  boolean once = true;
   while (!Serial) // prevents Serial flow from just stopping at some (early) point.
   {
 
@@ -224,8 +226,11 @@ void setup()
   // ---------------------------------- SCORE -------------------------
   doubleSquirrel = new Score("doubleSquirrel");
   elektrosmoff = new Score("elektrosmoff");
+  experimental = new Score("experimental");
   Globals::score_list.push_back(elektrosmoff);
-  Globals::active_score = doubleSquirrel;
+  Globals::score_list.push_back(doubleSquirrel);
+  Globals::score_list.push_back(experimental);
+  Globals::active_score = elektrosmoff;
 
   // turn off all currently playing MIDI notes:
   for (int channel = 1; channel < 3; channel++)
