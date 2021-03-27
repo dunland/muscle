@@ -35,19 +35,20 @@ public:
   static const int RESET_TOPO = 2; // resets beat_topography (of all instruments)
   static const int RESET_AND_PROCEED_SCORE = 3;
   static const int EXPERIMENTAL = 4; // hold = mute, release = randomize and increase score step
+  static const int INCREMENT_SCORE = 5; // hold = mute, release = randomize and increase score step
   static int FOOTSWITCH_MODE;
 
-  static void footswitch_pressed(std::vector<Instrument *> instruments, Score *score);
+  static void footswitch_pressed(std::vector<Instrument *> instruments);
 
   static void footswitch_released(std::vector<Instrument *> instruments);
 
-  static void checkFootSwitch(std::vector<Instrument *> instruments, Score *active_score);
+  static void checkFootSwitch(std::vector<Instrument *> instruments);
   // --------------------------------------------------------------------
 
   ////////////////////////////////// LCD ////////////////////////////////
   ///////////////////////////////////////////////////////////////////////
   static LiquidCrystal *lcd;
-  static void update_lcd_display();
+  static void display_scores();
 
   // --------------------------------------------------------------------
 

@@ -1,13 +1,12 @@
 /*
-   SUPER MUSCLE v.0.2.0
+   SUPER MUSCLE v.0.2.1
    ------------------------------------
-   December 2020
+   October 2020-March 2021
    by David Unland david[at]unland[dot]eu
    github.com/dunland/muscle
    ------------------------------------
    ------------------------------------
 */
-
 /* --------------------------------------------------------------------- */
 /* ------------------------------- GLOBAL ------------------------------ */
 /* --------------------------------------------------------------------- */
@@ -23,6 +22,8 @@
 #include <Serial.h>
 #include <Rhythmics.h>
 
+String VERSION_NUMBER = "0.2.1";
+
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
 // define instruments:
@@ -34,7 +35,6 @@ Synthesizer *volca; // create a KORG Volca Keys instrument called volca
 
 Rhythmics *rhythmics;
 
-Score *active_score;
 Score *doubleSquirrel;
 Score *elektrosmoff;
 
@@ -119,8 +119,10 @@ void setup()
   // Serial3.begin(57600); // contained in tsunami.begin()
   unsigned long wait_for_Serial = millis();
 
+  boolean once = true;
   while (!Serial) // prevents Serial flow from just stopping at some (early) point.
   {
+
     if (millis() > wait_for_Serial + 5000)
     {
       Globals::do_print_JSON = false;
@@ -131,6 +133,15 @@ void setup()
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
   MIDI.begin(MIDI_CHANNEL_OMNI);
+    // if (once)
+    // {
+    //   Hardware::lcd->begin(16, 2);
+    //   Hardware::lcd->setCursor(0, 0);
+    //   Hardware::lcd->print("SUPER MUSCLE");
+    //   Hardware::lcd->setCursor(0, 1);
+    //   Hardware::lcd->print("VERSION_NUMBER");
+    //   once = false;
+    // }
 
   // -------------------- Hardware initialization ---------------------
   // Hardware::lcd(Hardware::RS, Hardware::EN, Hardware::D4, Hardware::D5, Hardware::D6, Hardware::D7);
@@ -145,12 +156,15 @@ void setup()
 
   // LCD
   Hardware::lcd->begin(16, 2);
+  Hardware::lcd->setCursor(0,0);
+  Hardware::lcd->print("SUPER MUSCLE");
+  Hardware::lcd->setCursor(0,1);
+  Hardware::lcd->print(VERSION_NUMBER);
 
   // ------------------------ INSTRUMENT SETUP ------------------------
   // instantiate external MIDI devices:
   mKorg = new Synthesizer(2);
   volca = new Synthesizer(1);
-
 
   instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::crash1, Drumset::ride};
 
@@ -208,9 +222,10 @@ void setup()
   Globals::println_to_console("-----------------------------------------------");
 
   // ---------------------------------- SCORE -------------------------
-  doubleSquirrel = new Score();
-  elektrosmoff = new Score();
-  active_score = doubleSquirrel;
+  doubleSquirrel = new Score("doubleSquirrel");
+  elektrosmoff = new Score("elektrosmoff");
+  Globals::score_list.push_back(elektrosmoff);
+  Globals::active_score = doubleSquirrel;
 
   // turn off all currently playing MIDI notes:
   for (int channel = 1; channel < 3; channel++)
@@ -242,7 +257,7 @@ void setup()
   // Drumset::cowbell->midi_settings.active_note = 50;
 
   // assign startup instrument effects:
-  Drumset::hihat->effect = TapTempo;
+  Drumset::hihat->effect = Monitor;
   Drumset::crash1->effect = Monitor;
   Drumset::cowbell->effect = Monitor;
   Drumset::ride->effect = Monitor;
@@ -255,6 +270,9 @@ void setup()
   // Debug:
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
   // tracknum, channel
+
+  Hardware::lcd->clear();
+  delay(500);
 }
 
 /* --------------------------------------------------------------------- */
@@ -278,7 +296,7 @@ void loop()
     if (instrument->stroke_detected()) // evaluates pins for activity repeatedly
     {
       // ----------------------- perform pin action -------------------
-      instrument->trigger(MIDI, active_score); // runs trigger function according to instrument's EffectType
+      instrument->trigger(MIDI); // runs trigger function according to instrument's EffectType
       instrument->timing.wasHit = true;        // a flag to show that the instrument was hit (for transmission via JSON)
     }
   }
@@ -308,7 +326,7 @@ void loop()
   }
 
   //----------------------- DO THINGS ONCE PER 32nd-step:--------------
-  rhythmics->run_beat(last_beat_pos, instruments, MIDI, active_score);
+  rhythmics->run_beat(last_beat_pos, instruments, MIDI);
 
   //////////////////////////////// SCORE ////////////////////////////
   ///////////////////////////////////////////////////////////////////
@@ -318,17 +336,19 @@ void loop()
   // THIS SONG IS COMPOSED FOR microKORG A.63
   // SCORE, stepwise:
 
-  static std::vector<int> locrian_mode = {active_score->notes[0] + 1, active_score->notes[0] + 3, active_score->notes[0] + 5, active_score->notes[0] + 6, active_score->notes[0] + 8, active_score->notes[0] + 11};
+  static std::vector<int> locrian_mode = {Globals::active_score->notes[0] + 1, Globals::active_score->notes[0] + 3, Globals::active_score->notes[0] + 5, Globals::active_score->notes[0] + 6, Globals::active_score->notes[0] + 8, Globals::active_score->notes[0] + 11};
 
   if (Globals::current_beat_pos != last_beat_pos)
   {
-    // active_score->run_doubleSquirrel(active_score, MIDI, mKorg, volca, Drumset::hihat, Drumset::snare, Drumset::kick, Drumset::tom2, Drumset::ride, Drumset::crash1, Drumset::standtom); // TODO: manual assignment of functions, automatic access to instruments etc!!!
+    // Globals::active_score->run_doubleSquirrel(Globals::active_score, MIDI, mKorg, volca, Drumset::hihat, Drumset::snare, Drumset::kick, Drumset::tom2, Drumset::ride, Drumset::crash1, Drumset::standtom); // TODO: manual assignment of functions, automatic access to instruments etc!!!
 
-    // active_score->run();
-    active_score->run_experimental(mKorg, volca);
+    // Globals::active_score->load();
+    Globals::active_score->run(mKorg, MIDI); // TODO: globale Synthesizer-Liste
+    // Globals::active_score->run_experimental(mKorg, volca);
+    // Globals::active_score->run_elektrosmoff(mKorg, MIDI);
 
     // vibrate if new score is ready:
-    if (active_score->beat_sum.ready())
+    if (Globals::active_score->beat_sum.ready())
     {
       digitalWrite(VIBR, HIGH);
       Globals::println_to_console("ready to go to next score step! hit footswitch!");
@@ -352,10 +372,14 @@ void loop()
   Globals::last_16th_count = Globals::current_16th_count;
 
   // Hardware:
-  Hardware::checkFootSwitch(instruments, active_score); // check step of footswitch
+  Hardware::checkFootSwitch(instruments); // check step of footswitch
   // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
+
   // rotary encoder:
   Hardware::checkEncoder();
+
+  // LCD:
+  Hardware::display_scores();
 
   // tidying up what's left from performing functions..
   for (auto &instrument : instruments)

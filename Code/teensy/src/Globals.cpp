@@ -18,6 +18,12 @@ IntervalTimer Globals::masterClock; // 1 bar
 
 Tsunami Globals::tsunami;
 
+
+// ------------------------------- Score ----------------------------
+std::vector<Score *> Globals::score_list; // all relevant scores
+int Globals::active_score_pointer = 0;	  // points at active score of scores_list
+Score* Globals::active_score;
+
 float Globals::track_bpm[256] =
 	{
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -433,6 +439,8 @@ String Globals::EffectstypeToHumanReadable(EffectsType type)
 		return "Random_CC_Effect";
 	case MainNoteIteration:
 		return "MainNoteIteration";
+	case Reflex_and_PlayMidi:
+		return "Reflex_and_PlayMidi";
 	}
 	return "";
 }

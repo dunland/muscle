@@ -11,8 +11,9 @@ class Synthesizer;
 class Score
 {
 public:
-    Score()
+    Score(String name_)
     {
+        name = name_;
         // setup names of elements for display on Serial Monitor:
         beat_sum.tag = "v";
         beat_regularity.tag = "r";
@@ -22,6 +23,8 @@ public:
         Globals::print_to_console("active_score->note[0] = ");
         Globals::println_to_console(notes[0]);
     }
+
+    String name; // name to be displayed on LCD
 
     int step = 0;
     std::vector<int> steps;
@@ -40,11 +43,11 @@ public:
     void set_notes(std::vector<int> list);
     void add_bassNote(int note); // adds a NOTE to notes[]
 
-    // STANDARD RUN:
-    void run();                                                                                                                                                                                                                                                           // iterates through all score steps, executing the current step functions
-    void run_doubleSquirrel(Score *active_score, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca, Instrument *hihat, Instrument *snare, Instrument *kick, Instrument *tom2, Instrument *ride, Instrument *crash1, Instrument *standtom); // TODO: tentative, as this should be dynamic later..
+    // STANDARD RUN: select according to score->name
+    void run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);                                                                                                                                                                                                                                                           // iterates through all score steps, executing the current step functions
+    void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca); // TODO: tentative, as this should be dynamic later..
 
-    void run_elektrosmoff();
+    void run_elektrosmoff(Synthesizer* mKorg, midi::MidiInterface<HardwareSerial> MIDI);
 
     void run_experimental(Synthesizer *mKorg, Synthesizer *volca);
 

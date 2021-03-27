@@ -8,5 +8,5 @@ class JSON
 {
     public:
     
-    static void compose_and_send_json(std::vector<Instrument *> instruments, Score *active_score);
+    static void compose_and_send_json(std::vector<Instrument *> instruments);
 };

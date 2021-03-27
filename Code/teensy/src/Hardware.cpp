@@ -5,9 +5,9 @@
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-int Hardware::FOOTSWITCH_MODE = RESET_AND_PROCEED_SCORE;
+int Hardware::FOOTSWITCH_MODE = INCREMENT_SCORE;
 
-void Hardware::footswitch_pressed(std::vector<Instrument *> instruments, Score *active_score)
+void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
 {
   switch (FOOTSWITCH_MODE)
   {
@@ -44,11 +44,11 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments, Score *
     break;
 
   case (RESET_AND_PROCEED_SCORE):
-    if (active_score->beat_sum.average_smooth >= active_score->beat_sum.activation_thresh) // score proceed criterion reached
+    if (Globals::active_score->beat_sum.average_smooth >= Globals::active_score->beat_sum.activation_thresh) // score proceed criterion reached
     {
       Globals::println_to_console("regularity height > 10: reset!");
-      active_score->step++; // go to next score step
-      active_score->setup = true;
+      Globals::active_score->step++; // go to next score step
+      Globals::active_score->setup = true;
       for (auto &instrument : instruments)
         for (int j = 0; j < 16; j++)
           instrument->topography.a_16[j] = 0;
@@ -56,14 +56,14 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments, Score *
       Globals::println_to_console("all instrument topographies were reset.");
 
       for (int j = 0; j < 16; j++)
-        active_score->beat_sum.a_16[j] = 0; // reset topography
-      active_score->beat_sum.average_smooth = 0;
+        Globals::active_score->beat_sum.a_16[j] = 0; // reset topography
+      Globals::active_score->beat_sum.average_smooth = 0;
     }
 
     else // not enough strokes to proceed yet.
     {
       Globals::print_to_console("regularity too low to proceed.. is at ");
-      Globals::println_to_console(active_score->beat_sum.average_smooth);
+      Globals::println_to_console(Globals::active_score->beat_sum.average_smooth);
     }
 
     // either way, shuffle instruments with Random_CC_Effect:
@@ -76,11 +76,17 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments, Score *
     break;
 
   case (EXPERIMENTAL):
-    active_score->step++; // go to next score step
-    active_score->setup = true;
+    Globals::active_score->step++; // go to next score step
+    Globals::active_score->setup = true;
 
     for (auto &instrument : instruments)
       instrument->set_effect(Change_CC);
+    break;
+
+  // increment score:
+  case (INCREMENT_SCORE):
+    Globals::active_score->step++; // go to next score step
+    Globals::active_score->setup = true;
     break;
 
   default:
@@ -115,7 +121,7 @@ void Hardware::footswitch_released(std::vector<Instrument *> instruments)
   }
 }
 
-void Hardware::checkFootSwitch(std::vector<Instrument *> instruments, Score *active_score)
+void Hardware::checkFootSwitch(std::vector<Instrument *> instruments)
 {
 
   static int switch_state;
@@ -127,7 +133,7 @@ void Hardware::checkFootSwitch(std::vector<Instrument *> instruments, Score *act
   {
     if (switch_state == LOW)
     {
-      footswitch_pressed(instruments, active_score);
+      footswitch_pressed(instruments);
       Globals::println_to_console("Footswitch pressed.");
     }
     else
@@ -144,15 +150,18 @@ void Hardware::checkFootSwitch(std::vector<Instrument *> instruments, Score *act
 ///////////////////////////////////////////////////////////////////////
 LiquidCrystal *Hardware::lcd = new LiquidCrystal(RS, EN, D4, D5, D6, D7);
 
-void Hardware::update_lcd_display()
+void Hardware::display_scores()
 {
-
-  // LCD SETUP:
-  lcd->setCursor(0, 0);      // move cursor to   (0, 0)
-  lcd->print(encoder_count); // print message at (0, 0)
+  // rotary display:
+  lcd->setCursor(0, 0);
+  lcd->print(encoder_count);
 
   lcd->setCursor(4, 0);
   lcd->print(encoder_value);
+
+  // active score display:
+  lcd->setCursor(0, 1);
+  lcd->print(Globals::score_list[Globals::active_score_pointer]->name);
 }
 
 // --------------------------------------------------------------------
@@ -172,8 +181,8 @@ void Hardware::checkEncoder()
   // ROTARY ENCODER:
   if (encoder_oldPosition != encoder_newPosition)
   {
-    
-    // value rising:
+
+    // rising value:
     if (encoder_oldPosition > encoder_newPosition)
     {
       if (encoder_count > 0)
@@ -184,7 +193,7 @@ void Hardware::checkEncoder()
       encoder_previous_count = encoder_count;
     }
 
-    // value sinking:
+    // sinking value:
     else
     {
       if (encoder_count < 127)
@@ -194,7 +203,7 @@ void Hardware::checkEncoder()
   }
 
   // PUSH BUTTON:
-  if (digitalRead(6) == LOW)
+  if (digitalRead(PUSHBUTTON) == LOW)
     encoder_value = encoder_count;
 }
 

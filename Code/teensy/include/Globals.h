@@ -5,6 +5,8 @@
 #include <Tsunami.h> // in cpp
 #include <vector>
 
+class Score;
+
 // instrument naming for human-readable console outputs:
 enum DrumType
 {
@@ -133,6 +135,12 @@ public:
   // hard-coded list of BPMs of tracks stored on Tsunami's SD card.
   // TODO: somehow make BPM accessible from file title
   static float track_bpm[256];
+
+  // ------------------------------- Score ----------------------------
+
+  static std::vector<Score *> score_list; // all relevant scores
+  static int active_score_pointer; // points at active score of scores_list
+  static Score *active_score;
 
   // ----------------------------- Auxiliary --------------------------
 

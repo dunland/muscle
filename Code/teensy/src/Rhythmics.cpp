@@ -5,7 +5,7 @@
 #include <Score.h>
 #include <MIDI.h>
 
-void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI, Score *active_score)
+void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI)
 {
     static boolean toggleLED = true;
 
@@ -16,7 +16,7 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         // → problem: if there was any stroke at all, it was probably not on the very first run BEFORE derivation was executed
 
         if (Globals::do_print_JSON)
-            JSON::compose_and_send_json(instruments, active_score);
+            JSON::compose_and_send_json(instruments);
 
         // -------------------------- 32nd-notes --------------------------
 
@@ -83,36 +83,36 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         }
 
         // sum up all topographies of all instruments:
-        active_score->beat_sum.reset();
+        Globals::active_score->beat_sum.reset();
         for (auto &instrument : instruments)
         {
             if (instrument->drumtype != Ride && instrument->drumtype != Crash1 && instrument->drumtype != Crash2) // cymbals have too many counts
-                active_score->beat_sum.add(&instrument->topography);
+                Globals::active_score->beat_sum.add(&instrument->topography);
         }
-        active_score->beat_sum.smoothen_dataArray();
+        Globals::active_score->beat_sum.smoothen_dataArray();
 
         Globals::print_to_console("avg: ");
-        Globals::print_to_console(active_score->beat_sum.average_smooth);
+        Globals::print_to_console(Globals::active_score->beat_sum.average_smooth);
         Globals::print_to_console("/");
-        Globals::print_to_console(active_score->beat_sum.activation_thresh);
+        Globals::print_to_console(Globals::active_score->beat_sum.activation_thresh);
         Globals::print_to_console("\tstep:");
-        Globals::println_to_console(active_score->step);
+        Globals::println_to_console(Globals::active_score->step);
 
-        active_score->beat_regularity.derive_from(&active_score->beat_sum); // TODO: also do this for all instruments
+        Globals::active_score->beat_regularity.derive_from(&Globals::active_score->beat_sum); // TODO: also do this for all instruments
 
         // print topo arrays:
         if (Globals::do_print_beat_sum)
         {
             // for (auto &instrument : instruments)
             // Globals::printTopoArray(&instrument->topography);
-            Globals::printTopoArray(&active_score->beat_sum); // print volume layer
+            Globals::printTopoArray(&Globals::active_score->beat_sum); // print volume layer
         }
         // Globals::printTopoArray(&active_score->beat_regularity);
 
         // perform timed pin actions according to current beat:
         for (auto &instrument : instruments)
         {
-            instrument->perform(instruments, MIDI, active_score);
+            instrument->perform(instruments, MIDI);
         }
     }
 }

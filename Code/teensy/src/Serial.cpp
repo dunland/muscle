@@ -9,8 +9,9 @@
 #include <Hardware.h>
 #include <Score.h>
 
-void JSON::compose_and_send_json(std::vector<Instrument *> instruments, Score *active_score)
+void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 {
+    Score *active_score = Globals::active_score;
     size_t capacity = JSON_ARRAY_SIZE(active_score->notes.size()) + 9 * JSON_ARRAY_SIZE(16) + 9 * JSON_OBJECT_SIZE(8) + 2 * JSON_OBJECT_SIZE(9);
     DynamicJsonDocument doc(capacity);
 

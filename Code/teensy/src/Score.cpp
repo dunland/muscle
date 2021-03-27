@@ -45,12 +45,71 @@ void Score::set_step_function(int trigger_step, Instrument *instrument, EffectsT
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////// STANDARD RUN //////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void Score::run()
+void Score::run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
 {
+    if (name == "elektrosmoff")
+    {
+        run_elektrosmoff(synth, MIDI);
+    }
+    else if (name == "doubleSquirrel")
+    {
+        // run_doubleSquirrel(Synthesizer *mKorg, Synthesizer *volca, midi::MidiInterface<HardwareSerial> MIDI);
+        Globals::println_to_console("running 'doubleSquirrel' -- but nothing to do yet..");
+    }
+    else if (name == "experimental")
+    {
+        // run_experimental(Synthesizer* mKorg, Synthesizer* volca);
+        Globals::println_to_console("running 'experimenal' -- but nothing to do yet..");
+    }
 }
 
-void Score::run_elektrosmoff()
+void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
 {
+    // THIS SONG IS COMPOSED FOR microKORG A.81
+    switch (step)
+    {
+    case 0:
+        /* vocoder not activated */
+        break;
+    case 1:
+        if (setup)
+        {
+            Drumset::snare->set_effect(Monitor);
+            synth->delaydepth = 0;
+
+            Drumset::snare->midi_settings.active_note = 55;                 // G = 55
+            Drumset::snare->setup_midi(Amplevel, synth, 127, 0, 3, -0.002); // changes Gate in Vocoder-Mode (hopefully)
+            setup = false;
+        }
+
+        Drumset::snare->set_effect(Change_CC);
+        if (Drumset::snare->midi_settings.synth->notes[55] == false)
+            Drumset::snare->midi_settings.synth->sendNoteOn(55, MIDI); // play note 55 (G) if it is not playing at the moment
+
+        // proceed:
+        if (Drumset::crash1->timing.wasHit)
+        {
+            step++;
+        }
+        break;
+
+    case 2:
+        if (setup)
+        {
+            synth->amplevel = 127; // keep amp at maxLevel
+            Drumset::snare->setup_midi(DelayDepth, synth, 127, 0, 3, -0.002);
+        }
+
+    default:
+
+        // proceed to next score in list:
+        Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::score_list.size();
+        // ...and begin at step 0:
+        Globals::score_list[Globals::active_score_pointer]->step = 0;
+        break;
+    }
+
+    // SCORE END -------------------------------
 }
 
 // 1: playMidi+CC_Change; 2: change_cc only
@@ -114,14 +173,26 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca)
         break;
 
     default:
-        step = 1;
+        // proceed to next score in list:
+        Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::score_list.size();
+        // ...and begin at step 0:
+        Globals::score_list[Globals::active_score_pointer]->step = 0;
         break;
     }
 }
 
 // old routine from master thesis presentation:
-void Score::run_doubleSquirrel(Score *active_score, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca, Instrument *hihat, Instrument *snare, Instrument *kick, Instrument *tom2, Instrument *ride, Instrument *crash1, Instrument *standtom) // TODO: make this much more automatic!!
+void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca) // TODO: make this much more automatic!!
 {
+    Score *active_score = Globals::active_score;
+    
+    Instrument *kick = Drumset::kick;
+    Instrument *hihat = Drumset::hihat;
+    Instrument *snare = Drumset::snare;
+    Instrument *crash1 = Drumset::crash1;
+    Instrument *ride = Drumset::ride;
+    Instrument *standtom = Drumset::standtom;
+    Instrument *tom2 = Drumset::tom2;
     //   static int note_idx = -1;
     //   static int rhythmic_iterator;
 
@@ -431,8 +502,11 @@ void Score::run_doubleSquirrel(Score *active_score, midi::MidiInterface<Hardware
         //     // case 7: // swell effect with notes!
         //     // break;
 
-    default: // go back to beginning...
-        step = 0;
+    default:
+        // proceed to next score in list:
+        Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::score_list.size();
+        // ...and begin at step 0:
+        Globals::score_list[Globals::active_score_pointer]->step = 0;
         break;
     }
 }
