@@ -18,7 +18,7 @@
 #include <Globals.h>
 #include <Instruments.h>
 #include <Hardware.h>
-#include <Score.h>
+#include <Score/Score.h>
 #include <Serial.h>
 #include <Rhythmics.h>
 
@@ -134,16 +134,16 @@ void setup()
   }
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
+  // -------------------------------- MIDI ----------------------------
   MIDI.begin(MIDI_CHANNEL_OMNI);
-    // if (once)
-    // {
-    //   Hardware::lcd->begin(16, 2);
-    //   Hardware::lcd->setCursor(0, 0);
-    //   Hardware::lcd->print("SUPER MUSCLE");
-    //   Hardware::lcd->setCursor(0, 1);
-    //   Hardware::lcd->print("VERSION_NUMBER");
-    //   once = false;
-    // }
+    // turn off all currently playing MIDI notes:
+  for (int channel = 1; channel < 3; channel++)
+  {
+    for (int note_number = 0; note_number < 127; note_number++)
+    {
+      MIDI.sendNoteOff(note_number, 127, channel);
+    }
+  }
 
   // -------------------- Hardware initialization ---------------------
   // Hardware::lcd(Hardware::RS, Hardware::EN, Hardware::D4, Hardware::D5, Hardware::D6, Hardware::D7);
@@ -186,7 +186,7 @@ void setup()
     }
   }
 
-  // set instrument calibration array:
+  // --------------- set instrument calibration array -----------------
 
   // tom1->sensitivity.threshold = 200;
   // tom1->sensitivity.crossings = 20;
@@ -199,15 +199,12 @@ void setup()
   Drumset::ride->setup_sensitivity(400, 2, 5, true);
   Drumset::snare->setup_sensitivity(120, 10, 10, false); // (2020-11-11) // 180, 12 (2020-08-27)
 
-  // calculate noise floor:
+  // ------------------ calculate noise floor -------------------------
   for (auto &instrument : instruments)
     instrument->calculateNoiseFloor();
 
   // print startup information:
   Globals::println_to_console("\n..calculating noiseFloor done.");
-
-  Globals::println_to_console("assigning effects...");
-
   Globals::println_to_console("-----------------------------------------------");
   Globals::println_to_console("calibration values set as follows:");
   Globals::println_to_console("instr\tthrshld\tcrosses\tnoiseFloor");
@@ -232,14 +229,6 @@ void setup()
   Globals::score_list.push_back(experimental);
   Globals::active_score = elektrosmoff;
 
-  // turn off all currently playing MIDI notes:
-  for (int channel = 1; channel < 3; channel++)
-  {
-    for (int note_number = 0; note_number < 127; note_number++)
-    {
-      MIDI.sendNoteOff(note_number, 127, channel);
-    }
-  }
 
   // link midi synth to instruments:
   Drumset::snare->midi_settings.synth = mKorg;
@@ -336,30 +325,10 @@ void loop()
   //////////////////////////////// SCORE ////////////////////////////
   ///////////////////////////////////////////////////////////////////
 
-  // step proceeds if footswitch is pressed (in mode RESET_AND_PROCEED_SCORE) when regularity is high enough
-
-  // THIS SONG IS COMPOSED FOR microKORG A.63
-  // SCORE, stepwise:
-
-  static std::vector<int> locrian_mode = {Globals::active_score->notes[0] + 1, Globals::active_score->notes[0] + 3, Globals::active_score->notes[0] + 5, Globals::active_score->notes[0] + 6, Globals::active_score->notes[0] + 8, Globals::active_score->notes[0] + 11};
-
-  if (Globals::current_beat_pos != last_beat_pos)
+  if (Globals::current_beat_pos != last_beat_pos) // run once per 32nd-step
   {
-    // Globals::active_score->run_doubleSquirrel(Globals::active_score, MIDI, mKorg, volca, Drumset::hihat, Drumset::snare, Drumset::kick, Drumset::tom2, Drumset::ride, Drumset::crash1, Drumset::standtom); // TODO: manual assignment of functions, automatic access to instruments etc!!!
-
     // Globals::active_score->load();
     Globals::active_score->run(mKorg, MIDI); // TODO: globale Synthesizer-Liste
-    // Globals::active_score->run_experimental(mKorg, volca);
-    // Globals::active_score->run_elektrosmoff(mKorg, MIDI);
-
-    // vibrate if new score is ready:
-    if (Globals::active_score->beat_sum.ready())
-    {
-      digitalWrite(VIBR, HIGH);
-      Globals::println_to_console("ready to go to next score step! hit footswitch!");
-    }
-    else
-      digitalWrite(VIBR, LOW);
 
     //----------------------- SCORE END -------------------------------
 

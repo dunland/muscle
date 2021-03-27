@@ -3,7 +3,7 @@
 #include <Globals.h>
 #include <Serial.h>
 #include <Instruments.h>
-#include <Score.h>
+#include <Score/Score.h>
 #include <MIDI.h>
 
 class Rhythmics{

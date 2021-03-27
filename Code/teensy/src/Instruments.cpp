@@ -1,7 +1,7 @@
 #include <Instruments.h>
 #include <MIDI.h>
 #include <Tsunami.h>
-#include <Score.h>
+#include <Score/Score.h>
 #include <Hardware.h>
 
 void Instrument::set_notes(std::vector<int> list)

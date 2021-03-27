@@ -5,7 +5,7 @@
 #include <Globals.h>
 #include <Tsunami.h>
 #include <MIDI.h>
-#include <Score.h>
+#include <Score/Score.h>
 
 class Synthesizer;
 

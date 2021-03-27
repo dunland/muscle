@@ -1,5 +1,5 @@
 #include <Hardware.h>
-#include <Score.h>
+#include <Score/Score.h>
 #include <Instruments.h>
 
 ////////////////////////////////// FOOT SWITCH ////////////////////////

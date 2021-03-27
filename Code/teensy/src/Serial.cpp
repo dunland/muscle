@@ -7,7 +7,7 @@
 #include <Globals.h>
 #include <Instruments.h>
 #include <Hardware.h>
-#include <Score.h>
+#include <Score/Score.h>
 
 void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 {
