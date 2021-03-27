@@ -48,10 +48,11 @@ void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSer
         {
             synth->amplevel = 127; // keep amp at maxLevel
             Drumset::snare->setup_midi(DelayDepth, synth, 127, 0, 3, -0.002);
+            setup = false;
         }
+        break;
 
     default:
-
         proceed_to_next_score();
         break;
     }
@@ -65,6 +66,10 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca)
 {
     switch (step)
     {
+    case 0:
+        step = 1;
+        break;
+
     case 1: // change CC ("Reflex") + PlayMidi
         if (setup)
         {
