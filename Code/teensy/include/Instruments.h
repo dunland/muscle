@@ -163,7 +163,7 @@ public:
 
     void change_cc_out(midi::MidiInterface<HardwareSerial>);
 
-    void shuffle_cc();
+    void shuffle_cc(boolean force_);
 };
 
 class Drumset

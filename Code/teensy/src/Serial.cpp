@@ -9,6 +9,8 @@
 #include <Hardware.h>
 #include <Score/Score.h>
 
+// sends JSON as Serial information over port "Serial" (via USB)
+
 void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 {
     Score *active_score = Globals::active_score;

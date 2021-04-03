@@ -19,7 +19,8 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
             JSON::compose_and_send_json(instruments);
 
         // -------------------------- 32nd-notes --------------------------
-
+        Serial.println("");
+        
         // print millis and current beat:
         if (Globals::do_send_to_processing)
             Globals::print_to_console("m");
@@ -34,6 +35,8 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         // -------------------------- full notes: -------------------------
         if (Globals::current_beat_pos == 0)
         {
+            Serial.print("hit");
+            Serial.println("Snare");
         }
 
         // ------------------------- quarter notes: -----------------------
@@ -95,7 +98,9 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         Globals::print_to_console(Globals::active_score->beat_sum.average_smooth);
         Globals::print_to_console("/");
         Globals::print_to_console(Globals::active_score->beat_sum.activation_thresh);
-        Globals::print_to_console("\tstep:");
+        Globals::print_to_console("\t");
+        Globals::print_to_console(Globals::active_score->name);
+        Globals::print_to_console(".");
         Globals::println_to_console(Globals::active_score->step);
 
         Globals::active_score->beat_regularity.derive_from(&Globals::active_score->beat_sum); // TODO: also do this for all instruments

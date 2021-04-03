@@ -23,6 +23,11 @@
 #include <Rhythmics.h>
 
 String VERSION_NUMBER = "0.2.1";
+const boolean DO_PRINT_JSON = false;
+const boolean DO_PRINT_TO_CONSOLE = true;
+const boolean DO_PRINT_BEAT_SUM = false;
+const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
+const boolean USING_TSUNAMI = false;
 
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
@@ -32,7 +37,6 @@ static std::vector<Instrument *> instruments; // all instruments go in here
 
 Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
 Synthesizer *volca; // create a KORG Volca Keys instrument called volca
-
 
 // Songs:
 Score *doubleSquirrel;
@@ -104,10 +108,10 @@ void setup()
 {
   //---------------------- Global / Debug values ----------------------
 
-  Globals::use_responsiveCalibration = false;
-  Globals::do_print_beat_sum = false; // prints active_score->beat_sum topography array
-  Globals::do_print_to_console = true;
-  Globals::do_print_JSON = false;
+  Globals::use_responsiveCalibration = DO_USE_RESPONSIVE_CALIBRATION;
+  Globals::do_print_beat_sum = DO_PRINT_BEAT_SUM; // prints active_score->beat_sum topography array
+  Globals::do_print_to_console = DO_PRINT_TO_CONSOLE;
+  Globals::do_print_JSON = DO_PRINT_JSON;
 
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
@@ -132,11 +136,19 @@ void setup()
       break;
     }
   }
+
+  // LCD
+  // Hardware::lcd->begin(16, 2);
+  // Hardware::lcd->setCursor(0, 0);
+  // Hardware::lcd->print("SUPER MUSCLE");
+  // Hardware::lcd->setCursor(0, 1);
+  // Hardware::lcd->print(VERSION_NUMBER);
+
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
   // -------------------------------- MIDI ----------------------------
   MIDI.begin(MIDI_CHANNEL_OMNI);
-    // turn off all currently playing MIDI notes:
+  // turn off all currently playing MIDI notes:
   for (int channel = 1; channel < 3; channel++)
   {
     for (int note_number = 0; note_number < 127; note_number++)
@@ -146,21 +158,23 @@ void setup()
   }
 
   // -------------------- Hardware initialization ---------------------
-  // Hardware::lcd(Hardware::RS, Hardware::EN, Hardware::D4, Hardware::D5, Hardware::D6, Hardware::D7);
 
-  delay(1000);              // wait for Tsunami to finish reset // redundant?
-  Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
-  delay(100);
-  Globals::tsunami.stopAllTracks(); // in case Tsunami was already playing.
-  Globals::tsunami.samplerateOffset(0, 0);
-  Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
-  delay(100);                          // some time for Tsunami to respond with version string
+  if (USING_TSUNAMI)
+  {
+    delay(1000);              // wait for Tsunami to finish reset // redundant?
+    Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
+    delay(100);
+    Globals::tsunami.stopAllTracks(); // in case Tsunami was already playing.
+    Globals::tsunami.samplerateOffset(0, 0);
+    Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
+    delay(100);                          // some time for Tsunami to respond with version string
+  }
 
-  // LCD
+  // // LCD
   Hardware::lcd->begin(16, 2);
-  Hardware::lcd->setCursor(0,0);
+  Hardware::lcd->setCursor(0, 0);
   Hardware::lcd->print("SUPER MUSCLE");
-  Hardware::lcd->setCursor(0,1);
+  Hardware::lcd->setCursor(0, 1);
   Hardware::lcd->print(VERSION_NUMBER);
 
   // ------------------------ INSTRUMENT SETUP ------------------------
@@ -229,7 +243,6 @@ void setup()
   Globals::score_list.push_back(experimental);
   Globals::active_score = elektrosmoff;
 
-
   // link midi synth to instruments:
   Drumset::snare->midi_settings.synth = mKorg;
   Drumset::kick->midi_settings.synth = mKorg;
@@ -265,8 +278,9 @@ void setup()
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
   // tracknum, channel
 
+  delay(2000);
   Hardware::lcd->clear();
-  delay(500);
+  // delay(500);
 }
 
 /* --------------------------------------------------------------------- */
@@ -290,8 +304,8 @@ void loop()
     if (instrument->stroke_detected()) // evaluates pins for activity repeatedly
     {
       // ----------------------- perform pin action -------------------
-      instrument->trigger(MIDI); // runs trigger function according to instrument's EffectType
-      instrument->timing.wasHit = true;        // a flag to show that the instrument was hit (for transmission via JSON)
+      instrument->trigger(MIDI);        // runs trigger function according to instrument's EffectType
+      instrument->timing.wasHit = true; // a flag to show that the instrument was hit (for transmission via JSON)
     }
   }
 

@@ -64,14 +64,10 @@ void Score::run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
     }
     else if (name == "doubleSquirrel")
     {
-        // run_doubleSquirrel(Synthesizer *mKorg, Synthesizer *volca, midi::MidiInterface<HardwareSerial> MIDI);
-        Globals::println_to_console("running 'doubleSquirrel' -- but nothing to do yet..");
         run_doubleSquirrel(MIDI, synth, synth);
     }
     else if (name == "experimental")
     {
-        // run_experimental(Synthesizer* mKorg, Synthesizer* volca);
-        Globals::println_to_console("running 'experimenal' -- but nothing to do yet..");
         run_experimental(synth, synth);
     }
 }

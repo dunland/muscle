@@ -32,7 +32,6 @@ void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSer
             setup = false;
         }
 
-        Drumset::snare->set_effect(Change_CC);
         if (Drumset::snare->midi_settings.synth->notes[55] == false)
             Drumset::snare->midi_settings.synth->sendNoteOn(55, MIDI); // play note 55 (G) if it is not playing at the moment
 
@@ -80,25 +79,25 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca)
 
             Drumset::kick->set_effect(PlayMidi);
             Drumset::kick->setup_midi(None, mKorg, 127, 0, 1, 0.1);
-            Drumset::kick->shuffle_cc(); // set a random midi CC channel
+            Drumset::kick->shuffle_cc(true); // set a random midi CC channel
             Drumset::kick->midi_settings.notes.push_back(notes[0] + 12 + 7);
             Drumset::kick->midi_settings.active_note = Drumset::kick->midi_settings.notes[0];
 
             Drumset::snare->set_effect(PlayMidi);
             Drumset::snare->setup_midi(None, mKorg, 127, 0, 1, 0.1);
-            Drumset::snare->shuffle_cc(); // set a random midi CC channel
+            Drumset::snare->shuffle_cc(true); // set a random midi CC channel
             Drumset::snare->midi_settings.notes.push_back(notes[0] + 12 + 12);
             Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[0];
 
             Drumset::tom2->set_effect(PlayMidi);
             Drumset::tom2->setup_midi(None, mKorg, 127, 0, 1, 0.1);
-            Drumset::tom2->shuffle_cc(); // set a random midi CC channel
+            Drumset::tom2->shuffle_cc(true); // set a random midi CC channel
             Drumset::tom2->midi_settings.notes.push_back(notes[0] + 12 + 5);
             Drumset::tom2->midi_settings.active_note = Drumset::tom2->midi_settings.notes[0];
 
             Drumset::standtom->set_effect(PlayMidi);
             Drumset::standtom->setup_midi(None, mKorg, 127, 0, 1, 0.1);
-            Drumset::standtom->shuffle_cc(); // set a random midi CC channel
+            Drumset::standtom->shuffle_cc(true); // set a random midi CC channel
             Drumset::standtom->midi_settings.notes.push_back(notes[0] + 12 + 7);
             Drumset::standtom->midi_settings.active_note = Drumset::standtom->midi_settings.notes[0];
 
@@ -126,6 +125,16 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca)
         break;
 
     default:
+        Drumset::snare->set_effect(Monitor);
+        Drumset::hihat->set_effect(Monitor);
+        Drumset::kick->set_effect(Monitor);
+        Drumset::tom2->set_effect(Monitor);
+        Drumset::standtom->set_effect(Monitor);
+        Drumset::crash1->set_effect(Monitor);
+        Drumset::cowbell->set_effect(Monitor);
+        Drumset::ride->set_effect(Monitor);
+        // Drumset::tom1->set_effect(Monitor);
+        // Drumset::crash2->set_effect(Monitor);
         proceed_to_next_score();
         break;
     }

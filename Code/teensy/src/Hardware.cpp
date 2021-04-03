@@ -105,7 +105,7 @@ void Hardware::footswitch_released(std::vector<Instrument *> instruments)
   case (EXPERIMENTAL):
     for (auto &instrument : instruments)
     {
-      instrument->shuffle_cc();
+      instrument->shuffle_cc(false);
       instrument->set_effect(Change_CC);
     }
     break;

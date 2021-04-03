@@ -63,7 +63,7 @@ void Instrument::set_effect(EffectsType effect_)
 
   case Reflex_and_PlayMidi:
     score.ready_to_shuffle = true;
-    shuffle_cc();
+    shuffle_cc(false);
     if (midi_settings.notes.size() > 0 && midi_settings.active_note > 0)
     {
       effect = effect_;
@@ -77,7 +77,7 @@ void Instrument::set_effect(EffectsType effect_)
 
   case Random_CC_Effect:
     score.ready_to_shuffle = true;
-    shuffle_cc();
+    shuffle_cc(false);
     effect = effect_;
     Globals::println_to_console("done.");
     break;
@@ -259,6 +259,8 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
   // always count up topography:
   countup_topography();
   topography.smoothen_dataArray();
+  Serial.print("hit");
+  Serial.print(Globals::DrumtypeToHumanreadable(drumtype));
 
   switch (effect)
   {
@@ -366,7 +368,7 @@ void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
 
   case Reflex_and_PlayMidi:
     turnMidiNoteOff(MIDI);
-    shuffle_cc();
+    shuffle_cc(false);
     break;
 
   case Change_CC:
@@ -375,7 +377,7 @@ void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
 
   case Random_CC_Effect:
     change_cc_out(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
-    shuffle_cc();
+    shuffle_cc(false);
     break;
 
   default:
@@ -917,11 +919,11 @@ void Instrument::change_cc_out(midi::MidiInterface<HardwareSerial> MIDI) // chan
 }
 
 // sets the midi channel to a random value of all implemented channels
-void Instrument::shuffle_cc()
+void Instrument::shuffle_cc(boolean force_ = false)
 {
-  if (score.ready_to_shuffle)
+  if (score.ready_to_shuffle || force_ == true)
   {
-    if (midi_settings.cc_val == midi_settings.cc_standard)
+    if (midi_settings.cc_val == midi_settings.cc_standard || force_ == true)
     {
 
       // ATTENTION:
@@ -948,6 +950,11 @@ void Instrument::shuffle_cc()
       Globals::println_to_console(midi_settings.cc_standard);
     }
   }
+  else
+  {
+    Globals::println_to_console("could not shuffle CC, because !score.ready_to_shuffle");
+  }
+  
 }
 
 // instantiate instruments:
