@@ -9,6 +9,9 @@ int Hardware::FOOTSWITCH_MODE = INCREMENT_SCORE;
 
 void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
 {
+  lcd->setCursor(11, 0);
+  lcd->print("!");
+
   switch (FOOTSWITCH_MODE)
   {
   case (LOG_BEATS):
@@ -47,8 +50,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
     if (Globals::active_score->beat_sum.average_smooth >= Globals::active_score->beat_sum.activation_thresh) // score proceed criterion reached
     {
       Globals::println_to_console("regularity height > 10: reset!");
-      Globals::active_score->step++; // go to next score step
-      Globals::active_score->setup = true;
+      Globals::active_score->increase_step(); // go to next score step
       for (auto &instrument : instruments)
         for (int j = 0; j < 16; j++)
           instrument->topography.a_16[j] = 0;
@@ -91,6 +93,10 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
 
 void Hardware::footswitch_released(std::vector<Instrument *> instruments)
 {
+
+  lcd->setCursor(11, 0);
+  lcd->print(" ");
+
   switch (FOOTSWITCH_MODE)
   {
   case (LOG_BEATS):
@@ -152,11 +158,11 @@ LiquidCrystal *Hardware::lcd = new LiquidCrystal(RS, EN, D4, D5, D6, D7);
 void Hardware::display_scores()
 {
   // rotary display:
-  lcd->setCursor(0, 0);
-  lcd->print(encoder_count);
+  // lcd->setCursor(0, 0);
+  // lcd->print(encoder_count);
 
-  lcd->setCursor(4, 0);
-  lcd->print(encoder_value);
+  // lcd->setCursor(4, 0);
+  // lcd->print(encoder_value);
 
   // active score display:
   lcd->setCursor(0, 1);
@@ -164,6 +170,21 @@ void Hardware::display_scores()
 
   lcd->setCursor(14, 1);
   lcd->print(Globals::active_score->step);
+}
+
+// display midi values of instruments with FX-Type CC_Change
+void Hardware::display_Midi_values(std::vector<Instrument *> instruments)
+{
+  for (uint8_t i = 0; i<instruments.size(); i++)
+  {
+    if (instruments[i]->effect == Change_CC)
+    {
+      Hardware::lcd->setCursor(((i%4)*4)+1, int(i>=4));
+      Hardware::lcd->print(instruments[i]->midi_settings.cc_val);
+      Hardware::lcd->setCursor(((i%4)*4), int(i>=4));
+      Hardware::lcd->print(instruments[i]->drumtype);
+    }
+  }
 }
 
 // --------------------------------------------------------------------

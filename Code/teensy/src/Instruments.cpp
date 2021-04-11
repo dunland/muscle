@@ -261,6 +261,8 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
   topography.smoothen_dataArray();
   Serial.print("hit");
   Serial.print(Globals::DrumtypeToHumanreadable(drumtype));
+  Hardware::lcd->setCursor(13,0);
+  Hardware::lcd->print(Globals::DrumtypeToHumanreadable(drumtype));
 
   switch (effect)
   {

@@ -52,7 +52,7 @@ public:
 
     void run_elektrosmoff(Synthesizer *mKorg, midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_experimental(Synthesizer *mKorg, Synthesizer *volca);
+    void run_experimental(Synthesizer *mKorg, Synthesizer *volca, midi::MidiInterface<HardwareSerial> MIDI);
 
     // ------------------------------- MODES: (deprecated) ------------
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score

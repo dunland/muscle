@@ -36,6 +36,8 @@ void Score::increase_step()
 {
     step++;
     setup = true;
+    Serial.println("step");
+    Serial.println(step);
 }
 
 void Score::proceed_to_next_score()
@@ -68,7 +70,7 @@ void Score::run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
     }
     else if (name == "experimental")
     {
-        run_experimental(synth, synth);
+        run_experimental(synth, synth, MIDI);
     }
 }
 

@@ -73,6 +73,7 @@ public:
   ///////////////////////////////////////////////////////////////////////
   static LiquidCrystal *lcd;
   static void display_scores();
+  static void display_Midi_values(std::vector<Instrument *> instruments); // display midi values of instruments with FX-Type CC_Change
 
   // --------------------------------------------------------------------
 

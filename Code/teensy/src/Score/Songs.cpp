@@ -16,7 +16,8 @@ void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSer
     case 0: // Vocoder not activated
         if (setup)
         {
-            Hardware::FOOTSWITCH_MODE = Hardware::RESET_AND_PROCEED_SCORE;
+            Drumset::snare->set_effect(Monitor);
+            Hardware::FOOTSWITCH_MODE = Hardware::INCREMENT_SCORE;
             setup = false;
         }
         break;
@@ -24,16 +25,19 @@ void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSer
     case 1: // Snare → Vocoder fade in
         if (setup)
         {
-            Drumset::snare->set_effect(Monitor);
             synth->delaydepth = 0;
 
             Drumset::snare->midi_settings.active_note = 55;                 // G = 55
-            Drumset::snare->setup_midi(Amplevel, synth, 127, 0, 3, -0.002); // changes Gate in Vocoder-Mode (hopefully)
+            Drumset::snare->setup_midi(Amplevel, synth, 127, 0, 3, -0.002); // changes Gate in Vocoder-Mode
+            Drumset::snare->set_effect(Change_CC);
             setup = false;
         }
 
         if (Drumset::snare->midi_settings.synth->notes[55] == false)
             Drumset::snare->midi_settings.synth->sendNoteOn(55, MIDI); // play note 55 (G) if it is not playing at the moment
+
+        Hardware::lcd->setCursor(0, 0);
+        Hardware::lcd->print(Drumset::snare->midi_settings.cc_val);
 
         // proceed:
         if (Drumset::crash1->timing.wasHit)
@@ -61,7 +65,7 @@ void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSer
 
 //////////////////////////// EXPERIMENTAL /////////////////////////////
 // 1: playMidi+CC_Change; 2: change_cc only
-void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca)
+void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca, midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (step)
     {
@@ -121,21 +125,13 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca)
             Drumset::standtom->set_effect(Change_CC);
             Drumset::hihat->set_effect(TapTempo);
             setup = false;
+            notes.push_back(int(random(24,48)));
         }
+        playSingleNote(mKorg, MIDI);
         break;
 
-    default:
-        Drumset::snare->set_effect(Monitor);
-        Drumset::hihat->set_effect(Monitor);
-        Drumset::kick->set_effect(Monitor);
-        Drumset::tom2->set_effect(Monitor);
-        Drumset::standtom->set_effect(Monitor);
-        Drumset::crash1->set_effect(Monitor);
-        Drumset::cowbell->set_effect(Monitor);
-        Drumset::ride->set_effect(Monitor);
-        // Drumset::tom1->set_effect(Monitor);
-        // Drumset::crash2->set_effect(Monitor);
-        proceed_to_next_score();
+    default: // start over again
+        step = 0;
         break;
     }
 }

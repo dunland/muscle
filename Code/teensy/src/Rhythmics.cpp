@@ -35,8 +35,9 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         // -------------------------- full notes: -------------------------
         if (Globals::current_beat_pos == 0)
         {
-            Serial.print("hit");
-            Serial.println("Snare");
+            // testing visuals:
+            // Serial.print("hit");
+            // Serial.println("Snare");
         }
 
         // ------------------------- quarter notes: -----------------------

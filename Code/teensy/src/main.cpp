@@ -10,11 +10,13 @@
 /* --------------------------------------------------------------------- */
 /* ------------------------------- GLOBAL ------------------------------ */
 /* --------------------------------------------------------------------- */
+
 #include <Arduino.h>
 #include <vector>
 #include <MIDI.h>
 #include <Tsunami.h>
 #include <ArduinoJson.h>
+#include <settings.h>
 #include <Globals.h>
 #include <Instruments.h>
 #include <Hardware.h>
@@ -22,6 +24,7 @@
 #include <Serial.h>
 #include <Rhythmics.h>
 
+// ----------------------------- settings -----------------------------
 String VERSION_NUMBER = "0.2.1";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
@@ -29,6 +32,8 @@ const boolean DO_PRINT_BEAT_SUM = false;
 const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
 const boolean USING_TSUNAMI = false;
 
+
+// ----------------------------- variables ----------------------------
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
 // define instruments:
@@ -202,16 +207,16 @@ void setup()
 
   // --------------- set instrument calibration array -----------------
 
-  // tom1->sensitivity.threshold = 200;
-  // tom1->sensitivity.crossings = 20;
-  Drumset::hihat->setup_sensitivity(80, 15, 10, false);
-  Drumset::standtom->setup_sensitivity(200, 10, 10, false); // (2020-11-11) // 60, 20 (2020-08-27)
-  Drumset::tom2->setup_sensitivity(100, 9, 10, false);      // 300, 18
-  Drumset::kick->setup_sensitivity(200, 12, 10, false);     // (2020-11-11) // 100, 16 (2020-08-27)
-  Drumset::cowbell->setup_sensitivity(80, 15, 10, false);
-  Drumset::crash1->setup_sensitivity(300, 2, 5, true);
-  Drumset::ride->setup_sensitivity(400, 2, 5, true);
-  Drumset::snare->setup_sensitivity(120, 10, 10, false); // (2020-11-11) // 180, 12 (2020-08-27)
+  Drumset::snare->setup_sensitivity(SNARE_THRESHOLD, SNARE_CROSSINGS, SNARE_DELAY_AFTER_STROKE, SNARE_FIRST_STROKE);
+  Drumset::hihat->setup_sensitivity(HIHAT_THRESHOLD, HIHAT_CROSSINGS, HIHAT_DELAY_AFTER_STROKE, HIHAT_FIRST_STROKE);
+  Drumset::kick->setup_sensitivity(KICK_THRESHOLD, KICK_CROSSINGS, KICK_DELAY_AFTER_STROKE, KICK_FIRST_STROKE);
+  // Drumset::tom1->setup_sensitivity(TOM1_THRESHOLD, TOM1_CROSSINGS, TOM1_DELAY_AFTER_STROKE, TOM1_FIRST_STROKE);
+  Drumset::tom2->setup_sensitivity(TOM2_THRESHOLD, TOM2_CROSSINGS, TOM2_DELAY_AFTER_STROKE, TOM2_FIRST_STROKE);
+  Drumset::standtom->setup_sensitivity(STANDTOM_THRESHOLD, STANDTOM_CROSSINGS, STANDTOM_DELAY_AFTER_STROKE, STANDTOM_FIRST_STROKE);
+  Drumset::crash1->setup_sensitivity(CRASH1_THRESHOLD, CRASH1_CROSSINGS, CRASH1_DELAY_AFTER_STROKE, CRASH1_FIRST_STROKE);
+  // Drumset::crash2->setup_sensitivity(CRASH2_THRESHOLD, CRASH2_CROSSINGS, CRASH2_DELAY_AFTER_STROKE, CRASH2_FIRST_STROKE);
+  Drumset::ride->setup_sensitivity(RIDE_THRESHOLD, RIDE_CROSSINGS, RIDE_DELAY_AFTER_STROKE, RIDE_FIRST_STROKE);
+  Drumset::cowbell->setup_sensitivity(COWBELL_THRESHOLD, COWBELL_CROSSINGS, COWBELL_DELAY_AFTER_STROKE, COWBELL_FIRST_STROKE);
 
   // ------------------ calculate noise floor -------------------------
   for (auto &instrument : instruments)
@@ -239,7 +244,7 @@ void setup()
   elektrosmoff = new Score("elektrosmoff");
   experimental = new Score("experimental");
   Globals::score_list.push_back(elektrosmoff);
-  Globals::score_list.push_back(doubleSquirrel);
+  // Globals::score_list.push_back(doubleSquirrel);
   Globals::score_list.push_back(experimental);
   Globals::active_score = elektrosmoff;
 
@@ -364,10 +369,11 @@ void loop()
   // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
 
   // rotary encoder:
-  Hardware::checkEncoder();
+  // Hardware::checkEncoder();
 
   // LCD:
   Hardware::display_scores();
+  Hardware::display_Midi_values(instruments);
 
   // tidying up what's left from performing functions..
   for (auto &instrument : instruments)
