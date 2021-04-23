@@ -89,7 +89,7 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca, midi::MidiI
             // Drumset::kick->midi_settings.active_note = notes[note_idx] + 6;
             // Drumset::tom2->midi_settings.active_note = notes[note_idx] + 16;
             // Drumset::standtom->midi_settings.active_note = notes[note_idx] + 12;
-            Hardware::footswitch_mode = Experimental;
+            Hardware::footswitch_mode = Increment_Score;
 
             Drumset::kick->set_effect(PlayMidi);
             Drumset::kick->setup_midi(None, mKorg, 127, 0, 1, 0.1);
@@ -143,8 +143,8 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca, midi::MidiI
         break;
 
     default: // start over again
-        // step = 0;
-        proceed_to_next_score();
+        step = 0;
+        // proceed_to_next_score();
         break;
     }
 }
@@ -267,7 +267,7 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI, Synthes
 
     case 0: // init state
 
-        Hardware::footswitch_mode = Reset_and_Proceed_Score;
+        Hardware::footswitch_mode = Reset_Topo_and_Proceed_Score;
 
         static std::vector<int> locrian_mode = {notes[0] + 1, notes[0] + 3, notes[0] + 5, notes[0] + 6, notes[0] + 8, notes[0] + 11};
 

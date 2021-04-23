@@ -41,6 +41,7 @@ void Score::increase_step()
     Hardware::lcd->clear();
 }
 
+// proceed to step 0 of next score:
 void Score::proceed_to_next_score()
 {
 	Globals::println_to_console("End of score reached! Proceeding to next score!");

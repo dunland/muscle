@@ -53,7 +53,7 @@ enum FootswitchMode
   Log_Beats,
   Hold_CC,
   Reset_Topo, // resets beat_topography (of all instruments)
-  Reset_and_Proceed_Score,
+  Reset_Topo_and_Proceed_Score,
   Experimental, // hold = mute, release = randomize and increase score step
   Increment_Score  // hold = mute, release = randomize and increase score step
 };

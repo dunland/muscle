@@ -46,7 +46,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
     }
     break;
 
-  case (Reset_and_Proceed_Score):
+  case (Reset_Topo_and_Proceed_Score):
     if (Globals::active_score->beat_sum.average_smooth >= Globals::active_score->beat_sum.activation_thresh) // score proceed criterion reached
     {
       Globals::println_to_console("regularity height > 10: reset!");
@@ -77,13 +77,13 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
 
     break;
 
-  case (Experimental):
-    Globals::active_score->step++; // go to next score step
-    Globals::active_score->setup = true;
+  // case (Experimental): // increase step and 
+  //   Globals::active_score->step++; // go to next score step
+  //   Globals::active_score->setup = true;
 
-    for (auto &instrument : instruments)
-      instrument->set_effect(Change_CC);
-    break;
+  //   for (auto &instrument : instruments)
+  //     instrument->set_effect(Change_CC);
+  //   break;
 
   default:
     Globals::println_to_console("Footswitch mode not defined!");
@@ -230,7 +230,7 @@ void Hardware::checkEncoder()
   if (digitalRead(PUSHBUTTON) == LOW && millis() > lastPush + 200)
   {
     encoder_value = encoder_count;
-    Globals::active_score->increase_step();
+    Globals::active_score->proceed_to_next_score();
     lastPush = millis();
   }
 }
