@@ -48,19 +48,23 @@
 class Score;
 class Instrument;
 
+enum FootswitchMode
+{
+  Log_Beats,
+  Hold_CC,
+  Reset_Topo, // resets beat_topography (of all instruments)
+  Reset_and_Proceed_Score,
+  Experimental, // hold = mute, release = randomize and increase score step
+  Increment_Score  // hold = mute, release = randomize and increase score step
+};
+
 class Hardware
 {
 public:
   ////////////////////////////////// FOOT SWITCH ////////////////////////
   ///////////////////////////////////////////////////////////////////////
 
-  static const int LOG_BEATS = 0;
-  static const int HOLD_CC = 1;
-  static const int RESET_TOPO = 2; // resets beat_topography (of all instruments)
-  static const int RESET_AND_PROCEED_SCORE = 3;
-  static const int EXPERIMENTAL = 4; // hold = mute, release = randomize and increase score step
-  static const int INCREMENT_SCORE = 5; // hold = mute, release = randomize and increase score step
-  static int FOOTSWITCH_MODE;
+  static FootswitchMode footswitch_mode;
 
   static void footswitch_pressed(std::vector<Instrument *> instruments);
 

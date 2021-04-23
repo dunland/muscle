@@ -369,7 +369,7 @@ void loop()
   // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
 
   // rotary encoder:
-  // Hardware::checkEncoder();
+  Hardware::checkEncoder();
 
   // LCD:
   Hardware::display_scores();

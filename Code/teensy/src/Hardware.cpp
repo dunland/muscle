@@ -5,16 +5,16 @@
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-int Hardware::FOOTSWITCH_MODE = INCREMENT_SCORE;
+FootswitchMode Hardware::footswitch_mode = Increment_Score;
 
 void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
 {
   lcd->setCursor(11, 0);
   lcd->print("!");
 
-  switch (FOOTSWITCH_MODE)
+  switch (footswitch_mode)
   {
-  case (LOG_BEATS):
+  case (Log_Beats):
     // set pinMode of all instruments to 3 (record what is being played)
     for (auto &instrument : instruments)
     {
@@ -25,11 +25,11 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
     }
     break;
 
-  case (HOLD_CC): // prevents swell_vals to be changed in swell_beat()
+  case (Hold_CC): // prevents swell_vals to be changed in swell_beat()
     Globals::footswitch_is_pressed = true;
     break;
 
-  case (RESET_TOPO): // resets beat_topography (for all instruments)
+  case (Reset_Topo): // resets beat_topography (for all instruments)
     for (auto &instrument : instruments)
     {
       // reset 8th-note-topography:
@@ -46,7 +46,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
     }
     break;
 
-  case (RESET_AND_PROCEED_SCORE):
+  case (Reset_and_Proceed_Score):
     if (Globals::active_score->beat_sum.average_smooth >= Globals::active_score->beat_sum.activation_thresh) // score proceed criterion reached
     {
       Globals::println_to_console("regularity height > 10: reset!");
@@ -77,7 +77,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
 
     break;
 
-  case (EXPERIMENTAL):
+  case (Experimental):
     Globals::active_score->step++; // go to next score step
     Globals::active_score->setup = true;
 
@@ -97,18 +97,18 @@ void Hardware::footswitch_released(std::vector<Instrument *> instruments)
   lcd->setCursor(11, 0);
   lcd->print(" ");
 
-  switch (FOOTSWITCH_MODE)
+  switch (footswitch_mode)
   {
-  case (LOG_BEATS):
+  case (Log_Beats):
     for (auto &instrument : instruments)
       instrument->effect = instrument->lastEffect;
     break;
 
-  case (HOLD_CC):
+  case (Hold_CC):
     Globals::footswitch_is_pressed = false;
     break;
 
-  case (EXPERIMENTAL):
+  case (Experimental):
     for (auto &instrument : instruments)
     {
       instrument->shuffle_cc(false);
@@ -117,7 +117,7 @@ void Hardware::footswitch_released(std::vector<Instrument *> instruments)
     break;
 
   // increment score:
-  case (INCREMENT_SCORE):
+  case (Increment_Score):
     Globals::active_score->increase_step(); // go to next score step
     break;
 
@@ -179,10 +179,10 @@ void Hardware::display_Midi_values(std::vector<Instrument *> instruments)
   {
     if (instruments[i]->effect == Change_CC)
     {
-      Hardware::lcd->setCursor(((i%4)*4)+1, int(i>=4));
-      Hardware::lcd->print(instruments[i]->midi_settings.cc_val);
       Hardware::lcd->setCursor(((i%4)*4), int(i>=4));
-      Hardware::lcd->print(instruments[i]->drumtype);
+      Hardware::lcd->print(Globals::DrumtypeToHumanreadable(instruments[i]->drumtype)[0]);
+      Hardware::lcd->setCursor(((i%4)*4)+1, int(i>=4));
+      Hardware::lcd->print(int(instruments[i]->midi_settings.cc_val));
     }
   }
 }

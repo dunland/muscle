@@ -38,6 +38,7 @@ void Score::increase_step()
     setup = true;
     Serial.println("step");
     Serial.println(step);
+    Hardware::lcd->clear();
 }
 
 void Score::proceed_to_next_score()

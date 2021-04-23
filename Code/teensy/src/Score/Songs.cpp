@@ -17,7 +17,8 @@ void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSer
         if (setup)
         {
             Drumset::snare->set_effect(Monitor);
-            Hardware::FOOTSWITCH_MODE = Hardware::INCREMENT_SCORE;
+            Hardware::footswitch_mode = Increment_Score;
+            synth->delaydepth = 0;
             setup = false;
         }
         break;
@@ -25,7 +26,7 @@ void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSer
     case 1: // Snare → Vocoder fade in
         if (setup)
         {
-            synth->delaydepth = 0;
+            synth->sendControlChange(DelayDepth, 0, MIDI);
 
             Drumset::snare->midi_settings.active_note = 55;                 // G = 55
             Drumset::snare->setup_midi(Amplevel, synth, 127, 0, 3, -0.002); // changes Gate in Vocoder-Mode
@@ -36,21 +37,29 @@ void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSer
         if (Drumset::snare->midi_settings.synth->notes[55] == false)
             Drumset::snare->midi_settings.synth->sendNoteOn(55, MIDI); // play note 55 (G) if it is not playing at the moment
 
-        Hardware::lcd->setCursor(0, 0);
-        Hardware::lcd->print(Drumset::snare->midi_settings.cc_val);
-
         // proceed:
         if (Drumset::crash1->timing.wasHit)
         {
-            step++;
+            increase_step();
         }
         break;
 
     case 2: // Snare → increase delay depth
         if (setup)
         {
-            synth->amplevel = 127; // keep amp at maxLevel
-            Drumset::snare->setup_midi(DelayDepth, synth, 127, 0, 3, -0.002);
+            synth->sendControlChange(Amplevel, 127, MIDI);
+            Drumset::snare->midi_settings.cc_val = 0;
+            Drumset::snare->setup_midi(DelayDepth, synth, 90, 0, 3, -0.002);
+            setup = false;
+        }
+        break;
+
+    case 3: // kill switch
+        if (setup)
+        {
+            Drumset::snare->set_effect(Monitor);
+            synth->sendControlChange(Amplevel, 0, MIDI);
+            synth->sendControlChange(DelayDepth, 0, MIDI);
             setup = false;
         }
         break;
@@ -80,6 +89,7 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca, midi::MidiI
             // Drumset::kick->midi_settings.active_note = notes[note_idx] + 6;
             // Drumset::tom2->midi_settings.active_note = notes[note_idx] + 16;
             // Drumset::standtom->midi_settings.active_note = notes[note_idx] + 12;
+            Hardware::footswitch_mode = Experimental;
 
             Drumset::kick->set_effect(PlayMidi);
             Drumset::kick->setup_midi(None, mKorg, 127, 0, 1, 0.1);
@@ -105,7 +115,6 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca, midi::MidiI
             Drumset::standtom->midi_settings.notes.push_back(notes[0] + 12 + 7);
             Drumset::standtom->midi_settings.active_note = Drumset::standtom->midi_settings.notes[0];
 
-            Hardware::FOOTSWITCH_MODE = Hardware::EXPERIMENTAL;
             Drumset::kick->set_effect(PlayMidi);
             Drumset::snare->set_effect(PlayMidi);
             Drumset::tom2->set_effect(PlayMidi);
@@ -118,20 +127,24 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca, midi::MidiI
     case 2: // change CC only
         if (setup)
         {
-            Hardware::FOOTSWITCH_MODE = Hardware::EXPERIMENTAL;
+            Hardware::footswitch_mode = Experimental;
+
             Drumset::kick->set_effect(Change_CC);
             Drumset::snare->set_effect(Change_CC);
             Drumset::tom2->set_effect(Change_CC);
             Drumset::standtom->set_effect(Change_CC);
             Drumset::hihat->set_effect(TapTempo);
+            
+            notes.push_back(int(random(24, 48)));
+            playSingleNote(mKorg, MIDI);
+
             setup = false;
-            notes.push_back(int(random(24,48)));
         }
-        playSingleNote(mKorg, MIDI);
         break;
 
     default: // start over again
-        step = 0;
+        // step = 0;
+        proceed_to_next_score();
         break;
     }
 }
@@ -254,9 +267,9 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI, Synthes
 
     case 0: // init state
 
-        Hardware::FOOTSWITCH_MODE = Hardware::RESET_AND_PROCEED_SCORE;
+        Hardware::footswitch_mode = Reset_and_Proceed_Score;
 
-        static std::vector<int> locrian_mode = {Globals::active_score->notes[0] + 1, Globals::active_score->notes[0] + 3, Globals::active_score->notes[0] + 5, Globals::active_score->notes[0] + 6, Globals::active_score->notes[0] + 8, Globals::active_score->notes[0] + 11};
+        static std::vector<int> locrian_mode = {notes[0] + 1, notes[0] + 3, notes[0] + 5, notes[0] + 6, notes[0] + 8, notes[0] + 11};
 
         // setup score note seed:
         Globals::print_to_console("active_score->notes[0] = ");

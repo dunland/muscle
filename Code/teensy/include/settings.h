@@ -2,7 +2,7 @@
 
 #pragma once
 
-#define SNARE_THRESHOLD 100
+#define SNARE_THRESHOLD 70
 #define SNARE_CROSSINGS 10
 #define SNARE_DELAY_AFTER_STROKE 10
 #define SNARE_FIRST_STROKE false
