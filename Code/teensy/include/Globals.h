@@ -7,6 +7,12 @@
 
 class Score;
 
+enum MachineState
+{
+  Running,
+  Calibration
+};
+
 // instrument naming for human-readable console outputs:
 enum DrumType
 {
@@ -109,6 +115,9 @@ public:
 
   static int tapInterval;
   static int current_BPM;
+
+  // ------------------ Machine State ------------------
+  static MachineState machine_state;
 
   // ------------------ variables for interrupt timers ------------------
 

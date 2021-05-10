@@ -44,13 +44,15 @@ void Score::increase_step()
 // proceed to step 0 of next score:
 void Score::proceed_to_next_score()
 {
-	Globals::println_to_console("End of score reached! Proceeding to next score!");
+	// Globals::println_to_console("End of score reached! Proceeding to next score!");
 	// proceed to next score in list:
 	Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::score_list.size();
-	// ...and begin at step 0:
-	Globals::score_list[Globals::active_score_pointer]->step = 0;
-	Globals::score_list[Globals::active_score_pointer]->setup = true;
 	Globals::active_score = Globals::score_list[Globals::active_score_pointer];
+	// ...and begin at step 0:
+    Globals::active_score->step = 0;
+    Globals::active_score->setup = true;
+	// Globals::score_list[Globals::active_score_pointer]->step = 0;
+	// Globals::score_list[Globals::active_score_pointer]->setup = true;
 
     Hardware::lcd->clear();
 

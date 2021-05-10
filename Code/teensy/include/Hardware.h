@@ -8,7 +8,6 @@
 #define VIBR 0
 #define FOOTSWITCH 2
 
-
 /* LCD pinout:
 1   Vss       GND       
 2   Vss       +5V
@@ -55,7 +54,22 @@ enum FootswitchMode
   Reset_Topo, // resets beat_topography (of all instruments)
   Reset_Topo_and_Proceed_Score,
   Experimental, // hold = mute, release = randomize and increase score step
-  Increment_Score  // hold = mute, release = randomize and increase score step
+  Increment_Score
+};
+
+enum PushbuttonMode
+{
+  Pb_Edit_Mode,
+  Pb_Scroll_Menu
+};
+
+struct menu
+{
+  int number_of_elements; // how many menu elements are there?
+  int active_element;     // which menu element is active?
+  int pointer = 0;        // pointing at active menu element
+  menu *sub_menu;
+  menu *parent_menu;
 };
 
 class Hardware
@@ -65,6 +79,7 @@ public:
   ///////////////////////////////////////////////////////////////////////
 
   static FootswitchMode footswitch_mode;
+  static PushbuttonMode pushbutton_mode;
 
   static void footswitch_pressed(std::vector<Instrument *> instruments);
 
@@ -76,8 +91,10 @@ public:
   ////////////////////////////////// LCD ////////////////////////////////
   ///////////////////////////////////////////////////////////////////////
   static LiquidCrystal *lcd;
+  static void lcd_display(std::vector<Instrument *> instruments);
   static void display_scores();
   static void display_Midi_values(std::vector<Instrument *> instruments); // display midi values of instruments with FX-Type CC_Change
+  static menu *lcd_menu;
 
   // --------------------------------------------------------------------
 
@@ -88,6 +105,11 @@ public:
   static int encoder_count;
 
   static void checkEncoder();
+
+  /////////////////////////////// PUSHBUTTON ////////////////////////////
+  ///////////////////////////////////////////////////////////////////////
+  static void checkPushButton();          // checks whether pushbutton is pressed and executes action
+  static boolean pushbutton_is_pressed(); // only checks whether pushbutton is pressed
 
   // --------------------------------------------------------------------
 

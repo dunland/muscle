@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 FootswitchMode Hardware::footswitch_mode = Increment_Score;
+PushbuttonMode Hardware::pushbutton_mode = Pb_Scroll_Menu;
 
 void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
 {
@@ -77,13 +78,13 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
 
     break;
 
-  // case (Experimental): // increase step and 
-  //   Globals::active_score->step++; // go to next score step
-  //   Globals::active_score->setup = true;
+    // case (Experimental): // increase step and
+    //   Globals::active_score->step++; // go to next score step
+    //   Globals::active_score->setup = true;
 
-  //   for (auto &instrument : instruments)
-  //     instrument->set_effect(Change_CC);
-  //   break;
+    //   for (auto &instrument : instruments)
+    //     instrument->set_effect(Change_CC);
+    //   break;
 
   default:
     Globals::println_to_console("Footswitch mode not defined!");
@@ -154,16 +155,70 @@ void Hardware::checkFootSwitch(std::vector<Instrument *> instruments)
 ////////////////////////////////// LCD ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 LiquidCrystal *Hardware::lcd = new LiquidCrystal(RS, EN, D4, D5, D6, D7);
+menu *Hardware::lcd_menu = new menu;
+
+void Hardware::lcd_display(std::vector<Instrument *> instruments)
+{
+  switch (Globals::machine_state)
+  {
+  case Running:
+
+    // switch if any instrument has CC mode:
+    int instruments_with_CC_mode = 0;
+    for (uint8_t i = 0; i < instruments.size(); i++)
+    {
+      if (instruments[i]->effect == Change_CC)
+      {
+        instruments_with_CC_mode++;
+      }
+    }
+
+    // start to toggle when CC-occupied display area gets too large
+    if (instruments_with_CC_mode > 3)
+    {
+      static unsigned long last_running_state_switch = 0;
+      static boolean running_mode = true;
+
+      if (millis() > (last_running_state_switch + 3000))
+      {
+        running_mode = !running_mode;
+        Hardware::lcd->clear();
+        last_running_state_switch = millis();
+      }
+
+      if (running_mode == true) // mode A: display scores
+        Hardware::display_scores();
+      else // mode B: display Midi Values
+        Hardware::display_Midi_values(instruments);
+    }
+
+    else
+      // just display score:
+      Hardware::display_scores();
+
+    break;
+
+  case Calibration:
+    //level 1: display all instruments
+    for (uint8_t i = 0; i < instruments.size(); i++)
+    {
+      if (instruments[i]->effect == Change_CC)
+      {
+        Hardware::lcd->setCursor(((i % 4) * 4), int(i >= 4));
+        Hardware::lcd->print(Globals::DrumtypeToHumanreadable(instruments[i]->drumtype));
+        Hardware::lcd->setCursor(((Hardware::lcd_menu->pointer % 4) * 4), int(Hardware::lcd_menu->pointer >= 4));
+        Hardware::lcd->print("→");
+      }
+    }
+    break;
+
+  default:
+    break;
+  }
+}
 
 void Hardware::display_scores()
 {
-  // rotary display:
-  // lcd->setCursor(0, 0);
-  // lcd->print(encoder_count);
-
-  // lcd->setCursor(4, 0);
-  // lcd->print(encoder_value);
-
   // active score display:
   lcd->setCursor(0, 1);
   lcd->print(Globals::score_list[Globals::active_score_pointer]->name);
@@ -175,13 +230,13 @@ void Hardware::display_scores()
 // display midi values of instruments with FX-Type CC_Change
 void Hardware::display_Midi_values(std::vector<Instrument *> instruments)
 {
-  for (uint8_t i = 0; i<instruments.size(); i++)
+  for (uint8_t i = 0; i < instruments.size(); i++)
   {
     if (instruments[i]->effect == Change_CC)
     {
-      Hardware::lcd->setCursor(((i%4)*4), int(i>=4));
+      Hardware::lcd->setCursor(((i % 4) * 4), int(i >= 4));
       Hardware::lcd->print(Globals::DrumtypeToHumanreadable(instruments[i]->drumtype)[0]);
-      Hardware::lcd->setCursor(((i%4)*4)+1, int(i>=4));
+      Hardware::lcd->setCursor(((i % 4) * 4) + 1, int(i >= 4));
       Hardware::lcd->print(int(instruments[i]->midi_settings.cc_val));
     }
   }
@@ -224,14 +279,55 @@ void Hardware::checkEncoder()
       encoder_oldPosition = encoder_newPosition;
     }
   }
+}
 
-  ///////////////////////////// PUSH BUTTON ///////////////////////////
+///////////////////////////// PUSH BUTTON ///////////////////////////
+void Hardware::checkPushButton()
+{
+  if (pushbutton_is_pressed())
+  {
+    switch (Globals::machine_state)
+    {
+    case Running:
+      Globals::active_score->proceed_to_next_score();
+      break;
+
+    case Calibration:
+
+      switch (pushbutton_mode)
+      {
+      case Pb_Edit_Mode: // change value and leave edit mode
+        encoder_value = encoder_count;
+        pushbutton_mode = Pb_Scroll_Menu;
+        break;
+      case Pb_Scroll_Menu: // select menu and go to edit mode
+        Hardware::lcd_menu->pointer = (Hardware::lcd_menu->pointer + 1) % Hardware::lcd_menu->number_of_elements;
+        pushbutton_mode = Pb_Edit_Mode;
+        break;
+      }
+      break;
+
+    default:
+      break;
+    }
+  }
+}
+
+boolean Hardware::pushbutton_is_pressed()
+{
   static unsigned long lastPush = 0;
   if (digitalRead(PUSHBUTTON) == LOW && millis() > lastPush + 200)
   {
-    encoder_value = encoder_count;
-    Globals::active_score->proceed_to_next_score();
     lastPush = millis();
+    lcd->setCursor(11, 0);
+    lcd->print("!");
+    return true;
+  }
+  else
+  {
+    // lcd->setCursor(11, 0);
+    // lcd->print(" ");
+    return false;
   }
 }
 

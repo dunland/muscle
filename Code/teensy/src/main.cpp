@@ -1,7 +1,7 @@
 /*
-   SUPER MUSCLE v.0.2.1
+   SUPER MUSCLE
    ------------------------------------
-   October 2020-March 2021
+   October 2020-May 2021
    by David Unland david[at]unland[dot]eu
    github.com/dunland/muscle
    ------------------------------------
@@ -23,15 +23,15 @@
 #include <Score/Score.h>
 #include <Serial.h>
 #include <Rhythmics.h>
+#include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-String VERSION_NUMBER = "0.2.1";
+String VERSION_NUMBER = "0.2.103";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
 const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
 const boolean USING_TSUNAMI = false;
-
 
 // ----------------------------- variables ----------------------------
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
@@ -175,7 +175,7 @@ void setup()
     delay(100);                          // some time for Tsunami to respond with version string
   }
 
-  // // LCD
+  // LCD
   Hardware::lcd->begin(16, 2);
   Hardware::lcd->setCursor(0, 0);
   Hardware::lcd->print("SUPER MUSCLE");
@@ -283,6 +283,8 @@ void setup()
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
   // tracknum, channel
 
+  if (Hardware::pushbutton_is_pressed())
+    Globals::machine_state = Calibration;
   delay(2000);
   Hardware::lcd->clear();
   // delay(500);
@@ -370,10 +372,10 @@ void loop()
 
   // rotary encoder:
   Hardware::checkEncoder();
+  Hardware::checkPushButton();
 
   // LCD:
-  Hardware::display_scores();
-  Hardware::display_Midi_values(instruments);
+  Hardware::lcd_display(instruments);
 
   // tidying up what's left from performing functions..
   for (auto &instrument : instruments)
