@@ -193,8 +193,9 @@ void Hardware::lcd_display(std::vector<Instrument *> instruments)
     }
 
     else
-      // just display score:
+      // display both score and midi vals:
       Hardware::display_scores();
+      Hardware::display_Midi_values(instruments);
 
     break;
 
