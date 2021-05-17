@@ -179,4 +179,7 @@ class Drumset
     static Instrument *ride;
     static Instrument *tom1;
     static Instrument *crash2;
+
+    static std::vector<Instrument *> instruments; // all instruments go in here
+
 };

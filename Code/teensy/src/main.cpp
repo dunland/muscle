@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-String VERSION_NUMBER = "0.2.103";
+String VERSION_NUMBER = "0.2.104";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -37,8 +37,6 @@ const boolean USING_TSUNAMI = false;
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
 // define instruments:
-
-static std::vector<Instrument *> instruments; // all instruments go in here
 
 Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
 Synthesizer *volca; // create a KORG Volca Keys instrument called volca
@@ -70,7 +68,7 @@ void printNormalizedValues(boolean printNorm_criterion)
     static unsigned long lastMillis;
     if (millis() != lastMillis)
     {
-      for (auto &instrument : instruments)
+      for (auto &instrument : Drumset::instruments)
       {
         // static int countsCopy[Globals::numInputs];
         //noInterrupts();
@@ -93,7 +91,7 @@ void printNormalizedValues(boolean printNorm_criterion)
 void samplePins()
 {
   // read all pins:
-  for (auto &instrument : instruments)
+  for (auto &instrument : Drumset::instruments)
   {
     if (pinValue(instrument) > instrument->sensitivity.threshold)
     {
@@ -187,12 +185,12 @@ void setup()
   mKorg = new Synthesizer(2);
   volca = new Synthesizer(1);
 
-  instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::crash1, Drumset::ride};
+  Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::crash1, Drumset::ride};
 
   rhythmics = new Rhythmics();
 
   // initialize arrays:
-  for (auto &instrument : instruments)
+  for (auto &instrument : Drumset::instruments)
   {
     pinMode(instrument->led, OUTPUT);
     for (int j = 0; j < 8; j++)
@@ -219,7 +217,7 @@ void setup()
   Drumset::cowbell->setup_sensitivity(COWBELL_THRESHOLD, COWBELL_CROSSINGS, COWBELL_DELAY_AFTER_STROKE, COWBELL_FIRST_STROKE);
 
   // ------------------ calculate noise floor -------------------------
-  for (auto &instrument : instruments)
+  for (auto &instrument : Drumset::instruments)
     instrument->calculateNoiseFloor();
 
   // print startup information:
@@ -227,7 +225,7 @@ void setup()
   Globals::println_to_console("-----------------------------------------------");
   Globals::println_to_console("calibration values set as follows:");
   Globals::println_to_console("instr\tthrshld\tcrosses\tnoiseFloor");
-  for (Instrument *instrument : instruments)
+  for (Instrument *instrument : Drumset::instruments)
   {
     Globals::print_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
     Globals::print_to_console("\t");
@@ -303,7 +301,7 @@ void loop()
 
   // --------------------- INCOMING SIGNALS FROM PIEZOS ---------------
   // (define what should happen when instruments are hit)
-  for (auto &instrument : instruments)
+  for (auto &instrument : Drumset::instruments)
   {
     // if (instrument->effect == PlayMidi_rawPin || instrument->effect == CC_Effect_rawPin)
     //  instrument->trigger(instrument, MIDI);
@@ -341,7 +339,7 @@ void loop()
   }
 
   //----------------------- DO THINGS ONCE PER 32nd-step:--------------
-  rhythmics->run_beat(last_beat_pos, instruments, MIDI);
+  rhythmics->run_beat(last_beat_pos, Drumset::instruments, MIDI);
 
   //////////////////////////////// SCORE ////////////////////////////
   ///////////////////////////////////////////////////////////////////
@@ -353,7 +351,7 @@ void loop()
 
     //----------------------- SCORE END -------------------------------
 
-    for (auto &instrument : instruments)
+    for (auto &instrument : Drumset::instruments)
     {
       instrument->timing.wasHit = false;
     }
@@ -367,7 +365,7 @@ void loop()
   Globals::last_16th_count = Globals::current_16th_count;
 
   // Hardware:
-  Hardware::checkFootSwitch(instruments); // check step of footswitch
+  Hardware::checkFootSwitch(); // check step of footswitch
   // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
 
   // rotary encoder:
@@ -375,10 +373,10 @@ void loop()
   Hardware::checkPushButton();
 
   // LCD:
-  Hardware::lcd_display(instruments);
+  Hardware::lcd_display();
 
   // tidying up what's left from performing functions..
-  for (auto &instrument : instruments)
+  for (auto &instrument : Drumset::instruments)
     instrument->tidyUp(MIDI);
 
   // MIDI.sendControlChange(50, 100, 2);

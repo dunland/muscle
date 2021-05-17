@@ -968,3 +968,5 @@ Instrument *Drumset::standtom = new Instrument(A2, Standtom1);
 Instrument *Drumset::cowbell = new Instrument(A3, Cowbell);
 Instrument *Drumset::crash1 = new Instrument(A0, Crash1);
 Instrument *Drumset::ride = new Instrument(A4, Ride);
+
+std::vector<Instrument *> Drumset::instruments; // all instruments go in here

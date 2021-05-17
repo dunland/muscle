@@ -1,6 +1,7 @@
 #include <Hardware.h>
 #include <Score/Score.h>
 #include <Instruments.h>
+#include <Calibration.h>
 
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -8,7 +9,7 @@
 FootswitchMode Hardware::footswitch_mode = Increment_Score;
 PushbuttonMode Hardware::pushbutton_mode = Pb_Scroll_Menu;
 
-void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
+void Hardware::footswitch_pressed()
 {
   lcd->setCursor(11, 0);
   lcd->print("!");
@@ -17,7 +18,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
   {
   case (Log_Beats):
     // set pinMode of all instruments to 3 (record what is being played)
-    for (auto &instrument : instruments)
+    for (auto &instrument : Drumset::instruments)
     {
       instrument->lastEffect = instrument->effect;
       instrument->effect = FootSwitchLooper; // TODO: not for Cowbell?
@@ -31,7 +32,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
     break;
 
   case (Reset_Topo): // resets beat_topography (for all instruments)
-    for (auto &instrument : instruments)
+    for (auto &instrument : Drumset::instruments)
     {
       // reset 8th-note-topography:
       for (int j = 0; j < 8; j++)
@@ -52,7 +53,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
     {
       Globals::println_to_console("regularity height > 10: reset!");
       Globals::active_score->increase_step(); // go to next score step
-      for (auto &instrument : instruments)
+      for (auto &instrument : Drumset::instruments)
         for (int j = 0; j < 16; j++)
           instrument->topography.a_16[j] = 0;
 
@@ -70,7 +71,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
     }
 
     // either way, shuffle instruments with Random_CC_Effect:
-    for (auto &instrument : instruments)
+    for (auto &instrument : Drumset::instruments)
     {
       if (instrument->effect == Random_CC_Effect)
         instrument->score.ready_to_shuffle = true;
@@ -82,7 +83,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
     //   Globals::active_score->step++; // go to next score step
     //   Globals::active_score->setup = true;
 
-    //   for (auto &instrument : instruments)
+    //   for (auto &instrument : Drumset::instruments)
     //     instrument->set_effect(Change_CC);
     //   break;
 
@@ -92,7 +93,7 @@ void Hardware::footswitch_pressed(std::vector<Instrument *> instruments)
   }
 }
 
-void Hardware::footswitch_released(std::vector<Instrument *> instruments)
+void Hardware::footswitch_released()
 {
 
   lcd->setCursor(11, 0);
@@ -101,7 +102,7 @@ void Hardware::footswitch_released(std::vector<Instrument *> instruments)
   switch (footswitch_mode)
   {
   case (Log_Beats):
-    for (auto &instrument : instruments)
+    for (auto &instrument : Drumset::instruments)
       instrument->effect = instrument->lastEffect;
     break;
 
@@ -110,7 +111,7 @@ void Hardware::footswitch_released(std::vector<Instrument *> instruments)
     break;
 
   case (Experimental):
-    for (auto &instrument : instruments)
+    for (auto &instrument : Drumset::instruments)
     {
       instrument->shuffle_cc(false);
       instrument->set_effect(Change_CC);
@@ -127,7 +128,7 @@ void Hardware::footswitch_released(std::vector<Instrument *> instruments)
   }
 }
 
-void Hardware::checkFootSwitch(std::vector<Instrument *> instruments)
+void Hardware::checkFootSwitch()
 {
 
   static int switch_state;
@@ -139,12 +140,12 @@ void Hardware::checkFootSwitch(std::vector<Instrument *> instruments)
   {
     if (switch_state == LOW)
     {
-      footswitch_pressed(instruments);
+      footswitch_pressed();
       Globals::println_to_console("Footswitch pressed.");
     }
     else
     {
-      footswitch_released(instruments);
+      footswitch_released();
       Globals::println_to_console("Footswitch released.");
     }
     last_switch_state = switch_state;
@@ -157,7 +158,7 @@ void Hardware::checkFootSwitch(std::vector<Instrument *> instruments)
 LiquidCrystal *Hardware::lcd = new LiquidCrystal(RS, EN, D4, D5, D6, D7);
 menu *Hardware::lcd_menu = new menu;
 
-void Hardware::lcd_display(std::vector<Instrument *> instruments)
+void Hardware::lcd_display()
 {
   switch (Globals::machine_state)
   {
@@ -165,9 +166,9 @@ void Hardware::lcd_display(std::vector<Instrument *> instruments)
 
     // switch if any instrument has CC mode:
     int instruments_with_CC_mode = 0;
-    for (uint8_t i = 0; i < instruments.size(); i++)
+    for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
     {
-      if (instruments[i]->effect == Change_CC)
+      if (Drumset::instruments[i]->effect == Change_CC)
       {
         instruments_with_CC_mode++;
       }
@@ -189,24 +190,24 @@ void Hardware::lcd_display(std::vector<Instrument *> instruments)
       if (running_mode == true) // mode A: display scores
         Hardware::display_scores();
       else // mode B: display Midi Values
-        Hardware::display_Midi_values(instruments);
+        Hardware::display_Midi_values();
     }
 
     else
       // display both score and midi vals:
       Hardware::display_scores();
-      Hardware::display_Midi_values(instruments);
+      Hardware::display_Midi_values();
 
     break;
 
   case Calibration:
     //level 1: display all instruments
-    for (uint8_t i = 0; i < instruments.size(); i++)
+    for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
     {
-      if (instruments[i]->effect == Change_CC)
+      if (Drumset::instruments[i]->effect == Change_CC)
       {
         Hardware::lcd->setCursor(((i % 4) * 4), int(i >= 4));
-        Hardware::lcd->print(Globals::DrumtypeToHumanreadable(instruments[i]->drumtype));
+        Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[i]->drumtype));
         Hardware::lcd->setCursor(((Hardware::lcd_menu->pointer % 4) * 4), int(Hardware::lcd_menu->pointer >= 4));
         Hardware::lcd->print("→");
       }
@@ -229,16 +230,16 @@ void Hardware::display_scores()
 }
 
 // display midi values of instruments with FX-Type CC_Change
-void Hardware::display_Midi_values(std::vector<Instrument *> instruments)
+void Hardware::display_Midi_values()
 {
-  for (uint8_t i = 0; i < instruments.size(); i++)
+  for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
   {
-    if (instruments[i]->effect == Change_CC)
+    if (Drumset::instruments[i]->effect == Change_CC)
     {
       Hardware::lcd->setCursor(((i % 4) * 4), int(i >= 4));
-      Hardware::lcd->print(Globals::DrumtypeToHumanreadable(instruments[i]->drumtype)[0]);
+      Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[i]->drumtype)[0]);
       Hardware::lcd->setCursor(((i % 4) * 4) + 1, int(i >= 4));
-      Hardware::lcd->print(int(instruments[i]->midi_settings.cc_val));
+      Hardware::lcd->print(int(Drumset::instruments[i]->midi_settings.cc_val));
     }
   }
 }
@@ -299,6 +300,7 @@ void Hardware::checkPushButton()
       {
       case Pb_Edit_Mode: // change value and leave edit mode
         encoder_value = encoder_count;
+        Calibration::set_value(encoder_value);
         pushbutton_mode = Pb_Scroll_Menu;
         break;
       case Pb_Scroll_Menu: // select menu and go to edit mode

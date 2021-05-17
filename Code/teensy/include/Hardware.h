@@ -81,19 +81,19 @@ public:
   static FootswitchMode footswitch_mode;
   static PushbuttonMode pushbutton_mode;
 
-  static void footswitch_pressed(std::vector<Instrument *> instruments);
+  static void footswitch_pressed();
 
-  static void footswitch_released(std::vector<Instrument *> instruments);
+  static void footswitch_released();
 
-  static void checkFootSwitch(std::vector<Instrument *> instruments);
+  static void checkFootSwitch();
   // --------------------------------------------------------------------
 
   ////////////////////////////////// LCD ////////////////////////////////
   ///////////////////////////////////////////////////////////////////////
   static LiquidCrystal *lcd;
-  static void lcd_display(std::vector<Instrument *> instruments);
+  static void lcd_display();
   static void display_scores();
-  static void display_Midi_values(std::vector<Instrument *> instruments); // display midi values of instruments with FX-Type CC_Change
+  static void display_Midi_values(); // display midi values of instruments with FX-Type CC_Change
   static menu *lcd_menu;
 
   // --------------------------------------------------------------------
