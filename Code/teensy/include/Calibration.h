@@ -2,20 +2,25 @@
 
 #include <Instruments.h>
 
+enum Feature_Type
+{
+    Select_Instrument,
+    Select_Value,
+    Set_Threshold,
+    Set_Crossings,
+    Set_Delay_After_Stroke,
+    Set_Stroke_Detection_After_First
+};
+
 class Calibration
 {
 
+public:
+
 static Instrument *selected_instrument;
-static int instr_locator;
 
-static void select_instrument(Instrument *selected_instrument, int value);
+static Feature_Type current_feature;
 
-static void set_threshold(Instrument *selected_instrument, int value);
-
-static void set_crossings(Instrument *selected_instrument, int value);
-
-static void set_delay_after_stroke(Instrument *selected_instrument, int value);
-
-static void set_stroke_detection_after_first(Instrument *selected_instrument, boolean);
+static void set_value(int val);
 
 };

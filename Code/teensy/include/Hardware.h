@@ -5,9 +5,6 @@
 #include <LiquidCrystal.h>
 #include <Encoder.h>
 
-#define VIBR 0
-#define FOOTSWITCH 2
-
 /* LCD pinout:
 1   Vss       GND       
 2   Vss       +5V
@@ -57,12 +54,6 @@ enum FootswitchMode
   Increment_Score
 };
 
-enum PushbuttonMode
-{
-  Pb_Edit_Mode,
-  Pb_Scroll_Menu
-};
-
 struct menu
 {
   int number_of_elements; // how many menu elements are there?
@@ -72,6 +63,24 @@ struct menu
   menu *parent_menu;
 };
 
+class Knob
+{
+
+public:
+  Knob(int knob_pin_)
+  {
+    knob_pin = knob_pin_;
+  }
+
+  int knob_pin;
+
+  void poll();
+
+  void pressed();
+
+  void released();
+};
+
 class Hardware
 {
 public:
@@ -79,7 +88,6 @@ public:
   ///////////////////////////////////////////////////////////////////////
 
   static FootswitchMode footswitch_mode;
-  static PushbuttonMode pushbutton_mode;
 
   static void footswitch_pressed();
 

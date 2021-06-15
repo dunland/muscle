@@ -275,6 +275,8 @@ def draw():
         lines[i].move()
         lines[i].render()
 
+    print(frame_count)
+
     organise_step_functions()
 
 # --------------------------------- CONTROLS --------------------------

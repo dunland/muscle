@@ -15,7 +15,7 @@ boolean Globals::do_print_beat_sum = false; // prints Score::beat_sum topography
 boolean Globals::do_print_JSON = true;		// will be deactivated if no USB answer for 5 seconds
 
 IntervalTimer Globals::masterClock; // 1 bar
-MachineState Globals::machine_state = Running;
+MachineState Globals::machine_state;
 
 Tsunami Globals::tsunami;
 

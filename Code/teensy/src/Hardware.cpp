@@ -2,13 +2,14 @@
 #include <Score/Score.h>
 #include <Instruments.h>
 #include <Calibration.h>
+#include <settings.h>
 
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
 FootswitchMode Hardware::footswitch_mode = Increment_Score;
-PushbuttonMode Hardware::pushbutton_mode = Pb_Scroll_Menu;
 
+// ------------------------------------------------------------------------------
 void Hardware::footswitch_pressed()
 {
   lcd->setCursor(11, 0);
@@ -93,6 +94,7 @@ void Hardware::footswitch_pressed()
   }
 }
 
+// ------------------------------------------------------------------------------
 void Hardware::footswitch_released()
 {
 
@@ -128,6 +130,7 @@ void Hardware::footswitch_released()
   }
 }
 
+// ------------------------------------------------------------------------------
 void Hardware::checkFootSwitch()
 {
 
@@ -135,7 +138,7 @@ void Hardware::checkFootSwitch()
   static int last_switch_state = HIGH;
   static unsigned long last_switch_toggle = 1000; // some pre-delay to prevent initial misdetection
 
-  switch_state = digitalRead(FOOTSWITCH);
+  switch_state = digitalRead(FOOTSWITCH_PIN);
   if (switch_state != last_switch_state && millis() > last_switch_toggle + 20)
   {
     if (switch_state == LOW)
@@ -158,12 +161,13 @@ void Hardware::checkFootSwitch()
 LiquidCrystal *Hardware::lcd = new LiquidCrystal(RS, EN, D4, D5, D6, D7);
 menu *Hardware::lcd_menu = new menu;
 
+// ------------------------------------------------------------------------------
 void Hardware::lcd_display()
 {
   switch (Globals::machine_state)
   {
-  case Running:
-
+  case Machine_Running:
+  {
     // switch if any instrument has CC mode:
     int instruments_with_CC_mode = 0;
     for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
@@ -185,7 +189,8 @@ void Hardware::lcd_display()
         running_mode = !running_mode;
         Hardware::lcd->clear();
         last_running_state_switch = millis();
-      }
+      }///////////////////////////////////////////////////////////////////////
+
 
       if (running_mode == true) // mode A: display scores
         Hardware::display_scores();
@@ -193,32 +198,77 @@ void Hardware::lcd_display()
         Hardware::display_Midi_values();
     }
 
+    // display both score and midi vals:
     else
-      // display both score and midi vals:
+    {
       Hardware::display_scores();
       Hardware::display_Midi_values();
-
-    break;
-
-  case Calibration:
-    //level 1: display all instruments
-    for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
-    {
-      if (Drumset::instruments[i]->effect == Change_CC)
-      {
-        Hardware::lcd->setCursor(((i % 4) * 4), int(i >= 4));
-        Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[i]->drumtype));
-        Hardware::lcd->setCursor(((Hardware::lcd_menu->pointer % 4) * 4), int(Hardware::lcd_menu->pointer >= 4));
-        Hardware::lcd->print("→");
-      }
     }
-    break;
+  }
+  break;
+
+  case Machine_Calibrating:
+  {
+    switch (Calibration::current_feature)
+    {
+    //level 1: display instrument with sensitivity values
+    case Select_Instrument:
+
+      // display instrument:
+      Hardware::lcd->setCursor(0, 0);
+      Hardware::lcd->print("→");
+      Hardware::lcd->setCursor(1, 0);
+      Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[encoder_count]->drumtype));
+
+      // display instrument values:
+      Hardware::lcd->setCursor(0, 1);
+      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.threshold);
+      Hardware::lcd->setCursor(4, 1);
+      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.crossings);
+      Hardware::lcd->setCursor(8, 1);
+      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.delayAfterStroke);
+      Hardware::lcd->setCursor(12, 1);
+      if (Drumset::instruments[encoder_count]->timing.countAfterFirstStroke == true)
+        Hardware::lcd->print("true");
+      else
+        Hardware::lcd->print("false");
+      break;
+
+    case Select_Value:
+      // display instrument:
+      Hardware::lcd->setCursor(0, 0);
+      Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[encoder_count]->drumtype));
+
+      // display arrow:
+      Hardware::lcd->setCursor((((encoder_count % Drumset::instruments.size()) % 4) * 4), int((encoder_count % Drumset::instruments.size()) >= 4));
+      Hardware::lcd->print("→");
+
+      // display instrument values:
+      Hardware::lcd->setCursor(0, 1);
+      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.threshold);
+      Hardware::lcd->setCursor(4, 1);
+      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.crossings);
+      Hardware::lcd->setCursor(8, 1);
+      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.delayAfterStroke);
+      Hardware::lcd->setCursor(12, 1);
+      if (Drumset::instruments[encoder_count]->timing.countAfterFirstStroke == true)
+        Hardware::lcd->print("true");
+      else
+        Hardware::lcd->print("false");
+      break;
+
+    default:
+      break;
+    }
+  }
+  break;
 
   default:
     break;
   }
 }
 
+// ------------------------------------------------------------------------------
 void Hardware::display_scores()
 {
   // active score display:
@@ -229,6 +279,7 @@ void Hardware::display_scores()
   lcd->print(Globals::active_score->step);
 }
 
+// ------------------------------------------------------------------------------
 // display midi values of instruments with FX-Type CC_Change
 void Hardware::display_Midi_values()
 {
@@ -284,28 +335,29 @@ void Hardware::checkEncoder()
 }
 
 ///////////////////////////// PUSH BUTTON ///////////////////////////
+///////////////////////////////////////////////////////////////////////
 void Hardware::checkPushButton()
 {
   if (pushbutton_is_pressed())
   {
     switch (Globals::machine_state)
     {
-    case Running:
+    case Machine_Running:
       Globals::active_score->proceed_to_next_score();
       break;
 
-    case Calibration:
+    case Machine_Calibrating:
 
-      switch (pushbutton_mode)
+      switch (Calibration::current_feature)
       {
-      case Pb_Edit_Mode: // change value and leave edit mode
+      case Select_Instrument: // change value and leave edit mode
         encoder_value = encoder_count;
         Calibration::set_value(encoder_value);
-        pushbutton_mode = Pb_Scroll_Menu;
+        Calibration::current_feature = Select_Value;
         break;
-      case Pb_Scroll_Menu: // select menu and go to edit mode
+      case Select_Value: // select menu and go to edit mode
         Hardware::lcd_menu->pointer = (Hardware::lcd_menu->pointer + 1) % Hardware::lcd_menu->number_of_elements;
-        pushbutton_mode = Pb_Edit_Mode;
+        Calibration::current_feature = Select_Instrument;
         break;
       }
       break;
@@ -328,8 +380,6 @@ boolean Hardware::pushbutton_is_pressed()
   }
   else
   {
-    // lcd->setCursor(11, 0);
-    // lcd->print(" ");
     return false;
   }
 }
@@ -345,13 +395,13 @@ void Hardware::vibrate_motor(unsigned long vibration_duration_input)
 {
   motor_vibration_begin = millis();
   motor_vibration_duration = vibration_duration_input;
-  digitalWrite(VIBR, HIGH);
+  digitalWrite(VIBRATION_MOTOR_PIN, HIGH);
 }
 
 void Hardware::request_motor_deactivation() // turn off vibration and MIDI notes
 {
   if (millis() > motor_vibration_begin + motor_vibration_duration)
-    digitalWrite(VIBR, LOW);
+    digitalWrite(VIBRATION_MOTOR_PIN, LOW);
 }
 
 //////////////////////// SYNTHESIZER CLASS ////////////////////////////

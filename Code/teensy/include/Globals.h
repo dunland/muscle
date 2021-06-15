@@ -9,8 +9,8 @@ class Score;
 
 enum MachineState
 {
-  Running,
-  Calibration
+  Machine_Running,
+  Machine_Calibrating
 };
 
 // instrument naming for human-readable console outputs:

@@ -2,6 +2,7 @@
 #include <MIDI.h>
 #include <Instruments.h>
 #include <Hardware.h>
+#include <settings.h>
 
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////////// SONGS /////////////////////////////////
@@ -487,9 +488,9 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI, Synthes
     // vibrate if new score is ready:
     if (Globals::active_score->beat_sum.ready())
     {
-        digitalWrite(VIBR, HIGH);
+        digitalWrite(VIBRATION_MOTOR_PIN, HIGH);
         Globals::println_to_console("ready to go to next score step! hit footswitch!");
     }
     else
-        digitalWrite(VIBR, LOW);
+        digitalWrite(VIBRATION_MOTOR_PIN, LOW);
 }

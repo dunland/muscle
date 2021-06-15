@@ -2,6 +2,13 @@
 
 #pragma once
 
+/////////////////////////////// KNOBS /////////////////////////////////
+
+#define VIBRATION_MOTOR_PIN 0
+#define FOOTSWITCH_PIN 2
+
+///////////////////////////// INSTRUMENTS /////////////////////////////
+
 #define SNARE_THRESHOLD 70
 #define SNARE_CROSSINGS 10
 #define SNARE_DELAY_AFTER_STROKE 10

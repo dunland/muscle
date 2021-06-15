@@ -117,8 +117,8 @@ void setup()
   Globals::do_print_JSON = DO_PRINT_JSON;
 
   //------------------------ initialize pins --------------------------
-  pinMode(VIBR, OUTPUT);
-  pinMode(FOOTSWITCH, INPUT_PULLUP);
+  pinMode(VIBRATION_MOTOR_PIN, OUTPUT);
+  pinMode(FOOTSWITCH_PIN, INPUT_PULLUP);
   pinMode(PUSHBUTTON, INPUT_PULLUP);
 
   randomSeed(analogRead(A0) * analogRead(A19));
@@ -282,7 +282,10 @@ void setup()
   // tracknum, channel
 
   if (Hardware::pushbutton_is_pressed())
-    Globals::machine_state = Calibration;
+    Globals::machine_state = Machine_Calibrating;
+    else
+    Globals::machine_state = Machine_Running;
+
   delay(2000);
   Hardware::lcd->clear();
   // delay(500);
