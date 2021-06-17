@@ -117,7 +117,7 @@ public:
   static int current_BPM;
 
   // ------------------ Machine State ------------------
-  static MachineState machine_state;
+  static volatile MachineState machine_state;
 
   // ------------------ variables for interrupt timers ------------------
 

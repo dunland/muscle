@@ -159,7 +159,7 @@ void Hardware::checkFootSwitch()
 ////////////////////////////////// LCD ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 LiquidCrystal *Hardware::lcd = new LiquidCrystal(RS, EN, D4, D5, D6, D7);
-menu *Hardware::lcd_menu = new menu;
+volatile boolean Hardware::FLAG_CLEAR_LCD = false;
 
 // ------------------------------------------------------------------------------
 void Hardware::lcd_display()
@@ -187,74 +187,144 @@ void Hardware::lcd_display()
       if (millis() > (last_running_state_switch + 3000))
       {
         running_mode = !running_mode;
-        Hardware::lcd->clear();
+        lcd->clear();
         last_running_state_switch = millis();
-      }///////////////////////////////////////////////////////////////////////
-
+      } ///////////////////////////////////////////////////////////////////////
 
       if (running_mode == true) // mode A: display scores
-        Hardware::display_scores();
+        display_scores();
       else // mode B: display Midi Values
-        Hardware::display_Midi_values();
+        display_Midi_values();
     }
 
     // display both score and midi vals:
     else
     {
-      Hardware::display_scores();
-      Hardware::display_Midi_values();
+      display_scores();
+      display_Midi_values();
     }
   }
   break;
 
   case Machine_Calibrating:
   {
-    switch (Calibration::current_feature)
+    switch (Calibration::calibration_mode)
     {
     //level 1: display instrument with sensitivity values
     case Select_Instrument:
 
       // display instrument:
-      Hardware::lcd->setCursor(0, 0);
-      Hardware::lcd->print("→");
-      Hardware::lcd->setCursor(1, 0);
-      Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[encoder_count]->drumtype));
+      lcd->setCursor(0, 0);
+      lcd->print("[");
+      lcd->setCursor(1, 0);
+      lcd->print(Globals::DrumtypeToHumanreadable(Calibration::selected_instrument->drumtype));
+      lcd->setCursor(2, 0);
+      lcd->print("]");
 
       // display instrument values:
-      Hardware::lcd->setCursor(0, 1);
-      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.threshold);
-      Hardware::lcd->setCursor(4, 1);
-      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.crossings);
-      Hardware::lcd->setCursor(8, 1);
-      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.delayAfterStroke);
-      Hardware::lcd->setCursor(12, 1);
+      lcd->setCursor(0, 1);
+      lcd->print(Drumset::instruments[encoder_count]->sensitivity.threshold);
+      lcd->setCursor(4, 1);
+      lcd->print(Drumset::instruments[encoder_count]->sensitivity.crossings);
+      lcd->setCursor(8, 1);
+      lcd->print(Drumset::instruments[encoder_count]->sensitivity.delayAfterStroke);
+      lcd->setCursor(12, 1);
       if (Drumset::instruments[encoder_count]->timing.countAfterFirstStroke == true)
-        Hardware::lcd->print("true");
+        lcd->print("true");
       else
-        Hardware::lcd->print("false");
+        lcd->print("false");
+
       break;
 
-    case Select_Value:
-      // display instrument:
-      Hardware::lcd->setCursor(0, 0);
-      Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[encoder_count]->drumtype));
+    case Select_Sensitivity_Param:
 
-      // display arrow:
-      Hardware::lcd->setCursor((((encoder_count % Drumset::instruments.size()) % 4) * 4), int((encoder_count % Drumset::instruments.size()) >= 4));
-      Hardware::lcd->print("→");
+      lcd->autoscroll();
+      lcd->setCursor(0, 0);
+      if (Calibration::selected_sensitivity_param == 0)
+        lcd->print("[Threshold]");
+      if (Calibration::selected_sensitivity_param == 1)
+        lcd->print("[Crossings]");
+      if (Calibration::selected_sensitivity_param == 2)
+        lcd->print("[Delay_After_Stroke]");
+      if (Calibration::selected_sensitivity_param == 3)
+        lcd->print("[start Stroke Detection after first stroke?]");
 
-      // display instrument values:
-      Hardware::lcd->setCursor(0, 1);
-      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.threshold);
-      Hardware::lcd->setCursor(4, 1);
-      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.crossings);
-      Hardware::lcd->setCursor(8, 1);
-      Hardware::lcd->print(Drumset::instruments[encoder_count]->sensitivity.delayAfterStroke);
-      Hardware::lcd->setCursor(12, 1);
-      if (Drumset::instruments[encoder_count]->timing.countAfterFirstStroke == true)
-        Hardware::lcd->print("true");
-      else
-        Hardware::lcd->print("false");
+      lcd->setCursor(12, 0);
+      if (Calibration::selected_sensitivity_param == 0)
+        lcd->print(Calibration::selected_instrument->sensitivity.threshold);
+      if (Calibration::selected_sensitivity_param == 1)
+        lcd->print(Calibration::selected_instrument->sensitivity.crossings);
+      if (Calibration::selected_sensitivity_param == 2)
+        lcd->print(Calibration::selected_instrument->sensitivity.delayAfterStroke);
+      if (Calibration::selected_sensitivity_param == 3)
+        if (Calibration::selected_instrument->timing.countAfterFirstStroke)
+          lcd->print("true");
+
+      lcd->setCursor(12, 1);
+      lcd->print(Calibration::selected_instrument->timing.highestVal);
+
+      for (int i = 1; i < 13; i++)
+      {
+        lcd->setCursor(i - 1, 1);
+        if (Calibration::selected_instrument->timing.highestVal > i * 50)
+        {
+          lcd->print("■");
+        }
+        else
+        {
+          lcd->print("□");
+        }
+      }
+
+      break;
+
+    case Set_Value:
+
+      lcd->autoscroll();
+      lcd->setCursor(0, 0);
+      if (Calibration::selected_sensitivity_param == 0)
+        lcd->print("Threshold");
+      if (Calibration::selected_sensitivity_param == 1)
+        lcd->print("Crossings");
+      if (Calibration::selected_sensitivity_param == 2)
+        lcd->print("Delay_After_Stroke");
+      if (Calibration::selected_sensitivity_param == 3)
+        lcd->print("start Stroke Detection after first stroke?");
+
+      lcd->setCursor(11, 0);
+      lcd->print("[");
+      lcd->setCursor(12, 0);
+
+      if (Calibration::selected_sensitivity_param == 0)
+        lcd->print(Calibration::selected_instrument->sensitivity.threshold);
+      if (Calibration::selected_sensitivity_param == 1)
+        lcd->print(Calibration::selected_instrument->sensitivity.crossings);
+      if (Calibration::selected_sensitivity_param == 2)
+        lcd->print(Calibration::selected_instrument->sensitivity.delayAfterStroke);
+      if (Calibration::selected_sensitivity_param == 3)
+        if (Calibration::selected_instrument->timing.countAfterFirstStroke)
+          lcd->print("true");
+
+      lcd->setCursor(15, 0);
+      lcd->print("]");
+
+      lcd->setCursor(12, 1);
+      lcd->print(Calibration::selected_instrument->timing.highestVal);
+
+      // draw reactive volumeter:
+      for (int i = 0; i < 13; i++)
+      {
+        lcd->setCursor(i, 1);
+        if (Calibration::selected_instrument->timing.highestVal > i * 50)
+        {
+          lcd->print("■");
+        }
+        else
+        {
+          lcd->print("□");
+        }
+      }
+
       break;
 
     default:
@@ -302,6 +372,7 @@ void Hardware::display_Midi_values()
 Encoder *Hardware::myEnc = new Encoder(ENCODER1, ENCODER2);
 int Hardware::encoder_value;
 int Hardware::encoder_count = 0;
+int Hardware::encoder_maxVal = 127;
 
 void Hardware::checkEncoder()
 {
@@ -327,7 +398,7 @@ void Hardware::checkEncoder()
     // sinking value:
     else
     {
-      if (encoder_count < 127)
+      if (encoder_count < encoder_maxVal)
         encoder_count++;
       encoder_oldPosition = encoder_newPosition;
     }
@@ -336,53 +407,62 @@ void Hardware::checkEncoder()
 
 ///////////////////////////// PUSH BUTTON ///////////////////////////
 ///////////////////////////////////////////////////////////////////////
+unsigned long Hardware::last_pushbutton_release = 0;
+
 void Hardware::checkPushButton()
 {
-  if (pushbutton_is_pressed())
+  static int button_state;
+  static int last_button_state = false;
+  static unsigned long last_button_toggle = 1000; // some pre-delay to prevent initial misdetection
+
+  button_state = digitalRead(PUSHBUTTON);
+  if (button_state != last_button_state && millis() > last_button_toggle + 20)
   {
     switch (Globals::machine_state)
     {
     case Machine_Running:
-      Globals::active_score->proceed_to_next_score();
+      if (button_state == LOW) // if pressed
+        Globals::active_score->proceed_to_next_score();
       break;
 
     case Machine_Calibrating:
 
-      switch (Calibration::current_feature)
+      if (button_state == LOW && millis() > last_button_toggle + 3000) // released after 3s
       {
-      case Select_Instrument: // change value and leave edit mode
-        encoder_value = encoder_count;
-        Calibration::set_value(encoder_value);
-        Calibration::current_feature = Select_Value;
-        break;
-      case Select_Value: // select menu and go to edit mode
-        Hardware::lcd_menu->pointer = (Hardware::lcd_menu->pointer + 1) % Hardware::lcd_menu->number_of_elements;
-        Calibration::current_feature = Select_Instrument;
-        break;
+        noInterrupts();
+        Globals::machine_state = Machine_Running;
+        interrupts();
       }
+
+      if (button_state == LOW)
+        encoder_value = encoder_count;
+      Calibration::set(encoder_value);
+
       break;
 
     default:
       break;
     }
+    last_button_state = button_state;
+    last_button_toggle = millis();
   }
 }
 
-boolean Hardware::pushbutton_is_pressed()
-{
-  static unsigned long lastPush = 0;
-  if (digitalRead(PUSHBUTTON) == LOW && millis() > lastPush + 200)
-  {
-    lastPush = millis();
-    lcd->setCursor(11, 0);
-    lcd->print("!");
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
+// boolean Hardware::pushbutton_is_pressed()
+// {
+//   static unsigned long lastPush = 0;
+//   if (digitalRead(PUSHBUTTON) == LOW && millis() > lastPush + 200)
+//   {
+//     lastPush = millis();
+//     lcd->setCursor(11, 0);
+//     lcd->print("!");
+//     return true;
+//   }
+//   else
+//   {
+//     return false;
+//   }
+// }
 
 // --------------------------------------------------------------------
 

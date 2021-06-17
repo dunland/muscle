@@ -54,15 +54,6 @@ enum FootswitchMode
   Increment_Score
 };
 
-struct menu
-{
-  int number_of_elements; // how many menu elements are there?
-  int active_element;     // which menu element is active?
-  int pointer = 0;        // pointing at active menu element
-  menu *sub_menu;
-  menu *parent_menu;
-};
-
 class Knob
 {
 
@@ -102,8 +93,7 @@ public:
   static void lcd_display();
   static void display_scores();
   static void display_Midi_values(); // display midi values of instruments with FX-Type CC_Change
-  static menu *lcd_menu;
-
+  static volatile boolean FLAG_CLEAR_LCD; // CAUTION: USED IN INTERRUPTS! DON'T CHANGE WITHOUT STOPPING THEM
   // --------------------------------------------------------------------
 
   ///////////////////////////// ROTARY ENCODER //////////////////////////
@@ -111,6 +101,7 @@ public:
   static Encoder *myEnc;
   static int encoder_value;
   static int encoder_count;
+  static int encoder_maxVal;
 
   static void checkEncoder();
 
@@ -118,7 +109,7 @@ public:
   ///////////////////////////////////////////////////////////////////////
   static void checkPushButton();          // checks whether pushbutton is pressed and executes action
   static boolean pushbutton_is_pressed(); // only checks whether pushbutton is pressed
-
+  static unsigned long last_pushbutton_release;
   // --------------------------------------------------------------------
 
   ////////////////////////////// VIBRATION MOTOR ////////////////////////

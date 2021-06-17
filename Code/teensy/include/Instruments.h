@@ -29,10 +29,10 @@ public:
     // sensitivity and instrument calibration
     struct SENSITIVITY
     {
-        int threshold;
-        int crossings;
-        int noiseFloor;
-        int delayAfterStroke = 10; // TODO: assess best timing for each instrument
+        volatile int threshold;
+        volatile int crossings;
+        volatile int noiseFloor;
+        volatile int delayAfterStroke = 10; // TODO: assess best timing for each instrument
     } sensitivity;
 
     struct TIMING
@@ -41,11 +41,12 @@ public:
         volatile unsigned long firstPinActiveTime;
         unsigned long lastPinActiveTimeCopy;
         unsigned long firstPinActiveTimeCopy;
-        boolean countAfterFirstStroke = false; // start counting after first threshold crossing or using delayAfterStroke
+        volatile boolean countAfterFirstStroke = false; // start counting after first threshold crossing or using delayAfterStroke
         volatile int counts = 0;
         boolean stroke_flag = false;
         int countsCopy;
         boolean wasHit = false;
+        volatile int highestVal = 0; // highest stroke value stored in Calibration Mode
 
     } timing;
 

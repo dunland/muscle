@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-String VERSION_NUMBER = "0.2.104";
+String VERSION_NUMBER = "0.2.107";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -93,12 +93,21 @@ void samplePins()
   // read all pins:
   for (auto &instrument : Drumset::instruments)
   {
-    if (pinValue(instrument) > instrument->sensitivity.threshold)
+    static int pin_value = pinValue(instrument);
+    if (pin_value > instrument->sensitivity.threshold)
     {
       if (instrument->timing.counts < 1)
         instrument->timing.firstPinActiveTime = millis();
       instrument->timing.lastPinActiveTime = millis();
       instrument->timing.counts++;
+    }
+    if (Globals::machine_state == Machine_Calibrating)
+    {
+      if (pin_value > instrument->timing.highestVal)
+      {
+        instrument->timing.highestVal = pin_value;
+        Hardware::FLAG_CLEAR_LCD = true;
+      }
     }
   }
 }
@@ -281,10 +290,18 @@ void setup()
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
   // tracknum, channel
 
-  if (Hardware::pushbutton_is_pressed())
+  if (digitalRead(PUSHBUTTON) == LOW) // pushbutton is pressed
+  {
+    noInterrupts();
     Globals::machine_state = Machine_Calibrating;
-    else
+    interrupts();
+  }
+  else
+  {
+    noInterrupts();
     Globals::machine_state = Machine_Running;
+    interrupts();
+  }
 
   delay(2000);
   Hardware::lcd->clear();
@@ -377,6 +394,11 @@ void loop()
 
   // LCD:
   Hardware::lcd_display();
+
+  if (Globals::machine_state == Machine_Calibrating)
+  {
+    Calibration::update();
+  }
 
   // tidying up what's left from performing functions..
   for (auto &instrument : Drumset::instruments)
