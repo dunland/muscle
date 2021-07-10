@@ -32,8 +32,17 @@ public:
     int note_change_pos = 0; // defines at what position to increase note_idx
     std::vector<int> notes;
 
+    struct tempo
+    {
+        int min_tempo = 0;
+        int max_tempo = 999;
+        int tapTempoResetTime = 4000; // time to restart tapTempo if not used for this long
+        unsigned int tapTempoTimeOut = 2000;   // do not count second tap, if time gap to first one exceeds this
+    } tempo;
+
     boolean setup = true; // when true, current score_step's setup function is executed.
 
+    // TODO: move this to Rhythmics
     TOPOGRAPHY beat_sum;         // sum of all instrument topographies
     TOPOGRAPHY beat_regularity;  // for advance of step
     TOPOGRAPHY topo_midi_effect; // for TopographyMidiEffect
@@ -44,9 +53,10 @@ public:
     void add_bassNote(int note); // adds a NOTE to notes[]
     void increase_step();
     void proceed_to_next_score();
+    void setTempoRange(int min_tempo_, int max_tempo_);
 
     // STANDARD RUN: select according to score->name
-    void run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);                                    // iterates through all score steps, executing the current step functions
+    void run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // iterates through all score steps, executing the current step functions
 
     void run_sattelstein(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);
 

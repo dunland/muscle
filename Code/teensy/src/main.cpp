@@ -1,7 +1,7 @@
 /*
    SUPER MUSCLE
    ------------------------------------
-   October 2020-May 2021
+   October 2020-July 2021
    by David Unland david[at]unland[dot]eu
    github.com/dunland/muscle
    ------------------------------------
@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-String VERSION_NUMBER = "0.2.105i";
+String VERSION_NUMBER = "0.2.105j";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -243,6 +243,7 @@ void setup()
   // doubleSquirrel = new Score("doubleSquirrel");
   monitoring = new Score("monitoring");
   sattelstein = new Score("sattelstein");
+  sattelstein->setTempoRange(150, 170);
   elektrosmoff = new Score("elektrosmoff");
   experimental = new Score("experimental");
   Globals::score_list.push_back(sattelstein);

@@ -57,6 +57,7 @@ void Instrument::footswitch_recordSlots() // record what is being played and rep
   score.set_rhythm_slot[Globals::current_eighth_count] = true;
 }
 
+// ------------------------------ TAP TEMPO ---------------------------
 void Instrument::getTapTempo()
 {
   static unsigned long timeSinceFirstTap = 0;
@@ -71,7 +72,7 @@ void Instrument::getTapTempo()
     //      break;
 
   case 1:                                     // first hit
-    if (millis() > timeSinceFirstTap + 10000) // reinitiate tap if not used for ten seconds
+    if (millis() > timeSinceFirstTap + Globals::active_score->tempo.tapTempoResetTime) // reinitiate tap if not used for ten seconds
     {
       num_of_taps = 0;
       clock_sum = 0;
@@ -84,14 +85,17 @@ void Instrument::getTapTempo()
 
   case 2: // second hit
 
-    if (millis() < timeSinceFirstTap + 2000) // only record tap if interval was not too long
+    if (millis() < timeSinceFirstTap + Globals::active_score->tempo.tapTempoTimeOut) // only record tap if interval was not too long
     {
       num_of_taps++;
       clock_sum += millis() - timeSinceFirstTap;
       Globals::tapInterval = clock_sum / num_of_taps;
       Globals::print_to_console("new tap Tempo is ");
 
-      if (Globals::tapInterval >= 300) // quarter notes when slow tapping
+      // check if score tempo was set, else define quarters are > 300 ms (< 200 BPM)
+      int quarter_timing = (Globals::active_score->tempo.min_tempo > 0) ? Globals::active_score->tempo.min_tempo : 300;
+
+      if (Globals::tapInterval >= quarter_timing && Globals::tapInterval <= 60000/Globals::active_score->tempo.max_tempo) // quarter notes when slow tapping; tapInterval must be within score tempo range
       {
         Globals::current_BPM = 60000 / Globals::tapInterval;
         Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
@@ -100,7 +104,7 @@ void Instrument::getTapTempo()
         Globals::print_to_console(Globals::tapInterval);
         Globals::println_to_console(" ms interval int quarter-notes)");
       }
-      else // eighth-notes when fast tapping
+      else if (Globals::tapInterval >= 60000/(Globals::active_score->tempo.min_tempo * 2) && Globals::tapInterval <= 60000/(Globals::active_score->tempo.max_tempo * 2))// eighth-notes when fast tapping
       {
         Globals::current_BPM = (60000 / Globals::tapInterval) / 2;                                    // BPM >= 180 → strokes are 8th-notes, BPM half-time
         Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 8 / 128); // 8 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
@@ -113,7 +117,7 @@ void Instrument::getTapTempo()
       tapState = 1;
     }
 
-    if (timeSinceFirstTap > 2000) // forget tap if time was too long
+    if (timeSinceFirstTap > Globals::active_score->tempo.tapTempoTimeOut) // forget tap if time was too long
     {
       tapState = 1;
       // Globals::println_to_console(("too long...");

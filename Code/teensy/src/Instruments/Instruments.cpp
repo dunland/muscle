@@ -4,6 +4,9 @@
 #include <Score/Score.h>
 #include <Hardware.h>
 
+// ---------------------- SETUP FUNCTIONS -----------------------------
+
+// set instrument notes via list
 void Instrument::set_notes(std::vector<int> list)
 {
   for (uint8_t i = 0; i < list.size(); i++)
@@ -12,6 +15,7 @@ void Instrument::set_notes(std::vector<int> list)
   }
 }
 
+// setup midi settings with params
 void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor)
 {
   midi_settings.cc_chan = cc_type;
@@ -24,12 +28,14 @@ void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int
   midi_settings.cc_standard = (cc_tidyUp_factor > 0) ? midi_settings.cc_min : midi_settings.cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
 }
 
-void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth) // setup midi without params
+// setup midi without params
+void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth) 
 {
   midi_settings.cc_chan = cc_type;
   midi_settings.synth = synth;
 }
 
+// set instrument sensitivity
 void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean countAfterFirstStroke)
 {
   sensitivity.threshold = threshold_;
@@ -38,7 +44,7 @@ void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfte
   timing.countAfterFirstStroke = countAfterFirstStroke;
 }
 
-// without handle for variable:
+// set effect without handle for variable:
 void Instrument::set_effect(EffectsType effect_)
 {
   Globals::print_to_console("Setting effect for ");
