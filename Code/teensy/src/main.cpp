@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-String VERSION_NUMBER = "0.2.104";
+String VERSION_NUMBER = "0.2.105i";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -42,7 +42,9 @@ Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
 Synthesizer *volca; // create a KORG Volca Keys instrument called volca
 
 // Songs:
-Score *doubleSquirrel;
+// Score *doubleSquirrel;
+Score *monitoring;
+Score *sattelstein;
 Score *elektrosmoff;
 Score *experimental;
 
@@ -238,13 +240,15 @@ void setup()
   Globals::println_to_console("-----------------------------------------------");
 
   // ---------------------------------- SCORE -------------------------
-  doubleSquirrel = new Score("doubleSquirrel");
+  // doubleSquirrel = new Score("doubleSquirrel");
+  monitoring = new Score("monitoring");
+  sattelstein = new Score("sattelstein");
   elektrosmoff = new Score("elektrosmoff");
   experimental = new Score("experimental");
+  Globals::score_list.push_back(sattelstein);
   Globals::score_list.push_back(elektrosmoff);
-  // Globals::score_list.push_back(doubleSquirrel);
   Globals::score_list.push_back(experimental);
-  Globals::active_score = elektrosmoff;
+  Globals::active_score = sattelstein;
 
   // link midi synth to instruments:
   Drumset::snare->midi_settings.synth = mKorg;

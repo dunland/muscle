@@ -73,6 +73,14 @@ void Score::run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
     {
         run_experimental(synth, synth, MIDI);
     }
+    // else if (name == "monitoring")
+    // {
+    //     run_monitoring(synth, synth, MIDI);
+    // }
+    else if (name == "sattelstein")
+    {
+        run_sattelstein(synth, MIDI);
+    }
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////

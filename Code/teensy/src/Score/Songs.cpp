@@ -8,6 +8,48 @@
 ///////////////////////////////////////////////////////////////////////
 
 //////////////////////////// ELEKTROSMOFF /////////////////////////////
+void Score::run_sattelstein(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
+{
+    switch (step)
+    {
+    case 0:
+        if (setup)
+        {
+            Hardware::footswitch_mode = Increment_Score;
+            setup = false;
+        }
+        break;
+
+    case 1: // play notes G2 and G3
+        if (setup)
+        {
+            setup = false;
+        }
+
+        if (synth->notes[55] == false)
+            synth->sendNoteOn(55, MIDI); // play note 55 (G) if it is not playing at the moment
+        if (synth->notes[43] == false)
+            synth->sendNoteOn(43, MIDI); // play note 43 (G) if it is not playing at the moment
+        break;
+
+    case 2: // stop playing notes and leave
+        if (setup)
+        {
+            synth->sendNoteOff(55, MIDI); // play note 55 (G) if it is not playing at the moment
+            synth->sendNoteOff(43, MIDI); // play note 43 (G) if it is not playing at the moment
+
+            setup = false;
+        }
+        increase_step();
+        break;
+
+    default:
+
+        proceed_to_next_score();
+        break;
+    }
+}
+
 void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
 {
     // THIS SONG IS COMPOSED FOR microKORG A.81
@@ -134,7 +176,7 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca, midi::MidiI
             Drumset::tom2->set_effect(Change_CC);
             Drumset::standtom->set_effect(Change_CC);
             Drumset::hihat->set_effect(TapTempo);
-            
+
             notes.push_back(int(random(24, 48)));
             playSingleNote(mKorg, MIDI);
 

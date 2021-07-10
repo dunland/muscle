@@ -300,7 +300,7 @@ void Hardware::checkPushButton()
       {
       case Pb_Edit_Mode: // change value and leave edit mode
         encoder_value = encoder_count;
-        Calibration::set_value(encoder_value);
+        // Calibration::set_value(encoder_value);         
         pushbutton_mode = Pb_Scroll_Menu;
         break;
       case Pb_Scroll_Menu: // select menu and go to edit mode
