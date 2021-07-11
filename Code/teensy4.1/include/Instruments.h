@@ -46,7 +46,7 @@ public:
         boolean stroke_flag = false;
         int countsCopy;
         boolean wasHit = false;
-        volatile int highestVal = 0; // highest stroke value stored in Calibration Mode
+        // volatile int highestVal = 0; // highest stroke value stored in Calibration Mode
 
     } timing;
 

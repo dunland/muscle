@@ -25,6 +25,8 @@ static const int SET_CROSSINGS = 1;
 static const int SET_DELAY_AFTER_STROKE = 2;
 static const int SET_STROKE_DETECTION_AFTER_FIRST = 3;
 
+static int recent_threshold_crossings; // rememers amount of crossings of last detected stroke
+
 static void setup();
 
 static void set(int val);
