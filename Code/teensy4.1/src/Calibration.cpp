@@ -72,12 +72,10 @@ void Calibration::update()
         {
         case Select_Instrument:
             selected_instrument = Drumset::instruments[Hardware::encoder_count % Drumset::instruments.size()];
-            Serial.print("changing selected instrument");
             break;
 
         case Select_Sensitivity_Param:
             selected_sensitivity_param = Hardware::encoder_count % 4;
-            Serial.println("changing selected senstivity parameter");
             break;
 
         case Set_Value:

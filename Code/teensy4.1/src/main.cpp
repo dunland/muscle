@@ -21,9 +21,10 @@
 #include <Instruments.h>
 #include <Hardware.h>
 #include <Score/Score.h>
-#include <Serial.h>
+#include <JSON.h>
 #include <Rhythmics.h>
 #include <Calibration.h>
+#include <SD.h>
 
 // ----------------------------- settings -----------------------------
 String VERSION_NUMBER = "0.2.109";
@@ -116,6 +117,49 @@ void samplePins()
   }
 }
 
+void test_SD()
+{
+
+  File myFile;
+  const int chipSelect = BUILTIN_SDCARD;
+
+  Serial.print("Initializing SD card...");
+  if (!SD.begin(chipSelect))
+  {
+    Serial.println("initialization failed!");
+    return;
+  }
+  Serial.println("initialization done.");
+  myFile = SD.open("/test.txt", FILE_WRITE); //append to file
+  if (myFile)
+  {
+    Serial.print("Writing to test.txt...");
+    myFile.println("testing 1, 2, 3.");
+    myFile.close();
+    Serial.println("done.");
+  }
+  else
+  {
+    Serial.println("error opening test.txt to write");
+  }
+  myFile = SD.open("/test.txt", FILE_READ); //read from file
+  if (myFile)
+  {
+    Serial.println("test.txt:");
+    String inString; //need to use Strings because of the ESP32 webserver
+    while (myFile.available())
+    {
+      inString += myFile.readString();
+    }
+    myFile.close();
+    Serial.print(inString);
+  }
+  else
+  {
+    Serial.println("error opening test.txt to read");
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// SETUP //////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -133,7 +177,7 @@ void setup()
   pinMode(VIBRATION_MOTOR_PIN, OUTPUT);
   pinMode(FOOTSWITCH_PIN, INPUT_PULLUP);
   pinMode(PUSHBUTTON, INPUT_PULLUP);
-  // pinMode(A5, INPUT);
+  // HINT: all analog pins are inputs anyway; they don't have to be set up
 
   randomSeed(analogRead(A0) * analogRead(19));
 
@@ -153,6 +197,9 @@ void setup()
       break;
     }
   }
+
+  // test_SD();
+  // SD.begin(BUILTIN_SDCARD);
 
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
@@ -222,6 +269,11 @@ void setup()
   // Drumset::crash2->setup_sensitivity(CRASH2_THRESHOLD, CRASH2_CROSSINGS, CRASH2_DELAY_AFTER_STROKE, CRASH2_FIRST_STROKE);
   Drumset::ride->setup_sensitivity(RIDE_THRESHOLD, RIDE_CROSSINGS, RIDE_DELAY_AFTER_STROKE, RIDE_FIRST_STROKE);
   Drumset::cowbell->setup_sensitivity(COWBELL_THRESHOLD, COWBELL_CROSSINGS, COWBELL_DELAY_AFTER_STROKE, COWBELL_FIRST_STROKE);
+
+  // try to override sensitivity with data from SD:
+  // TODO: only do this if file exists!
+  JSON::read_sensitivity_data_from_SD(Drumset::instruments);
+
 
   // ------------------ calculate noise floor -------------------------
   for (auto &instrument : Drumset::instruments)
@@ -338,7 +390,7 @@ void loop()
     digitalWrite(LED_BUILTIN, HIGH);
     last_led = millis();
   }
-  Serial.println(analogRead(A5));
+  // Serial.println(analogRead(A5));
 
   if (millis() > last_led + 50)
     digitalWrite(LED_BUILTIN, LOW);
@@ -355,7 +407,7 @@ void loop()
   Hardware::lcd_display();
   Calibration::update();
 
-  Serial.println(Globals::DrumtypeToHumanreadable(Calibration::selected_instrument->drumtype));
+  // Serial.println(Globals::DrumtypeToHumanreadable(Calibration::selected_instrument->drumtype));
 }
 
 // void loop_()

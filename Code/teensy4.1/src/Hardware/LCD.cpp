@@ -16,8 +16,6 @@ void Hardware::lcd_display()
     {
     case Machine_Running:
     {
-        Serial.println("running machine");
-
         lcd->setCursor(0, 0);
         lcd->print("running");
 
@@ -65,7 +63,6 @@ void Hardware::lcd_display()
         {
         //level 1: display instrument with sensitivity values
         case Select_Instrument:
-            // Serial.println("select instrument");
 
             // display instrument:
             lcd->setCursor(0, 0);
@@ -101,7 +98,6 @@ void Hardware::lcd_display()
             break;
 
         case Select_Sensitivity_Param:
-            Serial.println("select sensitivity param");
 
             // lcd->autoscroll();
             lcd->setCursor(0, 0);
@@ -139,7 +135,6 @@ void Hardware::lcd_display()
             break;
 
         case Set_Value:
-            Serial.println("set value");
 
             // lcd->autoscroll();
             lcd->setCursor(0, 0);

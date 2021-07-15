@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Globals.h>
-#include <Serial.h>
+#include <JSON.h>
 #include <Instruments.h>
 #include <Score/Score.h>
 #include <MIDI.h>

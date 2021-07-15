@@ -3,6 +3,7 @@
 #include <Instruments.h>
 #include <Calibration.h>
 #include <settings.h>
+#include <JSON.h>
 
 ///////////////////////////// ROTARY ENCODER //////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -64,7 +65,6 @@ void Hardware::checkPushButton()
       if (button_state == HIGH) // button released
       {
         Globals::active_score->proceed_to_next_score();
-        Serial.println("push button pressed.");
       }
       break;
 
@@ -72,8 +72,10 @@ void Hardware::checkPushButton()
 
       if (button_state == HIGH) // button released
       {
+        // save current encoder value:
         encoder_value = encoder_count;
-        Serial.println("push button pressed.");
+
+        // go one level down and setup new mode:
         Calibration::set(encoder_value);
       }
 
@@ -94,10 +96,16 @@ void Hardware::checkPushButton()
     switch (Calibration::calibration_mode)
     {
     case Select_Instrument:
+
+      // change mode:
       noInterrupts();
       Globals::machine_state = Machine_Running;
       interrupts();
-      // TODO: save settings to SD card
+
+      // save settings to SD card:
+      JSON::save_settings_to_SD(Drumset::instruments);
+
+      // clear up:
       Serial.println("leaving calibration mode.");
       Hardware::lcd->clear();
       break;
