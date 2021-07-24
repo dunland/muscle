@@ -8,6 +8,40 @@
 ///////////////////////////////////////////////////////////////////////
 
 //////////////////////////// ELEKTROSMOFF /////////////////////////////
+void Score::run_control_dd200(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
+{
+    switch (step)
+    {
+    case 0:
+        if (setup)
+        {
+            Drumset::crash1->setup_midi(DelayDepth, dd200, 127, 0, 50, -1); // change
+            Drumset::snare->set_effect(Change_CC);
+            setup = false;
+        }
+
+        static float val;
+        static float step = 1;
+        val = (val + step);
+        if (val == 0)
+            Hardware::lcd->clear();
+        // if (millis() > last_change + 1000)
+        // {
+        MIDI.sendControlChange(94, int(val) % 127, 2);
+        MIDI.sendControlChange(17, int(val) % 127, 3);
+        // synth->sendControlChange(DelayDepth, int(val) % 127, MIDI);
+        // last_change = millis();
+        // }
+
+        Hardware::lcd->setCursor(10, 0);
+        Hardware::lcd->print(int(val)%127);
+        break;
+
+    default:
+        break;
+    }
+}
+
 void Score::run_sattelstein(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (step)

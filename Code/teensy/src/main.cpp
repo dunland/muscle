@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-String VERSION_NUMBER = "0.2.105j";
+String VERSION_NUMBER = "0.2.105m";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -40,6 +40,8 @@ midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as 
 
 Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
 Synthesizer *volca; // create a KORG Volca Keys instrument called volca
+Synthesizer *dd200;
+Synthesizer *whammy;
 
 // Songs:
 // Score *doubleSquirrel;
@@ -47,6 +49,7 @@ Score *monitoring;
 Score *sattelstein;
 Score *elektrosmoff;
 Score *experimental;
+Score *control_dd200;
 
 Rhythmics *rhythmics;
 
@@ -186,6 +189,8 @@ void setup()
   // instantiate external MIDI devices:
   mKorg = new Synthesizer(2);
   volca = new Synthesizer(1);
+  dd200 = new Synthesizer(3);
+  whammy = new Synthesizer(4);
 
   Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::crash1, Drumset::ride};
 
@@ -246,10 +251,13 @@ void setup()
   sattelstein->setTempoRange(150, 170);
   elektrosmoff = new Score("elektrosmoff");
   experimental = new Score("experimental");
+  control_dd200 = new Score("control_dd200");
+
+  Globals::score_list.push_back(control_dd200);
   Globals::score_list.push_back(sattelstein);
   Globals::score_list.push_back(elektrosmoff);
   Globals::score_list.push_back(experimental);
-  Globals::active_score = sattelstein;
+  Globals::active_score = control_dd200;
 
   // link midi synth to instruments:
   Drumset::snare->midi_settings.synth = mKorg;
@@ -286,8 +294,8 @@ void setup()
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
   // tracknum, channel
 
-  if (Hardware::pushbutton_is_pressed())
-    Globals::machine_state = Calibration;
+  // if (Hardware::pushbutton_is_pressed())
+    // Globals::machine_state = Calibration;
   delay(2000);
   Hardware::lcd->clear();
   // delay(500);
@@ -352,7 +360,8 @@ void loop()
   if (Globals::current_beat_pos != last_beat_pos) // run once per 32nd-step
   {
     // Globals::active_score->load();
-    Globals::active_score->run(mKorg, MIDI); // TODO: globale Synthesizer-Liste
+    // Globals::active_score->run(mKorg, MIDI); // TODO: globale Synthesizer-Liste
+    Globals::active_score->run(dd200, MIDI); // TODO: globale Synthesizer-Liste
 
     //----------------------- SCORE END -------------------------------
 

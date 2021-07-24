@@ -68,6 +68,8 @@ public:
 
     void run_experimental(Synthesizer *mKorg, Synthesizer *volca, midi::MidiInterface<HardwareSerial> MIDI);
 
+    void run_control_dd200(Synthesizer *dd200, midi::MidiInterface<HardwareSerial> MIDI);
+
     // ------------------------------- MODES: (deprecated) ------------
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
 
