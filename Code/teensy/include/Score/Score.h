@@ -56,19 +56,19 @@ public:
     void setTempoRange(int min_tempo_, int max_tempo_);
 
     // STANDARD RUN: select according to score->name
-    void run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // iterates through all score steps, executing the current step functions
+    void run(midi::MidiInterface<HardwareSerial> MIDI); // iterates through all score steps, executing the current step functions
 
-    void run_sattelstein(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);
+    void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca);
+    void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *mKorg, Synthesizer *volca); // TODO: tentative, as this should be dynamic later..
+    void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI); // TODO: tentative, as this should be dynamic later..
 
-    void run_elektrosmoff(Synthesizer *mKorg, midi::MidiInterface<HardwareSerial> MIDI);
+    void run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_experimental(Synthesizer *mKorg, Synthesizer *volca, midi::MidiInterface<HardwareSerial> MIDI);
+    void run_experimental(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_control_dd200(Synthesizer *dd200, midi::MidiInterface<HardwareSerial> MIDI);
+    void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
 
     // ------------------------------- MODES: (deprecated) ------------
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score

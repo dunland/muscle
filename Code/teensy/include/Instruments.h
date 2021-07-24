@@ -168,7 +168,7 @@ public:
 
 class Drumset
 {
-    public:
+public:
     static Instrument *snare;
     static Instrument *hihat;
     static Instrument *kick;
@@ -181,5 +181,13 @@ class Drumset
     static Instrument *crash2;
 
     static std::vector<Instrument *> instruments; // all instruments go in here
+};
 
+class Synthesizers
+{
+    public:
+    static Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
+    static Synthesizer *volca; // create a KORG Volca Keys instrument called volca
+    static Synthesizer *dd200;
+    static Synthesizer *whammy;
 };

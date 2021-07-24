@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-String VERSION_NUMBER = "0.2.105m";
+String VERSION_NUMBER = "0.2.105n";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -35,13 +35,6 @@ const boolean USING_TSUNAMI = false;
 
 // ----------------------------- variables ----------------------------
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
-
-// define instruments:
-
-Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
-Synthesizer *volca; // create a KORG Volca Keys instrument called volca
-Synthesizer *dd200;
-Synthesizer *whammy;
 
 // Songs:
 // Score *doubleSquirrel;
@@ -185,14 +178,6 @@ void setup()
   Hardware::lcd->setCursor(0, 1);
   Hardware::lcd->print(VERSION_NUMBER);
 
-  // ------------------------ INSTRUMENT SETUP ------------------------
-  // instantiate external MIDI devices:
-  mKorg = new Synthesizer(2);
-  volca = new Synthesizer(1);
-  dd200 = new Synthesizer(3);
-  whammy = new Synthesizer(4);
-
-  Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::crash1, Drumset::ride};
 
   rhythmics = new Rhythmics();
 
@@ -260,14 +245,14 @@ void setup()
   Globals::active_score = control_dd200;
 
   // link midi synth to instruments:
-  Drumset::snare->midi_settings.synth = mKorg;
-  Drumset::kick->midi_settings.synth = mKorg;
-  Drumset::hihat->midi_settings.synth = mKorg;
-  Drumset::crash1->midi_settings.synth = mKorg;
-  Drumset::ride->midi_settings.synth = mKorg;
-  Drumset::tom2->midi_settings.synth = mKorg;
-  Drumset::standtom->midi_settings.synth = mKorg;
-  Drumset::cowbell->midi_settings.synth = mKorg;
+  Drumset::snare->midi_settings.synth = Synthesizers::mKorg;
+  Drumset::kick->midi_settings.synth = Synthesizers::mKorg;
+  Drumset::hihat->midi_settings.synth = Synthesizers::mKorg;
+  Drumset::crash1->midi_settings.synth = Synthesizers::mKorg;
+  Drumset::ride->midi_settings.synth = Synthesizers::mKorg;
+  Drumset::tom2->midi_settings.synth = Synthesizers::mKorg;
+  Drumset::standtom->midi_settings.synth = Synthesizers::mKorg;
+  Drumset::cowbell->midi_settings.synth = Synthesizers::mKorg;
 
   // an initial midi note must be defined, otherwise there is a problem with the tidyUp function
   // Drumset::snare->midi_settings.active_note = 50;
@@ -361,7 +346,7 @@ void loop()
   {
     // Globals::active_score->load();
     // Globals::active_score->run(mKorg, MIDI); // TODO: globale Synthesizer-Liste
-    Globals::active_score->run(dd200, MIDI); // TODO: globale Synthesizer-Liste
+    Globals::active_score->run(MIDI); // TODO: globale Synthesizer-Liste
 
     //----------------------- SCORE END -------------------------------
 

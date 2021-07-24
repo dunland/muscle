@@ -29,7 +29,7 @@ void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int
 }
 
 // setup midi without params
-void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth) 
+void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth)
 {
   midi_settings.cc_chan = cc_type;
   midi_settings.synth = synth;
@@ -267,7 +267,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
   topography.smoothen_dataArray();
   Serial.print("hit");
   Serial.print(Globals::DrumtypeToHumanreadable(drumtype));
-  Hardware::lcd->setCursor(13,0);
+  Hardware::lcd->setCursor(13, 0);
   Hardware::lcd->print(Globals::DrumtypeToHumanreadable(drumtype));
 
   switch (effect)
@@ -403,4 +403,10 @@ Instrument *Drumset::cowbell = new Instrument(A3, Cowbell);
 Instrument *Drumset::crash1 = new Instrument(A0, Crash1);
 Instrument *Drumset::ride = new Instrument(A4, Ride);
 
-std::vector<Instrument *> Drumset::instruments; // all instruments go in here
+std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::crash1, Drumset::ride};
+
+// instantiate external MIDI devices:
+Synthesizer *Synthesizers::mKorg = new Synthesizer(2);
+Synthesizer *Synthesizers::volca = new Synthesizer(1);
+Synthesizer *Synthesizers::dd200 = new Synthesizer(3);
+Synthesizer *Synthesizers::whammy = new Synthesizer(4);

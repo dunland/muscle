@@ -66,31 +66,31 @@ void Score::setTempoRange(int min_tempo_, int max_tempo_)
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////// STANDARD RUN //////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void Score::run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
+void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
 {
     if (name == "elektrosmoff")
     {
-        run_elektrosmoff(synth, MIDI);
+        run_elektrosmoff(MIDI);
     }
     else if (name == "doubleSquirrel")
     {
-        run_doubleSquirrel(MIDI, synth, synth);
+        run_doubleSquirrel(MIDI);
     }
     else if (name == "experimental")
     {
-        run_experimental(synth, synth, MIDI);
+        run_experimental(MIDI);
     }
     // else if (name == "monitoring")
     // {
-    //     run_monitoring(synth, synth, MIDI);
+    //     run_monitoring(MIDI);
     // }
     else if (name == "sattelstein")
     {
-        run_sattelstein(synth, MIDI);
+        run_sattelstein(MIDI);
     }
     else if (name == "control_dd200")
     {
-        run_control_dd200(synth, MIDI);
+        run_control_dd200(MIDI);
     }
 }
 
