@@ -7,7 +7,7 @@
 /////////////////////////////// SONGS /////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-//////////////////////////// ELEKTROSMOFF /////////////////////////////
+//////////////////////////// CONTROL DD200 /////////////////////////////
 void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (step)
@@ -15,33 +15,36 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (setup)
         {
-            Drumset::crash1->setup_midi(DelayDepth, Synthesizers::dd200, 127, 0, 50, -1); // change
-            Drumset::snare->set_effect(Change_CC);
+            Drumset::crash1->setup_midi(dd200_DelayTime, Synthesizers::dd200, 127, 0, -10, 0.2); // change
+            Drumset::crash1->set_effect(Change_CC);
+            Drumset::ride->setup_midi(DelayDepth, Synthesizers::dd200, 127, 0, -3, 0.1); // change
+            Drumset::ride->set_effect(Change_CC);
             setup = false;
         }
 
-        static float val;
-        static float step = 1;
-        val = (val + step);
-        if (val == 0)
-            Hardware::lcd->clear();
-        // if (millis() > last_change + 1000)
-        // {
-        MIDI.sendControlChange(94, int(val) % 127, 2);
-        MIDI.sendControlChange(17, int(val) % 127, 3);
+        // static float val;
+        // static float step = 1;
+        // val = (val + step);
+        // if (val == 0)
+        //     Hardware::lcd->clear();
+        // // if (millis() > last_change + 1000)
+        // // {
+        // MIDI.sendControlChange(94, int(val) % 127, 2);
+        // MIDI.sendControlChange(17, int(val) % 127, 3);
         // synth->sendControlChange(DelayDepth, int(val) % 127, MIDI);
         // last_change = millis();
         // }
 
         Hardware::lcd->setCursor(10, 0);
-        Hardware::lcd->print(int(val)%127);
+        Hardware::lcd->print(Drumset::crash1->midi_settings.cc_val);
         break;
 
     default:
         break;
     }
 }
-
+//////////////////////////// SATTELSTEIN /////////////////////////////
+// THIS SONG IS COMPOSED FOR microKORG A.57
 void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (step)
@@ -49,6 +52,8 @@ void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (setup)
         {
+            // Synthesizers::mKorg->s
+            MIDI.sendProgramChange(38, Synthesizers::mKorg->midi_channel); // selects microKORG Sound A.57
             Hardware::footswitch_mode = Increment_Score;
             setup = false;
         }
@@ -71,6 +76,7 @@ void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
         {
             Synthesizers::mKorg->sendNoteOff(55, MIDI); // play note 55 (G) if it is not playing at the moment
             Synthesizers::mKorg->sendNoteOff(43, MIDI); // play note 43 (G) if it is not playing at the moment
+            MIDI.sendRealTime(midi::Stop);
 
             setup = false;
         }
@@ -84,6 +90,7 @@ void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
     }
 }
 
+//////////////////////////// ELEKTROSMOFF /////////////////////////////
 void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
 {
     // THIS SONG IS COMPOSED FOR microKORG A.81
@@ -92,6 +99,7 @@ void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
     case 0: // Vocoder not activated
         if (setup)
         {
+            MIDI.sendProgramChange(56, Synthesizers::mKorg->midi_channel); // switches to A.81
             Drumset::snare->set_effect(Monitor);
             Hardware::footswitch_mode = Increment_Score;
             Synthesizers::mKorg->delaydepth = 0;
@@ -136,6 +144,7 @@ void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::snare->set_effect(Monitor);
             Synthesizers::mKorg->sendControlChange(Amplevel, 0, MIDI);
             Synthesizers::mKorg->sendControlChange(DelayDepth, 0, MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
             setup = false;
         }
         break;

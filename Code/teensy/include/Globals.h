@@ -47,13 +47,16 @@ enum EffectsType
   TapTempoRange
 };
 
+// TODO: globale Control-Channes für alle Synths gleichschalten ODER neuen enum für jeden Synth
 enum CC_Type // channels on mKORG:
 {
   None = -1,
+  dd200_DelayTime = 17,
   Osc2_semitone = 18,
   Osc2_tune = 19,
   Mix_Level_1 = 20,
   Mix_Level_2 = 21,
+  dd200_OnOff = 27,
   Patch_1_Depth = 28,
   Patch_3_Depth = 30,
   Cutoff = 44,

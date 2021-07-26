@@ -66,6 +66,12 @@ enum CC_Type // channels on mKORG:
   DelayDepth = 94
 };
 
+// TODO: make own enum for every synth OR reset channels on each synth!
+// enum dd200_CC
+// {
+//   dd200_fxLevel = 19
+// };
+
 class TOPOGRAPHY
 {
 public:
