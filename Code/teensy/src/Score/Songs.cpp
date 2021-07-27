@@ -22,21 +22,6 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             setup = false;
         }
 
-        // static float val;
-        // static float step = 1;
-        // val = (val + step);
-        // if (val == 0)
-        //     Hardware::lcd->clear();
-        // // if (millis() > last_change + 1000)
-        // // {
-        // MIDI.sendControlChange(94, int(val) % 127, 2);
-        // MIDI.sendControlChange(17, int(val) % 127, 3);
-        // synth->sendControlChange(DelayDepth, int(val) % 127, MIDI);
-        // last_change = millis();
-        // }
-
-        Hardware::lcd->setCursor(10, 0);
-        Hardware::lcd->print(Drumset::crash1->midi_settings.cc_val);
         break;
 
     default:
@@ -52,8 +37,8 @@ void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (setup)
         {
-            // Synthesizers::mKorg->s
-            MIDI.sendProgramChange(38, Synthesizers::mKorg->midi_channel); // selects microKORG Sound A.57
+            Score::resetInstruments();                        // reset all instruments to "Monitor" mode
+            Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
             Hardware::footswitch_mode = Increment_Score;
             setup = false;
         }
@@ -74,8 +59,8 @@ void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
     case 2: // stop playing notes and leave
         if (setup)
         {
-            Synthesizers::mKorg->sendNoteOff(55, MIDI); // play note 55 (G) if it is not playing at the moment
-            Synthesizers::mKorg->sendNoteOff(43, MIDI); // play note 43 (G) if it is not playing at the moment
+            // Synthesizers::mKorg->sendNoteOff(55, MIDI); // play note 55 (G) if it is not playing at the moment
+            // Synthesizers::mKorg->sendNoteOff(43, MIDI); // play note 43 (G) if it is not playing at the moment
             MIDI.sendRealTime(midi::Stop);
 
             setup = false;
@@ -99,7 +84,8 @@ void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
     case 0: // Vocoder not activated
         if (setup)
         {
-            MIDI.sendProgramChange(56, Synthesizers::mKorg->midi_channel); // switches to A.81
+            Synthesizers::mKorg->sendProgramChange(56, MIDI); // selects mKORG Voice A.57
+            Score::resetInstruments();                        // reset all instruments to "Monitor" mode
             Drumset::snare->set_effect(Monitor);
             Hardware::footswitch_mode = Increment_Score;
             Synthesizers::mKorg->delaydepth = 0;
@@ -111,10 +97,10 @@ void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
         if (setup)
         {
             Synthesizers::mKorg->sendControlChange(DelayDepth, 0, MIDI);
-
-            Drumset::snare->midi_settings.active_note = 55;                 // G = 55
+            Drumset::snare->midi_settings.active_note = 55;                               // G = 55
             Drumset::snare->setup_midi(Amplevel, Synthesizers::mKorg, 127, 0, 3, -0.002); // changes Gate in Vocoder-Mode
             Drumset::snare->set_effect(Change_CC);
+            Drumset::snare->midi_settings.synth->sendNoteOn(55, MIDI); // play note 55 (G) if it is not playing at the moment
             setup = false;
         }
 
@@ -164,6 +150,10 @@ void Score::run_experimental(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
+        resetInstruments(); // reset all instruments to "Monitor" mode
+        Synthesizers::mKorg->sendProgramChange(int(random(0, 128)), MIDI);
+        notes.push_back(int(random(24, 48)));
+
         step = 1;
         break;
 
@@ -177,34 +167,42 @@ void Score::run_experimental(midi::MidiInterface<HardwareSerial> MIDI)
             Hardware::footswitch_mode = Increment_Score;
 
             Drumset::kick->set_effect(PlayMidi);
-            Drumset::kick->setup_midi(None, Synthesizers::mKorg, 127, 0, 1, 0.1);
+            Drumset::kick->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
             Drumset::kick->shuffle_cc(true); // set a random midi CC channel
             Drumset::kick->midi_settings.notes.push_back(notes[0] + 12 + 7);
             Drumset::kick->midi_settings.active_note = Drumset::kick->midi_settings.notes[0];
 
             Drumset::snare->set_effect(PlayMidi);
-            Drumset::snare->setup_midi(None, Synthesizers::mKorg, 127, 0, 1, 0.1);
+            Drumset::snare->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
             Drumset::snare->shuffle_cc(true); // set a random midi CC channel
             Drumset::snare->midi_settings.notes.push_back(notes[0] + 12 + 12);
             Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[0];
 
             Drumset::tom2->set_effect(PlayMidi);
-            Drumset::tom2->setup_midi(None, Synthesizers::mKorg, 127, 0, 1, 0.1);
+            Drumset::tom2->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
             Drumset::tom2->shuffle_cc(true); // set a random midi CC channel
             Drumset::tom2->midi_settings.notes.push_back(notes[0] + 12 + 5);
             Drumset::tom2->midi_settings.active_note = Drumset::tom2->midi_settings.notes[0];
 
             Drumset::standtom->set_effect(PlayMidi);
-            Drumset::standtom->setup_midi(None, Synthesizers::mKorg, 127, 0, 1, 0.1);
+            Drumset::standtom->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
             Drumset::standtom->shuffle_cc(true); // set a random midi CC channel
             Drumset::standtom->midi_settings.notes.push_back(notes[0] + 12 + 7);
             Drumset::standtom->midi_settings.active_note = Drumset::standtom->midi_settings.notes[0];
+
+            Drumset::ride->setup_midi(Resonance, Synthesizers::mKorg, 115, 15, 2, -0.01);
+            Drumset::crash1->setup_midi(Cutoff, Synthesizers::mKorg, 115, 15, 2, -0.01);
 
             Drumset::kick->set_effect(PlayMidi);
             Drumset::snare->set_effect(PlayMidi);
             Drumset::tom2->set_effect(PlayMidi);
             Drumset::standtom->set_effect(PlayMidi);
+            Drumset::ride->set_effect(Change_CC);
+            Drumset::crash1->set_effect(Change_CC);
             Drumset::hihat->set_effect(TapTempo);
+
+            playSingleNote(Synthesizers::mKorg, MIDI);
+
             setup = false;
         }
         break;
@@ -212,15 +210,16 @@ void Score::run_experimental(midi::MidiInterface<HardwareSerial> MIDI)
     case 2: // change CC only
         if (setup)
         {
-            Hardware::footswitch_mode = Experimental;
+            // Hardware::footswitch_mode = Experimental;
 
             Drumset::kick->set_effect(Change_CC);
             Drumset::snare->set_effect(Change_CC);
             Drumset::tom2->set_effect(Change_CC);
             Drumset::standtom->set_effect(Change_CC);
+            Drumset::ride->set_effect(Change_CC);
+            Drumset::crash1->set_effect(Change_CC);
             Drumset::hihat->set_effect(TapTempo);
 
-            notes.push_back(int(random(24, 48)));
             playSingleNote(Synthesizers::mKorg, MIDI);
 
             setup = false;
@@ -228,7 +227,7 @@ void Score::run_experimental(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default: // start over again
-        step = 0;
+        step = 1;
         // proceed_to_next_score();
         break;
     }
@@ -380,7 +379,7 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
             // assign effects to instruments:
             // the hihat will change the allocated (AmpLevel) value on the synth, whenever hit:
             hihat->effect = Change_CC;
-            hihat->setup_midi(Amplevel,Synthesizers::mKorg, 127, 0, 0.65, 0);
+            hihat->setup_midi(Amplevel, Synthesizers::mKorg, 127, 0, 0.65, 0);
 
             // these instruments do not play a role here. just print out what they do:
             snare->effect = Monitor;
@@ -391,7 +390,7 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
             standtom->effect = Monitor;
 
             active_score->playSingleNote(Synthesizers::mKorg, MIDI); // start playing a bass note on synth
-            active_score->setup = false;               // leave setup section
+            active_score->setup = false;                             // leave setup section
         }
 
         Globals::print_to_console("amplevel_val = ");
@@ -465,10 +464,10 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
             crash1->effect = Change_CC;
 
             // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
-            snare->setup_midi(Osc2_tune,Synthesizers::mKorg, 127, 13, 15, -0.1);
-            kick->setup_midi(Amplevel,Synthesizers::mKorg, 127, 80, -35, 0.1);
-            ride->setup_midi(Resonance,Synthesizers::mKorg, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
-            crash1->setup_midi(Patch_3_Depth,Synthesizers::mKorg, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
+            snare->setup_midi(Osc2_tune, Synthesizers::mKorg, 127, 13, 15, -0.1);
+            kick->setup_midi(Amplevel, Synthesizers::mKorg, 127, 80, -35, 0.1);
+            ride->setup_midi(Resonance, Synthesizers::mKorg, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
+            crash1->setup_midi(Patch_3_Depth, Synthesizers::mKorg, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
 
             active_score->setup = false;
         }
@@ -477,12 +476,12 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
         static int cutoff_val = 50;
 
         cutoff_val = max(50, (min(127, active_score->beat_sum.average_smooth * step_factor)));
-       Synthesizers::mKorg->sendControlChange(Cutoff, cutoff_val, MIDI);
+        Synthesizers::mKorg->sendControlChange(Cutoff, cutoff_val, MIDI);
 
         // fade in Osc1 slowly
         static int osc1_level;
         osc1_level = min(127, active_score->beat_sum.average_smooth * 4);
-       Synthesizers::mKorg->sendControlChange(Mix_Level_1, osc1_level, MIDI);
+        Synthesizers::mKorg->sendControlChange(Mix_Level_1, osc1_level, MIDI);
 
         break;
 
@@ -495,9 +494,9 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
         {
             active_score->beat_sum.activation_thresh = 15;
             snare->effect = Change_CC;
-            snare->setup_midi(Osc2_tune,Synthesizers::mKorg, 64, 0, 1, 0);      // does not decrease
-            kick->setup_midi(DelayDepth,Synthesizers::mKorg, 127, 0, 50, -0.1); // TODO: implement oscillation possibility
-            ride->setup_midi(Cutoff,Synthesizers::mKorg, 127, 13, -0.7, 0.1);   // TODO: implement oscillation possibility
+            snare->setup_midi(Osc2_tune, Synthesizers::mKorg, 64, 0, 1, 0);      // does not decrease
+            kick->setup_midi(DelayDepth, Synthesizers::mKorg, 127, 0, 50, -0.1); // TODO: implement oscillation possibility
+            ride->setup_midi(Cutoff, Synthesizers::mKorg, 127, 13, -0.7, 0.1);   // TODO: implement oscillation possibility
             active_score->setup = false;
         }
 
@@ -522,13 +521,13 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
 
             // cutoff on tom2:
             tom2->effect = Change_CC;
-            tom2->setup_midi(Cutoff,Synthesizers::mKorg, 127, 20, 30, -0.1);
+            tom2->setup_midi(Cutoff, Synthesizers::mKorg, 127, 20, 30, -0.1);
             ride->effect = Monitor;
             snare->effect = Monitor;
 
-           Synthesizers::mKorg->sendControlChange(Resonance, 31, MIDI);
-           Synthesizers::mKorg->sendControlChange(Cutoff, 28, MIDI);
-           Synthesizers::mKorg->sendControlChange(Osc2_tune, 0, MIDI);
+            Synthesizers::mKorg->sendControlChange(Resonance, 31, MIDI);
+            Synthesizers::mKorg->sendControlChange(Cutoff, 28, MIDI);
+            Synthesizers::mKorg->sendControlChange(Osc2_tune, 0, MIDI);
             active_score->add_bassNote(active_score->notes[0] + int(random(6)));
             // active_score->note_change_pos = int(random(8, 16)); // change at a rate between quarter and half notes
             active_score->setup = false;

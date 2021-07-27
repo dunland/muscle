@@ -166,4 +166,6 @@ public:
   void sendNoteOn(int note, midi::MidiInterface<HardwareSerial> MIDI);
 
   void sendNoteOff(int note, midi::MidiInterface<HardwareSerial> MIDI);
+
+  void sendProgramChange(int number, midi::MidiInterface<HardwareSerial> MIDI);
 };

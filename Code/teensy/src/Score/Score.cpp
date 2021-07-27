@@ -53,6 +53,14 @@ void Score::proceed_to_next_score()
     for (auto &instrument : Drumset::instruments)
         instrument->effect = Monitor;
 
+    for (auto &synth : Synthesizers::synths)
+    {
+        for (int note = 0; note < 127; note++)
+        {
+            synth->notes[note] = false;
+        }
+    }
+
     Hardware::lcd->clear();
 }
 
@@ -61,6 +69,15 @@ void Score::setTempoRange(int min_tempo_, int max_tempo_)
 {
     tempo.min_tempo = min_tempo_;
     tempo.max_tempo = max_tempo_;
+}
+
+// reset all instruments to "Monitor" mode
+void Score::resetInstruments()
+{
+    for (auto &drum : Drumset::instruments)
+    {
+        drum->effect = Monitor;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -151,7 +168,10 @@ void Score::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSe
 void Score::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
 {
     if (notes.size() > 0)
-        synth->sendNoteOn(notes[note_idx], MIDI);
+    {
+        if (synth->notes[note_idx] == false)
+            synth->sendNoteOn(notes[note_idx], MIDI);
+    }
     else
         Globals::println_to_console("cannot play MIDI note, because Score::notes is empty.");
 }

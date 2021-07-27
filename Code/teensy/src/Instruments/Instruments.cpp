@@ -410,3 +410,5 @@ Synthesizer *Synthesizers::mKorg = new Synthesizer(2);
 Synthesizer *Synthesizers::volca = new Synthesizer(1);
 Synthesizer *Synthesizers::dd200 = new Synthesizer(3);
 Synthesizer *Synthesizers::whammy = new Synthesizer(4);
+
+std::vector<Synthesizer *> Synthesizers::synths = {Synthesizers::mKorg, Synthesizers::volca, Synthesizers::whammy, Synthesizers::dd200};

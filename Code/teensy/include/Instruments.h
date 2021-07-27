@@ -183,6 +183,8 @@ public:
     static std::vector<Instrument *> instruments; // all instruments go in here
 };
 
+// TODO: REORGANIZE SYNTHESIZERS CLASS:
+// put "synths" into "Instruments"?, delete "Synthesizers"
 class Synthesizers
 {
     public:
@@ -190,4 +192,6 @@ class Synthesizers
     static Synthesizer *volca; // create a KORG Volca Keys instrument called volca
     static Synthesizer *dd200;
     static Synthesizer *whammy;
+
+    static std::vector<Synthesizer*> synths;
 };

@@ -54,7 +54,9 @@ public:
     void increase_step();
     void proceed_to_next_score();
     void setTempoRange(int min_tempo_, int max_tempo_);
+    void resetInstruments();
 
+    // ---------------------------- SONGS: ---------------------------
     // STANDARD RUN: select according to score->name
     void run(midi::MidiInterface<HardwareSerial> MIDI); // iterates through all score steps, executing the current step functions
 
@@ -73,7 +75,7 @@ public:
     // ------------------------------- MODES: (deprecated) ------------
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
 
-    void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on never off):
+    void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on, never off):
 
     void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
 

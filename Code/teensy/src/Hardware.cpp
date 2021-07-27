@@ -115,6 +115,7 @@ void Hardware::footswitch_released()
     {
       instrument->shuffle_cc(false);
       instrument->set_effect(Change_CC);
+      Globals::active_score->increase_step(); // go to next score step
     }
     break;
 
@@ -160,6 +161,15 @@ menu *Hardware::lcd_menu = new menu;
 
 void Hardware::lcd_display()
 {
+  // clear LCD display twice per second:
+  static unsigned long last_clear = 0;
+  if (millis() > last_clear + 500)
+  {
+    lcd->clear();
+    last_clear = millis();
+  }
+
+  // Machine-State-dependent display:
   switch (Globals::machine_state)
   {
   case Running:
@@ -235,14 +245,17 @@ void Hardware::display_scores()
 // display midi values of instruments with FX-Type CC_Change
 void Hardware::display_Midi_values()
 {
+  int pos = 0;
   for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
   {
     if (Drumset::instruments[i]->effect == Change_CC)
     {
-      Hardware::lcd->setCursor(((i % 4) * 4), int(i >= 4));
+      Hardware::lcd->setCursor(((pos % 4) * 4), int(pos >= 4));
       Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[i]->drumtype)[0]);
-      Hardware::lcd->setCursor(((i % 4) * 4) + 1, int(i >= 4));
+      Hardware::lcd->setCursor(((pos % 4) * 4) + 1, int(pos >= 4));
       Hardware::lcd->print(int(Drumset::instruments[i]->midi_settings.cc_val));
+
+      pos++;
     }
   }
 }
@@ -521,4 +534,9 @@ void Synthesizer::sendNoteOff(int note, midi::MidiInterface<HardwareSerial> MIDI
 {
   notes[note] = false; // remember that note is turned off
   MIDI.sendNoteOff(note, 127, midi_channel);
+}
+
+void Synthesizer::sendProgramChange(int number, midi::MidiInterface<HardwareSerial> MIDI)
+{
+  MIDI.sendProgramChange(number, midi_channel);
 }
