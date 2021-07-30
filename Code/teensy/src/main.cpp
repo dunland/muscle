@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-String VERSION_NUMBER = "0.2.105n";
+String VERSION_NUMBER = "0.2.105o";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -41,8 +41,9 @@ midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as 
 Score *monitoring;
 Score *sattelstein;
 Score *elektrosmoff;
-Score *experimental;
+Score *randomVoice;
 Score *control_dd200;
+Score *a_72;
 
 Rhythmics *rhythmics;
 
@@ -235,14 +236,20 @@ void setup()
   sattelstein = new Score("sattelstein");
   sattelstein->setTempoRange(150, 170);
   elektrosmoff = new Score("elektrosmoff");
-  experimental = new Score("experimental");
+  randomVoice = new Score("randomVoice");
   control_dd200 = new Score("control_dd200");
+  a_72 = new Score("A.72");
 
-  Globals::score_list.push_back(control_dd200);
+  Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(a_72);  
   Globals::score_list.push_back(sattelstein);
+  Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(control_dd200);
+  Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(elektrosmoff);
-  Globals::score_list.push_back(experimental);
-  Globals::active_score = control_dd200;
+  Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(randomVoice);
+  Globals::active_score = monitoring;
 
   // link midi synth to instruments:
   Drumset::snare->midi_settings.synth = Synthesizers::mKorg;

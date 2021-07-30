@@ -67,7 +67,8 @@ enum CC_Type // channels on mKORG:
   Sustain = 25,
   Release = 26,
   DelayTime = 51,
-  DelayDepth = 94
+  DelayDepth = 94,
+  TimbreSelect = 95
 };
 
 class TOPOGRAPHY

@@ -434,6 +434,10 @@ void Synthesizer::sendControlChange(CC_Type cc_type, int val, midi::MidiInterfac
     delaydepth = val;
     break;
 
+  case TimbreSelect:
+    timbreselect = val;
+    break;
+
   default:
     break;
   }

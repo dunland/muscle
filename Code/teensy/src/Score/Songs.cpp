@@ -7,6 +7,26 @@
 /////////////////////////////// SONGS /////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
+void Score::run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
+{
+    switch (step)
+    {
+    case 0:
+        if (setup)
+        {
+            Hardware::footswitch_mode = Increment_Score;
+            resetInstruments();
+            notes.clear();
+            setup = false;
+        }
+        break;
+
+    default:
+        proceed_to_next_score();
+        break;
+    }
+}
+
 //////////////////////////// CONTROL DD200 /////////////////////////////
 void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 {
@@ -15,16 +35,27 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (setup)
         {
+            Hardware::footswitch_mode = Increment_Score;
+            resetInstruments();
+            notes.clear();
+
+            notes.push_back(31);                              // G
+            Synthesizers::mKorg->sendProgramChange(91, MIDI); // switches to Voice B.44
+
             Drumset::crash1->setup_midi(dd200_DelayTime, Synthesizers::dd200, 127, 0, -10, 0.2); // change
             Drumset::crash1->set_effect(Change_CC);
             Drumset::ride->setup_midi(DelayDepth, Synthesizers::dd200, 127, 0, -3, 0.1); // change
             Drumset::ride->set_effect(Change_CC);
+
             setup = false;
         }
+        playSingleNote(Synthesizers::mKorg, MIDI);
 
         break;
 
     default:
+        Synthesizers::mKorg->sendNoteOff(31, MIDI);
+        proceed_to_next_score();
         break;
     }
 }
@@ -61,7 +92,8 @@ void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
         {
             // Synthesizers::mKorg->sendNoteOff(55, MIDI); // play note 55 (G) if it is not playing at the moment
             // Synthesizers::mKorg->sendNoteOff(43, MIDI); // play note 43 (G) if it is not playing at the moment
-            MIDI.sendRealTime(midi::Stop);
+            // MIDI.sendRealTime(midi::Stop); // TODO: make this work!
+            Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
 
             setup = false;
         }
@@ -143,9 +175,87 @@ void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
     // SCORE END -------------------------------
 }
 
-//////////////////////////// EXPERIMENTAL /////////////////////////////
+//////////////////////////// A.72 /////////////////////////////
+void Score::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
+{
+    // each step:
+    // - switch between Timbre 1 and 2
+    // - add a note to Score::notes
+    // - increase note-index
+    // → play latest 4 notes
+
+    int note_increase = 4; // notes are in turns added by 4 or 5
+
+    switch (step)
+    {
+    case 0:
+        if (setup)
+        {
+
+            resetInstruments();
+            notes.clear();
+            notes.push_back(int(random(12, 24)));
+
+            Hardware::footswitch_mode = Increment_Score;
+            Synthesizers::mKorg->sendProgramChange(49, MIDI); // switches to Voice A.72
+            delay(200);
+            Synthesizers::mKorg->sendControlChange(TimbreSelect, 1, MIDI); // Select Timbre 2
+
+            Drumset::ride->set_effect(Change_CC);
+            Drumset::ride->setup_midi(Cutoff, Synthesizers::mKorg, 127, 29, 3, -0.035);
+
+            Drumset::standtom->set_effect(Change_CC);
+            Drumset::standtom->setup_midi(Resonance, Synthesizers::mKorg, 127, 29, 5, -0.05);
+
+            Drumset::kick->midi_settings.notes.push_back(notes[0] + 44);
+            Drumset::kick->midi_settings.active_note = Drumset::kick->midi_settings.notes[0];
+            Drumset::kick->set_effect(PlayMidi);
+
+            Drumset::snare->midi_settings.notes.push_back(notes[0] + 49);
+            Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[0];
+            Drumset::snare->set_effect(PlayMidi);
+
+            setup = false;
+        }
+        playSingleNote(Synthesizers::mKorg, MIDI);
+
+        // increasing amplitude until max:
+        static float val = 0;
+        val += 0.5;
+        Synthesizers::mKorg->sendControlChange(Amplevel, int(val), MIDI);
+
+        Hardware::lcd->setCursor(10, 0);
+        Hardware::lcd->print(val);
+
+        if (Synthesizers::mKorg->amplevel >= 126)
+            step = 1;
+        break;
+
+    case 1:
+        if (setup)
+        {
+            int val = (Synthesizers::mKorg->timbreselect == 0) ? 127 : 0;
+            Synthesizers::mKorg->sendControlChange(TimbreSelect, val, MIDI); // Select Timbre 2
+
+            setup = false;
+        }
+        playSingleNote(Synthesizers::mKorg, MIDI);
+
+        break;
+
+    default:
+        step = 1;
+        setup = true;
+        note_increase = (note_increase == 4) ? 5 : 4;
+        notes.push_back(notes[note_idx] + note_increase);
+        note_idx++;
+        break;
+    }
+}
+
+//////////////////////////// RANDOM VOICE /////////////////////////////
 // 1: playMidi+CC_Change; 2: change_cc only
-void Score::run_experimental(midi::MidiInterface<HardwareSerial> MIDI)
+void Score::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (step)
     {
@@ -228,6 +338,8 @@ void Score::run_experimental(midi::MidiInterface<HardwareSerial> MIDI)
 
     default: // start over again
         step = 1;
+        setup = true;
+        Synthesizers::mKorg->notes[notes[note_idx]] = false;
         // proceed_to_next_score();
         break;
     }

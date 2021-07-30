@@ -40,6 +40,7 @@ public:
         unsigned int tapTempoTimeOut = 2000;   // do not count second tap, if time gap to first one exceeds this
     } tempo;
 
+    // TODO: make this a functional bool and reset instruments etc when calling (and deactivate it automatically)!
     boolean setup = true; // when true, current score_step's setup function is executed.
 
     // TODO: move this to Rhythmics
@@ -68,14 +69,18 @@ public:
 
     void run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_experimental(midi::MidiInterface<HardwareSerial> MIDI);
+    void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI);
 
+    void run_a72(midi::MidiInterface<HardwareSerial> MIDI);
+    
     void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
 
     // ------------------------------- MODES: (deprecated) ------------
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
 
-    void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on, never off):
+    void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on, never off)
+
+    void playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);
 
     void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
 

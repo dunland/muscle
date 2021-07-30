@@ -158,6 +158,7 @@ public:
   int release;
   int delaytime;
   int delaydepth;
+  int timbreselect;
 
   void sendControlChange(CC_Type cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI); // sets cc_value (used for JSON comm) and sends MIDI-ControlChange
 

@@ -93,14 +93,14 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
     {
         run_doubleSquirrel(MIDI);
     }
-    else if (name == "experimental")
+    else if (name == "randomVoice")
     {
-        run_experimental(MIDI);
+        run_randomVoice(MIDI);
     }
-    // else if (name == "monitoring")
-    // {
-    //     run_monitoring(MIDI);
-    // }
+    else if (name == "monitoring")
+    {
+        run_monitoring(MIDI);
+    }
     else if (name == "sattelstein")
     {
         run_sattelstein(MIDI);
@@ -108,6 +108,10 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
     else if (name == "control_dd200")
     {
         run_control_dd200(MIDI);
+    }
+    else if (name == "A.72")
+    {
+        run_a72(MIDI);
     }
 }
 
@@ -174,6 +178,34 @@ void Score::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSeria
     }
     else
         Globals::println_to_console("cannot play MIDI note, because Score::notes is empty.");
+}
+
+// play last 3 notes in list:
+void Score::playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
+{
+    if (notes.size() == 1)
+    {
+        if (synth->notes[note_idx] == false)
+            synth->sendNoteOn(notes[note_idx], MIDI);
+    }
+
+    else if (notes.size() == 2)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            if (synth->notes[note_idx] == false)
+                synth->sendNoteOn(notes[note_idx - i], MIDI);
+        }
+    }
+
+    else if (notes.size() >= 3)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (synth->notes[note_idx] == false)
+                synth->sendNoteOn(notes[note_idx - i], MIDI);
+        }
+    }
 }
 
 void Score::envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)

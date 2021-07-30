@@ -426,6 +426,8 @@ String Globals::EffectstypeToHumanReadable(EffectsType type)
 		return "FootSwitchLooper";
 	case TapTempo:
 		return "TapTempo";
+	case TapTempoRange:
+		return "TapTempoRange";
 	case Swell:
 		return "Swell";
 	case TsunamiLink:
