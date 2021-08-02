@@ -1,7 +1,7 @@
 /*
    SUPER MUSCLE
    ------------------------------------
-   October 2020-July 2021
+   October 2020-August 2021
    by David Unland david[at]unland[dot]eu
    github.com/dunland/muscle
    ------------------------------------
@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-String VERSION_NUMBER = "0.2.105o";
+String VERSION_NUMBER = "0.2.2";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
