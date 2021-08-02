@@ -73,6 +73,10 @@ void Score::run(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
     {
         run_experimental(synth, synth, MIDI);
     }
+    else if (name == "control_dd200")
+    {
+        run_control_dd200(synth, MIDI);
+    }    
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////

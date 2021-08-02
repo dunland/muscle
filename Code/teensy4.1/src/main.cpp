@@ -41,12 +41,15 @@ midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as 
 
 Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
 Synthesizer *volca; // create a KORG Volca Keys instrument called volca
+Synthesizer *dd200;
+Synthesizer *whammy;
 
 // Songs:
 // Score *doubleSquirrel;
 Score *elektrosmoff;
 Score *experimental;
 Score *monitors;
+Score *control_dd200;
 
 Rhythmics *rhythmics;
 
@@ -238,6 +241,8 @@ void setup()
   // instantiate external MIDI devices:
   mKorg = new Synthesizer(2);
   volca = new Synthesizer(1);
+  dd200 = new Synthesizer(3);
+  whammy = new Synthesizer(4);
 
   Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::crash1, Drumset::ride};
 
@@ -262,18 +267,17 @@ void setup()
   Drumset::snare->setup_sensitivity(SNARE_THRESHOLD, SNARE_CROSSINGS, SNARE_DELAY_AFTER_STROKE, SNARE_FIRST_STROKE);
   Drumset::hihat->setup_sensitivity(HIHAT_THRESHOLD, HIHAT_CROSSINGS, HIHAT_DELAY_AFTER_STROKE, HIHAT_FIRST_STROKE);
   Drumset::kick->setup_sensitivity(KICK_THRESHOLD, KICK_CROSSINGS, KICK_DELAY_AFTER_STROKE, KICK_FIRST_STROKE);
-  // Drumset::tom1->setup_sensitivity(TOM1_THRESHOLD, TOM1_CROSSINGS, TOM1_DELAY_AFTER_STROKE, TOM1_FIRST_STROKE);
+  // Drumset::tom1->setup_sensitivity(TOM1_THRESHOLD, TOM1_CROSSINGS, TOM1_DELAY_AFTER_STROKE, TOM1_FIRST_STROKE); // currently not in use
   Drumset::tom2->setup_sensitivity(TOM2_THRESHOLD, TOM2_CROSSINGS, TOM2_DELAY_AFTER_STROKE, TOM2_FIRST_STROKE);
   Drumset::standtom->setup_sensitivity(STANDTOM_THRESHOLD, STANDTOM_CROSSINGS, STANDTOM_DELAY_AFTER_STROKE, STANDTOM_FIRST_STROKE);
   Drumset::crash1->setup_sensitivity(CRASH1_THRESHOLD, CRASH1_CROSSINGS, CRASH1_DELAY_AFTER_STROKE, CRASH1_FIRST_STROKE);
-  // Drumset::crash2->setup_sensitivity(CRASH2_THRESHOLD, CRASH2_CROSSINGS, CRASH2_DELAY_AFTER_STROKE, CRASH2_FIRST_STROKE);
+  // Drumset::crash2->setup_sensitivity(CRASH2_THRESHOLD, CRASH2_CROSSINGS, CRASH2_DELAY_AFTER_STROKE, CRASH2_FIRST_STROKE); // currently not in use
   Drumset::ride->setup_sensitivity(RIDE_THRESHOLD, RIDE_CROSSINGS, RIDE_DELAY_AFTER_STROKE, RIDE_FIRST_STROKE);
   Drumset::cowbell->setup_sensitivity(COWBELL_THRESHOLD, COWBELL_CROSSINGS, COWBELL_DELAY_AFTER_STROKE, COWBELL_FIRST_STROKE);
 
   // try to override sensitivity with data from SD:
-  // TODO: only do this if file exists!
-  JSON::read_sensitivity_data_from_SD(Drumset::instruments);
-
+  if (SD.exists("sense.txt"))
+    JSON::read_sensitivity_data_from_SD(Drumset::instruments);
 
   // ------------------ calculate noise floor -------------------------
   for (auto &instrument : Drumset::instruments)
@@ -300,12 +304,13 @@ void setup()
   // doubleSquirrel = new Score("doubleSquirrel");
   elektrosmoff = new Score("elektrosmoff");
   experimental = new Score("experimental");
+  control_dd200 = new Score("control_dd200");
   monitors = new Score("monitoring");
-  Globals::score_list.push_back(elektrosmoff);
   Globals::score_list.push_back(monitors);
-  // Globals::score_list.push_back(doubleSquirrel);
+  Globals::score_list.push_back(control_dd200);
+  Globals::score_list.push_back(elektrosmoff);
   Globals::score_list.push_back(experimental);
-  Globals::active_score = elektrosmoff;
+  Globals::active_score = control_dd200;
 
   // link midi synth to instruments:
   Drumset::snare->midi_settings.synth = mKorg;
@@ -374,7 +379,34 @@ void setup()
 /* ------------------------------- LOOP -------------------------------- */
 /* --------------------------------------------------------------------- */
 
-void loop()
+
+void loop() {
+  static int val = 0;
+  val = (val + 1) % 127;
+  MIDI.sendControlChange(94, val, 3);
+  MIDI.sendControlChange(94, val, 1);
+  MIDI.sendNoteOn(30,127,1);
+
+  if (val > 50)
+  {
+    for (int i = 0; i<16; i++)
+      MIDI.sendNoteOn(50, val, i);
+    volca->sendNoteOn(50, MIDI);
+  }
+  else
+  {
+    MIDI.sendNoteOff(50, val, 1);
+    volca->sendNoteOff(50, MIDI);
+  }
+  
+  Serial.println(val);
+
+  delay(10);
+  
+
+}
+
+void loop__()
 {
   static bool once = true;
   if (once)

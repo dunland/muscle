@@ -8,6 +8,25 @@
 /////////////////////////////// SONGS /////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
+void Score::run_control_dd200(Synthesizer *dd200, midi::MidiInterface<HardwareSerial> MIDI)
+{
+    switch (step)
+    {
+    case 0:
+        if (setup)
+        {
+            Drumset::snare->setup_midi(DelayDepth, dd200, 127, 0, 50, -1); // change 
+            Drumset::snare->set_effect(Change_CC);
+            setup = false;
+        }
+
+        break;
+
+    default:
+        break;
+    }
+}
+
 //////////////////////////// ELEKTROSMOFF /////////////////////////////
 void Score::run_elektrosmoff(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
 {
@@ -136,7 +155,7 @@ void Score::run_experimental(Synthesizer *mKorg, Synthesizer *volca, midi::MidiI
             Drumset::tom2->set_effect(Change_CC);
             Drumset::standtom->set_effect(Change_CC);
             Drumset::hihat->set_effect(TapTempo);
-            
+
             notes.push_back(int(random(24, 48)));
             playSingleNote(mKorg, MIDI);
 
