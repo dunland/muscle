@@ -75,6 +75,8 @@ public:
     
     void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
 
+    void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI);
+
     // ------------------------------- MODES: (deprecated) ------------
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
 

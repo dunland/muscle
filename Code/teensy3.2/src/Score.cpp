@@ -113,6 +113,10 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
     {
         run_a72(MIDI);
     }
+    else if (name == "whammyMountains")
+    {
+        run_whammyMountains(MIDI);
+    }    
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////

@@ -1,6 +1,12 @@
 // SETTINGS
 #pragma once
 
+////////////////////////////// MIDI CHANNELS //////////////////////////
+#define MIDI_CHANNEL_VOLCA 1
+#define MIDI_CHANNEL_MICROKORG 2
+#define MIDI_CHANNEL_DD200 3
+#define MIDI_CHANNEL_WHAMMY 4
+
 /////////////////////////// AUXILIARY HARDWARE ////////////////////////
 #define VIBR 0
 #define FOOTSWITCH 2

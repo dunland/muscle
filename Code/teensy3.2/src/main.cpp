@@ -1,7 +1,7 @@
 /*
    SUPER MUSCLE
    ------------------------------------
-   October 2020-August 2021
+   October 2020-November 2021
    by David Unland david[at]unland[dot]eu
    github.com/dunland/muscle
    ------------------------------------
@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.20";
+const String VERSION_NUMBER = "0.2.21";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -44,6 +44,7 @@ Score *elektrosmoff;
 Score *randomVoice;
 Score *control_dd200;
 Score *a_72;
+Score *whammyMountains;
 
 Rhythmics *rhythmics;
 
@@ -239,7 +240,9 @@ void setup()
   randomVoice = new Score("randomVoice");
   control_dd200 = new Score("control_dd200");
   a_72 = new Score("A.72");
+  whammyMountains = new Score("whammyMountains");
 
+  Globals::score_list.push_back(whammyMountains);
   Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(a_72);  
   Globals::score_list.push_back(sattelstein);
