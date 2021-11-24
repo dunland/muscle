@@ -2,6 +2,7 @@
 #include <MIDI.h>
 #include <Instruments.h>
 #include <Hardware.h>
+#include <settings.h>
 
 //////////////////////////// DOUBLE SQUIRREL /////////////////////////////
 // old routine from master thesis presentation

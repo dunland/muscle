@@ -3,6 +3,7 @@
 #include <Tsunami.h>
 #include <Score/Score.h>
 #include <Hardware.h>
+#include <settings.h>
 
 // ---------------------- SETUP FUNCTIONS -----------------------------
 
@@ -394,14 +395,14 @@ void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
 }
 
 // instantiate instruments:
-Instrument *Drumset::snare = new Instrument(A5, Snare);
-Instrument *Drumset::hihat = new Instrument(A6, Hihat);
-Instrument *Drumset::kick = new Instrument(A1, Kick);
-Instrument *Drumset::tom2 = new Instrument(A7, Tom2);
-Instrument *Drumset::standtom = new Instrument(A2, Standtom1);
-Instrument *Drumset::cowbell = new Instrument(A3, Cowbell);
-Instrument *Drumset::crash1 = new Instrument(A0, Crash1);
-Instrument *Drumset::ride = new Instrument(A4, Ride);
+Instrument *Drumset::snare = new Instrument(INPUT_PIN_SNARE, Snare);
+Instrument *Drumset::hihat = new Instrument(INPUT_PIN_HIHAT, Hihat);
+Instrument *Drumset::kick = new Instrument(INPUT_PIN_KICK, Kick);
+Instrument *Drumset::tom2 = new Instrument(INPUT_PIN_TOM2, Tom2);
+Instrument *Drumset::standtom = new Instrument(INPUT_PIN_STANDTOM, Standtom1);
+Instrument *Drumset::cowbell = new Instrument(INPUT_PIN_COWBELL, Cowbell);
+Instrument *Drumset::crash1 = new Instrument(INPUT_PIN_CRASH1, Crash1);
+Instrument *Drumset::ride = new Instrument(INPUT_PIN_RIDE, Ride);
 
 std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::crash1, Drumset::ride};
 

@@ -5,45 +5,6 @@
 #include <LiquidCrystal.h>
 #include <Encoder.h>
 
-#define VIBR 0
-#define FOOTSWITCH 2
-
-/* LCD pinout:
-1   Vss       GND       
-2   Vss       +5V
-3   LCD Drive poti power / GND
-4   RS        11
-5   R/W       GND
-6   EN        12
-7   D0        --
-8   D1        --
-9   D2        --
-10  D3        --
-11  D4        8
-12  D5        9
-13  D6        4
-14  D7        5
-15  A         +5V
-16  K         GND
-
-*/
-
-// LCD Pins:
-#define RS 11
-#define EN 12
-#define D4 8
-#define D5 9
-#define D6 4
-#define D7 5
-
-// Encoder Pins:
-// right - encoder1
-// middle - ground
-// left - encoder2
-#define ENCODER1 3
-#define ENCODER2 6
-#define PUSHBUTTON 7
-
 class Score;
 class Instrument;
 

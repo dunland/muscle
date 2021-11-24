@@ -2,6 +2,7 @@
 #include <Score/Score.h>
 #include <Instruments.h>
 #include <Calibration.h>
+#include <settings.h>
 
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -376,6 +377,8 @@ void Hardware::request_motor_deactivation() // turn off vibration and MIDI notes
 // sets cc_value (for JSON communication) and sends MIDI-ControlChange:
 void Synthesizer::sendControlChange(CC_Type cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI)
 {
+  static int previous_val = -1;
+
   switch (cc_type)
   {
   case Osc2_semitone:
@@ -446,7 +449,7 @@ void Synthesizer::sendControlChange(CC_Type cc_type, int val, midi::MidiInterfac
   {
     Globals::println_to_console("could not send MIDI CC Command: CC_Type not defined.");
   }
-  else
+  else if (val != previous_val)
   {
     MIDI.sendControlChange(int(cc_type), val, midi_channel);
   }
