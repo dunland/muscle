@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.21";
+const String VERSION_NUMBER = "0.2.213";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -35,6 +35,7 @@ const boolean USING_TSUNAMI = false;
 
 // ----------------------------- variables ----------------------------
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
+// typedef midi::MidiInterface<HardwareSerial> MidiInterface;
 
 // Songs:
 // Score *doubleSquirrel;
@@ -252,7 +253,8 @@ void setup()
   Globals::score_list.push_back(elektrosmoff);
   Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(randomVoice);
-  Globals::active_score = monitoring;
+
+  Globals::active_score = Globals::score_list.at(0);
 
   // link midi synth to instruments:
   Drumset::snare->midi_settings.synth = Synthesizers::mKorg;
@@ -340,7 +342,8 @@ void loop()
   */
   if (sendMidiCopy)
   {
-    Serial2.write(0xF8); // MIDI-clock has to be sent 24 times per quarter note
+    // Serial2.write(0xF8); // MIDI-clock has to be sent 24 times per quarter note
+    Serial2.write(midi::Clock);
     noInterrupts();
     Globals::sendMidiClock = false;
     interrupts();

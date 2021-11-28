@@ -170,7 +170,7 @@ void Hardware::lcd_display()
     last_clear = millis();
   }
 
-  // Machine-State-dependent display:
+  // ------------- Machine-State-dependent display: -------------------
   switch (Globals::machine_state)
   {
   case Running:
@@ -233,6 +233,7 @@ void Hardware::lcd_display()
   }
 }
 
+// ------------------------- print stuff ------------------------------
 void Hardware::display_scores()
 {
   // active score display:
