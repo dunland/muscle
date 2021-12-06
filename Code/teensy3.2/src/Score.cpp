@@ -116,7 +116,11 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
     else if (name == "whammyMountains")
     {
         run_whammyMountains(MIDI);
-    }    
+    }
+    else if (name == "hutschnur")
+    {
+        run_hutschnur(MIDI);
+    }
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////

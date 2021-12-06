@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.213";
+const String VERSION_NUMBER = "0.2.214";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -46,6 +46,7 @@ Score *randomVoice;
 Score *control_dd200;
 Score *a_72;
 Score *whammyMountains;
+Score *hutschnur;
 
 Rhythmics *rhythmics;
 
@@ -242,7 +243,9 @@ void setup()
   control_dd200 = new Score("control_dd200");
   a_72 = new Score("A.72");
   whammyMountains = new Score("whammyMountains");
+  hutschnur = new Score("hutschnur");
 
+  Globals::score_list.push_back(hutschnur);
   Globals::score_list.push_back(whammyMountains);
   Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(a_72);  
