@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.214";
+const String VERSION_NUMBER = "0.2.217";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -182,7 +182,6 @@ void setup()
   Hardware::lcd->setCursor(0, 1);
   Hardware::lcd->print(VERSION_NUMBER);
 
-
   rhythmics = new Rhythmics();
 
   // initialize arrays:
@@ -245,10 +244,10 @@ void setup()
   whammyMountains = new Score("whammyMountains");
   hutschnur = new Score("hutschnur");
 
-  Globals::score_list.push_back(hutschnur);
-  Globals::score_list.push_back(whammyMountains);
+  // Globals::score_list.push_back(hutschnur);
+  // Globals::score_list.push_back(whammyMountains);
   Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(a_72);  
+  Globals::score_list.push_back(a_72);
   Globals::score_list.push_back(sattelstein);
   Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(control_dd200);
@@ -295,7 +294,7 @@ void setup()
   // tracknum, channel
 
   // if (Hardware::pushbutton_is_pressed())
-    // Globals::machine_state = Calibration;
+  // Globals::machine_state = Calibration;
   delay(2000);
   Hardware::lcd->clear();
   // delay(500);
@@ -343,10 +342,11 @@ void loop()
      one tap beat equals one quarter note
      only one midi clock signal should be send per 24th quarter note
   */
-  if (sendMidiCopy)
+  if (sendMidiCopy) // MIDI-clock has to be sent 24 times per quarter note
   {
-    // Serial2.write(0xF8); // MIDI-clock has to be sent 24 times per quarter note
-    Serial2.write(midi::Clock);
+    // Serial2.write(0xF8);
+    // Serial2.write(midi::Clock);
+    MIDI.sendRealTime(midi::Clock);
     noInterrupts();
     Globals::sendMidiClock = false;
     interrupts();

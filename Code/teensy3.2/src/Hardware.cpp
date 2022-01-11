@@ -173,6 +173,7 @@ void Hardware::lcd_display()
   // ------------- Machine-State-dependent display: -------------------
   switch (Globals::machine_state)
   {
+  // -------------------------- RUNNING -------------------------------
   case Running:
   {
     // switch if any instrument has CC mode:
@@ -212,6 +213,7 @@ void Hardware::lcd_display()
 
     break;
   }
+  // -------------------------- CALIBRATION ---------------------------
   case Calibration:
   {
     //level 1: display all instruments
@@ -236,10 +238,11 @@ void Hardware::lcd_display()
 // ------------------------- print stuff ------------------------------
 void Hardware::display_scores()
 {
-  // active score display:
+  // score name
   lcd->setCursor(0, 1);
   lcd->print(Globals::score_list[Globals::active_score_pointer]->name);
 
+  // step
   lcd->setCursor(14, 1);
   lcd->print(Globals::active_score->step);
 }

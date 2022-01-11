@@ -71,7 +71,7 @@ void Instrument::getTapTempo()
     //      tapState = 1;
     //      break;
 
-  case 1:                                     // first hit
+  case 1:                                                                              // first hit
     if (millis() > timeSinceFirstTap + Globals::active_score->tempo.tapTempoResetTime) // reinitiate tap if not used for ten seconds
     {
       num_of_taps = 0;
@@ -95,24 +95,25 @@ void Instrument::getTapTempo()
       // check if score tempo was set, else define quarters are > 300 ms (< 200 BPM)
       int quarter_timing = (Globals::active_score->tempo.min_tempo > 0) ? Globals::active_score->tempo.min_tempo : 300;
 
-      if (Globals::tapInterval >= quarter_timing && Globals::tapInterval <= 60000/Globals::active_score->tempo.max_tempo) // quarter notes when slow tapping; tapInterval must be within score tempo range
+  //TODO: re-apply tap-tempo quarter vs eighth notes differentiation
+      // if (Globals::tapInterval >= quarter_timing && Globals::tapInterval <= 60000 / Globals::active_score->tempo.max_tempo) // quarter notes when slow tapping; tapInterval must be within score tempo range
       {
         Globals::current_BPM = 60000 / Globals::tapInterval;
         Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
         Globals::print_to_console(60000 / Globals::tapInterval);
         Globals::print_to_console(" bpm (");
         Globals::print_to_console(Globals::tapInterval);
-        Globals::println_to_console(" ms interval int quarter-notes)");
+        // Globals::println_to_console(" ms interval int quarter-notes)");
       }
-      else if (Globals::tapInterval >= 60000/(Globals::active_score->tempo.min_tempo * 2) && Globals::tapInterval <= 60000/(Globals::active_score->tempo.max_tempo * 2))// eighth-notes when fast tapping
-      {
-        Globals::current_BPM = (60000 / Globals::tapInterval) / 2;                                    // BPM >= 180 → strokes are 8th-notes, BPM half-time
-        Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 8 / 128); // 8 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
-        Globals::print_to_console((60000 / Globals::tapInterval) / 2);
-        Globals::print_to_console(" bpm (");
-        Globals::print_to_console(Globals::tapInterval);
-        Globals::println_to_console(" ms interval in 8th-notes)");
-      }
+      // else if (Globals::tapInterval >= 60000 / (Globals::active_score->tempo.min_tempo * 2) && Globals::tapInterval <= 60000 / (Globals::active_score->tempo.max_tempo * 2)) // eighth-notes when fast tapping
+      // {
+      //   Globals::current_BPM = (60000 / Globals::tapInterval) / 2;                                    // BPM >= 180 → strokes are 8th-notes, BPM half-time
+      //   Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 8 / 128); // 8 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+      //   Globals::print_to_console((60000 / Globals::tapInterval) / 2);
+      //   Globals::print_to_console(" bpm (");
+      //   Globals::print_to_console(Globals::tapInterval);
+      //   Globals::println_to_console(" ms interval in 8th-notes)");
+      // }
 
       tapState = 1;
     }
@@ -225,9 +226,9 @@ void Instrument::mainNoteIteration(Synthesizer *synth_, midi::MidiInterface<Hard
 
   if (millis() > lastNoteChange + 4000) // only do this once in an interval of 4 seconds, because there are always many hits on a cymbal..
   {
-    synth_->sendNoteOff(Globals::active_score->notes[Globals::active_score->note_idx], MIDI);             // turn previous note off
+    synth_->sendNoteOff(Globals::active_score->notes[Globals::active_score->note_idx], MIDI);                      // turn previous note off
     Globals::active_score->note_idx = (Globals::active_score->note_idx + 1) % Globals::active_score->notes.size(); // iterate note pointer
-    synth_->sendNoteOn(Globals::active_score->notes[Globals::active_score->note_idx], MIDI);              // turn next note on
+    synth_->sendNoteOn(Globals::active_score->notes[Globals::active_score->note_idx], MIDI);                       // turn next note on
 
     lastNoteChange = millis();
   }
@@ -575,5 +576,4 @@ void Instrument::shuffle_cc(boolean force_ = false)
   {
     Globals::println_to_console("could not shuffle CC, because !score.ready_to_shuffle");
   }
-  
 }
