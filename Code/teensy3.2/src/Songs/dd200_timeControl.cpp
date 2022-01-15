@@ -5,13 +5,12 @@
 
 void Score::run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI)
 {
-static int delay_time;
+    static int delay_time;
 
-
-switch(step)
-{
-case 0:
-   if (setup)
+    switch (step)
+    {
+    case 0:
+        if (setup)
         {
             delay_time = 0;
             setup = false;
@@ -26,19 +25,22 @@ case 0:
             int idx = 0;
             for (int i = 2; i < 128; i++) // starting at <2 will always result in mod = 0
             {
-                if (Globals::tapInterval % Hardware::dd_200_midi_time_map[i] < smallest_mod) // smaller → update
+                if (Globals::tapInterval % Hardware::dd_200_midi_time_map[i] <= smallest_mod) // smaller → update
                 {
-                    smallest_mod = Globals::tapInterval % Hardware::dd_200_midi_time_map[i];
-                    idx = i;
-                }
-                else if (Globals::tapInterval % Hardware::dd_200_midi_time_map[i] == smallest_mod) // equal → any of the two
-                {
-                    if (random(0, 1) >= 0.5)
+                    if (random(2) > 0)
                     {
                         smallest_mod = Globals::tapInterval % Hardware::dd_200_midi_time_map[i];
                         idx = i;
                     }
                 }
+                // else if (Globals::tapInterval % Hardware::dd_200_midi_time_map[i] == smallest_mod) // equal → any of the two
+                // {
+                //     if (random(0, 2) > 0)
+                //     {
+                //         smallest_mod = Globals::tapInterval % Hardware::dd_200_midi_time_map[i];
+                //         idx = i;
+                //     }
+                // }
             }
             delay_time = Hardware::dd_200_midi_time_map[idx];
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, delay_time, MIDI);
@@ -50,6 +52,8 @@ case 0:
         Hardware::lcd->print(Globals::tapInterval);
         Hardware::lcd->setCursor(8, 0);
         Hardware::lcd->print(delay_time);
+
+        Serial.println(random(2));
         break;
-}
+    }
 }
