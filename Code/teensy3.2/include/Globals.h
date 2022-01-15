@@ -54,6 +54,7 @@ enum CC_Type // channels on mKORG:
   dd200_DelayTime = 17,
   Osc2_semitone = 18,
   Osc2_tune = 19,
+  dd200_DelayLevel = 19,
   Mix_Level_1 = 20,
   Mix_Level_2 = 21,
   dd200_OnOff = 27,
@@ -68,6 +69,7 @@ enum CC_Type // channels on mKORG:
   Release = 26,
   DelayTime = 51,
   DelayDepth = 94,
+  dd200_DelayDepth = 94,
   TimbreSelect = 95
 };
 

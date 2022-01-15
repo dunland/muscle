@@ -36,7 +36,7 @@ public:
     {
         int min_tempo = 0;
         int max_tempo = 999;
-        int tapTempoResetTime = 4000; // time to restart tapTempo if not used for this long
+        int tapTempoResetTime = 0; // time to restart tapTempo if not used for this long
         unsigned int tapTempoTimeOut = 2000;   // do not count second tap, if time gap to first one exceeds this
     } tempo;
 
@@ -74,6 +74,8 @@ public:
     void run_a72(midi::MidiInterface<HardwareSerial> MIDI);
     
     void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
+
+    void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI);
 
     void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI);
 

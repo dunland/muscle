@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.217";
+const String VERSION_NUMBER = "0.2.218";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -44,6 +44,7 @@ Score *sattelstein;
 Score *elektrosmoff;
 Score *randomVoice;
 Score *control_dd200;
+Score *dd200_timeControl;
 Score *a_72;
 Score *whammyMountains;
 Score *hutschnur;
@@ -240,12 +241,15 @@ void setup()
   elektrosmoff = new Score("elektrosmoff");
   randomVoice = new Score("randomVoice");
   control_dd200 = new Score("control_dd200");
+  dd200_timeControl = new Score("dd200_timeControl");
   a_72 = new Score("A.72");
   whammyMountains = new Score("whammyMountains");
   hutschnur = new Score("hutschnur");
 
   // Globals::score_list.push_back(hutschnur);
   // Globals::score_list.push_back(whammyMountains);
+  Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(dd200_timeControl);
   Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(a_72);
   Globals::score_list.push_back(sattelstein);

@@ -2,6 +2,9 @@
 #include <MIDI.h>
 #include <Instruments.h>
 #include <Hardware.h>
+/*
+    DD-200 test code compendium
+*/
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
 void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
@@ -61,6 +64,10 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1:
+        /*
+        crash:  delay_depth++; delay_level--
+        ride:   delay_depth--; delay_level++;
+        */
 
         if (setup)
         {
@@ -99,7 +106,7 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
         break;
 
-    case 2: // test code! just increases the delay time continuously.
+    case 2: // increases the delay time continuously.
         static unsigned long lastUpCount = millis();
         if (millis() > lastUpCount + 500)
         {
@@ -115,6 +122,11 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 3: // test code! increases the delay time when snare is hit, decrease via kick
+        if (setup)
+        {
+            delay_time = 0;
+            setup = false;
+        }
         if (Drumset::kick->timing.wasHit)
         {
             delay_time -= 1;
@@ -128,7 +140,14 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             if (delay_time > 127)
                 delay_time = 127;
         }
-        break;
+
+        Synthesizers::dd200->sendControlChange(dd200_DelayTime, delay_time, MIDI);
+
+        // print val
+        Hardware::lcd->setCursor(0, 0);
+        Hardware::lcd->print(delay_time);
+
+        break;     
 
     default:
         Synthesizers::mKorg->sendNoteOff(31, MIDI);

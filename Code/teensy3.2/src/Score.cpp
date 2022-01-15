@@ -109,6 +109,10 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
     {
         run_control_dd200(MIDI);
     }
+    else if (name == "dd200_timeControl")
+    {
+        run_dd200_timeControl(MIDI);
+    }
     else if (name == "A.72")
     {
         run_a72(MIDI);

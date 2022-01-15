@@ -83,6 +83,12 @@ public:
   static void vibrate_motor(unsigned long vibration_duration);
 
   static void request_motor_deactivation();
+
+  //////////////////////////////// DD-200 /////////////////////////////
+  /////////////////////////////////////////////////////////////////////
+
+  static int dd_200_midi_time_map[128];
+  
 };
 
 class Synthesizer
