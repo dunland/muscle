@@ -264,10 +264,10 @@ void Instrument::setInstrumentPrintString()
 void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
 {
   // always count up topography:
-  countup_topography();
-  topography.smoothen_dataArray();
-  Serial.print("hit");
-  Serial.print(Globals::DrumtypeToHumanreadable(drumtype));
+  // countup_topography();
+  // topography.smoothen_dataArray();
+  Serial.print("hit: ");
+  Serial.println(Globals::DrumtypeToHumanreadable(drumtype));
   Hardware::lcd->setCursor(13, 0);
   Hardware::lcd->print(Globals::DrumtypeToHumanreadable(drumtype));
 

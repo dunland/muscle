@@ -73,16 +73,8 @@ void printNormalizedValues(boolean printNorm_criterion)
     {
       for (auto &instrument : Drumset::instruments)
       {
-        // static int countsCopy[Globals::numInputs];
-        //noInterrupts();
-        //countsCopy[i] = counts[i];
-        //interrupts();
-        //Globals::print_to_console(pins[i]);
-        //Globals::print_to_console(":\t");
         Globals::print_to_console(pinValue(instrument));
         Globals::print_to_console("\t");
-        //Globals::print_to_console(", ");
-        //Globals::print_to_console(countsCopy[i]);
       }
       Globals::println_to_console("");
     }
@@ -142,13 +134,6 @@ void setup()
       break;
     }
   }
-
-  // LCD
-  // Hardware::lcd->begin(16, 2);
-  // Hardware::lcd->setCursor(0, 0);
-  // Hardware::lcd->print("SUPER MUSCLE");
-  // Hardware::lcd->setCursor(0, 1);
-  // Hardware::lcd->print(VERSION_NUMBER);
 
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
@@ -365,7 +350,6 @@ void loop()
   if (Globals::current_beat_pos != last_beat_pos) // run once per 32nd-step
   {
     // Globals::active_score->load();
-    // Globals::active_score->run(mKorg, MIDI); // TODO: globale Synthesizer-Liste
     Globals::active_score->run(MIDI); // TODO: globale Synthesizer-Liste
 
     //----------------------- SCORE END -------------------------------
