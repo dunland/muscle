@@ -125,6 +125,10 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
     {
         run_hutschnur(MIDI);
     }
+    else if (name == "control_volca")
+    {
+        run_control_volca(MIDI);
+    }
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////

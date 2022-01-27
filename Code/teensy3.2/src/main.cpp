@@ -48,6 +48,7 @@ Score *dd200_timeControl;
 Score *a_72;
 Score *whammyMountains;
 Score *hutschnur;
+Score *control_volca;
 
 Rhythmics *rhythmics;
 
@@ -230,9 +231,11 @@ void setup()
   a_72 = new Score("A.72");
   whammyMountains = new Score("whammyMountains");
   hutschnur = new Score("hutschnur");
+  control_volca = new Score("control_volca");
 
   // Globals::score_list.push_back(hutschnur);
   // Globals::score_list.push_back(whammyMountains);
+  Globals::score_list.push_back(control_volca);
   Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(dd200_timeControl);
   Globals::score_list.push_back(monitoring);

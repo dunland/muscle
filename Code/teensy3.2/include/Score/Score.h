@@ -72,7 +72,7 @@ public:
     void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI);
 
     void run_a72(midi::MidiInterface<HardwareSerial> MIDI);
-    
+
     void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
 
     void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI);
@@ -80,6 +80,8 @@ public:
     void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI);
 
     void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI);
+
+    void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI);
 
     // ------------------------------- MODES: (deprecated) ------------
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
