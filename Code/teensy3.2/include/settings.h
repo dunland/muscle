@@ -12,7 +12,7 @@
 #define FOOTSWITCH 2
 
 /* LCD pinout:
-1   Vss       GND       
+1   Vss       GND
 2   Vss       +5V
 3   LCD Drive poti power / GND
 4   RS        11
@@ -59,17 +59,17 @@
 #define SNARE_THRESHOLD 115
 #define SNARE_CROSSINGS 5
 #define SNARE_DELAY_AFTER_STROKE 5
-#define SNARE_FIRST_STROKE false
+#define SNARE_FIRST_STROKE true
 
-#define HIHAT_THRESHOLD 100 
+#define HIHAT_THRESHOLD 100
 #define HIHAT_CROSSINGS 10
 #define HIHAT_DELAY_AFTER_STROKE 5
 #define HIHAT_FIRST_STROKE false
 
 #define KICK_THRESHOLD 200
 #define KICK_CROSSINGS 5
-#define KICK_DELAY_AFTER_STROKE 10
-#define KICK_FIRST_STROKE false
+#define KICK_DELAY_AFTER_STROKE 15
+#define KICK_FIRST_STROKE true
 
 #define TOM1_THRESHOLD 200
 #define TOM1_CROSSINGS 20
