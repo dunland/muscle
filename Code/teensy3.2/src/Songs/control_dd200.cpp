@@ -183,24 +183,29 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
         if (setup)
         {
+            Hardware::footswitch_mode = No_Footswitch_Mode;
             Drumset::hihat->set_effect(TapTempo);
             Synthesizers::dd200->sendControlChange(dd200_DelayLevel, 80, MIDI); // I think 80 was a good value
             setup = false;
         }
 
-        if (Drumset::crash1->timing.wasHit)
+        static bool bUseEffects = true;
+        if (bUseEffects)
         {
-            delay_time = min(110, delay_time + 10);
-            delay_level = min(90, delay_level + 1);
-        }
-        if (Drumset::ride->timing.wasHit) // ride has lower max vals
-        {
-            delay_time = min(100, delay_time + 2);
-            delay_level = min(80, delay_level + 1);
-        }
+            if (Drumset::crash1->timing.wasHit)
+            {
+                delay_time = min(127, delay_time + 5);
+                delay_level = min(127, delay_level + 1);
+            }
+            if (Drumset::ride->timing.wasHit) // ride has lower max vals
+            {
+                delay_time = min(127, delay_time + 2);
+                delay_level = min(127, delay_level + 1);
+            }
 
-        delay_time = max(0, delay_time - 0.5);
-        delay_level = max(0, delay_level - 0.3);
+            delay_time = max(0, delay_time - 0.5);
+            delay_level = max(0, delay_level - 0.3);
+        }
 
         Synthesizers::dd200->sendControlChange(dd200_DelayDepth, int(delay_time), MIDI);
         Synthesizers::dd200->sendControlChange(dd200_DelayLevel, int(delay_level), MIDI);
@@ -208,10 +213,34 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print(Globals::current_BPM);
 
+        if (!bUseEffects)
+        {
+            Hardware::lcd->setCursor(3, 0);
+            Hardware::lcd->print("/");
+        }
+
         Hardware::lcd->setCursor(4, 0);
         Hardware::lcd->print(int(delay_time));
         Hardware::lcd->setCursor(8, 0);
         Hardware::lcd->print(int(delay_level));
+
+        static float temp_delay_level;
+        static uint64_t lastToggle = 0;
+
+        if (Hardware::footswitch_is_pressed && millis() > lastToggle + 50) // tempo-linked stutter if on hold
+        {
+            if (bUseEffects) // save to temp
+            {
+                temp_delay_level = delay_level;
+                delay_level = 0;
+            }
+            else // restore from temp
+            {
+                delay_level = temp_delay_level;
+            }
+            bUseEffects = !bUseEffects;
+            lastToggle = millis();
+        }
 
         break;
 
