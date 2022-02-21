@@ -236,10 +236,10 @@ void setup()
   // Globals::score_list.push_back(hutschnur);
   // Globals::score_list.push_back(whammyMountains);
   Globals::score_list.push_back(control_volca);
+  // Globals::score_list.push_back(monitoring);
+  // Globals::score_list.push_back(dd200_timeControl);
   Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(dd200_timeControl);
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(a_72);
+  // Globals::score_list.push_back(a_72);
   Globals::score_list.push_back(sattelstein);
   Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(control_dd200);

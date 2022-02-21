@@ -9,6 +9,7 @@
 
 FootswitchMode Hardware::footswitch_mode = Increment_Score;
 PushbuttonMode Hardware::pushbutton_mode = Pb_Scroll_Menu;
+bool Hardware::footswitch_is_pressed = false;
 
 void Hardware::footswitch_pressed()
 {
@@ -80,6 +81,8 @@ void Hardware::footswitch_pressed()
 
     break;
 
+  case (No_Footswitch_Mode):
+    break;
     // case (Experimental): // increase step and
     //   Globals::active_score->step++; // go to next score step
     //   Globals::active_score->setup = true;
@@ -144,11 +147,13 @@ void Hardware::checkFootSwitch()
     {
       footswitch_pressed();
       Globals::println_to_console("Footswitch pressed.");
+      footswitch_is_pressed = true;
     }
     else
     {
       footswitch_released();
       Globals::println_to_console("Footswitch released.");
+      footswitch_is_pressed = false;
     }
     last_switch_state = switch_state;
     last_switch_toggle = millis();
@@ -216,7 +221,7 @@ void Hardware::lcd_display()
   // -------------------------- CALIBRATION ---------------------------
   case Calibration:
   {
-    //level 1: display all instruments
+    // level 1: display all instruments
     for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
     {
       if (Drumset::instruments[i]->effect == Change_CC)
@@ -397,22 +402,22 @@ int Hardware::dd_200_midi_interval_map[128] =
     //     14, 14, 13, 13, 13, 13, 13, 13,
     //     13, 13, 12, 12, 12, 12, 12, 12};
 
-{1, 2, 42, 81, 121, 161, 200, 240,
- 280, 319, 359, 399, 438, 478, 518, 557,
- 597, 637, 676, 716, 756, 795, 835, 875,
- 914, 954, 994, 1030, 1070, 1110, 1150, 1190, 1230,
- 1270, 1310, 1350, 1390, 1430, 1460, 1500, 1540,
- 1580, 1620, 1660, 1700, 1740, 1780, 1820, 1860,
- 1900, 1940, 1980, 2020, 2060, 2100, 2140, 2180,
- 2220, 2260, 2300, 2340, 2380, 2420, 2460, 2500,
- 2540, 2580, 2620, 2650, 2690, 2730, 2770, 2810,
- 2850, 2890, 2930, 2970, 3010, 3050, 3090, 3130,
- 3170, 3210, 3250, 3290, 3330, 3370, 3410, 3450,
- 3490, 3530, 3570, 3610, 3650, 3690, 3730, 3770,
- 3800, 3840, 3880, 3920, 3960, 4000, 4040, 4080,
- 4120, 4160, 4200, 4240, 4280, 4320, 4360, 4400,
- 4440, 4480, 4520, 4560, 4600, 4640, 4680, 4720,
- 4760, 4800, 4840, 4880, 4920, 4960, 5000};
+    {1, 2, 42, 81, 121, 161, 200, 240,
+     280, 319, 359, 399, 438, 478, 518, 557,
+     597, 637, 676, 716, 756, 795, 835, 875,
+     914, 954, 994, 1030, 1070, 1110, 1150, 1190, 1230,
+     1270, 1310, 1350, 1390, 1430, 1460, 1500, 1540,
+     1580, 1620, 1660, 1700, 1740, 1780, 1820, 1860,
+     1900, 1940, 1980, 2020, 2060, 2100, 2140, 2180,
+     2220, 2260, 2300, 2340, 2380, 2420, 2460, 2500,
+     2540, 2580, 2620, 2650, 2690, 2730, 2770, 2810,
+     2850, 2890, 2930, 2970, 3010, 3050, 3090, 3130,
+     3170, 3210, 3250, 3290, 3330, 3370, 3410, 3450,
+     3490, 3530, 3570, 3610, 3650, 3690, 3730, 3770,
+     3800, 3840, 3880, 3920, 3960, 4000, 4040, 4080,
+     4120, 4160, 4200, 4240, 4280, 4320, 4360, 4400,
+     4440, 4480, 4520, 4560, 4600, 4640, 4680, 4720,
+     4760, 4800, 4840, 4880, 4920, 4960, 5000};
 
 //////////////////////// SYNTHESIZER CLASS ////////////////////////////
 ///////////////////////////////////////////////////////////////////////

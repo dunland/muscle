@@ -15,7 +15,8 @@ enum FootswitchMode
   Reset_Topo, // resets beat_topography (of all instruments)
   Reset_Topo_and_Proceed_Score,
   Experimental, // hold = mute, release = randomize and increase score step
-  Increment_Score
+  Increment_Score,
+  No_Footswitch_Mode
 };
 
 enum PushbuttonMode
@@ -47,6 +48,8 @@ public:
   static void footswitch_released();
 
   static void checkFootSwitch();
+
+  static bool footswitch_is_pressed; // just gives info about state of footswitch
   // --------------------------------------------------------------------
 
   ////////////////////////////////// LCD ////////////////////////////////
@@ -88,7 +91,7 @@ public:
   /////////////////////////////////////////////////////////////////////
 
   static int dd_200_midi_interval_map[128];
-  
+
 };
 
 class Synthesizer
