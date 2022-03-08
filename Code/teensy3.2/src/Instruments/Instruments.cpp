@@ -266,8 +266,8 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
   // always count up topography:
   // countup_topography();
   // topography.smoothen_dataArray();
-  Serial.print("hit: ");
-  Serial.print(Globals::DrumtypeToHumanreadable(drumtype));
+  // Serial.print("hit/");
+  Serial.println(Globals::DrumtypeToHumanreadable(drumtype));
   Hardware::lcd->setCursor(13, 0);
   Hardware::lcd->print(Globals::DrumtypeToHumanreadable(drumtype));
 
@@ -294,8 +294,6 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
     getTapTempo();
     break;
 
- // asdada
- // asdasdasflasf
   case Swell:
     swell_rec(MIDI);
     break;

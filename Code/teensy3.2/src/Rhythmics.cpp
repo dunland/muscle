@@ -19,7 +19,8 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
             JSON::compose_and_send_json(instruments);
 
         // -------------------------- 32nd-notes --------------------------
-        Serial.println("");
+        if (Globals::do_send_to_processing)
+        Globals::println_to_console("");
 
         // print millis and current beat:
         if (Globals::do_send_to_processing)

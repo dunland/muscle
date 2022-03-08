@@ -14,8 +14,8 @@ enum FootswitchMode
   Hold_CC,
   Reset_Topo, // resets beat_topography (of all instruments)
   Reset_Topo_and_Proceed_Score,
-  Experimental, // hold = mute, release = randomize and increase score step
-  Increment_Score,
+  Experimental,    // hold = mute, release = randomize and increase score step
+  Increment_Score, // go to next score step
   No_Footswitch_Mode
 };
 
@@ -91,7 +91,6 @@ public:
   /////////////////////////////////////////////////////////////////////
 
   static int dd_200_midi_interval_map[128];
-
 };
 
 class Synthesizer

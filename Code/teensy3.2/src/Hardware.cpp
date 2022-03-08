@@ -131,6 +131,8 @@ void Hardware::footswitch_released()
   default:
     break;
   }
+
+  Serial.println("footswitch released");
 }
 
 void Hardware::checkFootSwitch()

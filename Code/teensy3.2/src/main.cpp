@@ -26,9 +26,10 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.221";
+const String VERSION_NUMBER = "0.2.23";
+const boolean DO_SEND_MIDI_CLOCK = true;
 const boolean DO_PRINT_JSON = false;
-const boolean DO_PRINT_TO_CONSOLE = true;
+const boolean DO_PRINT_TO_CONSOLE = false;
 const boolean DO_PRINT_BEAT_SUM = false;
 const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
 const boolean USING_TSUNAMI = false;
@@ -49,6 +50,7 @@ Score *a_72;
 Score *whammyMountains;
 Score *hutschnur;
 Score *control_volca;
+Score *runVisuals;
 
 Rhythmics *rhythmics;
 
@@ -121,7 +123,7 @@ void setup()
 
   //-------------------------- Communication --------------------------
 
-  Serial.begin(115200);
+  Serial.begin(9600);
   // Serial3.begin(57600); // contained in tsunami.begin()
   unsigned long wait_for_Serial = millis();
 
@@ -232,9 +234,11 @@ void setup()
   whammyMountains = new Score("whammyMountains");
   hutschnur = new Score("hutschnur");
   control_volca = new Score("control_volca");
+  runVisuals = new Score("runVisuals");
 
   // Globals::score_list.push_back(hutschnur);
   // Globals::score_list.push_back(whammyMountains);
+  Globals::score_list.push_back(runVisuals);
   Globals::score_list.push_back(control_volca);
   // Globals::score_list.push_back(monitoring);
   // Globals::score_list.push_back(dd200_timeControl);
@@ -298,6 +302,14 @@ void setup()
 
 void loop()
 {
+
+  // static unsigned long last_message = 0;
+  // if (millis() > last_message + 1000)
+  // {
+  //   Serial.println("Snare");
+  //   last_message = millis();
+  // }
+
   Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
 
   // ------------------------- DEBUG AREA -----------------------------
@@ -338,6 +350,7 @@ void loop()
   {
     // Serial2.write(0xF8);
     // Serial2.write(midi::Clock);
+    if (DO_SEND_MIDI_CLOCK)
     MIDI.sendRealTime(midi::Clock);
     noInterrupts();
     Globals::sendMidiClock = false;

@@ -129,6 +129,10 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
     {
         run_control_volca(MIDI);
     }
+    else if (name == "runVisuals")
+    {
+        runVisuals(MIDI);
+    }
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////
