@@ -172,12 +172,11 @@ public:
     static Instrument *snare;
     static Instrument *hihat;
     static Instrument *kick;
+    static Instrument *tom1;
     static Instrument *tom2;
     static Instrument *standtom;
     static Instrument *crash1;
-    static Instrument *cowbell;
     static Instrument *ride;
-    static Instrument *tom1;
     static Instrument *crash2;
 
     static std::vector<Instrument *> instruments; // all instruments go in here
