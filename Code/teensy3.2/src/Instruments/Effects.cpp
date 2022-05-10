@@ -1,6 +1,6 @@
 #include <Instruments.h>
 #include <MIDI.h>
-#include <Tsunami.h>
+// #include <Tsunami.h>
 #include <Score/Score.h>
 #include <Hardware.h>
 
@@ -297,18 +297,18 @@ void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // upda
         (3. reset that parameter, if you like) */
 
       // MIDI.sendNoteOn(notes_list[instr], 127, midi_settings.synth); // also play a note on each hit?
-      if (effect == CymbalSwell)
-      {
-        if (Globals::tsunami.isTrackPlaying(score.tsunami_track))
-        {
-          static int trackLevel = 0;
-          static int previousTracklevel = 0;
-          trackLevel = min(-40 + score.swell_val, 0);
-          if (trackLevel != previousTracklevel)
-            Globals::tsunami.trackFade(score.tsunami_track, trackLevel, 100, false); // fade smoothly within 100 ms
-          previousTracklevel = trackLevel;
-        }
-      }
+      // if (effect == CymbalSwell)
+      // {
+      //   if (Globals::tsunami.isTrackPlaying(score.tsunami_track))
+      //   {
+      //     static int trackLevel = 0;
+      //     static int previousTracklevel = 0;
+      //     trackLevel = min(-40 + score.swell_val, 0);
+      //     if (trackLevel != previousTracklevel)
+      //       Globals::tsunami.trackFade(score.tsunami_track, trackLevel, 100, false); // fade smoothly within 100 ms
+      //     previousTracklevel = trackLevel;
+      //   }
+      // }
       // decrease swell_val:
       if (score.swell_val > 0)
       {
@@ -414,7 +414,7 @@ void Instrument::tsunamiLink()
     // set loudness and fade:
     //int trackLevel = min(-40 + (topography.average_smooth * 5), 0);
     int trackLevel = 0;                                                            // Debug
-    Globals::tsunami.trackFade(tracknum, trackLevel, Globals::tapInterval, false); // fade smoothly within length of a quarter note
+    // Globals::tsunami.trackFade(tracknum, trackLevel, Globals::tapInterval, false); // fade smoothly within length of a quarter note
 
     // TODO: set track channels for each instrument according to output
     // output A: speaker on drumset
@@ -422,34 +422,34 @@ void Instrument::tsunamiLink()
     // cool effects: let sounds walk through room from drumset to PA
 
     // --------------------------- play track -------------------------
-    if (!Globals::tsunami.isTrackPlaying(tracknum) && Globals::beatCount == 0)
-    {
-      // set playback speed according to current_BPM:
-      int sr_offset;
-      float r = Globals::current_BPM / float(Globals::track_bpm[tracknum]);
-      Globals::print_to_console("r = ");
-      Globals::println_to_console(r);
-      if (!(r > 2) && !(r < 0.5))
-      {
-        // samplerateOffset scales playback speeds from 0.5 to 1 to 2
-        // and maps to -32768 to 0 to 32767
-        sr_offset = (r >= 1) ? 32767 * (r - 1) : -32768 + 32768 * 2 * (r - 0.5);
-        sr_offset = int(sr_offset);
-        Globals::print_to_console("sr_offset = ");
-        Globals::println_to_console(sr_offset);
-      }
-      else
-      {
-        sr_offset = 0;
-      }
+    // if (!Globals::tsunami.isTrackPlaying(tracknum) && Globals::beatCount == 0)
+    // {
+    //   // set playback speed according to current_BPM:
+    //   int sr_offset;
+    //   float r = Globals::current_BPM / float(Globals::track_bpm[tracknum]);
+    //   Globals::print_to_console("r = ");
+    //   Globals::println_to_console(r);
+    //   if (!(r > 2) && !(r < 0.5))
+    //   {
+    //     // samplerateOffset scales playback speeds from 0.5 to 1 to 2
+    //     // and maps to -32768 to 0 to 32767
+    //     sr_offset = (r >= 1) ? 32767 * (r - 1) : -32768 + 32768 * 2 * (r - 0.5);
+    //     sr_offset = int(sr_offset);
+    //     Globals::print_to_console("sr_offset = ");
+    //     Globals::println_to_console(sr_offset);
+    //   }
+    //   else
+    //   {
+    //     sr_offset = 0;
+    //   }
 
-      //int channel = 0;                              // Debug
-      Globals::tsunami.samplerateOffset(score.tsunami_channel, sr_offset); // TODO: link channels to instruments
-      Globals::tsunami.trackGain(tracknum, trackLevel);
-      Globals::tsunami.trackPlayPoly(tracknum, score.tsunami_channel, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
-      Globals::print_to_console("starting to play track ");
-      Globals::println_to_console(tracknum);
-    } // track playing end
+    //   //int channel = 0;                              // Debug
+    //   Globals::tsunami.samplerateOffset(score.tsunami_channel, sr_offset); // TODO: link channels to instruments
+    //   Globals::tsunami.trackGain(tracknum, trackLevel);
+    //   Globals::tsunami.trackPlayPoly(tracknum, score.tsunami_channel, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
+    //   Globals::print_to_console("starting to play track ");
+    //   Globals::println_to_console(tracknum);
+    // } // track playing end
   }   // threshold end
 
   // Debug:

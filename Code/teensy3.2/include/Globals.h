@@ -2,7 +2,7 @@
 #define GLOBALS_H
 
 #include <Arduino.h>
-#include <Tsunami.h> // in cpp
+// #include <Tsunami.h> // in cpp
 #include <vector>
 
 class Score;
@@ -145,7 +145,7 @@ public:
 
   // ----------------------------- Hardware ---------------------------
 
-  static Tsunami tsunami; // TODO: make this be part of Hardware
+  // static Tsunami tsunami; // TODO: make this be part of Hardware
   static boolean footswitch_is_pressed;
 
   // hard-coded list of BPMs of tracks stored on Tsunami's SD card.

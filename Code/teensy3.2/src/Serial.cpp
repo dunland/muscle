@@ -2,15 +2,22 @@
 #include <Arduino.h>
 #include <vector>
 #include <MIDI.h>
-#include <Tsunami.h>
+// #include <Tsunami.h>
 #include <ArduinoJson.h>
 #include <Globals.h>
 #include <Instruments.h>
 #include <Hardware.h>
 #include <Score/Score.h>
 
-// sends JSON as Serial information over port "Serial" (via USB)
+char NanoKontrol::address1[NanoKontrol::numChars] = {0};
+char NanoKontrol::address2[NanoKontrol::numChars] = {0};
+int NanoKontrol::incomingInt = 0;
+bool NanoKontrol::newData = false;
+char NanoKontrol::receivedChars[numChars];
+char NanoKontrol::tempChars[numChars]; // temporary array for use when parsing
 
+
+// sends JSON as Serial information over port "Serial" (via USB)
 void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 {
     Score *active_score = Globals::active_score;
@@ -71,4 +78,89 @@ void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
     // transmit information:
     serializeJson(doc, Serial);
     Serial.println("");
+}
+
+///////////////////////////// NANOKONTROL /////////////////////////////
+
+void NanoKontrol::recvWithStartEndMarkers()
+{
+    static boolean recvInProgress = false;
+    static byte ndx = 0;
+    char startMarker = '[';
+    char endMarker = ']';
+    char rc;
+
+    while (Serial.available() > 0 && newData == false)
+    {
+        rc = Serial.read();
+
+        if (recvInProgress == true)
+        {
+            if (rc != endMarker)
+            {
+                receivedChars[ndx] = rc;
+                ndx++;
+                if (ndx >= numChars)
+                {
+                    ndx = numChars - 1;
+                }
+            }
+            else
+            {
+                receivedChars[ndx] = '\0'; // terminate the string
+                recvInProgress = false;
+                ndx = 0;
+                newData = true;
+            }
+        }
+
+        else if (rc == startMarker)
+        {
+            recvInProgress = true;
+        }
+    }
+}
+
+// --------------------------------------------------------------------
+
+void NanoKontrol::parseData()
+{ // split the data into its parts
+
+    char *strtokIndx; // this is used by strtok() as an index
+
+    strtokIndx = strtok(tempChars, "/"); // get the first part - the string
+    strcpy(address1, strtokIndx);        // copy it to messageFromPC
+
+    strtokIndx = strtok(NULL, "/"); // this continues where the previous call left off
+    strcpy(address2, strtokIndx);
+
+    strtokIndx = strtok(NULL, "/");
+    incomingInt = atoi(strtokIndx); // convert this part to an integer
+}
+
+// --------------------------------------------------------------------
+
+void NanoKontrol::loop()
+{
+    recvWithStartEndMarkers();
+    if (newData == true)
+    {
+        strcpy(tempChars, receivedChars);
+        // this temporary copy is necessary to protect the original data
+        //   because strtok() used in parseData() replaces the commas with \0
+        parseData();
+        showParsedData();
+        newData = false;
+    }
+}
+
+// --------------------------------------------------------------------
+
+void NanoKontrol::showParsedData() {
+  Serial.print("address 1: ");
+  Serial.println(address1);
+  Serial.print("address 2: ");
+  Serial.println(address2);
+  Serial.print("value: ");
+  Serial.println(incomingInt);
 }

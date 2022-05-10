@@ -14,8 +14,7 @@
 #include <Arduino.h>
 #include <vector>
 #include <MIDI.h>
-#include <Tsunami.h>
-#include <ArduinoJson.h>
+// #include <Tsunami.h>
 #include <settings.h>
 #include <Globals.h>
 #include <Instruments.h>
@@ -120,7 +119,7 @@ void setup()
   pinMode(FOOTSWITCH, INPUT_PULLUP);
   pinMode(PUSHBUTTON, INPUT_PULLUP);
 
-  randomSeed(analogRead(A0) * analogRead(A19));
+  randomSeed(analogRead(A0) * analogRead(A1));
 
   //-------------------------- Communication --------------------------
 
@@ -154,16 +153,16 @@ void setup()
 
   // -------------------- Hardware initialization ---------------------
 
-  if (USING_TSUNAMI)
-  {
-    delay(1000);              // wait for Tsunami to finish reset // redundant?
-    Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
-    delay(100);
-    Globals::tsunami.stopAllTracks(); // in case Tsunami was already playing.
-    Globals::tsunami.samplerateOffset(0, 0);
-    Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
-    delay(100);                          // some time for Tsunami to respond with version string
-  }
+  // if (USING_TSUNAMI)
+  // {
+  //   delay(1000);              // wait for Tsunami to finish reset // redundant?
+  //   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
+  //   delay(100);
+  //   Globals::tsunami.stopAllTracks(); // in case Tsunami was already playing.
+  //   Globals::tsunami.samplerateOffset(0, 0);
+  //   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
+  //   delay(100);                          // some time for Tsunami to respond with version string
+  // }
 
   // LCD
   Hardware::lcd->begin(16, 2);
@@ -315,7 +314,7 @@ void loop()
   //   last_message = millis();
   // }
 
-  Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
+  // Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
 
   // ------------------------- DEBUG AREA -----------------------------
   printNormalizedValues(false);
@@ -370,7 +369,6 @@ void loop()
 
   if (Globals::current_beat_pos != last_beat_pos) // run once per 32nd-step
   {
-    // Globals::active_score->load();
     Globals::active_score->run(MIDI); // TODO: globale Synthesizer-Liste
 
     //----------------------- SCORE END -------------------------------
@@ -403,6 +401,6 @@ void loop()
   for (auto &instrument : Drumset::instruments)
     instrument->tidyUp(MIDI);
 
-  // MIDI.sendControlChange(50, 100, 2);
+  NanoKontrol::loop();
 }
 // --------------------------------------------------------------------

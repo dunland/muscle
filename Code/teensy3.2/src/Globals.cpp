@@ -1,5 +1,5 @@
 #include <Globals.h>
-#include <Tsunami.h>
+// #include <Tsunami.h>
 #include <ArduinoJson.h>
 
 bool TOPOGRAPHY::ready()
@@ -17,7 +17,7 @@ boolean Globals::do_print_JSON = true;		// will be deactivated if no USB answer 
 IntervalTimer Globals::masterClock; // 1 bar
 MachineState Globals::machine_state = Running;
 
-Tsunami Globals::tsunami;
+// Tsunami Globals::tsunami;
 
 // ------------------------------- Score ----------------------------
 std::vector<Score *> Globals::score_list; // all relevant scores
