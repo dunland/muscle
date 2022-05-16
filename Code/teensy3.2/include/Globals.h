@@ -10,7 +10,8 @@ class Score;
 enum MachineState
 {
   Running,
-  Calibration
+  Calibration,
+  NanoKontrol_Test
 };
 
 // instrument naming for human-readable console outputs:

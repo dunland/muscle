@@ -237,6 +237,7 @@ void Hardware::lcd_display()
     break;
 
   default:
+  /* define what to display elsewhere... */
     break;
   }
   }

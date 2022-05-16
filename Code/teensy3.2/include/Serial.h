@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <Score/Score.h>
+#include <Instruments.h>
 
 class Instrument;
 
@@ -24,8 +25,18 @@ public:
 
     static boolean newData;
 
+    static Instrument *instrument;
+    static const int SET_CC_TYPE = 0;
+    static const int SET_DEST = 1; // midi device destination
+    static const int SET_CC_MIN = 2;
+    static const int SET_INCREASE = 3;
+    static const int SET_CC_MAX = 4;
+    static const int SET_DECREASE = 5;
+    static int paramToChange;
+
     static void loop();
     static void recvWithStartEndMarkers();
     static void parseData();
-    static void showParsedData();
+    static void allocateData();
+    static void printToLCD();
 };

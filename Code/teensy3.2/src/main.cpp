@@ -294,7 +294,7 @@ void setup()
   // tracknum, channel
 
   // if (Hardware::pushbutton_is_pressed())
-  // Globals::machine_state = Calibration;
+  Globals::machine_state = NanoKontrol_Test; // Debug Nanokontrol LCD
   delay(2000);
   Hardware::lcd->clear();
   // delay(500);
