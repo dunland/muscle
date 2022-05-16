@@ -22,17 +22,19 @@ public:
     static char address1[numChars];
     static char address2[numChars];
     static int incomingInt;
+    static int incomingChannel, incomingValue;
 
     static boolean newData;
 
     static Instrument *instrument;
+    static const int SET_INSTRUMENT = 0;
     static const int SET_CC_TYPE = 0;
     static const int SET_DEST = 1; // midi device destination
-    static const int SET_CC_MIN = 2;
-    static const int SET_INCREASE = 3;
-    static const int SET_CC_MAX = 4;
-    static const int SET_DECREASE = 5;
-    static int paramToChange;
+    static const int SET_CC_MIN = 0;
+    static const int SET_INCREASE = 1;
+    static const int SET_CC_MAX = 0;
+    static const int SET_DECREASE = 1;
+    static int paramsToChange[4];
 
     static void loop();
     static void recvWithStartEndMarkers();

@@ -111,6 +111,8 @@ public:
 
     void setup_midi(CC_Type cc_type, Synthesizer *synth); // setup midi without CC params
 
+    // TODO: setup midi for ADSR Reflex effect!)
+
     void setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean firstStroke_);
 
     void calculateNoiseFloor();

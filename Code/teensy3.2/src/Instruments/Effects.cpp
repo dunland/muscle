@@ -413,7 +413,7 @@ void Instrument::tsunamiLink()
 
     // set loudness and fade:
     //int trackLevel = min(-40 + (topography.average_smooth * 5), 0);
-    int trackLevel = 0;                                                            // Debug
+    // int trackLevel = 0;                                                            // Debug
     // Globals::tsunami.trackFade(tracknum, trackLevel, Globals::tapInterval, false); // fade smoothly within length of a quarter note
 
     // TODO: set track channels for each instrument according to output
