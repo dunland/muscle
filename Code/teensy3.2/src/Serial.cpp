@@ -290,20 +290,20 @@ void NanoKontrol::printToLCD()
     if (paramsToChange[2] == SET_CC_MIN)
         Hardware::lcd->print("min");
     else if (paramsToChange[2] == SET_INCREASE)
-        Hardware::lcd->print("↑↑↑");
+        Hardware::lcd->print("in");
 
     Hardware::lcd->setCursor(12, 0);
     if (paramsToChange[3] == SET_CC_MAX)
         Hardware::lcd->print("max");
     else if (paramsToChange[3] == SET_DECREASE)
-        Hardware::lcd->print("↓↓↓");
+        Hardware::lcd->print("out");
 
     Hardware::lcd->setCursor(0, 1);
     Hardware::lcd->print(Globals::DrumtypeToHumanreadable(instrument->drumtype));
 
     Hardware::lcd->setCursor(4, 1);
     if (paramsToChange[1] == SET_CC_TYPE)
-        Hardware::lcd->print(instrument->midi_settings.cc_chan); // TODO: make human readable!
+        Hardware::lcd->print(Globals::CCTypeToHumanReadable(instrument->midi_settings.cc_chan));
     else if (paramsToChange[1] == SET_DEST)
         Hardware::lcd->print("DST?");
 
@@ -329,11 +329,11 @@ void NanoKontrol::printToLCD()
     if (paramsToChange[2] == SET_CC_MIN)
         Serial.print("min\t");
     else if (paramsToChange[2] == SET_INCREASE)
-        Serial.print("↑↑↑\t");
+        Serial.print("in\t");
     if (paramsToChange[3] == SET_CC_MAX)
         Serial.print("max\t");
     else if (paramsToChange[3] == SET_DECREASE)
-        Serial.print("↓↓↓\t");
+        Serial.print("out\t");
 
     Serial.println();
 
@@ -341,7 +341,7 @@ void NanoKontrol::printToLCD()
     Serial.print("\t");
 
     if (paramsToChange[1] == SET_CC_TYPE)
-        Serial.print(instrument->midi_settings.cc_chan); // TODO: make human readable!
+        Serial.print(Globals::CCTypeToHumanReadable(instrument->midi_settings.cc_chan));
     else if (paramsToChange[1] == SET_DEST)
         Serial.print("DST?");
     Serial.print("\t");

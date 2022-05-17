@@ -165,6 +165,8 @@ public:
 
   static String EffectstypeToHumanReadable(EffectsType type);
 
+  static String CCTypeToHumanReadable(CC_Type type);
+
   static CC_Type int_to_cc_type(int);
 
   // DEBUG FUNCTIONS: ---------------------------------------------------

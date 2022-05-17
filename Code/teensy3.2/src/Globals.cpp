@@ -448,7 +448,36 @@ String Globals::EffectstypeToHumanReadable(EffectsType type)
 	return "";
 }
 
-CC_Type Globals::int_to_cc_type(int integer)
+// TODO: different enums for each device, so they don't overlap?
+String Globals::CCTypeToHumanReadable(CC_Type type)
+{
+	switch (type)
+	{
+		case None: 				return "None"; 				break;
+		case dd200_DelayTime: 	return "dTim"; 	break;
+		case Osc2_semitone: 	return "Osc2_semitone"; 	break;
+		// case Osc2_tune: 		return "Osc2_tune"; 		break;
+		case dd200_DelayLevel: 	return "dLvl";			 	break;
+		case Mix_Level_1: 		return "Mix_Level_1"; 		break;
+		case Mix_Level_2: 		return "Mix_Level_2"; 		break;
+		case dd200_OnOff: 		return "OnOf";		 		break;
+		case Patch_1_Depth: 	return "Patch_1_Depth"; 	break;
+		case Patch_3_Depth: 	return "Patch_3_Depth"; 	break;
+		case Cutoff: 			return "Cutoff"; 			break;
+		case LFO_Rate: 			return "LFO_Rate"; 			break;
+		case Resonance: 		return "Resonance"; 		break;
+		case Amplevel: 			return "Amplevel"; 			break;
+		case Sustain: 			return "Sustain"; 			break;
+		case Release: 			return "Release"; 			break;
+		case DelayTime: 		return "DelayTime"; 		break;
+		// case DelayDepth: 		return "DelayDepth"; 		break;
+		case dd200_DelayDepth: 	return "dDpt";			 	break;
+		case TimbreSelect: 		return "TimbreSelect"; 		break;
+		default: 				return "undefined"; 		break;
+	}
+}
+
+CC_Type Globals::int_to_cc_type(int integer) // TODO: can this not be done with casting?
 {
 	switch (integer)
 	{
