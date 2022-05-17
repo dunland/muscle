@@ -407,9 +407,9 @@ Instrument *Drumset::ride = new Instrument(INPUT_PIN_RIDE, Ride);
 std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::crash1, Drumset::ride};
 
 // instantiate external MIDI devices:
-Synthesizer *Synthesizers::mKorg = new Synthesizer(MIDI_CHANNEL_MICROKORG);
-Synthesizer *Synthesizers::volca = new Synthesizer(MIDI_CHANNEL_VOLCA);
-Synthesizer *Synthesizers::dd200 = new Synthesizer(MIDI_CHANNEL_DD200);
-Synthesizer *Synthesizers::whammy = new Synthesizer(MIDI_CHANNEL_WHAMMY);
+Synthesizer *Synthesizers::mKorg = new Synthesizer(MIDI_CHANNEL_MICROKORG, "mKRG");
+Synthesizer *Synthesizers::volca = new Synthesizer(MIDI_CHANNEL_VOLCA, "vlca");
+Synthesizer *Synthesizers::dd200 = new Synthesizer(MIDI_CHANNEL_DD200, "d200");
+Synthesizer *Synthesizers::whammy = new Synthesizer(MIDI_CHANNEL_WHAMMY, "whmy");
 
 std::vector<Synthesizer *> Synthesizers::synths = {Synthesizers::mKorg, Synthesizers::volca, Synthesizers::whammy, Synthesizers::dd200};

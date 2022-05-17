@@ -35,6 +35,7 @@ public:
     static const int SET_CC_MAX = 0;
     static const int SET_DECREASE = 1;
     static int paramsToChange[4];
+    static Synthesizer *dest_device;
 
     static void loop();
     static void recvWithStartEndMarkers();

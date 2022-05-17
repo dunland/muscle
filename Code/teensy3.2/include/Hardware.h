@@ -96,9 +96,10 @@ public:
 class Synthesizer
 {
 public:
-  Synthesizer(int midi_channel_)
+  Synthesizer(int midi_channel_, String name_="None")
   {
     midi_channel = midi_channel_;
+    name = name_;
     Globals::print_to_console("initialized synthesizer with midi channel ");
     Globals::println_to_console(midi_channel);
 
@@ -110,6 +111,7 @@ public:
   }
 
   int midi_channel; // the MIDI Channel to adress this instrument by
+  String name;
 
   boolean notes[127];
 

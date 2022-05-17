@@ -467,6 +467,7 @@ String Globals::CCTypeToHumanReadable(CC_Type type)
 		case LFO_Rate: 			return "LFO_Rate"; 			break;
 		case Resonance: 		return "Resonance"; 		break;
 		case Amplevel: 			return "Amplevel"; 			break;
+		case Attack: 			return "Attack"; 			break;
 		case Sustain: 			return "Sustain"; 			break;
 		case Release: 			return "Release"; 			break;
 		case DelayTime: 		return "DelayTime"; 		break;
