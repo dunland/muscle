@@ -19,14 +19,12 @@ Instrument *NanoKontrol::instrument = Drumset::instruments[0];
 int NanoKontrol::paramsToChange[4] = {NanoKontrol::SET_INSTRUMENT, NanoKontrol::SET_CC_TYPE, NanoKontrol::SET_CC_MIN, NanoKontrol::SET_CC_MAX};
 int NanoKontrol::incomingChannel = 0;
 int NanoKontrol::incomingValue = 0;
-Synthesizer *NanoKontrol::dest_device = Synthesizers::dd200;
 
 const CC_Type dd200_controlValues[4] = {
     dd200_DelayDepth,
     dd200_DelayLevel,
     dd200_DelayTime,
-    dd200_OnOff
-    };
+    dd200_OnOff};
 
 const CC_Type mKorg_controlValues[16] = {
     Osc2_semitone,
@@ -44,8 +42,7 @@ const CC_Type mKorg_controlValues[16] = {
     Release,
     DelayTime,
     DelayDepth,
-    TimbreSelect
-    };
+    TimbreSelect};
 
 // sends JSON as Serial information over port "Serial" (via USB)
 void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
@@ -169,8 +166,10 @@ void NanoKontrol::parseData()
 
     std::string str = strtokIndx;
 
-    if (strcmp("channel", address2) == 0) incomingChannel = incomingInt;
-    else if (strcmp("value", address2) == 0) incomingValue = incomingInt;
+    if (strcmp("channel", address2) == 0)
+        incomingChannel = incomingInt;
+    else if (strcmp("value", address2) == 0)
+        incomingValue = incomingInt;
 
     // instrument = Drumset::instruments[int(float(incomingInt) / 127.0 * (Drumset::instruments.size() - 1))];
 }
@@ -218,16 +217,16 @@ void NanoKontrol::allocateData()
         switch (paramsToChange[1])
         {
         case SET_CC_TYPE:
-            if (dest_device == Synthesizers::dd200)
+            if (instrument->midi_settings.synth == Synthesizers::dd200)
                 instrument->midi_settings.cc_chan = dd200_controlValues[int(float(incomingValue) / 127.0 * sizeof(dd200_controlValues) / sizeof(dd200_controlValues[0]))];
-            else if (dest_device == Synthesizers::mKorg)
+            else if (instrument->midi_settings.synth == Synthesizers::mKorg)
                 instrument->midi_settings.cc_chan = mKorg_controlValues[int(float(incomingValue) / 127.0 * sizeof(mKorg_controlValues) / sizeof(mKorg_controlValues[0]))];
             break;
 
         case SET_DEST:
-            dest_device = (incomingValue >= 64) ? Synthesizers::mKorg : Synthesizers::dd200;
+            instrument->midi_settings.synth = (incomingValue >= 64) ? Synthesizers::mKorg : Synthesizers::dd200;
             break;
-        
+
         default:
             break;
         }
@@ -378,7 +377,7 @@ void NanoKontrol::printToLCD()
     if (paramsToChange[1] == SET_CC_TYPE)
         Serial.print(Globals::CCTypeToHumanReadable(instrument->midi_settings.cc_chan));
     else if (paramsToChange[1] == SET_DEST)
-        Serial.print(dest_device->name);
+        Serial.print(instrument->midi_settings.synth->name);
     Serial.print("\t");
 
     if (paramsToChange[2] == SET_CC_MIN)
