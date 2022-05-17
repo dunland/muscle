@@ -216,6 +216,8 @@ void NanoKontrol::allocateData()
             break;
         }
 
+        break;
+
     case 19: // Knob 4: set type
         paramsToChange[3] = (incomingValue < 64) ? SET_CC_MAX : SET_DECREASE;
         break;
