@@ -133,6 +133,10 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
     {
         runVisuals(MIDI);
     }
+    else if (name == "zitteraal")
+    {
+        run_zitteraal(MIDI);
+    }    
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////

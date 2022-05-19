@@ -1,0 +1,41 @@
+#N canvas 2742 87 817 359 12;
+#X obj 130 -29 ctlin;
+#X floatatom 130 0 5 0 0 0 - - -, f 5;
+#X floatatom 170 0 5 0 0 0 - - -, f 5;
+#X floatatom 210 0 5 0 0 0 - - -, f 5;
+#X text 600 31 standard teensy address;
+#X msg 430 31 devicename /dev/ttyACM0;
+#X msg 410 -19 devices;
+#X text 470 -20 print list of devices;
+#X msg 440 81 baud 9600;
+#X msg 420 6 open 0;
+#X msg 450 111 pollintervall 10;
+#X msg 437 55 devicename /dev/ttyACM1;
+#X obj 430 141 comport 0 9600;
+#X msg 130 80 print [midi/value/\$1];
+#X obj 430 171 list tosymbol;
+#X obj 430 200 print symbols_from_teensy;
+#X text 530 171 convert incoming ASCII to symbols;
+#X obj 130 109 print out;
+#X msg 170 50 print [midi/channel/\$1];
+#X text 10 -100 Receive input from KORG nanoKONTROL2 MIDI Controller
+and forward it to teensy. Values must be packed in brackets [ ] for
+teensy code to parse it \, using Arduino_Serial_ParseDiverseData.ino
+2022-05-10;
+#X connect 0 0 1 0;
+#X connect 0 1 2 0;
+#X connect 0 2 3 0;
+#X connect 1 0 13 0;
+#X connect 2 0 18 0;
+#X connect 5 0 12 0;
+#X connect 6 0 12 0;
+#X connect 8 0 12 0;
+#X connect 9 0 12 0;
+#X connect 10 0 12 0;
+#X connect 11 0 12 0;
+#X connect 12 0 14 0;
+#X connect 13 0 12 0;
+#X connect 13 0 17 0;
+#X connect 14 0 15 0;
+#X connect 18 0 17 0;
+#X connect 18 0 12 0;

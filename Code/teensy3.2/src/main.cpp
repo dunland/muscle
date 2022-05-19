@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.23";
+const String VERSION_NUMBER = "0.2.24";
 const boolean DO_SEND_MIDI_CLOCK = true;
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = false;
@@ -51,6 +51,7 @@ Score *whammyMountains;
 Score *hutschnur;
 Score *control_volca;
 Score *runVisuals;
+Score *zitteraal;
 
 Rhythmics *rhythmics;
 
@@ -198,7 +199,7 @@ void setup()
   Drumset::crash1->setup_sensitivity(CRASH1_THRESHOLD, CRASH1_CROSSINGS, CRASH1_DELAY_AFTER_STROKE, CRASH1_FIRST_STROKE);
   // Drumset::crash2->setup_sensitivity(CRASH2_THRESHOLD, CRASH2_CROSSINGS, CRASH2_DELAY_AFTER_STROKE, CRASH2_FIRST_STROKE);
   Drumset::ride->setup_sensitivity(RIDE_THRESHOLD, RIDE_CROSSINGS, RIDE_DELAY_AFTER_STROKE, RIDE_FIRST_STROKE);
-  Drumset::cowbell->setup_sensitivity(COWBELL_THRESHOLD, COWBELL_CROSSINGS, COWBELL_DELAY_AFTER_STROKE, COWBELL_FIRST_STROKE);
+  Drumset::tom1->setup_sensitivity(TOM1_THRESHOLD, TOM1_CROSSINGS, TOM1_DELAY_AFTER_STROKE, TOM1_FIRST_STROKE);
 
   // ------------------ calculate noise floor -------------------------
   for (auto &instrument : Drumset::instruments)
@@ -235,10 +236,14 @@ void setup()
   hutschnur = new Score("hutschnur");
   control_volca = new Score("control_volca");
   runVisuals = new Score("runVisuals");
+  zitteraal = new Score("zitteraal");
 
   // Globals::score_list.push_back(hutschnur);
   // Globals::score_list.push_back(whammyMountains);
   Globals::score_list.push_back(runVisuals);
+  Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(zitteraal);
+  Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(control_volca);
   // Globals::score_list.push_back(monitoring);
   // Globals::score_list.push_back(dd200_timeControl);
@@ -260,9 +265,9 @@ void setup()
   Drumset::hihat->midi_settings.synth = Synthesizers::mKorg;
   Drumset::crash1->midi_settings.synth = Synthesizers::mKorg;
   Drumset::ride->midi_settings.synth = Synthesizers::mKorg;
+  Drumset::tom1->midi_settings.synth = Synthesizers::mKorg;
   Drumset::tom2->midi_settings.synth = Synthesizers::mKorg;
   Drumset::standtom->midi_settings.synth = Synthesizers::mKorg;
-  Drumset::cowbell->midi_settings.synth = Synthesizers::mKorg;
 
   // an initial midi note must be defined, otherwise there is a problem with the tidyUp function
   // Drumset::snare->midi_settings.active_note = 50;
@@ -277,7 +282,7 @@ void setup()
   // assign startup instrument effects:
   Drumset::hihat->effect = Monitor;
   Drumset::crash1->effect = Monitor;
-  Drumset::cowbell->effect = Monitor;
+  Drumset::tom1->effect = Monitor;
   Drumset::ride->effect = Monitor;
 
   // -------------------------- START TIMERS --------------------------
