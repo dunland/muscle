@@ -16,6 +16,9 @@ void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
             Hardware::footswitch_mode = Increment_Score;
             setup = false;
+            Globals::tapInterval = 392; // 153 BPM
+            Globals::current_BPM = 60000 / Globals::tapInterval;
+            Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
         }
         break;
 
@@ -34,8 +37,8 @@ void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
     case 2: // stop playing notes and leave
         if (setup)
         {
-            // Synthesizers::mKorg->sendNoteOff(55, MIDI); // play note 55 (G) if it is not playing at the moment
-            // Synthesizers::mKorg->sendNoteOff(43, MIDI); // play note 43 (G) if it is not playing at the moment
+            Synthesizers::mKorg->sendNoteOff(55, MIDI); // play note 55 (G) if it is not playing at the moment
+            Synthesizers::mKorg->sendNoteOff(43, MIDI); // play note 43 (G) if it is not playing at the moment
             // MIDI.sendRealTime(midi::Stop); // TODO: make this work!
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
 
