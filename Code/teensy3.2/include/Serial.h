@@ -41,4 +41,5 @@ public:
     static void parseData();
     static void allocateData();
     static void printToLCD();
+    static void printToSerial();
 };

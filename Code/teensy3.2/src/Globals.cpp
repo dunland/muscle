@@ -454,27 +454,27 @@ String Globals::CCTypeToHumanReadable(CC_Type type)
 	switch (type)
 	{
 		case None: 				return "None"; 				break;
-		case dd200_DelayTime: 	return "dTim"; 	break;
-		case Osc2_semitone: 	return "Osc2_semitone"; 	break;
+		case dd200_DelayTime: 	return "dTim"; 				break;
+		case Osc2_semitone: 	return "O2smi"; 			break;
 		// case Osc2_tune: 		return "Osc2_tune"; 		break;
 		case dd200_DelayLevel: 	return "dLvl";			 	break;
-		case Mix_Level_1: 		return "Mix_Level_1"; 		break;
-		case Mix_Level_2: 		return "Mix_Level_2"; 		break;
+		case Mix_Level_1: 		return "Mix1"; 				break;
+		case Mix_Level_2: 		return "Mix2";		 		break;
 		case dd200_OnOff: 		return "OnOf";		 		break;
-		case Patch_1_Depth: 	return "Patch_1_Depth"; 	break;
-		case Patch_3_Depth: 	return "Patch_3_Depth"; 	break;
-		case Cutoff: 			return "Cutoff"; 			break;
-		case LFO_Rate: 			return "LFO_Rate"; 			break;
-		case Resonance: 		return "Resonance"; 		break;
-		case Amplevel: 			return "Amplevel"; 			break;
-		case Attack: 			return "Attack"; 			break;
-		case Sustain: 			return "Sustain"; 			break;
-		case Release: 			return "Release"; 			break;
-		case DelayTime: 		return "DelayTime"; 		break;
+		case Patch_1_Depth: 	return "P1D"; 				break;
+		case Patch_3_Depth: 	return "P3D"; 				break;
+		case Cutoff: 			return "Ctf"; 				break;
+		case LFO_Rate: 			return "LFOr"; 				break;
+		case Resonance: 		return "Reso";		 		break;
+		case Amplevel: 			return "Amp"; 				break;
+		case Attack: 			return "atk"; 				break;
+		case Sustain: 			return "sus"; 				break;
+		case Release: 			return "Rls"; 				break;
+		case DelayTime: 		return "dTim"; 				break;
 		// case DelayDepth: 		return "DelayDepth"; 		break;
 		case dd200_DelayDepth: 	return "dDpt";			 	break;
-		case TimbreSelect: 		return "TimbreSelect"; 		break;
-		default: 				return "undefined"; 		break;
+		case TimbreSelect: 		return "Tmbr"; 				break;
+		default: 				return "n.d.";		 		break;
 	}
 }
 

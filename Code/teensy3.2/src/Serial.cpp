@@ -302,9 +302,10 @@ void NanoKontrol::loop()
         //   because strtok() used in parseData() replaces the commas with \0
         parseData();
         allocateData();
-        printToLCD();
+        printToSerial();
         newData = false;
     }
+       if (Globals::machine_state == NanoKontrol_Test) printToLCD();
 }
 
 // --------------------------------------------------------------------
@@ -352,9 +353,10 @@ void NanoKontrol::printToLCD()
         Hardware::lcd->print(Hardware::lcd->print(instrument->midi_settings.cc_max));
     else if (paramsToChange[3] == SET_DECREASE)
         Hardware::lcd->print(Hardware::lcd->print(instrument->midi_settings.cc_tidyUp_factor));
-
+}
     // ----------------------- print to Serial ------------------------
-
+void NanoKontrol::printToSerial()
+{
     Serial.print("INT\t");
     if (paramsToChange[1] == SET_CC_TYPE)
         Serial.print("CC\t");

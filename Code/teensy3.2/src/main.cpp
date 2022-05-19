@@ -25,7 +25,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.24";
+const String VERSION_NUMBER = "0.2.25";
 const boolean DO_SEND_MIDI_CLOCK = true;
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = false;
@@ -51,6 +51,7 @@ Score *hutschnur;
 Score *control_volca;
 Score *runVisuals;
 Score *zitteraal;
+Score *nanokontrol;
 
 Rhythmics *rhythmics;
 
@@ -236,9 +237,13 @@ void setup()
   control_volca = new Score("control_volca");
   runVisuals = new Score("runVisuals");
   zitteraal = new Score("zitteraal");
+  nanokontrol = new Score("nanokontrol");
 
   // Globals::score_list.push_back(hutschnur);
   // Globals::score_list.push_back(whammyMountains);
+  Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(nanokontrol);
+  Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(runVisuals);
   Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(zitteraal);
@@ -294,7 +299,7 @@ void setup()
   // tracknum, channel
 
   // if (Hardware::pushbutton_is_pressed())
-  Globals::machine_state = NanoKontrol_Test; // Debug Nanokontrol LCD
+  // Globals::machine_state = NanoKontrol_Test; // Debug Nanokontrol LCD
   delay(2000);
   Hardware::lcd->clear();
   // delay(500);

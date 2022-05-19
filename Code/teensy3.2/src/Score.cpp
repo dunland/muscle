@@ -136,7 +136,11 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
     else if (name == "zitteraal")
     {
         run_zitteraal(MIDI);
-    }    
+    }
+    else if (name == "nanokontrol")
+    {
+        run_nanokontrol(MIDI);
+    }
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////
