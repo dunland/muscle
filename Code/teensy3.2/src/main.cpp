@@ -26,7 +26,6 @@
 
 // ----------------------------- settings -----------------------------
 const String VERSION_NUMBER = "0.2.25";
-const boolean DO_SEND_MIDI_CLOCK = true;
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = false;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -226,9 +225,10 @@ void setup()
   // doubleSquirrel = new Score("doubleSquirrel");
   monitoring = new Score("monitoring");
   sattelstein = new Score("sattelstein");
-  sattelstein->setTempoRange(150, 170);
+  sattelstein->setTempoRange(150, 170); // TODO: make this work!
   elektrosmoff = new Score("elektrosmoff");
   randomVoice = new Score("randomVoice");
+  zitteraal = new Score("zitteraal");
   control_dd200 = new Score("control_dd200");
   dd200_timeControl = new Score("dd200_timeControl");
   a_72 = new Score("A.72");
@@ -236,29 +236,28 @@ void setup()
   hutschnur = new Score("hutschnur");
   control_volca = new Score("control_volca");
   runVisuals = new Score("runVisuals");
-  zitteraal = new Score("zitteraal");
   nanokontrol = new Score("nanokontrol");
 
   // Globals::score_list.push_back(hutschnur);
   // Globals::score_list.push_back(whammyMountains);
+  Globals::score_list.push_back(control_dd200);
   Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(nanokontrol);
   Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(runVisuals);
+  Globals::score_list.push_back(sattelstein);
   Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(zitteraal);
   Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(control_volca);
+  Globals::score_list.push_back(nanokontrol);
+  Globals::score_list.push_back(monitoring);
+  // Globals::score_list.push_back(runVisuals);
+  // Globals::score_list.push_back(monitoring);
+  // Globals::score_list.push_back(control_volca);
   // Globals::score_list.push_back(monitoring);
   // Globals::score_list.push_back(dd200_timeControl);
-  Globals::score_list.push_back(monitoring);
+  // Globals::score_list.push_back(monitoring);
   // Globals::score_list.push_back(a_72);
-  Globals::score_list.push_back(sattelstein);
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(control_dd200);
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(elektrosmoff);
-  Globals::score_list.push_back(monitoring);
+  // Globals::score_list.push_back(elektrosmoff);
+  // Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(randomVoice);
 
   Globals::active_score = Globals::score_list.at(0);
@@ -312,13 +311,6 @@ void setup()
 void loop()
 {
 
-  // static unsigned long last_message = 0;
-  // if (millis() > last_message + 1000)
-  // {
-  //   Serial.println("Snare");
-  //   last_message = millis();
-  // }
-
   // Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
 
   // ------------------------- DEBUG AREA -----------------------------
@@ -359,8 +351,8 @@ void loop()
   {
     // Serial2.write(0xF8);
     // Serial2.write(midi::Clock);
-    if (DO_SEND_MIDI_CLOCK)
-    MIDI.sendRealTime(midi::Clock);
+    if (Globals::bSendMidiClock)
+      MIDI.sendRealTime(midi::Clock);
     noInterrupts();
     Globals::sendMidiClock = false;
     interrupts();

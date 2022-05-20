@@ -43,7 +43,7 @@ enum EffectsType
   TopographyMidiEffect = 8,
   Change_CC = 9,
   Random_CC_Effect = 10,
-  MainNoteIteration = 11, 
+  MainNoteIteration = 11,
   Reflex_and_PlayMidi = 12,
   TapTempoRange
 };
@@ -123,6 +123,7 @@ public:
 
   static int tapInterval;
   static int current_BPM;
+  static bool bSendMidiClock; // whether or not to send Midi Clock signal
 
   // ------------------ Machine State ------------------
   static MachineState machine_state;
