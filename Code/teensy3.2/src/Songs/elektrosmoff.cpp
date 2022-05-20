@@ -16,7 +16,7 @@ void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
             Score::resetInstruments();                        // reset all instruments to "Monitor" mode
             Drumset::snare->set_effect(Monitor);
             Hardware::footswitch_mode = Increment_Score;
-            Synthesizers::mKorg->delaydepth = 0;
+            Synthesizers::mKorg->midi_values[DelayDepth] = 0;
             setup = false;
         }
         break;

@@ -55,14 +55,14 @@ void Score::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
         Hardware::lcd->setCursor(10, 0);
         Hardware::lcd->print(val);
 
-        if (Synthesizers::mKorg->amplevel >= 126)
+        if (Synthesizers::mKorg->midi_values[Amplevel] >= 126)
             step = 1;
         break;
 
     case 1:
         if (setup)
         {
-            int val = (Synthesizers::mKorg->timbreselect == 0) ? 127 : 0;
+            int val = (Synthesizers::mKorg->midi_values[TimbreSelect] == 0) ? 127 : 0;
             Synthesizers::mKorg->sendControlChange(TimbreSelect, val, MIDI); // Select Timbre 2
 
             setup = false;
