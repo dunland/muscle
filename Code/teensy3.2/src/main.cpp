@@ -25,7 +25,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.25";
+const String VERSION_NUMBER = "0.2.26";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = false;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -229,7 +229,7 @@ void setup()
   elektrosmoff = new Score("elektrosmoff");
   randomVoice = new Score("randomVoice");
   zitteraal = new Score("zitteraal");
-  control_dd200 = new Score("control_dd200");
+  control_dd200 = new Score("dd200");
   dd200_timeControl = new Score("dd200_timeControl");
   a_72 = new Score("A.72");
   whammyMountains = new Score("whammyMountains");

@@ -15,7 +15,9 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
     switch (step)
     {
-    case 0: // just using midi clock
+
+    case 0: // some ramp effect on snare
+
         if (setup)
         {
             Hardware::footswitch_mode = Increment_Score;
@@ -23,25 +25,65 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             notes.clear();
 
             setup = false;
+
+            Drumset::hihat->set_effect(Monitor);
+            Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 127, 0, 1, -0.1);
+            Drumset::snare->set_effect(Change_CC);
+        }
+
+        // // SNARE: start ramp:
+        // if (Drumset::snare->timing.wasHit && accept_stroke)
+        // {
+        //     lastHit = millis();
+        //     temp_BPM = Globals::current_BPM; // store current bpm
+        //     accept_stroke = false;
+        // }
+
+        // // ramp up:
+        // if (millis() < lastHit + ramp_time)
+        // {
+        //     Globals::current_BPM++;
+        //     Globals::tapInterval = 60000 / Globals::current_BPM;
+        //     Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+        // }
+        // // ramp end:
+        // else if (millis() > lastHit + ramp_time)
+        // {
+        //     accept_stroke = true;
+        //     Globals::current_BPM = temp_BPM; // reset BPM to stored value
+        // }
+
+        Hardware::lcd->setCursor(0, 0);
+        Serial.println(Drumset::snare->midi_settings.synth->midi_values[DelayTime]);
+        // Hardware::lcd->print(Drumset::snare->midi_settings.synth->midi_values[DelayTime]);
+        Hardware::lcd->setCursor(9, 1);
+        Hardware::lcd->print("snaRamp");
+
+        break;
+
+    case 1: // just using midi clock
+        if (setup)
+        {
+            setup = false;
             Drumset::hihat->set_effect(TapTempo);
         }
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print(Globals::current_BPM);
+        Hardware::lcd->setCursor(9, 1);
+        Hardware::lcd->print("clock");
 
         break;
 
-    case 1: // crash triggers dd200-time-reallocation
+    case 2: // crash triggers dd200-time-reallocation
         if (setup)
         {
             delay_time = 0;
             setup = false;
-            Drumset::hihat->set_effect(TapTempo);
+            Drumset::hihat->set_effect(Monitor); // tap tempo would conflict with delay_time!
         }
 
         if (Drumset::crash1->timing.wasHit)
         {
-
-            // detect BPM change:
             static int previous_tapInterval = 120;
             if (Globals::tapInterval != previous_tapInterval)
             {
@@ -83,13 +125,13 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
         Serial.println(random(2));
         break;
 
-    case 2: // crash and ride increase delay_time, automatic decrease
+    case 3: // snare and kick increase delay_time, automatic decrease
         if (setup)
         {
             // notes.push_back(31);                              // G
             Synthesizers::mKorg->sendProgramChange(91, MIDI); // switches to Voice B.44
-
-            Drumset::hihat->set_effect(TapTempo);
+            Globals::bSendMidiClock = false;
+            // Drumset::hihat->set_effect(TapTempo);
             setup = false;
         }
 
@@ -97,7 +139,7 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
            → instruments rise up */
         static int previous_delay_time = 0;
 
-        if (Drumset::crash1->timing.wasHit || Drumset::ride->timing.wasHit)
+        if (Drumset::snare->timing.wasHit || Drumset::kick->timing.wasHit)
         {
             delay_time += 1;
             if (delay_time > 127)
@@ -129,10 +171,10 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
         break;
 
-    case 3:
+    case 4:
         /*
-        crash:  delay_depth++; delay_level--
-        ride:   delay_depth--; delay_level++;
+        snare:  delay_depth++; delay_level--
+        kick:   delay_depth--; delay_level++;
         */
 
         if (setup)
@@ -141,7 +183,7 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             setup = false;
         }
 
-        if (Drumset::crash1->timing.wasHit)
+        if (Drumset::snare->timing.wasHit)
         {
             delay_depth += 1;
             if (delay_depth > 127)
@@ -150,7 +192,7 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             if (delay_level < 0)
                 delay_level = 0;
         }
-        if (Drumset::ride->timing.wasHit)
+        if (Drumset::kick->timing.wasHit)
         {
             delay_level += 1;
             if (delay_level > 127)
@@ -173,7 +215,7 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
         break;
 
-    case 4:
+    case 6:
         /*
          * delay time affected by crash (strong) and ride (little);
          * effect level affected by crash and ride;
@@ -245,20 +287,23 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
         //////////////////////////////// TESTS ////////////////////////
-        // case 4: // test code! increases the delay time continuously.
-        //     static unsigned long lastUpCount = millis();
-        //     if (millis() > lastUpCount + 500)
-        //     {
-        //         static int val = 0;
-        //         val = (val + 1) % 127;
-        //         Synthesizers::dd200->sendControlChange(dd200_DelayTime, val, MIDI);
-        //         lastUpCount = millis();
+        case 5: // test code! increases the delay time continuously.
+            static unsigned long lastUpCount = millis();
+            if (millis() > lastUpCount + 500)
+            {
+                static int val = 0;
+                val = (val + 1) % 127;
+                Synthesizers::dd200->sendControlChange(dd200_DelayTime, val, MIDI);
+                lastUpCount = millis();
 
-        //         // print val
-        //         Hardware::lcd->setCursor(0, 0);
-        //         Hardware::lcd->print(val);
-        //     }
-        //     break;
+                // print val
+                Hardware::lcd->setCursor(4, 0);
+                Hardware::lcd->print(val);
+                Serial.println(val);
+                Hardware::lcd->setCursor(9, 1);
+                Hardware::lcd->print("testRise");
+            }
+            break;
 
         // case 5: // test code! increases the delay time when snare is hit, decrease via kick
         //     if (setup)

@@ -89,6 +89,12 @@ void Instrument::set_effect(EffectsType effect_)
     Globals::println_to_console("done.");
     break;
 
+  case TapTempo:
+    Globals::bSendMidiClock = true;
+    effect = effect_;
+    Globals::println_to_console("done.");
+    break;
+
   default:
     effect = effect_;
     Globals::println_to_console("done.");
@@ -113,7 +119,7 @@ bool Instrument::stroke_detected()
   if (!timing.countAfterFirstStroke && millis() > timing.lastPinActiveTimeCopy + sensitivity.delayAfterStroke) // get counts only X ms after LAST hit
     stroke_criterion = true;
 
-  if (timing.countAfterFirstStroke && millis() > timing.firstPinActiveTimeCopy + sensitivity.delayAfterStroke) //get counts only X ms after FIRST hit ??
+  if (timing.countAfterFirstStroke && millis() > timing.firstPinActiveTimeCopy + sensitivity.delayAfterStroke) // get counts only X ms after FIRST hit ??
     stroke_criterion = true;
 
   if (stroke_criterion)
@@ -128,8 +134,8 @@ bool Instrument::stroke_detected()
     if (countsCopy >= sensitivity.crossings)
     {
       // LED blink:
-      //if (countsCopy[instr] != lastValue[instr]) toggleState = !toggleState;
-      //digitalWrite(LED_BUILTIN, toggleState);
+      // if (countsCopy[instr] != lastValue[instr]) toggleState = !toggleState;
+      // digitalWrite(LED_BUILTIN, toggleState);
       // lastValue[instr] = countsCopy;
 
       // countsCopy[instr] = 0;
@@ -298,7 +304,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
     swell_rec(MIDI);
     break;
 
-  //TODO:
+  // TODO:
   case TsunamiLink:
     // countup_topography(instrument);
     break;

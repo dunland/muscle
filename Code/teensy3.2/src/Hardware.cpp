@@ -237,7 +237,7 @@ void Hardware::lcd_display()
     break;
 
   default:
-    /* define what to display elsewhere... */
+  /* define what to display elsewhere... */
     break;
   }
   }
@@ -431,6 +431,72 @@ void Synthesizer::sendControlChange(CC_Type cc_type, int val, midi::MidiInterfac
   static int previous_val = -1;
   midi_values[cc_type] = val; // store value
 
+  // switch (cc_type)
+  // {
+  // case Osc2_semitone:
+  //   osc2_semitone = val;
+  //   break;
+
+  // case Osc2_tune:
+  //   osc2_tune = val;
+  //   break;
+
+  // case Mix_Level_1:
+  //   mix_level_1 = val;
+  //   break;
+
+  // case Mix_Level_2:
+  //   mix_level_2 = val;
+  //   break;
+
+  // case Patch_1_Depth:
+  //   patch1_depth = val;
+  //   break;
+
+  // case Patch_3_Depth:
+  //   patch3_depth = val;
+  //   break;
+
+  // case Cutoff:
+  //   cutoff = val;
+  //   break;
+
+  // case Resonance:
+  //   resonance = val;
+  //   break;
+
+  // case Amplevel:
+  //   amplevel = val;
+  //   break;
+
+  // case Attack:
+  //   attack = val;
+  //   break;
+
+  // case Sustain:
+  //   sustain = val;
+  //   break;
+
+  // case Release:
+  //   release = val;
+  //   break;
+
+  // case DelayTime:
+  //   delaytime = val;
+  //   break;
+
+  // case DelayDepth:
+  //   delaydepth = val;
+  //   break;
+
+  // case TimbreSelect:
+  //   timbreselect = val;
+  //   break;
+
+  // default:
+  //   break;
+  // }
+
   if (cc_type < 0)
   {
     Globals::println_to_console("could not send MIDI CC Command: CC_Type not defined.");
@@ -443,7 +509,7 @@ void Synthesizer::sendControlChange(CC_Type cc_type, int val, midi::MidiInterfac
 
 void Synthesizer::sendControlChange(int cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI)
 {
-  midi_values[cc_type] = val; // store value
+midi_values[cc_type] = val;
 
   if (cc_type < 0)
   {

@@ -83,7 +83,7 @@ void Score::resetInstruments()
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////// STANDARD RUN //////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
+void Score::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback function and set upon Song creation!
 {
     if (name == "elektrosmoff")
     {
@@ -105,7 +105,7 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI)
     {
         run_sattelstein(MIDI);
     }
-    else if (name == "control_dd200")
+    else if (name == "dd200")
     {
         run_control_dd200(MIDI);
     }

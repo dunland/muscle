@@ -107,6 +107,7 @@ public:
     for (int i = 0; i < 127; i++)
     {
       notes[i] = false;
+      midi_values[i] = 0;
     }
   }
 
@@ -114,23 +115,6 @@ public:
   String name;
 
   boolean notes[127];
-
-  // int osc2_semitone;
-  // int osc2_tune;
-  // int mix_level_1;
-  // int mix_level_2;
-  // int patch1_depth;
-  // int patch3_depth;
-  // int cutoff;
-  // int resonance;
-  // int amplevel;
-  // int attack;
-  // int sustain;
-  // int release;
-  // int delaytime;
-  // int delaydepth;
-  // int timbreselect;
-
   int midi_values[127];
 
   void sendControlChange(CC_Type cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI); // sets cc_value (used for JSON comm) and sends MIDI-ControlChange
