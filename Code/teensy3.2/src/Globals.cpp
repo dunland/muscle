@@ -64,7 +64,7 @@ int Globals::last_16th_count = 0;	   // stores last eightNoteCount for compariso
 
 int Globals::tapInterval = 500; // 0.5 s per beat for 120 BPM
 int Globals::current_BPM = 120;
-bool Globals::bSendMidiClock = false;
+bool Globals::bSendMidiClock = true;
 
 // ------------------------------- Hardware -----------------------------------
 boolean Globals::footswitch_is_pressed = false;
@@ -458,6 +458,7 @@ String Globals::CCTypeToHumanReadable(CC_Type type)
 		case None: 				return "None"; 				break;
 		case dd200_DelayTime: 	return "dTim"; 				break;
 		case Osc2_semitone: 	return "O2smi"; 			break;
+		case dd200_param:		return "dprm";				break;
 		// case Osc2_tune: 		return "Osc2_tune"; 		break;
 		case dd200_DelayLevel: 	return "dLvl";			 	break;
 		case Mix_Level_1: 		return "Mix1"; 				break;

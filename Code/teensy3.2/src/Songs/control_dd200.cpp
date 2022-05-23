@@ -16,7 +16,7 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
 
-    case 0: // some ramp effect on snare
+    case 0: // some ramp effect on snare. Used as intro for Concert at Stasi's. Works fine with DD200-DUAL mode @ ~150 BPM quarter notes
 
         if (setup)
         {
@@ -27,35 +27,12 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             setup = false;
 
             Drumset::hihat->set_effect(Monitor);
-            Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 127, 0, 1, -0.1);
+            Drumset::snare->setup_midi(dd200_param, Synthesizers::dd200, 89, 0, -4.17, 0.08);
             Drumset::snare->set_effect(Change_CC);
         }
 
-        // // SNARE: start ramp:
-        // if (Drumset::snare->timing.wasHit && accept_stroke)
-        // {
-        //     lastHit = millis();
-        //     temp_BPM = Globals::current_BPM; // store current bpm
-        //     accept_stroke = false;
-        // }
+        /* CC-values are printed automatically */
 
-        // // ramp up:
-        // if (millis() < lastHit + ramp_time)
-        // {
-        //     Globals::current_BPM++;
-        //     Globals::tapInterval = 60000 / Globals::current_BPM;
-        //     Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
-        // }
-        // // ramp end:
-        // else if (millis() > lastHit + ramp_time)
-        // {
-        //     accept_stroke = true;
-        //     Globals::current_BPM = temp_BPM; // reset BPM to stored value
-        // }
-
-        Hardware::lcd->setCursor(0, 0);
-        Serial.println(Drumset::snare->midi_settings.synth->midi_values[DelayTime]);
-        // Hardware::lcd->print(Drumset::snare->midi_settings.synth->midi_values[DelayTime]);
         Hardware::lcd->setCursor(9, 1);
         Hardware::lcd->print("snaRamp");
 
@@ -121,8 +98,9 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
         Hardware::lcd->print(Globals::tapInterval);
         Hardware::lcd->setCursor(8, 0);
         Hardware::lcd->print(delay_time);
+        Hardware::lcd->setCursor(8, 1);
+        Hardware::lcd->print("realloc");
 
-        Serial.println(random(2));
         break;
 
     case 3: // snare and kick increase delay_time, automatic decrease
@@ -141,17 +119,10 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
         if (Drumset::snare->timing.wasHit || Drumset::kick->timing.wasHit)
         {
-            delay_time += 1;
+            delay_time += 5;
             if (delay_time > 127)
                 delay_time = 127;
         }
-
-        // if (Drumset::standtom->timing.wasHit)
-        // {
-        //     delay_time += 5;
-        //     if (delay_time > 127)
-        //         delay_time = 127;
-        // }
 
         delay_time -= 0.5;
         if (delay_time < 1)
@@ -168,6 +139,9 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
         // BPM:
         Hardware::lcd->setCursor(7, 0);
         Hardware::lcd->print(Globals::current_BPM);
+
+        Hardware::lcd->setCursor(9, 1);
+        Hardware::lcd->print("KSramp");
 
         break;
 
@@ -217,8 +191,8 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 6:
         /*
-         * delay time affected by crash (strong) and ride (little);
-         * effect level affected by crash and ride;
+         * delay time affected by kick (strong) and snare (little);
+         * effect level affected by kick and snare;
          * effect level decreasing automatically;
          * feedback is at about 80
          */
@@ -234,12 +208,12 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
         static bool bUseEffects = true;
         if (bUseEffects)
         {
-            if (Drumset::crash1->timing.wasHit)
+            if (Drumset::kick->timing.wasHit)
             {
                 delay_time = min(127, delay_time + 5);
                 delay_level = min(127, delay_level + 1);
             }
-            if (Drumset::ride->timing.wasHit) // ride has lower max vals
+            if (Drumset::snare->timing.wasHit) // snare has lower max vals
             {
                 delay_time = min(127, delay_time + 2);
                 delay_level = min(127, delay_level + 1);
@@ -265,6 +239,8 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
         Hardware::lcd->print(int(delay_time));
         Hardware::lcd->setCursor(8, 0);
         Hardware::lcd->print(int(delay_level));
+        Hardware::lcd->setCursor(8, 0);
+        Hardware::lcd->print("KSramp2");
 
         static float temp_delay_level;
         static uint64_t lastToggle = 0;
@@ -299,7 +275,6 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
                 // print val
                 Hardware::lcd->setCursor(4, 0);
                 Hardware::lcd->print(val);
-                Serial.println(val);
                 Hardware::lcd->setCursor(9, 1);
                 Hardware::lcd->print("testRise");
             }

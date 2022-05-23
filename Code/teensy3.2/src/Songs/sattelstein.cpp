@@ -12,6 +12,7 @@ void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (setup)
         {
+            Globals::bSendMidiClock = true;
             Score::resetInstruments();                        // reset all instruments to "Monitor" mode
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
             Hardware::footswitch_mode = Increment_Score;

@@ -319,6 +319,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
 
   case Change_CC:
     change_cc_in(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    monitor();
     break;
 
   case Random_CC_Effect:

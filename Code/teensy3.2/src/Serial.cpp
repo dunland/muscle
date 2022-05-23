@@ -20,10 +20,11 @@ int NanoKontrol::paramsToChange[4] = {NanoKontrol::SET_INSTRUMENT, NanoKontrol::
 int NanoKontrol::incomingChannel = 0;
 int NanoKontrol::incomingValue = 0;
 
-const CC_Type dd200_controlValues[4] = {
+const CC_Type dd200_controlValues[5] = {
     dd200_DelayDepth,
     dd200_DelayLevel,
     dd200_DelayTime,
+    dd200_param,
     dd200_OnOff};
 
 const CC_Type mKorg_controlValues[16] = {
@@ -244,7 +245,7 @@ void NanoKontrol::allocateData()
             instrument->midi_settings.cc_min = incomingValue;
             break;
         case SET_INCREASE:
-            instrument->midi_settings.cc_increase_factor = map(float(incomingValue), 0.0, 127.0, -2.0, 2.0);
+            instrument->midi_settings.cc_increase_factor = map(float(incomingValue), 0.0, 127.0, -10.0, 10.0);
             break;
         default:
             break;

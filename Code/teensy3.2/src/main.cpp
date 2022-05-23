@@ -240,15 +240,26 @@ void setup()
 
   // Globals::score_list.push_back(hutschnur);
   // Globals::score_list.push_back(whammyMountains);
-  Globals::score_list.push_back(control_dd200);
   Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(sattelstein);
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(zitteraal);
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(nanokontrol);
-  Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(control_dd200); // intro
+  Globals::score_list.push_back(randomVoice); // --- interlude ---
+  Globals::score_list.push_back(monitoring); // hutschnur
+  Globals::score_list.push_back(randomVoice); // --- interlude ---
+  Globals::score_list.push_back(monitoring); // röskur
+  Globals::score_list.push_back(randomVoice); // --- interlude ---
+  Globals::score_list.push_back(monitoring); // wüste
+  Globals::score_list.push_back(randomVoice); // --- interlude ---
+  Globals::score_list.push_back(monitoring); // theodolit
+  Globals::score_list.push_back(randomVoice); // --- interlude ---
+  Globals::score_list.push_back(sattelstein); // sattelstein
+  Globals::score_list.push_back(randomVoice); // --- interlude ---
+  Globals::score_list.push_back(zitteraal); // zitteraal
+  Globals::score_list.push_back(randomVoice); // --- interlude ---
+  Globals::score_list.push_back(monitoring); // alhambra, mr wimbledon, kupfer und gold
+  Globals::score_list.push_back(randomVoice); // --- interlude ---
+  // Globals::score_list.push_back(monitoring);
+  // Globals::score_list.push_back(nanokontrol);
+  // Globals::score_list.push_back(monitoring);
   // Globals::score_list.push_back(runVisuals);
   // Globals::score_list.push_back(monitoring);
   // Globals::score_list.push_back(control_volca);
@@ -385,7 +396,6 @@ void loop()
 
   // Hardware:
   Hardware::checkFootSwitch(); // check step of footswitch
-  // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
 
   // rotary encoder:
   Hardware::checkEncoder();

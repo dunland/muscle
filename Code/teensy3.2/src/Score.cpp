@@ -76,8 +76,9 @@ void Score::resetInstruments()
 {
     for (auto &drum : Drumset::instruments)
     {
-        drum->effect = Monitor;
+        drum->set_effect(Monitor);
     }
+    //TODO: also reset synthesizers' CC values and turn notes off!
 }
 
 ///////////////////////////////////////////////////////////////////////

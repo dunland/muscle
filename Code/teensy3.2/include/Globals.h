@@ -58,6 +58,7 @@ enum CC_Type // channels on mKORG:
   dd200_DelayLevel = 19,
   Mix_Level_1 = 20,
   Mix_Level_2 = 21,
+  dd200_param = 22,
   dd200_OnOff = 27,
   Patch_1_Depth = 28,
   Patch_3_Depth = 30,
