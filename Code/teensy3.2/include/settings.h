@@ -47,11 +47,11 @@
 #define PUSHBUTTON 7
 
 //////////////////////////////// PIEZO INPUTS /////////////////////////
-#define INPUT_PIN_CRASH1 A0
+#define INPUT_PIN_CRASH1 A5
 #define INPUT_PIN_KICK A1
 #define INPUT_PIN_STANDTOM A2
 #define INPUT_PIN_RIDE A4
-#define INPUT_PIN_SNARE A5
+#define INPUT_PIN_SNARE A0
 #define INPUT_PIN_HIHAT A6
 #define INPUT_PIN_TOM1 A7
 #define INPUT_PIN_TOM2 A3

@@ -20,10 +20,11 @@ int NanoKontrol::paramsToChange[4] = {NanoKontrol::SET_INSTRUMENT, NanoKontrol::
 int NanoKontrol::incomingChannel = 0;
 int NanoKontrol::incomingValue = 0;
 
-const CC_Type dd200_controlValues[5] = {
+const CC_Type dd200_controlValues[6] = {
     dd200_DelayDepth,
     dd200_DelayLevel,
     dd200_DelayTime,
+    dd200_mod,
     dd200_param,
     dd200_OnOff};
 
@@ -206,15 +207,7 @@ void NanoKontrol::allocateData()
     break;
 
     case 1: // Fader 2: set CC_Type
-    {       // int val = -1; // results in "None"
-        // switch(static_cast<CC_Type>(incomingValue))
-        // {
-        //     case CC_Type::Amplevel: instrument->midi_settings.cc_chan = Amplevel; break;
-        //     case CC_Type::Attack: instrument->midi_settings.cc_chan = Attack; break;
-        //     case CC_Type::Cutoff: instrument->midi_settings.cc_chan = Cutoff; break;
-        //     case CC_Type::dd200_DelayDepth: instrument->midi_settings.cc_chan = dd200_DelayDepth; break;
-        //     // ...
-        // }
+    {  
         switch (paramsToChange[1])
         {
         case SET_CC_TYPE:

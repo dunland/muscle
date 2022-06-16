@@ -29,8 +29,6 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::hihat->set_effect(Monitor);
             Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
-
-            Globals::bSendMidiClock = false;
         }
 
         /* CC-values are printed automatically */
@@ -46,8 +44,6 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::hihat->set_effect(TapTempo);
             Drumset::snare->set_effect(Monitor);
 
-            Globals::bSendMidiClock = true;
-            
             setup = false;
             
         }
