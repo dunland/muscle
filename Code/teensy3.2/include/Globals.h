@@ -48,32 +48,35 @@ enum EffectsType
   TapTempoRange
 };
 
-// TODO: globale Control-Channes für alle Synths gleichschalten ODER neuen enum für jeden Synth
-enum CC_Type // channels on mKORG:
+enum CC_Type 
 {
   None = -1,
+
+  // mikroKORG CC channels:
+  mKORG_Osc2_semitone = 18,
+  mKORG_Osc2_tune = 19,
+  mKORG_Mix_Level_1 = 20,
+  mKORG_Mix_Level_2 = 21,
+  mKORG_Patch_1_Depth = 28,
+  mKORG_Patch_3_Depth = 30,
+  mKORG_Cutoff = 44,
+  mKORG_LFO_Rate = 46,
+  mKORG_Resonance = 71,
+  mKORG_Amplevel = 50,
+  mKORG_Attack = 23,
+  mKORG_Sustain = 25,
+  mKORG_Release = 26,
+  mKORG_DelayTime = 51,
+  mKORG_DelayDepth = 94,
+  mKORG_TimbreSelect = 95,
+
+  // DD-200 CC channels:
   dd200_DelayTime = 17,
-  Osc2_semitone = 18,
-  Osc2_tune = 19,
   dd200_DelayLevel = 19,
-  Mix_Level_1 = 20,
-  Mix_Level_2 = 21,
   dd200_mod = 21,
   dd200_param = 22,
   dd200_OnOff = 27,
-  Patch_1_Depth = 28,
-  Patch_3_Depth = 30,
-  Cutoff = 44,
-  LFO_Rate = 46,
-  Resonance = 71,
-  Amplevel = 50,
-  Attack = 23,
-  Sustain = 25,
-  Release = 26,
-  DelayTime = 51,
-  DelayDepth = 94,
-  dd200_DelayDepth = 94,
-  TimbreSelect = 95
+  dd200_DelayDepth = 94
 };
 
 class TOPOGRAPHY

@@ -16,7 +16,7 @@ void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
             Score::resetInstruments();                        // reset all instruments to "Monitor" mode
             Drumset::snare->set_effect(Monitor);
             Hardware::footswitch_mode = Increment_Score;
-            Synthesizers::mKorg->midi_values[DelayDepth] = 0;
+            Synthesizers::mKorg->midi_values[mKORG_DelayDepth] = 0;
             setup = false;
         }
         break;
@@ -24,9 +24,9 @@ void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
     case 1: // Snare → Vocoder fade in
         if (setup)
         {
-            Synthesizers::mKorg->sendControlChange(DelayDepth, 0, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_DelayDepth, 0, MIDI);
             Drumset::snare->midi_settings.active_note = 55;                               // G = 55
-            Drumset::snare->setup_midi(Amplevel, Synthesizers::mKorg, 127, 0, 3, -0.002); // changes Gate in Vocoder-Mode
+            Drumset::snare->setup_midi(mKORG_Amplevel, Synthesizers::mKorg, 127, 0, 3, -0.002); // changes Gate in Vocoder-Mode
             Drumset::snare->set_effect(Change_CC);
             Drumset::snare->midi_settings.synth->sendNoteOn(55, MIDI); // play note 55 (G) if it is not playing at the moment
             setup = false;
@@ -45,9 +45,9 @@ void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
     case 2: // Snare → increase delay depth
         if (setup)
         {
-            Synthesizers::mKorg->sendControlChange(Amplevel, 127, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 127, MIDI);
             Drumset::snare->midi_settings.cc_val = 0;
-            Drumset::snare->setup_midi(DelayDepth, Synthesizers::mKorg, 90, 0, 3, -0.002);
+            Drumset::snare->setup_midi(mKORG_DelayDepth, Synthesizers::mKorg, 90, 0, 3, -0.002);
             setup = false;
         }
         break;
@@ -56,8 +56,8 @@ void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
         if (setup)
         {
             Drumset::snare->set_effect(Monitor);
-            Synthesizers::mKorg->sendControlChange(Amplevel, 0, MIDI);
-            Synthesizers::mKorg->sendControlChange(DelayDepth, 0, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 0, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_DelayDepth, 0, MIDI);
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
             setup = false;
         }

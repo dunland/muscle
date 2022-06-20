@@ -243,7 +243,7 @@ void Score::envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::Mi
 
     cutoff_val = max(20, cutoff_val);  // must be at least 20
     cutoff_val = min(cutoff_val, 127); // must not be greater than 127
-    synth->sendControlChange(Cutoff, cutoff_val, MIDI);
+    synth->sendControlChange(mKORG_Cutoff, cutoff_val, MIDI);
 }
 
 void Score::envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth)
@@ -251,14 +251,14 @@ void Score::envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<Hardware
     int amp_val = topography->a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
     // amp_val = max(0, amp_val);                                    // must be at least 0
     amp_val = min(amp_val, 127); // must not be greater than 127
-    synth->sendControlChange(Amplevel, amp_val, MIDI);
+    synth->sendControlChange(mKORG_Amplevel, amp_val, MIDI);
 }
 
 void Score::crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth)
 {
     int delaytime = instrument->topography.a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
     delaytime = min(delaytime, 127);                                               // must not be greater than 127
-    synth->sendControlChange(DelayTime, delaytime, MIDI);
+    synth->sendControlChange(mKORG_DelayTime, delaytime, MIDI);
 }
 
 // void Score::set_ramp(midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration)

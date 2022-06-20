@@ -50,8 +50,8 @@ void Score::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::standtom->midi_settings.notes.push_back(notes[0] + 12 + 7);
             Drumset::standtom->midi_settings.active_note = Drumset::standtom->midi_settings.notes[0];
 
-            Drumset::standtom->setup_midi(Resonance, Synthesizers::mKorg, 115, 15, 2, -0.01);
-            Drumset::tom2->setup_midi(Cutoff, Synthesizers::mKorg, 115, 15, 2, -0.01);
+            Drumset::standtom->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 115, 15, 2, -0.01);
+            Drumset::tom2->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 115, 15, 2, -0.01);
 
             Drumset::kick->set_effect(PlayMidi);
             Drumset::snare->set_effect(PlayMidi);

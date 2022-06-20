@@ -27,13 +27,13 @@ void Score::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
             Hardware::footswitch_mode = Increment_Score;
             Synthesizers::mKorg->sendProgramChange(49, MIDI); // switches to Voice A.72
             delay(200);
-            Synthesizers::mKorg->sendControlChange(TimbreSelect, 1, MIDI); // Select Timbre 2
+            Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, 1, MIDI); // Select Timbre 2
 
             Drumset::ride->set_effect(Change_CC);
-            Drumset::ride->setup_midi(Cutoff, Synthesizers::mKorg, 127, 29, 3, -0.035);
+            Drumset::ride->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 127, 29, 3, -0.035);
 
             Drumset::standtom->set_effect(Change_CC);
-            Drumset::standtom->setup_midi(Resonance, Synthesizers::mKorg, 127, 29, 5, -0.05);
+            Drumset::standtom->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 127, 29, 5, -0.05);
 
             Drumset::kick->midi_settings.notes.push_back(notes[0] + 44);
             Drumset::kick->midi_settings.active_note = Drumset::kick->midi_settings.notes[0];
@@ -50,20 +50,20 @@ void Score::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
         // increasing amplitude until max:
         static float val = 0;
         val += 0.5;
-        Synthesizers::mKorg->sendControlChange(Amplevel, int(val), MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, int(val), MIDI);
 
         Hardware::lcd->setCursor(10, 0);
         Hardware::lcd->print(val);
 
-        if (Synthesizers::mKorg->midi_values[Amplevel] >= 126)
+        if (Synthesizers::mKorg->midi_values[mKORG_Amplevel] >= 126)
             step = 1;
         break;
 
     case 1:
         if (setup)
         {
-            int val = (Synthesizers::mKorg->midi_values[TimbreSelect] == 0) ? 127 : 0;
-            Synthesizers::mKorg->sendControlChange(TimbreSelect, val, MIDI); // Select Timbre 2
+            int val = (Synthesizers::mKorg->midi_values[mKORG_TimbreSelect] == 0) ? 127 : 0;
+            Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, val, MIDI); // Select Timbre 2
 
             setup = false;
         }
