@@ -12,8 +12,6 @@ void Score::run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI)
     // - increase note-index
     // → play latest 4 notes
 
-    int note_increase = 4; // notes are in turns added by 4 or 5
-
     switch (step)
     {
     case 0:

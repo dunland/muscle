@@ -55,8 +55,6 @@ void Score::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
 
             Drumset::kick->set_effect(PlayMidi);
             Drumset::snare->set_effect(PlayMidi);
-            Drumset::tom2->set_effect(PlayMidi);
-            Drumset::standtom->set_effect(PlayMidi);
             Drumset::standtom->set_effect(Change_CC);
             Drumset::tom2->set_effect(Change_CC);
             Drumset::hihat->set_effect(TapTempo);
