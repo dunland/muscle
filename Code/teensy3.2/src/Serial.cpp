@@ -20,32 +20,31 @@ int NanoKontrol::paramsToChange[4] = {NanoKontrol::SET_INSTRUMENT, NanoKontrol::
 int NanoKontrol::incomingChannel = 0;
 int NanoKontrol::incomingValue = 0;
 
-const CC_Type dd200_controlValues[5] = {
+const CC_Type dd200_controlValues[6] = {
     dd200_DelayDepth,
     dd200_DelayLevel,
     dd200_DelayTime,
+    dd200_mod,
     dd200_param,
     dd200_OnOff};
 
-const CC_Type mKorg_controlValues[17] = {
-    Osc2_semitone,
-    Osc2_tune,
-    Mix_Level_1,
-    Mix_Level_2,
-    Patch_1_Depth,
-    Patch_3_Depth,
-    Cutoff,
-    LFO1_Rate,
-    LFO2_Rate,
-    Resonance,
-    Amplevel,
-    Attack,
-    Sustain,
-    Release,
-    DelayTime,
-    DelayDepth,
-    TimbreSelect
-    };
+const CC_Type mKorg_controlValues[16] = {
+    mKORG_Osc2_semitone,
+    mKORG_Osc2_tune,
+    mKORG_Mix_Level_1,
+    mKORG_Mix_Level_2,
+    mKORG_Patch_1_Depth,
+    mKORG_Patch_3_Depth,
+    mKORG_Cutoff,
+    mKORG_LFO_Rate,
+    mKORG_Resonance,
+    mKORG_Amplevel,
+    mKORG_Attack,
+    mKORG_Sustain,
+    mKORG_Release,
+    mKORG_DelayTime,
+    mKORG_DelayDepth,
+    mKORG_TimbreSelect};
 
 // sends JSON as Serial information over port "Serial" (via USB)
 void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
@@ -208,15 +207,7 @@ void NanoKontrol::allocateData()
     break;
 
     case 1: // Fader 2: set CC_Type
-    {       // int val = -1; // results in "None"
-        // switch(static_cast<CC_Type>(incomingValue))
-        // {
-        //     case CC_Type::Amplevel: instrument->midi_settings.cc_chan = Amplevel; break;
-        //     case CC_Type::Attack: instrument->midi_settings.cc_chan = Attack; break;
-        //     case CC_Type::Cutoff: instrument->midi_settings.cc_chan = Cutoff; break;
-        //     case CC_Type::dd200_DelayDepth: instrument->midi_settings.cc_chan = dd200_DelayDepth; break;
-        //     // ...
-        // }
+    {
         switch (paramsToChange[1])
         {
         case SET_CC_TYPE:

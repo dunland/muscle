@@ -455,30 +455,29 @@ String Globals::CCTypeToHumanReadable(CC_Type type)
 {
 	switch (type)
 	{
-		case None: 				return "None"; 				break;
-		case dd200_DelayTime: 	return "dTim"; 				break;
-		case Osc2_semitone: 	return "O2smi"; 			break;
-		case dd200_param:		return "dprm";				break;
-		// case Osc2_tune: 		return "Osc2_tune"; 		break;
-		case dd200_DelayLevel: 	return "dLvl";			 	break;
-		case Mix_Level_1: 		return "Mix1"; 				break;
-		case Mix_Level_2: 		return "Mix2";		 		break;
-		case dd200_OnOff: 		return "OnOf";		 		break;
-		case Patch_1_Depth: 	return "P1D"; 				break;
-		case Patch_3_Depth: 	return "P3D"; 				break;
-		case Cutoff: 			return "Ctf"; 				break;
-		case LFO1_Rate: 		return "LF1r"; 				break;
-		case LFO2_Rate: 		return "LF2r"; 				break;
-		case Resonance: 		return "Reso";		 		break;
-		case Amplevel: 			return "Amp"; 				break;
-		case Attack: 			return "atk"; 				break;
-		case Sustain: 			return "sus"; 				break;
-		case Release: 			return "Rls"; 				break;
-		case DelayTime: 		return "dTim"; 				break;
+		case None: 					return "None"; 				break;
+		case dd200_DelayTime: 		return "dTim"; 				break;
+		case mKORG_Osc2_semitone: 	return "O2smi"; 			break;
+		case dd200_param:			return "dprm";				break;
+		// case Osc2_tune: 			return "Osc2_tune"; 		break;
+		case dd200_DelayLevel: 		return "dLvl";			 	break;
+		case mKORG_Mix_Level_1: 	return "Mix1"; 				break;
+		case mKORG_Mix_Level_2: 	return "Mix2";		 		break;
+		case dd200_OnOff: 			return "OnOf";		 		break;
+		case mKORG_Patch_1_Depth: 	return "P1D"; 				break;
+		case mKORG_Patch_3_Depth: 	return "P3D"; 				break;
+		case mKORG_Cutoff: 			return "Ctf"; 				break;
+		case mKORG_LFO_Rate: 		return "LFOr"; 				break;
+		case mKORG_Resonance: 		return "Reso";		 		break;
+		case mKORG_Amplevel: 		return "Amp"; 				break;
+		case mKORG_Attack: 			return "atk"; 				break;
+		case mKORG_Sustain: 		return "sus"; 				break;
+		case mKORG_Release: 		return "Rls"; 				break;
+		case mKORG_DelayTime: 		return "dTim"; 				break;
 		// case DelayDepth: 		return "DelayDepth"; 		break;
-		case dd200_DelayDepth: 	return "dDpt";			 	break;
-		case TimbreSelect: 		return "Tmbr"; 				break;
-		default: 				return "n.d.";		 		break;
+		case dd200_DelayDepth: 		return "dDpt";			 	break;
+		case mKORG_TimbreSelect: 	return "Tmbr"; 				break;
+		default: 					return "n.d.";		 		break;
 	}
 }
 
@@ -487,37 +486,35 @@ CC_Type Globals::int_to_cc_type(int integer) // TODO: can this not be done with 
 	switch (integer)
 	{
 	case 18:
-		return Osc2_semitone;
+		return mKORG_Osc2_semitone;
 	case 19:
-		return Osc2_tune;
+		return mKORG_Osc2_tune;
 	case 20:
-		return Mix_Level_1;
+		return mKORG_Mix_Level_1;
 	case 21:
-		return Mix_Level_2;
+		return mKORG_Mix_Level_2;
 	case 28:
-		return Patch_1_Depth;
+		return mKORG_Patch_1_Depth;
 	case 30:
-		return Patch_3_Depth;
+		return mKORG_Patch_3_Depth;
 	case 44:
-		return Cutoff;
+		return mKORG_Cutoff;
 	case 46:
-		return LFO1_Rate;
-	case 76:
-		return LFO2_Rate;
+		return mKORG_LFO_Rate;
 	case 71:
-		return Resonance;
+		return mKORG_Resonance;
 	case 50:
-		return Amplevel;
+		return mKORG_Amplevel;
 	case 23:
-		return Attack;
+		return mKORG_Attack;
 	case 25:
-		return Sustain;
+		return mKORG_Sustain;
 	case 26:
-		return Release;
+		return mKORG_Release;
 	case 51:
-		return DelayTime;
+		return mKORG_DelayTime;
 	case 94:
-		return DelayDepth;
+		return mKORG_DelayDepth;
 
 	// ATTENTION:
 	// IMPORTANT:

@@ -8,13 +8,6 @@
 void Score::run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI)
 {
 
-    static int note_idx = 0;
-    static Notes notes[12] = {
-        Note_A5, Note_C6, Note_F6, Note_E6,
-        Note_A5, Note_C6, Note_D6, Note_Db6,
-        Note_A5, Note_C6, Note_D6, Note_A5
-        };
-
     switch (step)
     {
     case 0:  // A.43

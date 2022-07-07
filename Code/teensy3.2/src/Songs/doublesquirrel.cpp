@@ -131,14 +131,14 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
         Globals::println_to_console(active_score->notes[0]);
         // set start values for microKORG:
 
-        Synthesizers::mKorg->sendControlChange(Cutoff, 50, MIDI); // sets cc_value and sends MIDI-ControlChange
-        Synthesizers::mKorg->sendControlChange(Mix_Level_1, 0, MIDI);
-        Synthesizers::mKorg->sendControlChange(Mix_Level_2, 127, MIDI);
-        Synthesizers::mKorg->sendControlChange(Osc2_tune, 0, MIDI);
-        Synthesizers::mKorg->sendControlChange(Osc2_semitone, 39, MIDI);
-        Synthesizers::mKorg->sendControlChange(Cutoff, 50, MIDI);
-        Synthesizers::mKorg->sendControlChange(Resonance, 13, MIDI);
-        Synthesizers::mKorg->sendControlChange(Amplevel, 0, MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Cutoff, 50, MIDI); // sets cc_value and sends MIDI-ControlChange
+        Synthesizers::mKorg->sendControlChange(mKORG_Mix_Level_1, 0, MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Mix_Level_2, 127, MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_tune, 0, MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, 39, MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Cutoff, 50, MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Resonance, 13, MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 0, MIDI);
 
         active_score->step = 1;
 
@@ -150,7 +150,7 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
             // assign effects to instruments:
             // the hihat will change the allocated (AmpLevel) value on the synth, whenever hit:
             hihat->effect = Change_CC;
-            hihat->setup_midi(Amplevel, Synthesizers::mKorg, 127, 0, 0.65, 0);
+            hihat->setup_midi(mKORG_Amplevel, Synthesizers::mKorg, 127, 0, 0.65, 0);
 
             // these instruments do not play a role here. just print out what they do:
             snare->effect = Monitor;
@@ -235,10 +235,10 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
             crash1->effect = Change_CC;
 
             // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
-            snare->setup_midi(Osc2_tune, Synthesizers::mKorg, 127, 13, 15, -0.1);
-            kick->setup_midi(Amplevel, Synthesizers::mKorg, 127, 80, -35, 0.1);
-            ride->setup_midi(Resonance, Synthesizers::mKorg, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
-            crash1->setup_midi(Patch_3_Depth, Synthesizers::mKorg, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
+            snare->setup_midi(mKORG_Osc2_tune, Synthesizers::mKorg, 127, 13, 15, -0.1);
+            kick->setup_midi(mKORG_Amplevel, Synthesizers::mKorg, 127, 80, -35, 0.1);
+            ride->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
+            crash1->setup_midi(mKORG_Patch_3_Depth, Synthesizers::mKorg, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
 
             active_score->setup = false;
         }
@@ -247,12 +247,12 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
         static int cutoff_val = 50;
 
         cutoff_val = max(50, (min(127, active_score->beat_sum.average_smooth * step_factor)));
-        Synthesizers::mKorg->sendControlChange(Cutoff, cutoff_val, MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Cutoff, cutoff_val, MIDI);
 
         // fade in Osc1 slowly
         static int osc1_level;
         osc1_level = min(127, active_score->beat_sum.average_smooth * 4);
-        Synthesizers::mKorg->sendControlChange(Mix_Level_1, osc1_level, MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Mix_Level_1, osc1_level, MIDI);
 
         break;
 
@@ -265,9 +265,9 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
         {
             active_score->beat_sum.activation_thresh = 15;
             snare->effect = Change_CC;
-            snare->setup_midi(Osc2_tune, Synthesizers::mKorg, 64, 0, 1, 0);      // does not decrease
-            kick->setup_midi(DelayDepth, Synthesizers::mKorg, 127, 0, 50, -0.1); // TODO: implement oscillation possibility
-            ride->setup_midi(Cutoff, Synthesizers::mKorg, 127, 13, -0.7, 0.1);   // TODO: implement oscillation possibility
+            snare->setup_midi(mKORG_Osc2_tune, Synthesizers::mKorg, 64, 0, 1, 0);      // does not decrease
+            kick->setup_midi(mKORG_DelayDepth, Synthesizers::mKorg, 127, 0, 50, -0.1); // TODO: implement oscillation possibility
+            ride->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 127, 13, -0.7, 0.1);   // TODO: implement oscillation possibility
             active_score->setup = false;
         }
 
@@ -292,13 +292,13 @@ void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO
 
             // cutoff on tom2:
             tom2->effect = Change_CC;
-            tom2->setup_midi(Cutoff, Synthesizers::mKorg, 127, 20, 30, -0.1);
+            tom2->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 127, 20, 30, -0.1);
             ride->effect = Monitor;
             snare->effect = Monitor;
 
-            Synthesizers::mKorg->sendControlChange(Resonance, 31, MIDI);
-            Synthesizers::mKorg->sendControlChange(Cutoff, 28, MIDI);
-            Synthesizers::mKorg->sendControlChange(Osc2_tune, 0, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_Resonance, 31, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_Cutoff, 28, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_Osc2_tune, 0, MIDI);
             active_score->add_bassNote(active_score->notes[0] + int(random(6)));
             // active_score->note_change_pos = int(random(8, 16)); // change at a rate between quarter and half notes
             active_score->setup = false;

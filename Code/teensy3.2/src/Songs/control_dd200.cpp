@@ -27,7 +27,7 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             setup = false;
 
             Drumset::hihat->set_effect(Monitor);
-            Drumset::snare->setup_midi(dd200_param, Synthesizers::dd200, 89, 0, -4.17, 0.08);
+            Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
         }
 
@@ -41,17 +41,22 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
     case 1: // just using midi clock
         if (setup)
         {
-            setup = false;
             Drumset::hihat->set_effect(TapTempo);
+            Drumset::snare->set_effect(Monitor);
+
+            setup = false;
+            
         }
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print(Globals::current_BPM);
+        Hardware::lcd->setCursor(3, 0);
+        Hardware::lcd->print("BPM");
         Hardware::lcd->setCursor(9, 1);
         Hardware::lcd->print("clock");
 
         break;
 
-    case 2: // crash triggers dd200-time-reallocation
+    case 10: // crash triggers dd200-time-reallocation
         if (setup)
         {
             delay_time = 0;
@@ -310,7 +315,8 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
     default:
         Synthesizers::mKorg->sendNoteOff(31, MIDI);
-        proceed_to_next_score();
+        // proceed_to_next_score();
+        step = 0;
         break;
     }
 }
