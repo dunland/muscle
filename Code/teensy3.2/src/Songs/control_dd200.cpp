@@ -33,8 +33,8 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
         /* CC-values are printed automatically */
 
-        Hardware::lcd->setCursor(9, 1);
-        Hardware::lcd->print("snaRamp");
+        Hardware::lcd->setCursor(4, 1);
+        Hardware::lcd->print("DUAL snaRamp");
 
         break;
 

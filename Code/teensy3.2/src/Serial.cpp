@@ -27,7 +27,7 @@ const CC_Type dd200_controlValues[5] = {
     dd200_param,
     dd200_OnOff};
 
-const CC_Type mKorg_controlValues[16] = {
+const CC_Type mKorg_controlValues[17] = {
     Osc2_semitone,
     Osc2_tune,
     Mix_Level_1,
@@ -35,7 +35,8 @@ const CC_Type mKorg_controlValues[16] = {
     Patch_1_Depth,
     Patch_3_Depth,
     Cutoff,
-    LFO_Rate,
+    LFO1_Rate,
+    LFO2_Rate,
     Resonance,
     Amplevel,
     Attack,
@@ -43,7 +44,8 @@ const CC_Type mKorg_controlValues[16] = {
     Release,
     DelayTime,
     DelayDepth,
-    TimbreSelect};
+    TimbreSelect
+    };
 
 // sends JSON as Serial information over port "Serial" (via USB)
 void JSON::compose_and_send_json(std::vector<Instrument *> instruments)

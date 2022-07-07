@@ -467,7 +467,8 @@ String Globals::CCTypeToHumanReadable(CC_Type type)
 		case Patch_1_Depth: 	return "P1D"; 				break;
 		case Patch_3_Depth: 	return "P3D"; 				break;
 		case Cutoff: 			return "Ctf"; 				break;
-		case LFO_Rate: 			return "LFOr"; 				break;
+		case LFO1_Rate: 		return "LF1r"; 				break;
+		case LFO2_Rate: 		return "LF2r"; 				break;
 		case Resonance: 		return "Reso";		 		break;
 		case Amplevel: 			return "Amp"; 				break;
 		case Attack: 			return "atk"; 				break;
@@ -500,7 +501,9 @@ CC_Type Globals::int_to_cc_type(int integer) // TODO: can this not be done with 
 	case 44:
 		return Cutoff;
 	case 46:
-		return LFO_Rate;
+		return LFO1_Rate;
+	case 76:
+		return LFO2_Rate;
 	case 71:
 		return Resonance;
 	case 50:

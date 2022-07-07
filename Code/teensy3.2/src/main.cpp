@@ -240,6 +240,7 @@ void setup()
 
   // Globals::score_list.push_back(hutschnur);
   // Globals::score_list.push_back(whammyMountains);
+  Globals::score_list.push_back(nanokontrol);
   Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(control_dd200); // intro
   Globals::score_list.push_back(randomVoice); // --- interlude ---
@@ -258,7 +259,6 @@ void setup()
   Globals::score_list.push_back(monitoring); // alhambra, mr wimbledon, kupfer und gold
   Globals::score_list.push_back(randomVoice); // --- interlude ---
   // Globals::score_list.push_back(monitoring);
-  // Globals::score_list.push_back(nanokontrol);
   // Globals::score_list.push_back(monitoring);
   // Globals::score_list.push_back(runVisuals);
   // Globals::score_list.push_back(monitoring);
