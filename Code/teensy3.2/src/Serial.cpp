@@ -28,7 +28,7 @@ const CC_Type dd200_controlValues[6] = {
     dd200_param,
     dd200_OnOff};
 
-const CC_Type mKorg_controlValues[16] = {
+const CC_Type mKorg_controlValues[17] = {
     mKORG_Osc2_semitone,
     mKORG_Osc2_tune,
     mKORG_Mix_Level_1,
@@ -36,7 +36,8 @@ const CC_Type mKorg_controlValues[16] = {
     mKORG_Patch_1_Depth,
     mKORG_Patch_3_Depth,
     mKORG_Cutoff,
-    mKORG_LFO_Rate,
+    mKORG_LFO1_Rate,
+    mKORG_LFO2_Rate,
     mKORG_Resonance,
     mKORG_Amplevel,
     mKORG_Attack,

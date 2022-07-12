@@ -19,6 +19,8 @@ void Score::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::hihat->set_effect(TapTempo);
 
             Synthesizers::mKorg->sendProgramChange(62, MIDI); // corresponds A.87
+            Synthesizers::whammy->sendProgramChange(58, MIDI); // HARMONY UP 5TH / UP 6TH
+
             delay(50);
             Synthesizers::mKorg->sendNoteOn(Note_D6, MIDI);
             Synthesizers::mKorg->sendNoteOn(Note_F6, MIDI);

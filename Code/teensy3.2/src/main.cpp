@@ -51,6 +51,8 @@ Score *control_volca;
 Score *runVisuals;
 Score *zitteraal;
 Score *nanokontrol;
+Score *pogoNumberOne;
+Score *roeskur;
 
 Rhythmics *rhythmics;
 
@@ -237,38 +239,26 @@ void setup()
   control_volca = new Score("control_volca");
   runVisuals = new Score("runVisuals");
   nanokontrol = new Score("nanokontrol");
+  pogoNumberOne = new Score("pogoNumberOne");
+  roeskur = new Score("roeskur");
 
-  // Globals::score_list.push_back(hutschnur);
-  // Globals::score_list.push_back(whammyMountains);
-  Globals::score_list.push_back(nanokontrol);
   Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(control_dd200); // intro
-  Globals::score_list.push_back(randomVoice); // --- interlude ---
-  Globals::score_list.push_back(monitoring); // hutschnur
-  Globals::score_list.push_back(randomVoice); // --- interlude ---
-  Globals::score_list.push_back(monitoring); // röskur
-  Globals::score_list.push_back(randomVoice); // --- interlude ---
-  Globals::score_list.push_back(monitoring); // wüste
-  Globals::score_list.push_back(randomVoice); // --- interlude ---
-  Globals::score_list.push_back(monitoring); // theodolit
-  Globals::score_list.push_back(randomVoice); // --- interlude ---
-  Globals::score_list.push_back(sattelstein); // sattelstein
-  Globals::score_list.push_back(randomVoice); // --- interlude ---
-  Globals::score_list.push_back(zitteraal); // zitteraal
-  Globals::score_list.push_back(randomVoice); // --- interlude ---
-  Globals::score_list.push_back(monitoring); // alhambra, mr wimbledon, kupfer und gold
-  Globals::score_list.push_back(randomVoice); // --- interlude ---
-  // Globals::score_list.push_back(monitoring);
-  // Globals::score_list.push_back(monitoring);
-  // Globals::score_list.push_back(runVisuals);
-  // Globals::score_list.push_back(monitoring);
-  // Globals::score_list.push_back(control_volca);
-  // Globals::score_list.push_back(monitoring);
-  // Globals::score_list.push_back(dd200_timeControl);
-  // Globals::score_list.push_back(monitoring);
-  // Globals::score_list.push_back(a_72);
-  // Globals::score_list.push_back(elektrosmoff);
-  // Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(pogoNumberOne); // pogo
+  Globals::score_list.push_back(hutschnur); // hutschnur
+  Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(roeskur);
+  Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(randomVoice);
+  Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(randomVoice);
+  Globals::score_list.push_back(monitoring);
+  Globals::score_list.push_back(randomVoice);
+  Globals::score_list.push_back(sattelstein);
+  Globals::score_list.push_back(randomVoice);
+  Globals::score_list.push_back(zitteraal);
+  Globals::score_list.push_back(randomVoice);
+  Globals::score_list.push_back(monitoring);
   Globals::score_list.push_back(randomVoice);
 
   Globals::active_score = Globals::score_list.at(0);

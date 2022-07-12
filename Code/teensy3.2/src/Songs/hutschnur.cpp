@@ -13,12 +13,16 @@ void Score::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
+        Synthesizers::whammy->sendProgramChange(63, MIDI); // HARMONY UP OCT / UP 2 OCT
         break;
 
-    case 1: // start Vocoder A.86
-        if (setup)
+    case 1: // do nothing
+
+    /* old hutschnur code:
+    // start Vocoder A.86
+      if (setup)
         {
-            /* ------- general initialization routine -------------- */
+            // ------- general initialization routine --------------
             Hardware::footswitch_mode = Increment_Score;
             resetInstruments();
             notes.clear();
@@ -40,7 +44,7 @@ void Score::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
             setup = false;
         }
 
-        /* ---------------- general loop here ---------------------- */
+        // ---------------- general loop here ----------------------
 
         // if (Drumset::snare->timing.wasHit)
         // {
@@ -87,6 +91,7 @@ void Score::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
         Hardware::lcd->setCursor(5, 0);
         Hardware::lcd->print(notes[noteIdx + 1]);
 
+*/
         break;
 
     default:

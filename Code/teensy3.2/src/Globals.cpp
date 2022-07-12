@@ -467,7 +467,8 @@ String Globals::CCTypeToHumanReadable(CC_Type type)
 		case mKORG_Patch_1_Depth: 	return "P1D"; 				break;
 		case mKORG_Patch_3_Depth: 	return "P3D"; 				break;
 		case mKORG_Cutoff: 			return "Ctf"; 				break;
-		case mKORG_LFO_Rate: 		return "LFOr"; 				break;
+		case mKORG_LFO1_Rate: 		return "LF1r"; 				break;
+		case mKORG_LFO2_Rate: 		return "LF2r"; 				break;
 		case mKORG_Resonance: 		return "Reso";		 		break;
 		case mKORG_Amplevel: 		return "Amp"; 				break;
 		case mKORG_Attack: 			return "atk"; 				break;
@@ -500,7 +501,9 @@ CC_Type Globals::int_to_cc_type(int integer) // TODO: can this not be done with 
 	case 44:
 		return mKORG_Cutoff;
 	case 46:
-		return mKORG_LFO_Rate;
+		return mKORG_LFO1_Rate;
+	case 76:
+		return mKORG_LFO2_Rate;
 	case 71:
 		return mKORG_Resonance;
 	case 50:
