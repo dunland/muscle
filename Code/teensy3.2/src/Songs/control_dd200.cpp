@@ -317,7 +317,7 @@ void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
     default:
         Synthesizers::mKorg->sendNoteOff(31, MIDI);
-        // proceed_to_next_score();
+        proceed_to_next_score();
         step = 0;
         break;
     }

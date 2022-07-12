@@ -142,6 +142,14 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback 
     {
         run_nanokontrol(MIDI);
     }
+    else if (name == "pogoNumberOne")
+    {
+        run_PogoNumberOne(MIDI);
+    }
+    else if (name == "roeskur")
+    {
+        run_roeskur(MIDI);
+    }
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////

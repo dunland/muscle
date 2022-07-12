@@ -7,20 +7,17 @@
 void Score::run_roeskur(midi::MidiInterface<HardwareSerial> MIDI)
 {
 
-    static Synthesizer *mKorg = Synthesizers::mKorg;
-    static int noteIdx = 0;
+    // static Synthesizer *mKorg = Synthesizers::mKorg;
+    // static int noteIdx = 0;
 
     switch (step)
     {
     case 0:
-        Synthesizers::whammy->sendProgramChange(63, MIDI); // HARMONY UP OCT / UP 2 OCT
-        break;
-
-    case 1: // do nothing
+        Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT / UP 2 OCT
         break;
 
     default:
-        increase_step();
+        proceed_to_next_score();
         break;
     }
 }

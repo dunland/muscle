@@ -7,18 +7,18 @@
 void Score::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
 {
 
-    static Synthesizer *mKorg = Synthesizers::mKorg;
-    static int noteIdx = 0;
+    // static Synthesizer *mKorg = Synthesizers::mKorg;
+    // static int noteIdx = 0;
 
     switch (step)
     {
     case 0:
-        Synthesizers::whammy->sendProgramChange(63, MIDI); // HARMONY UP OCT / UP 2 OCT
+        Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT / UP 2 OCT
         break;
 
-    case 1: // do nothing
-
     /* old hutschnur code:
+    case 1:
+
     // start Vocoder A.86
       if (setup)
         {
@@ -91,11 +91,12 @@ void Score::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
         Hardware::lcd->setCursor(5, 0);
         Hardware::lcd->print(notes[noteIdx + 1]);
 
-*/
         break;
+*/
 
     default:
-        increase_step();
+        // increase_step();
+        proceed_to_next_score();
         break;
     }
 }
