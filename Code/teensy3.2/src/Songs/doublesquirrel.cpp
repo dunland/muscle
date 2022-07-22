@@ -11,7 +11,7 @@
 // step proceeds if footswitch is pressed (in mode RESET_AND_PROCEED_SCORE) when regularity is high enough
 void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make this much more automatic!!
 {
-    static Song *active_score = Globals::active_score;
+    static Song *active_score = Globals::active_song;
 
     static Instrument *kick = Drumset::kick;
     static Instrument *hihat = Drumset::hihat;
@@ -340,7 +340,7 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
     }
 
     // vibrate if new score is ready:
-    if (Globals::active_score->beat_sum.ready())
+    if (Globals::active_song->beat_sum.ready())
     {
         digitalWrite(VIBR, HIGH);
         Globals::println_to_console("ready to go to next score step! hit footswitch!");

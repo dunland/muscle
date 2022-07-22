@@ -253,18 +253,16 @@ void setup()
   Globals::songlist.push_back(pogoNumberOne); // pogo
   Globals::songlist.push_back(hutschnur);     // hutschnur
   Globals::songlist.push_back(monitoring);    // wueste
-  Globals::songlist.push_back(zitteraal);     // zitteraal
-  // Globals::songlist.push_back(b_36);          // jam
+  Globals::songlist.push_back(zitteraal);     // besen
+  Globals::songlist.push_back(alhambra);      // alhambra
+  Globals::songlist.push_back(randomVoice);   // jam
   Globals::songlist.push_back(monitoring);    // mr wimbledon
   Globals::songlist.push_back(roeskur);       // roeskur
   Globals::songlist.push_back(sattelstein);   // sattelstein
-  Globals::songlist.push_back(monitoring);
-  Globals::songlist.push_back(alhambra);
-  Globals::songlist.push_back(monitoring);
-  Globals::songlist.push_back(randomVoice);
-  Globals::songlist.push_back(b_27);
+  Globals::songlist.push_back(monitoring);    // theodolit
+  Globals::songlist.push_back(monitoring);    // kupfer und gold
 
-  Globals::active_score = Globals::songlist.at(0);
+  Globals::active_song = Globals::songlist.at(0);
 
   // link midi synth to instruments:
   Drumset::snare->midi_settings.synth = Synthesizers::mKorg;
@@ -370,7 +368,7 @@ void loop()
 
   if (Globals::current_beat_pos != last_beat_pos) // run once per 32nd-step
   {
-    Globals::active_score->run(MIDI); // TODO: globale Synthesizer-Liste
+    Globals::active_song->run(MIDI); // TODO: globale Synthesizer-Liste
 
     //----------------------- SCORE END -------------------------------
 

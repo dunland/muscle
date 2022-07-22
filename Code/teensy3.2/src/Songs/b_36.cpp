@@ -21,7 +21,7 @@ void Song::run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::kick->midi_settings.active_note = Drumset::kick->midi_settings.notes[0];
             Drumset::kick->set_effect(PlayMidi);
 
-            // TODO: hitting the snare kill supermuscle! fix!!
+            // TODO: hitting the snare kills supermuscle! fix!!
             Drumset::snare->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
             Drumset::snare->midi_settings.notes.push_back(notes[1]);
             Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[1];

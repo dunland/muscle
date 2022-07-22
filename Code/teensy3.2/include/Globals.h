@@ -164,7 +164,7 @@ public:
 
   static std::vector<Song *> songlist; // all relevant scores
   static int active_score_pointer; // points at active score of scores_list
-  static Song *active_score;
+  static Song *active_song;
 
   // ----------------------------- Auxiliary --------------------------
 

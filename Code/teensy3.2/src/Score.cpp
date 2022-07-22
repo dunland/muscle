@@ -45,10 +45,10 @@ void Song::proceed_to_next_score()
 {
     // proceed to next score in list:
     Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::songlist.size();
-    Globals::active_score = Globals::songlist[Globals::active_score_pointer];
+    Globals::active_song = Globals::songlist[Globals::active_score_pointer];
     // ...and begin at step 0:
-    Globals::active_score->step = 0;
-    Globals::active_score->setup = true;
+    Globals::active_song->step = 0;
+    Globals::active_song->setup = true;
 
     for (auto &instrument : Drumset::instruments)
         instrument->effect = Monitor;
