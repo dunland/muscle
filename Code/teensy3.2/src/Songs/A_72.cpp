@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void Score::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
 {
     // each step:
     // - switch between Timbre 1 and 2

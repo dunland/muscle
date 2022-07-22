@@ -5,7 +5,7 @@
 #include <LiquidCrystal.h>
 #include <Encoder.h>
 
-class Score;
+class Song;
 class Instrument;
 
 enum FootswitchMode

@@ -30,11 +30,12 @@ void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int
 }
 
 // setup midi without params
-void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth)
-{
-  midi_settings.cc_chan = cc_type;
-  midi_settings.synth = synth;
-}
+// TODO: this one seems broken! fix it!
+// void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth)
+// {
+//   midi_settings.cc_chan = cc_type;
+//   midi_settings.synth = synth;
+// }
 
 // set instrument sensitivity
 void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean countAfterFirstStroke)

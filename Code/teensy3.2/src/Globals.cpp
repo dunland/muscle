@@ -20,9 +20,9 @@ MachineState Globals::machine_state = Running;
 // Tsunami Globals::tsunami;
 
 // ------------------------------- Score ----------------------------
-std::vector<Score *> Globals::score_list; // all relevant scores
+std::vector<Song *> Globals::songlist; // all relevant scores
 int Globals::active_score_pointer = 0;	  // points at active score of scores_list
-Score *Globals::active_score;
+Song *Globals::active_score;
 
 // Tusnami Sample list:
 // float Globals::track_bpm[256] =

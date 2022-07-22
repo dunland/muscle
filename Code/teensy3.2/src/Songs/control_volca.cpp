@@ -5,7 +5,7 @@
 #include <Notes.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void Score::run_control_volca(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_control_volca(midi::MidiInterface<HardwareSerial> MIDI)
 {
     static int grundton = Note_D4;
     static uint64_t lastNoteSent = 0;

@@ -5,7 +5,7 @@
 #include <Notes.h>
 
 //////////////////////////// ZITTERAAL /////////////////////////////
-void Score::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (step)
     {

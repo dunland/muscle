@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Score::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
 {
 
     // static Synthesizer *mKorg = Synthesizers::mKorg;

@@ -5,7 +5,7 @@
 
 //////////////////////////// SATTELSTEIN /////////////////////////////
 // THIS SONG IS COMPOSED FOR microKORG A.57
-void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (step)
     {
@@ -13,7 +13,7 @@ void Score::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
         if (setup)
         {
             Globals::bSendMidiClock = true;
-            Score::resetInstruments();                        // reset all instruments to "Monitor" mode
+            Song::resetInstruments();                        // reset all instruments to "Monitor" mode
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
             Hardware::footswitch_mode = Increment_Score;
             setup = false;

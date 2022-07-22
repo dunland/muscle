@@ -5,7 +5,7 @@
 // #include <Tsunami.h> // in cpp
 #include <vector>
 
-class Score;
+class Song;
 
 enum MachineState
 {
@@ -162,9 +162,9 @@ public:
 
   // ------------------------------- Score ----------------------------
 
-  static std::vector<Score *> score_list; // all relevant scores
+  static std::vector<Song *> songlist; // all relevant scores
   static int active_score_pointer; // points at active score of scores_list
-  static Score *active_score;
+  static Song *active_score;
 
   // ----------------------------- Auxiliary --------------------------
 

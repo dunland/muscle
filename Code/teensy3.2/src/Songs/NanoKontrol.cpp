@@ -5,7 +5,7 @@
 #include <Notes.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void Score::run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI)
 {
 
     switch (step)

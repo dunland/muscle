@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 ///////////////////////////// MONITORING //////////////////////////////
-void Score::run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (step)
     {

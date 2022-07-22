@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 //////////////////////////// ELEKTROSMOFF /////////////////////////////
-void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
 {
     // THIS SONG IS COMPOSED FOR microKORG A.81
     switch (step)
@@ -13,7 +13,7 @@ void Score::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
         if (setup)
         {
             Synthesizers::mKorg->sendProgramChange(56, MIDI); // selects mKORG Voice A.57
-            Score::resetInstruments();                        // reset all instruments to "Monitor" mode
+            Song::resetInstruments();                        // reset all instruments to "Monitor" mode
             Drumset::snare->set_effect(Monitor);
             Hardware::footswitch_mode = Increment_Score;
             Synthesizers::mKorg->midi_values[mKORG_DelayDepth] = 0;

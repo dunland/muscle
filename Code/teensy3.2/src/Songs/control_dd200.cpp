@@ -7,7 +7,7 @@
 */
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Score::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 {
     static float delay_time = 0;
     static float delay_depth = 0;

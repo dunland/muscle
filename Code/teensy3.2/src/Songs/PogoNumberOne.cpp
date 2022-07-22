@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void Score::run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI)
 {
 
     switch (step)

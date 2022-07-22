@@ -5,7 +5,7 @@
 
 //////////////////////////// RANDOM VOICE /////////////////////////////
 // 1: playMidi+CC_Change; 2: change_cc only
-void Score::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (step)
     {

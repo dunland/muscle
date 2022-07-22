@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Score::run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
 {
     /*
     WHAMMY MIDI CHANNEL = 4

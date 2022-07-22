@@ -9,9 +9,9 @@
 // THIS SONG IS COMPOSED FOR microKORG A.63
 // SCORE, stepwise:
 // step proceeds if footswitch is pressed (in mode RESET_AND_PROCEED_SCORE) when regularity is high enough
-void Score::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make this much more automatic!!
+void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make this much more automatic!!
 {
-    static Score *active_score = Globals::active_score;
+    static Song *active_score = Globals::active_score;
 
     static Instrument *kick = Drumset::kick;
     static Instrument *hihat = Drumset::hihat;

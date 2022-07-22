@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void Score::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
 {
     // skips thorugh visual levels by pressing footswitch
 

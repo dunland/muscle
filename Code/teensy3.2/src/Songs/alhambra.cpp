@@ -4,16 +4,12 @@
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Song::run_roeskur(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
 {
-
-    // static Synthesizer *mKorg = Synthesizers::mKorg;
-    // static int noteIdx = 0;
-
     switch (step)
     {
     case 0:
-        Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT / UP 2 OCT
+        Synthesizers::mKorg->sendProgramChange(34, MIDI); // load b_27
         break;
 
     default:

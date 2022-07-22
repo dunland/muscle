@@ -3,7 +3,7 @@
 #include <Instruments.h>
 #include <Hardware.h>
 
-void Score::run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI)
 {
     static int delay_time;
 

@@ -6,7 +6,7 @@
 /////////////////////////////////// SETUP FUNCTIONS /////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 
-void Score::set_notes(std::vector<int> list)
+void Song::set_notes(std::vector<int> list)
 {
     // clear notes list:
     notes.clear();
@@ -27,11 +27,11 @@ void Score::set_notes(std::vector<int> list)
     Globals::println_to_console("");
 }
 
-void Score::set_step_function(int trigger_step, Instrument *instrument, EffectsType effect_)
+void Song::set_step_function(int trigger_step, Instrument *instrument, EffectsType effect_)
 {
 }
 
-void Score::increase_step()
+void Song::increase_step()
 {
     step++;
     setup = true;
@@ -41,11 +41,11 @@ void Score::increase_step()
 }
 
 // proceed to step 0 of next score and set all instruments effects to "Monitor":
-void Score::proceed_to_next_score()
+void Song::proceed_to_next_score()
 {
     // proceed to next score in list:
-    Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::score_list.size();
-    Globals::active_score = Globals::score_list[Globals::active_score_pointer];
+    Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::songlist.size();
+    Globals::active_score = Globals::songlist[Globals::active_score_pointer];
     // ...and begin at step 0:
     Globals::active_score->step = 0;
     Globals::active_score->setup = true;
@@ -65,14 +65,14 @@ void Score::proceed_to_next_score()
 }
 
 // set tempo of the score:
-void Score::setTempoRange(int min_tempo_, int max_tempo_)
+void Song::setTempoRange(int min_tempo_, int max_tempo_)
 {
     tempo.min_tempo = min_tempo_;
     tempo.max_tempo = max_tempo_;
 }
 
 // reset all instruments to "Monitor" mode
-void Score::resetInstruments()
+void Song::resetInstruments()
 {
     for (auto &drum : Drumset::instruments)
     {
@@ -84,7 +84,7 @@ void Score::resetInstruments()
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////// STANDARD RUN //////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void Score::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback function and set upon Song creation!
+void Song::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback function and set upon Song creation!
 {
     if (name == "elektrosmoff")
     {
@@ -150,10 +150,22 @@ void Score::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback 
     {
         run_roeskur(MIDI);
     }
+    else if (name == "b_27")
+    {
+        run_b_27(MIDI);
+    }
+    else if (name == "b_36")
+    {
+        run_b_36(MIDI);
+    }
+    else if (name == "alhambra")
+    {
+        run_alhambra(MIDI);
+    }
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////
-void Score::add_bassNote(int note)
+void Song::add_bassNote(int note)
 {
     notes.push_back(note);
     Globals::print_to_console("note ");
@@ -172,7 +184,7 @@ void Score::add_bassNote(int note)
 ///////////////////////////////////////////////////////////////////////
 
 // play note, repeatedly:
-void Score::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int rhythmic_iterator) // initiates a continuous bass note from score
+void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int rhythmic_iterator) // initiates a continuous bass note from score
 {
     if (rhythmic_iterator != 0)
         note_change_pos = rhythmic_iterator;
@@ -206,7 +218,8 @@ void Score::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSe
 }
 
 // ----------------- play note only once (turn on never off):
-void Score::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
+// TODO: if this is running, re-play note whenever it is turned off (due to too many notes..)
+void Song::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
 {
     if (notes.size() > 0)
     {
@@ -218,7 +231,7 @@ void Score::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSeria
 }
 
 // play last 3 notes in list:
-void Score::playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
+void Song::playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
 {
     if (notes.size() == 1)
     {
@@ -245,7 +258,7 @@ void Score::playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareS
     }
 }
 
-void Score::envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)
+void Song::envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)
 {
     int cutoff_val = topography->a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
 
@@ -254,7 +267,7 @@ void Score::envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::Mi
     synth->sendControlChange(mKORG_Cutoff, cutoff_val, MIDI);
 }
 
-void Score::envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth)
+void Song::envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth)
 {
     int amp_val = topography->a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
     // amp_val = max(0, amp_val);                                    // must be at least 0
@@ -262,7 +275,7 @@ void Score::envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<Hardware
     synth->sendControlChange(mKORG_Amplevel, amp_val, MIDI);
 }
 
-void Score::crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth)
+void Song::crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth)
 {
     int delaytime = instrument->topography.a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
     delaytime = min(delaytime, 127);                                               // must not be greater than 127

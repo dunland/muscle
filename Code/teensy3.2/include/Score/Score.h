@@ -8,10 +8,10 @@
 class Instrument;
 class Synthesizer;
 
-class Score
+class Song
 {
 public:
-    Score(String name_)
+    Song(String name_)
     {
         name = name_;
         // setup names of elements for display on Serial Monitor:
@@ -92,6 +92,12 @@ public:
     void run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI);
 
     void run_roeskur(midi::MidiInterface<HardwareSerial> MIDI);
+
+    void run_b_27(midi::MidiInterface<HardwareSerial> MIDI);
+
+    void run_b_36(midi::MidiInterface<HardwareSerial> MIDI);
+
+    void run_alhambra(midi::MidiInterface<HardwareSerial> MIDI);
 
     // ------------------------------- MODES: (deprecated) ------------
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score

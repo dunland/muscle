@@ -25,7 +25,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.27";
+const String VERSION_NUMBER = "0.2.29";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = false;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -38,21 +38,24 @@ midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as 
 
 // Songs:
 // Score *doubleSquirrel;
-Score *monitoring;
-Score *sattelstein;
-Score *elektrosmoff;
-Score *randomVoice;
-Score *control_dd200;
-Score *dd200_timeControl;
-Score *a_72;
-Score *whammyMountains;
-Score *hutschnur;
-Score *control_volca;
-Score *runVisuals;
-Score *zitteraal;
-Score *nanokontrol;
-Score *pogoNumberOne;
-Score *roeskur;
+Song *monitoring;
+Song *sattelstein;
+Song *elektrosmoff;
+Song *randomVoice;
+Song *control_dd200;
+Song *dd200_timeControl;
+Song *a_72;
+Song *b_27;
+Song *b_36;
+Song *whammyMountains;
+Song *hutschnur;
+Song *control_volca;
+Song *runVisuals;
+Song *zitteraal;
+Song *nanokontrol;
+Song *pogoNumberOne;
+Song *roeskur;
+Song *alhambra;
 
 Rhythmics *rhythmics;
 
@@ -225,43 +228,43 @@ void setup()
 
   // ---------------------------------- SCORE -------------------------
   // doubleSquirrel = new Score("doubleSquirrel");
-  monitoring = new Score("monitoring");
-  sattelstein = new Score("sattelstein");
+  monitoring = new Song("monitoring");
+  sattelstein = new Song("sattelstein");
   sattelstein->setTempoRange(150, 170); // TODO: make this work!
-  elektrosmoff = new Score("elektrosmoff");
-  randomVoice = new Score("randomVoice");
-  zitteraal = new Score("zitteraal");
-  control_dd200 = new Score("dd200");
-  dd200_timeControl = new Score("dd200_timeControl");
-  a_72 = new Score("A.72");
-  whammyMountains = new Score("whammyMountains");
-  hutschnur = new Score("hutschnur");
-  control_volca = new Score("control_volca");
-  runVisuals = new Score("runVisuals");
-  nanokontrol = new Score("nanokontrol");
-  pogoNumberOne = new Score("pogoNumberOne");
-  roeskur = new Score("roeskur");
+  elektrosmoff = new Song("elektrosmoff");
+  randomVoice = new Song("randomVoice");
+  zitteraal = new Song("zitteraal");
+  control_dd200 = new Song("dd200");
+  dd200_timeControl = new Song("dd200_timeControl");
+  a_72 = new Song("A.72");
+  b_27 = new Song("b_27");
+  b_36 = new Song("b_36");
+  whammyMountains = new Song("whammyMountains");
+  hutschnur = new Song("hutschnur");
+  control_volca = new Song("control_volca");
+  runVisuals = new Song("runVisuals");
+  nanokontrol = new Song("nanokontrol");
+  pogoNumberOne = new Song("pogoNumberOne");
+  roeskur = new Song("roeskur");
+  alhambra = new Song("alhambra");
 
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(control_dd200); // intro
-  Globals::score_list.push_back(pogoNumberOne); // pogo
-  Globals::score_list.push_back(hutschnur); // hutschnur
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(roeskur);
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(randomVoice);
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(randomVoice);
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(randomVoice);
-  Globals::score_list.push_back(sattelstein);
-  Globals::score_list.push_back(randomVoice);
-  Globals::score_list.push_back(zitteraal);
-  Globals::score_list.push_back(randomVoice);
-  Globals::score_list.push_back(monitoring);
-  Globals::score_list.push_back(randomVoice);
+  Globals::songlist.push_back(monitoring);
+  Globals::songlist.push_back(control_dd200); // intro
+  Globals::songlist.push_back(pogoNumberOne); // pogo
+  Globals::songlist.push_back(hutschnur);     // hutschnur
+  Globals::songlist.push_back(monitoring);    // wueste
+  Globals::songlist.push_back(zitteraal);     // zitteraal
+  // Globals::songlist.push_back(b_36);          // jam
+  Globals::songlist.push_back(monitoring);    // mr wimbledon
+  Globals::songlist.push_back(roeskur);       // roeskur
+  Globals::songlist.push_back(sattelstein);   // sattelstein
+  Globals::songlist.push_back(monitoring);
+  Globals::songlist.push_back(alhambra);
+  Globals::songlist.push_back(monitoring);
+  Globals::songlist.push_back(randomVoice);
+  Globals::songlist.push_back(b_27);
 
-  Globals::active_score = Globals::score_list.at(0);
+  Globals::active_score = Globals::songlist.at(0);
 
   // link midi synth to instruments:
   Drumset::snare->midi_settings.synth = Synthesizers::mKorg;
