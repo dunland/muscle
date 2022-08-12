@@ -25,11 +25,11 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.29";
+const String VERSION_NUMBER = "0.2.31";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = false;
 const boolean DO_PRINT_BEAT_SUM = false;
-const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
+const boolean DO_USE_RESPONSIVE_CALIBRATION = true;
 const boolean USING_TSUNAMI = false;
 
 // ----------------------------- variables ----------------------------
@@ -56,6 +56,10 @@ Song *nanokontrol;
 Song *pogoNumberOne;
 Song *roeskur;
 Song *alhambra;
+Song *wueste;
+Song *mrWimbledon;
+Song *theodolit;
+Song *kupferUndGold;
 
 Rhythmics *rhythmics;
 
@@ -247,20 +251,24 @@ void setup()
   pogoNumberOne = new Song("pogoNumberOne");
   roeskur = new Song("roeskur");
   alhambra = new Song("alhambra");
+  wueste = new Song("wueste");                // non-existent!
+  mrWimbledon = new Song("mrWimbledon");      // non-existent!
+  theodolit = new Song("theodolit");          // non-existent!
+  kupferUndGold = new Song("kupferundgold");  // non-existent!
 
   Globals::songlist.push_back(monitoring);
   Globals::songlist.push_back(control_dd200); // intro
   Globals::songlist.push_back(pogoNumberOne); // pogo
   Globals::songlist.push_back(hutschnur);     // hutschnur
-  Globals::songlist.push_back(monitoring);    // wueste
+  Globals::songlist.push_back(wueste);        // wueste
   Globals::songlist.push_back(zitteraal);     // besen
   Globals::songlist.push_back(alhambra);      // alhambra
   Globals::songlist.push_back(randomVoice);   // jam
-  Globals::songlist.push_back(monitoring);    // mr wimbledon
+  Globals::songlist.push_back(mrWimbledon);    // mr wimbledon
   Globals::songlist.push_back(roeskur);       // roeskur
   Globals::songlist.push_back(sattelstein);   // sattelstein
-  Globals::songlist.push_back(monitoring);    // theodolit
-  Globals::songlist.push_back(monitoring);    // kupfer und gold
+  Globals::songlist.push_back(theodolit);    // theodolit
+  Globals::songlist.push_back(kupferUndGold);    // kupfer und gold
 
   Globals::active_song = Globals::songlist.at(0);
 

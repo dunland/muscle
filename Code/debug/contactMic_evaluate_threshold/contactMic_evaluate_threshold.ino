@@ -1,11 +1,11 @@
-const int noiseFloor = 473; // TODO: create function to assess noiseFloor upon startup
+const int noiseFloor = 700; // TODO: create function to assess noiseFloor upon startup
 const int max_val = 1023;
 const int globalThreshold = 20;
-int pin = A1;
+int pin = A2;
 
 void setup() {
-  Serial.begin(115200);
-  delay(1000);
+  Serial.begin(9600);
+  while (!Serial);
 
   pinMode(LED_BUILTIN, OUTPUT);
   //pinMode(A0, INPUT);
@@ -31,5 +31,5 @@ void loop() {
   {
     digitalWrite(LED_BUILTIN, LOW);
   }
-
+delay(10);
 }

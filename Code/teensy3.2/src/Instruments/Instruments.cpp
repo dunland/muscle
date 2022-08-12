@@ -162,7 +162,7 @@ bool Instrument::stroke_detected()
 void Instrument::calculateNoiseFloor()
 {
   // calculates the average noise floor out of 400 samples from all inputs
-
+  long beginNoiseFloorCaluclation = millis();
   int led_idx = 0;
 
   Globals::print_to_console("calculating noiseFloor for ");
@@ -173,8 +173,28 @@ void Instrument::calculateNoiseFloor()
   if (Globals::use_responsiveCalibration)
   {
     Globals::print_to_console(" ..waiting for stroke");
+    Hardware::lcd->setCursor(0, 0);
+    Hardware::lcd->print("waiting for stroke");
+    Hardware::lcd->setCursor(0, 1);
+    Hardware::lcd->print(Globals::DrumtypeToHumanreadable(drumtype));
     while (analogRead(pin) < min(1023, 700 + sensitivity.threshold))
-      ; // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
+      // timeout after 5s:
+      if (millis() > beginNoiseFloorCaluclation + 5000)
+      {
+        int totalSamples = 0;
+        boolean toggleState = false;
+        for (int n = 0; n < 400; n++)
+        {
+          if (n % 100 == 0)
+          {
+            Globals::print_to_console(" . ");
+            digitalWrite(led, toggleState);
+            toggleState = !toggleState;
+          }
+          totalSamples += analogRead(pin);
+        }
+        break;
+      };       // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
     Globals::print_to_console(" >!<");
     delay(1000); // should be long enough for drum not to oscillate anymore
   }
@@ -275,9 +295,10 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
   // topography.smoothen_dataArray();
   // Serial.print("hit/");
   Serial.println(Globals::DrumtypeToHumanreadable(drumtype));
-  Hardware::lcd->setCursor(13, 0);
+  Hardware::lcd->setCursor(12, 0);
   Hardware::lcd->print(Globals::DrumtypeToHumanreadable(drumtype));
 
+  // TODO: use (list of) callback functions instead! (this way multiple things could be performed upon each hit)
   switch (effect)
   {
   case PlayMidi:
@@ -412,7 +433,7 @@ Instrument *Drumset::standtom = new Instrument(INPUT_PIN_STANDTOM, Standtom1);
 Instrument *Drumset::crash1 = new Instrument(INPUT_PIN_CRASH1, Crash1);
 Instrument *Drumset::ride = new Instrument(INPUT_PIN_RIDE, Ride);
 
-std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::crash1, Drumset::ride};
+std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::tom1};
 
 // instantiate external MIDI devices:
 Synthesizer *Synthesizers::mKorg = new Synthesizer(MIDI_CHANNEL_MICROKORG, "mKRG");
