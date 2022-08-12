@@ -71,6 +71,7 @@ void Song::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
             // Hardware::footswitch_mode = Experimental;
 
             Drumset::kick->set_effect(Change_CC);
+            Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
             Drumset::tom2->set_effect(Change_CC);
             Drumset::standtom->set_effect(Change_CC);
