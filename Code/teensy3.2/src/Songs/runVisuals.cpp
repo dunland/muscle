@@ -15,7 +15,6 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
     case 0: // nix
         if (setup)
         {
-
             resetInstruments();
             notes.clear();
 

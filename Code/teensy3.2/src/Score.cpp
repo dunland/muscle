@@ -162,6 +162,14 @@ void Song::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback f
     {
         run_alhambra(MIDI);
     }
+    else if (name == "theodolit")
+    {
+        run_theodolit(MIDI);
+    }
+    else if (name == "kupferUndGold")
+    {
+        run_kupferUndGold(MIDI);
+    }
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////

@@ -16,10 +16,10 @@ void Song::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
             Song::resetInstruments();                        // reset all instruments to "Monitor" mode
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
             Hardware::footswitch_mode = Increment_Score;
-            setup = false;
             Globals::tapInterval = 392; // 153 BPM
             Globals::current_BPM = 60000 / Globals::tapInterval;
             Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+            setup = false;
         }
         break;
 

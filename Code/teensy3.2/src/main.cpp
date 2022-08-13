@@ -25,11 +25,11 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.31";
+const String VERSION_NUMBER = "0.2.32";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = false;
 const boolean DO_PRINT_BEAT_SUM = false;
-const boolean DO_USE_RESPONSIVE_CALIBRATION = true;
+const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
 const boolean USING_TSUNAMI = false;
 
 // ----------------------------- variables ----------------------------
@@ -254,7 +254,7 @@ void setup()
   wueste = new Song("wueste");                // non-existent!
   mrWimbledon = new Song("mrWimbledon");      // non-existent!
   theodolit = new Song("theodolit");          // non-existent!
-  kupferUndGold = new Song("kupferundgold");  // non-existent!
+  kupferUndGold = new Song("kupferUndGold");  // non-existent!
 
   Globals::songlist.push_back(monitoring);
   Globals::songlist.push_back(control_dd200); // intro

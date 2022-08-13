@@ -14,7 +14,6 @@ void Song::run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
             Hardware::footswitch_mode = Increment_Score;
             resetInstruments();
             notes.clear();
-            setup = false;
 
             // turn off all currently playing MIDI notes:
             for (int channel = 1; channel < 3; channel++)
@@ -24,6 +23,8 @@ void Song::run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
                     MIDI.sendNoteOff(note_number, 127, channel);
                 }
             }
+
+            setup = false;
         }
         break;
 
