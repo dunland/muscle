@@ -2,7 +2,7 @@
 #include <Globals.h>
 #include <Serial.h>
 #include <Instruments.h>
-#include <Score/Score.h>
+#include <Song.h>
 #include <MIDI.h>
 
 void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI)

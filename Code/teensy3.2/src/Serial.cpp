@@ -7,7 +7,7 @@
 #include <Globals.h>
 #include <Instruments.h>
 #include <Hardware.h>
-#include <Score/Score.h>
+#include <Song.h>
 
 char NanoKontrol::address1[NanoKontrol::numChars] = {0};
 char NanoKontrol::address2[NanoKontrol::numChars] = {0};

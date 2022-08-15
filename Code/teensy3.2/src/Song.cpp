@@ -1,4 +1,4 @@
-#include <Score/Score.h>
+#include <Song.h>
 #include <MIDI.h>
 #include <Instruments.h>
 #include <Hardware.h>
@@ -169,6 +169,14 @@ void Song::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback f
     else if (name == "kupferUndGold")
     {
         run_kupferUndGold(MIDI);
+    }
+    else if (name == "wueste")
+    {
+        run_monitoring(MIDI);
+    }
+    else if (name == "mrWimbledon")
+    {
+        run_monitoring(MIDI);
     }
 }
 

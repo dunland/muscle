@@ -1,5 +1,5 @@
 #include <Hardware.h>
-#include <Score/Score.h>
+#include <Song.h>
 #include <Instruments.h>
 #include <Calibration.h>
 #include <settings.h>

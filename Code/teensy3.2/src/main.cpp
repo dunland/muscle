@@ -19,13 +19,13 @@
 #include <Globals.h>
 #include <Instruments.h>
 #include <Hardware.h>
-#include <Score/Score.h>
+#include <Song.h>
 #include <Serial.h>
 #include <Rhythmics.h>
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.32";
+const String VERSION_NUMBER = "0.2.33";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = false;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -253,8 +253,8 @@ void setup()
   alhambra = new Song("alhambra");
   wueste = new Song("wueste");                // non-existent!
   mrWimbledon = new Song("mrWimbledon");      // non-existent!
-  theodolit = new Song("theodolit");          // non-existent!
-  kupferUndGold = new Song("kupferUndGold");  // non-existent!
+  theodolit = new Song("theodolit");
+  kupferUndGold = new Song("kupferUndGold");
 
   Globals::songlist.push_back(monitoring);
   Globals::songlist.push_back(control_dd200); // intro

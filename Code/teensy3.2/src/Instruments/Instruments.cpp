@@ -1,7 +1,7 @@
 #include <Instruments.h>
 #include <MIDI.h>
 // #include <Tsunami.h>
-#include <Score/Score.h>
+#include <Song.h>
 #include <Hardware.h>
 #include <settings.h>
 

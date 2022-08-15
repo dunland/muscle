@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <Score/Score.h>
+#include <Song.h>
 #include <Instruments.h>
 
 class Instrument;

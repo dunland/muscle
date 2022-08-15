@@ -1,4 +1,4 @@
-#include <Score/Score.h>
+#include <Song.h>
 #include <MIDI.h>
 #include <Instruments.h>
 #include <Hardware.h>
