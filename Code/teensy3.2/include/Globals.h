@@ -10,7 +10,7 @@ class Song;
 enum MachineState
 {
   Running,
-  Calibration,
+  Calibrating,
   NanoKontrol_Test
 };
 
@@ -163,7 +163,7 @@ public:
   // ------------------------------- Score ----------------------------
 
   static std::vector<Song *> songlist; // all relevant scores
-  static int active_score_pointer; // points at active score of scores_list
+  static int active_song_pointer; // points at active score of scores_list
   static Song *active_song;
 
   // ----------------------------- Auxiliary --------------------------

@@ -162,7 +162,7 @@ bool Instrument::stroke_detected()
 void Instrument::calculateNoiseFloor()
 {
   // calculates the average noise floor out of 400 samples from all inputs
-  long beginNoiseFloorCaluclation = millis();
+  unsigned long beginNoiseFloorCaluclation = millis();
   int led_idx = 0;
 
   Globals::print_to_console("calculating noiseFloor for ");

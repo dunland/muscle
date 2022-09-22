@@ -84,8 +84,8 @@ void Hardware::footswitch_pressed()
   case (No_Footswitch_Mode):
     break;
     // case (Experimental): // increase step and
-    //   Globals::active_score->step++; // go to next score step
-    //   Globals::active_score->setup = true;
+    //   Globals::active_song->step++; // go to next score step
+    //   Globals::active_song->setup = true;
 
     //   for (auto &instrument : Drumset::instruments)
     //     instrument->set_effect(Change_CC);
@@ -221,7 +221,7 @@ void Hardware::lcd_display()
     break;
   }
   // -------------------------- CALIBRATION ---------------------------
-  case Calibration:
+  case Calibrating:
   {
     // level 1: display all instruments
     for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
@@ -248,7 +248,7 @@ void Hardware::display_scores()
 {
   // score name
   lcd->setCursor(0, 1);
-  lcd->print(Globals::songlist[Globals::active_score_pointer]->name);
+  lcd->print(Globals::songlist[Globals::active_song_pointer]->name);
 
   // step
   lcd->setCursor(14, 1);
@@ -323,7 +323,7 @@ void Hardware::checkPushButton()
       Globals::active_song->proceed_to_next_score();
       break;
 
-    case Calibration:
+    case Calibrating:
 
       switch (pushbutton_mode)
       {

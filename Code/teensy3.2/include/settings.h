@@ -106,3 +106,7 @@
 #define COWBELL_DELAY_AFTER_STROKE 10
 #define COWBELL_FIRST_STROKE false
 
+//////////////////////////////// CORE /////////////////////////////////
+
+#define STARTUP_TIME_WAIT_FOR_USB 5000
+#define ENCODER_TIMEOUT 100

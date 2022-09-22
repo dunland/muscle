@@ -20,7 +20,7 @@ public:
 
         // add a bass note to Score
         notes.push_back(int(random(36, 48)));
-        Globals::print_to_console("active_score->note[0] = ");
+        Globals::print_to_console("active_song->note[0] = ");
         Globals::println_to_console(notes[0]);
     }
 

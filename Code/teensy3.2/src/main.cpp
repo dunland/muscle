@@ -15,26 +15,28 @@
 #include <vector>
 #include <MIDI.h>
 // #include <Tsunami.h>
+#include <ArduinoJson.h>
 #include <settings.h>
 #include <Globals.h>
 #include <Instruments.h>
 #include <Hardware.h>
 #include <Song.h>
 #include <Serial.h>
+#include <JSON.h>
 #include <Rhythmics.h>
 #include <Calibration.h>
+#include <SD.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.33";
+const String VERSION_NUMBER = "0.3.0";
 const boolean DO_PRINT_JSON = false;
-const boolean DO_PRINT_TO_CONSOLE = false;
+const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
 const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
 const boolean USING_TSUNAMI = false;
 
 // ----------------------------- variables ----------------------------
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
-// typedef midi::MidiInterface<HardwareSerial> MidiInterface;
 
 // Songs:
 // Score *doubleSquirrel;
@@ -110,6 +112,49 @@ void samplePins()
   }
 }
 
+void test_SD()
+{
+
+  File myFile;
+  const int chipSelect = BUILTIN_SDCARD;
+
+  Serial.print("Initializing SD card...");
+  if (!SD.begin(chipSelect))
+  {
+    Serial.println("initialization failed!");
+    return;
+  }
+  Serial.println("initialization done.");
+  myFile = SD.open("/test.txt", FILE_WRITE); //append to file
+  if (myFile)
+  {
+    Serial.print("Writing to test.txt...");
+    myFile.println("testing 1, 2, 3.");
+    myFile.close();
+    Serial.println("done.");
+  }
+  else
+  {
+    Serial.println("error opening test.txt to write");
+  }
+  myFile = SD.open("/test.txt", FILE_READ); //read from file
+  if (myFile)
+  {
+    Serial.println("test.txt:");
+    String inString; //need to use Strings because of the ESP32 webserver
+    while (myFile.available())
+    {
+      inString += myFile.readString();
+    }
+    myFile.close();
+    Serial.print(inString);
+  }
+  else
+  {
+    Serial.println("error opening test.txt to read");
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// SETUP //////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -119,7 +164,7 @@ void setup()
   //---------------------- Global / Debug values ----------------------
 
   Globals::use_responsiveCalibration = DO_USE_RESPONSIVE_CALIBRATION;
-  Globals::do_print_beat_sum = DO_PRINT_BEAT_SUM; // prints active_score->beat_sum topography array
+  Globals::do_print_beat_sum = DO_PRINT_BEAT_SUM; // prints active_song->beat_sum topography array
   Globals::do_print_to_console = DO_PRINT_TO_CONSOLE;
   Globals::do_print_JSON = DO_PRINT_JSON;
 
@@ -127,25 +172,29 @@ void setup()
   pinMode(VIBR, OUTPUT);
   pinMode(FOOTSWITCH, INPUT_PULLUP);
   pinMode(PUSHBUTTON, INPUT_PULLUP);
+  // HINT: all analog pins are inputs anyway; they don't have to be set up
 
-  randomSeed(analogRead(A0) * analogRead(A1));
+  randomSeed(analogRead(A0) * analogRead(19));
 
   //-------------------------- Communication --------------------------
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   // Serial3.begin(57600); // contained in tsunami.begin()
   unsigned long wait_for_Serial = millis();
 
   while (!Serial) // prevents Serial flow from just stopping at some (early) point.
   {
 
-    if (millis() > wait_for_Serial + 5000)
+    if (millis() > wait_for_Serial + STARTUP_TIME_WAIT_FOR_USB)
     {
       Globals::do_print_JSON = false;
       Globals::do_print_to_console = false;
       break;
     }
   }
+
+  // test_SD();
+  // SD.begin(BUILTIN_SDCARD);
 
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
@@ -164,13 +213,13 @@ void setup()
 
   // if (USING_TSUNAMI)
   // {
-  //   delay(1000);              // wait for Tsunami to finish reset // redundant?
-  //   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
-  //   delay(100);
-  //   Globals::tsunami.stopAllTracks(); // in case Tsunami was already playing.
-  //   Globals::tsunami.samplerateOffset(0, 0);
-  //   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
-  //   delay(100);                          // some time for Tsunami to respond with version string
+    //   delay(1000);              // wait for Tsunami to finish reset // redundant?
+    //   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
+    //   delay(100);
+    //   Globals::tsunami.stopAllTracks(); // in case Tsunami was already playing.
+    //   Globals::tsunami.samplerateOffset(0, 0);
+    //   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
+    //   delay(100);                          // some time for Tsunami to respond with version string
   // }
 
   // LCD
@@ -208,6 +257,10 @@ void setup()
   // Drumset::crash2->setup_sensitivity(CRASH2_THRESHOLD, CRASH2_CROSSINGS, CRASH2_DELAY_AFTER_STROKE, CRASH2_FIRST_STROKE);
   Drumset::ride->setup_sensitivity(RIDE_THRESHOLD, RIDE_CROSSINGS, RIDE_DELAY_AFTER_STROKE, RIDE_FIRST_STROKE);
   Drumset::tom1->setup_sensitivity(TOM1_THRESHOLD, TOM1_CROSSINGS, TOM1_DELAY_AFTER_STROKE, TOM1_FIRST_STROKE);
+
+  // try to override sensitivity with data from SD:
+  if (SD.exists("sense.txt"))
+    JSON::read_sensitivity_data_from_SD(Drumset::instruments);
 
   // ------------------ calculate noise floor -------------------------
   for (auto &instrument : Drumset::instruments)
@@ -298,20 +351,41 @@ void setup()
   Drumset::tom1->effect = Monitor;
   Drumset::ride->effect = Monitor;
 
+  // Debug:
+  // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
+  // tracknum, channel
+
+  if (Hardware::pushbutton_is_pressed()) // pushbutton is pressed
+  {
+    noInterrupts();
+    Globals::machine_state = Calibrating;
+    interrupts();
+    Hardware::lcd->clear();
+    Hardware::lcd->setCursor(0, 0);
+    Hardware::lcd->print("entering");
+    Hardware::lcd->setCursor(0, 1);
+    Hardware::lcd->print("Calibration Mode");
+    Calibration::setup();
+    delay(1000);
+  }
+  else
+  {
+    noInterrupts();
+    Globals::machine_state = Running;
+    interrupts();
+  }
+
   // -------------------------- START TIMERS --------------------------
   pinMonitor.begin(samplePins, 1000); // sample pin every 1 millisecond
 
   Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
 
-  // Debug:
-  // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
-  // tracknum, channel
-
-  // if (Hardware::pushbutton_is_pressed())
-  // Globals::machine_state = NanoKontrol_Test; // Debug Nanokontrol LCD
-  delay(2000);
+  // wait another second
+  delay(1000);
   Hardware::lcd->clear();
   // delay(500);
+
+  Globals::machine_state = Calibrating;
 }
 
 /* --------------------------------------------------------------------- */
@@ -320,7 +394,42 @@ void setup()
 
 void loop()
 {
+  static bool once = true;
+  if (once)
+  {
+    Calibration::setup();
+    once = false;
+  }
 
+  static unsigned long last_led = 0;
+  if (Calibration::selected_instrument->stroke_detected()) // check if stroke was detected and save to Calibration::recent_threshold_crossings
+  {
+    Hardware::lcd->clear(); // clear display
+    digitalWrite(LED_BUILTIN, HIGH);
+    last_led = millis();
+  }
+  // Serial.println(analogRead(A5));
+
+  if (millis() > last_led + 50)
+    digitalWrite(LED_BUILTIN, LOW);
+
+  // Hardware:
+  Hardware::checkFootSwitch(); // check step of footswitch
+  // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
+
+  // rotary encoder:
+  Hardware::checkEncoder();
+  Hardware::checkPushButton();
+
+  // LCD:
+  Hardware::lcd_display();
+  Calibration::update();
+
+  // Serial.println(Globals::DrumtypeToHumanreadable(Calibration::selected_instrument->drumtype));
+}
+
+void loop_()
+{
   // Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
 
   // ------------------------- DEBUG AREA -----------------------------
@@ -359,11 +468,9 @@ void loop()
   */
   if (sendMidiCopy) // MIDI-clock has to be sent 24 times per quarter note
   {
-    // Serial2.write(0xF8);
-    // Serial2.write(midi::Clock);
     if (Globals::bSendMidiClock)
       MIDI.sendRealTime(midi::Clock);
-    noInterrupts();
+          noInterrupts();
     Globals::sendMidiClock = false;
     interrupts();
   }
@@ -403,10 +510,16 @@ void loop()
   // LCD:
   Hardware::lcd_display();
 
+  if (Globals::machine_state == Calibrating)
+  {
+    Calibration::update();
+  }
+
   // tidying up what's left from performing functions..
   for (auto &instrument : Drumset::instruments)
     instrument->tidyUp(MIDI);
 
   NanoKontrol::loop();
+  Serial.println("looping");
 }
 // --------------------------------------------------------------------

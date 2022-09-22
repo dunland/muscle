@@ -94,10 +94,10 @@ void Instrument::getTapTempo()
       Globals::print_to_console("new tap Tempo is ");
 
       // check if score tempo was set, else define quarters are > 300 ms (< 200 BPM)
-      // int quarter_timing = (Globals::active_score->tempo.min_tempo > 0) ? Globals::active_score->tempo.min_tempo : 300;
+      // int quarter_timing = (Globals::active_song->tempo.min_tempo > 0) ? Globals::active_song->tempo.min_tempo : 300;
 
       //TODO: re-apply tap-tempo quarter vs eighth notes differentiation
-      // if (Globals::tapInterval >= quarter_timing && Globals::tapInterval <= 60000 / Globals::active_score->tempo.max_tempo) // quarter notes when slow tapping; tapInterval must be within score tempo range
+      // if (Globals::tapInterval >= quarter_timing && Globals::tapInterval <= 60000 / Globals::active_song->tempo.max_tempo) // quarter notes when slow tapping; tapInterval must be within score tempo range
       if (Globals::tapInterval >= 300)
       {
         Globals::current_BPM = 60000 / Globals::tapInterval;
@@ -107,7 +107,7 @@ void Instrument::getTapTempo()
         Globals::print_to_console(Globals::tapInterval);
         Globals::println_to_console(" ms interval: quarter-notes)");
       }
-      // else if (Globals::tapInterval >= 60000 / (Globals::active_score->tempo.min_tempo * 2) && Globals::tapInterval <= 60000 / (Globals::active_score->tempo.max_tempo * 2)) // eighth-notes when fast tapping
+      // else if (Globals::tapInterval >= 60000 / (Globals::active_song->tempo.min_tempo * 2) && Globals::tapInterval <= 60000 / (Globals::active_song->tempo.max_tempo * 2)) // eighth-notes when fast tapping
       else if (Globals::tapInterval < 300)
       {
         Globals::current_BPM = (60000 / Globals::tapInterval) / 2;                                    // BPM >= 180 → strokes are 8th-notes, BPM half-time

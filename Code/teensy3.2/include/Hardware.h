@@ -5,7 +5,43 @@
 #include <LiquidCrystal.h>
 #include <Encoder.h>
 
-class Song;
+/* LCD pinout:
+1   Vss       GND
+2   Vss       +5V
+3   LCD Drive poti power / GND
+4   RS        11
+5   R/W       GND
+6   EN        12
+7   D0        --
+8   D1        --
+9   D2        --
+10  D3        --
+11  D4        8
+12  D5        9
+13  D6        4
+14  D7        5
+15  A         +5V
+16  K         GND
+
+*/
+
+// LCD Pins:
+#define RS 11
+#define EN 12
+#define D4 8
+#define D5 9
+#define D6 4
+#define D7 5
+
+// Encoder Pins:
+// right - encoder1
+// middle - ground
+// left - encoder2
+
+// Pushbutton:
+// 7 & GND
+
+class Score;
 class Instrument;
 
 enum FootswitchMode
@@ -14,24 +50,26 @@ enum FootswitchMode
   Hold_CC,
   Reset_Topo, // resets beat_topography (of all instruments)
   Reset_Topo_and_Proceed_Score,
-  Experimental,    // hold = mute, release = randomize and increase score step
-  Increment_Score, // go to next score step
-  No_Footswitch_Mode
+  Experimental, // hold = mute, release = randomize and increase score step
+  Increment_Score
 };
 
-enum PushbuttonMode
+class Knob
 {
-  Pb_Edit_Mode,
-  Pb_Scroll_Menu
-};
 
-struct menu
-{
-  int number_of_elements; // how many menu elements are there?
-  int active_element;     // which menu element is active?
-  int pointer = 0;        // pointing at active menu element
-  menu *sub_menu;
-  menu *parent_menu;
+public:
+  Knob(int knob_pin_)
+  {
+    knob_pin = knob_pin_;
+  }
+
+  int knob_pin;
+
+  void poll();
+
+  void pressed();
+
+  void released();
 };
 
 class Hardware
@@ -41,15 +79,12 @@ public:
   ///////////////////////////////////////////////////////////////////////
 
   static FootswitchMode footswitch_mode;
-  static PushbuttonMode pushbutton_mode;
 
   static void footswitch_pressed();
 
   static void footswitch_released();
 
   static void checkFootSwitch();
-
-  static bool footswitch_is_pressed; // just gives info about state of footswitch
   // --------------------------------------------------------------------
 
   ////////////////////////////////// LCD ////////////////////////////////
@@ -58,8 +93,7 @@ public:
   static void lcd_display();
   static void display_scores();
   static void display_Midi_values(); // display midi values of instruments with FX-Type CC_Change
-  static menu *lcd_menu;
-
+  static volatile boolean FLAG_CLEAR_LCD; // CAUTION: USED IN INTERRUPTS! DON'T CHANGE WITHOUT STOPPING THEM
   // --------------------------------------------------------------------
 
   ///////////////////////////// ROTARY ENCODER //////////////////////////
@@ -67,6 +101,8 @@ public:
   static Encoder *myEnc;
   static int encoder_value;
   static int encoder_count;
+  static int asd;
+  static int encoder_maxVal;
 
   static void checkEncoder();
 
@@ -74,7 +110,7 @@ public:
   ///////////////////////////////////////////////////////////////////////
   static void checkPushButton();          // checks whether pushbutton is pressed and executes action
   static boolean pushbutton_is_pressed(); // only checks whether pushbutton is pressed
-
+  static unsigned long last_pushbutton_release;
   // --------------------------------------------------------------------
 
   ////////////////////////////// VIBRATION MOTOR ////////////////////////
@@ -107,7 +143,6 @@ public:
     for (int i = 0; i < 127; i++)
     {
       notes[i] = false;
-      midi_values[i] = 0;
     }
   }
 

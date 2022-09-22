@@ -21,7 +21,7 @@ MachineState Globals::machine_state = Running;
 
 // ------------------------------- Score ----------------------------
 std::vector<Song *> Globals::songlist; // all relevant scores
-int Globals::active_score_pointer = 0;	  // points at active score of scores_list
+int Globals::active_song_pointer = 0;	  // points at active score of scores_list
 Song *Globals::active_song;
 
 // Tusnami Sample list:
