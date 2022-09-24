@@ -23,7 +23,7 @@
 8   D1        --
 9   D2        --
 10  D3        --
-11  D4        8
+11  D4        10    // 8 on teensy3.2
 12  D5        9
 13  D6        4
 14  D7        5
@@ -34,7 +34,7 @@
 // LCD Pins:
 #define RS 11
 #define EN 12
-#define D4 8
+#define D4 10 // 8 on teensy3.2
 #define D5 9
 #define D6 4
 #define D7 5
@@ -45,7 +45,7 @@
 // left - encoder2 (6)
 #define ENCODER1 3
 #define ENCODER2 6
-#define PUSHBUTTON 7
+#define PUSHBUTTON 28 // 7 on teensy3.2
 
 //////////////////////////////// PIEZO INPUTS /////////////////////////
 #define INPUT_PIN_CRASH1 A7
