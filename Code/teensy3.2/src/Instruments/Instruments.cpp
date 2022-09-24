@@ -294,7 +294,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
   // countup_topography();
   // topography.smoothen_dataArray();
   // Serial.print("hit/");
-  Serial.println(Globals::DrumtypeToHumanreadable(drumtype));
+  Globals::println_to_console(Globals::DrumtypeToHumanreadable(drumtype));
   Hardware::lcd->setCursor(12, 0);
   Hardware::lcd->print(Globals::DrumtypeToHumanreadable(drumtype));
 

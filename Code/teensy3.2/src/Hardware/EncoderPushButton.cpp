@@ -103,7 +103,8 @@ void Hardware::checkPushButton()
       interrupts();
 
       // save settings to SD card:
-      JSON::save_settings_to_SD(Drumset::instruments);
+      if (Globals::bUsingSDCard)
+        JSON::save_settings_to_SD(Drumset::instruments);
 
       // clear up:
       Serial.println("leaving calibration mode.");

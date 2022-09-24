@@ -30,7 +30,7 @@
 // ----------------------------- settings -----------------------------
 const String VERSION_NUMBER = "0.3.0";
 const boolean DO_PRINT_JSON = false;
-const boolean DO_PRINT_TO_CONSOLE = true;
+const boolean DO_PRINT_TO_CONSOLE = false;
 const boolean DO_PRINT_BEAT_SUM = false;
 const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
 const boolean USING_TSUNAMI = false;
@@ -114,7 +114,6 @@ void samplePins()
 
 void test_SD()
 {
-
   File myFile;
   const int chipSelect = BUILTIN_SDCARD;
 
@@ -153,6 +152,7 @@ void test_SD()
   {
     Serial.println("error opening test.txt to read");
   }
+  Globals::bUsingSDCard = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -193,8 +193,8 @@ void setup()
     }
   }
 
-  // test_SD();
-  // SD.begin(BUILTIN_SDCARD);
+  test_SD();
+  SD.begin(BUILTIN_SDCARD);
 
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
@@ -394,42 +394,6 @@ void setup()
 
 void loop()
 {
-  static bool once = true;
-  if (once)
-  {
-    Calibration::setup();
-    once = false;
-  }
-
-  static unsigned long last_led = 0;
-  if (Calibration::selected_instrument->stroke_detected()) // check if stroke was detected and save to Calibration::recent_threshold_crossings
-  {
-    Hardware::lcd->clear(); // clear display
-    digitalWrite(LED_BUILTIN, HIGH);
-    last_led = millis();
-  }
-  // Serial.println(analogRead(A5));
-
-  if (millis() > last_led + 50)
-    digitalWrite(LED_BUILTIN, LOW);
-
-  // Hardware:
-  Hardware::checkFootSwitch(); // check step of footswitch
-  // Hardware::request_motor_deactivation(); // turn off vibration and MIDI notes
-
-  // rotary encoder:
-  Hardware::checkEncoder();
-  Hardware::checkPushButton();
-
-  // LCD:
-  Hardware::lcd_display();
-  Calibration::update();
-
-  // Serial.println(Globals::DrumtypeToHumanreadable(Calibration::selected_instrument->drumtype));
-}
-
-void loop_()
-{
   // Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
 
   // ------------------------- DEBUG AREA -----------------------------
@@ -478,14 +442,14 @@ void loop_()
   //----------------------- DO THINGS ONCE PER 32nd-step:--------------
   rhythmics->run_beat(last_beat_pos, Drumset::instruments, MIDI);
 
-  //////////////////////////////// SCORE ////////////////////////////
-  ///////////////////////////////////////////////////////////////////
+  //////////////////////////////// RHYTHMICS //////////////////////////
+  /////////////////////////////////////////////////////////////////////
 
   if (Globals::current_beat_pos != last_beat_pos) // run once per 32nd-step
   {
     Globals::active_song->run(MIDI); // TODO: globale Synthesizer-Liste
 
-    //----------------------- SCORE END -------------------------------
+    //----------------------- RHYTHMICS END ---------------------------
 
     for (auto &instrument : Drumset::instruments)
     {
@@ -520,6 +484,8 @@ void loop_()
     instrument->tidyUp(MIDI);
 
   NanoKontrol::loop();
-  Serial.println("looping");
+  Serial.println(Hardware::pushbutton_is_pressed());
+  static int button_state = digitalRead(PUSHBUTTON);
+  Serial.println(button_state);
 }
 // --------------------------------------------------------------------

@@ -1,4 +1,5 @@
 // SETTINGS
+// PINOUT, MIDI CHANNELS AND SENSITIVITY
 #pragma once
 
 ////////////////////////////// MIDI CHANNELS //////////////////////////
@@ -11,9 +12,9 @@
 #define VIBR 0
 #define FOOTSWITCH 2
 
-/* LCD pinout:
+/* LCD AV1623 pinout:
 1   Vss       GND
-2   Vss       +5V
+2   Vdd       +5V
 3   LCD Drive poti power / GND
 4   RS        11
 5   R/W       GND
@@ -39,9 +40,9 @@
 #define D7 5
 
 // Encoder Pins:
-// right - encoder1
-// middle - ground
-// left - encoder2
+// right - encoder1 (3)
+// middle - ground (GND)
+// left - encoder2 (6)
 #define ENCODER1 3
 #define ENCODER2 6
 #define PUSHBUTTON 7

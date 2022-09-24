@@ -130,6 +130,7 @@ public:
   static int tapInterval;
   static int current_BPM;
   static bool bSendMidiClock; // whether or not to send Midi Clock signal
+  static bool bUsingSDCard;
 
   // ------------------ Machine State ------------------
   static MachineState machine_state;

@@ -65,6 +65,7 @@ int Globals::last_16th_count = 0;	   // stores last eightNoteCount for compariso
 int Globals::tapInterval = 500; // 0.5 s per beat for 120 BPM
 int Globals::current_BPM = 120;
 bool Globals::bSendMidiClock = true;
+bool Globals::bUsingSDCard = false;
 
 // ------------------------------- Hardware -----------------------------------
 boolean Globals::footswitch_is_pressed = false;
