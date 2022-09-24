@@ -22,7 +22,6 @@ void Hardware::checkEncoder()
   // ROTARY ENCODER:
   if (encoder_oldPosition != encoder_newPosition && millis() > last_encoder_change + ENCODER_TIMEOUT)
   {
-
     // rising value:
     if (encoder_oldPosition > encoder_newPosition)
     {
@@ -51,18 +50,19 @@ unsigned long Hardware::last_pushbutton_release = 0;
 
 void Hardware::checkPushButton()
 {
-  static int button_state;
-  static int last_button_state = HIGH;
+  static bool last_button_state = false;
   static unsigned long last_button_toggle = 1000; // some pre-delay to prevent initial misdetection
   static unsigned long last_level_ascend = 0;
 
-  button_state = digitalRead(PUSHBUTTON);
-  if (button_state != last_button_state && millis() > last_button_toggle + 20 && millis() > last_level_ascend + 3000) // button status changed
+  bool button_state = !digitalRead(PUSHBUTTON);
+
+  // BUTTON TOGGLE:
+  if (button_state != last_button_state && millis() > last_button_toggle + 20) // button status changed
   {
     switch (Globals::machine_state)
     {
     case Running:
-      if (button_state == HIGH) // button released
+      if (button_state == false) // button released
       {
         Globals::active_song->proceed_to_next_score();
       }
@@ -70,7 +70,7 @@ void Hardware::checkPushButton()
 
     case Calibrating:
 
-      if (button_state == HIGH) // button released
+      if (button_state == false && millis() > last_button_toggle + 200) // button released
       {
         // save current encoder value:
         encoder_value = encoder_count;
@@ -90,46 +90,61 @@ void Hardware::checkPushButton()
     last_button_toggle = millis();
   }
 
-  // leave calibration mode
-  if (button_state == LOW && millis() > last_button_toggle + 3000 && millis() > 10000 && millis() > last_level_ascend + 3000) // pressed for 3s
+  // BUTTON HOLD:
+  else if (button_state == true && millis() > last_button_toggle + 3000 && millis() > 5000 && millis() > last_level_ascend + 3000) // pressed for 3s
   {
-    switch (Calibration::calibration_mode)
+    switch (Globals::machine_state)
     {
-    case Select_Instrument:
-
-      // change mode:
-      noInterrupts();
-      Globals::machine_state = Running;
-      interrupts();
-
-      // save settings to SD card:
-      if (Globals::bUsingSDCard)
-        JSON::save_settings_to_SD(Drumset::instruments);
-
-      // clear up:
-      Serial.println("leaving calibration mode.");
-      Hardware::lcd->clear();
+    case Running:
+      // go back one song:
+      Globals::active_song_pointer--;
+      if (Globals::active_song_pointer < 0)
+        Globals::active_song_pointer = Globals::songlist.size() - 1;
+      Globals::active_song = Globals::songlist[Globals::active_song_pointer];
       break;
 
-    case Select_Sensitivity_Param: // ascend back to Instrument Selection
-      Calibration::calibration_mode = Select_Instrument;
-      Hardware::lcd->clear();
-      break;
+    case Calibrating:
+      switch (Calibration::calibration_mode)
+      {
+      case Select_Instrument:
 
-    case Set_Value:
-      Calibration::calibration_mode = Select_Sensitivity_Param;
-      Hardware::lcd->clear();
-      break;
+        // leave calibration mode:
+        noInterrupts();
+        Globals::machine_state = Running;
+        interrupts();
 
+        // save settings to SD card:
+        if (Globals::bUsingSDCard)
+          JSON::save_settings_to_SD(Drumset::instruments);
+
+        // clear up:
+        Serial.println("leaving calibration mode.");
+        Hardware::lcd->clear();
+        break;
+
+      case Select_Sensitivity_Param: // ascend back to Instrument Selection
+        Calibration::calibration_mode = Select_Instrument;
+        Hardware::lcd->clear();
+        break;
+
+      case Set_Value:
+        Calibration::calibration_mode = Select_Sensitivity_Param;
+        Hardware::lcd->clear();
+        break;
+
+      default:
+        break;
+      }
+      last_level_ascend = millis();
+      break;
+      
     default:
       break;
     }
-    last_level_ascend = millis();
-    last_button_state = HIGH;
   }
 }
 
-boolean Hardware::pushbutton_is_pressed()
+bool Hardware::pushbutton_state()
 {
   static unsigned long lastPush = 0;
   if (digitalRead(PUSHBUTTON) == LOW && millis() > lastPush + 200)
@@ -137,6 +152,7 @@ boolean Hardware::pushbutton_is_pressed()
     lastPush = millis();
     lcd->setCursor(11, 0);
     lcd->print("!");
+    Serial.println("push!");
     return true;
   }
   else

@@ -73,7 +73,7 @@ public:
   /////////////////////////////// PUSHBUTTON ////////////////////////////
   ///////////////////////////////////////////////////////////////////////
   static void checkPushButton();          // checks whether pushbutton is pressed and executes action
-  static boolean pushbutton_is_pressed(); // only checks whether pushbutton is pressed
+  static boolean pushbutton_state(); // only checks whether pushbutton is pressed
   static unsigned long last_pushbutton_release;
   // --------------------------------------------------------------------
 

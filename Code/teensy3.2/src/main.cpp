@@ -355,7 +355,7 @@ void setup()
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
   // tracknum, channel
 
-  if (Hardware::pushbutton_is_pressed()) // pushbutton is pressed
+  if (Hardware::pushbutton_state()) // pushbutton is pressed
   {
     noInterrupts();
     Globals::machine_state = Calibrating;
@@ -366,6 +366,7 @@ void setup()
     Hardware::lcd->setCursor(0, 1);
     Hardware::lcd->print("Calibration Mode");
     Calibration::setup();
+    Serial.println("Entering Calibration Mode.");
     delay(1000);
   }
   else
@@ -384,8 +385,6 @@ void setup()
   delay(1000);
   Hardware::lcd->clear();
   // delay(500);
-
-  Globals::machine_state = Calibrating;
 }
 
 /* --------------------------------------------------------------------- */
@@ -484,8 +483,5 @@ void loop()
     instrument->tidyUp(MIDI);
 
   NanoKontrol::loop();
-  Serial.println(Hardware::pushbutton_is_pressed());
-  static int button_state = digitalRead(PUSHBUTTON);
-  Serial.println(button_state);
 }
 // --------------------------------------------------------------------
