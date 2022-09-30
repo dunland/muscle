@@ -182,7 +182,7 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
         {
             // assign effects to instruments:
             kick->set_effect(PlayMidi);
-            kick->setup_midi(None, Synthesizers::volca, 127, 0, 1, 0.1);
+            kick->setup_midi(CC_None, Synthesizers::volca, 127, 0, 1, 0.1);
             kick->midi_settings.notes.push_back(active_score->notes[0] + 12 + 7);
             kick->midi_settings.active_note = kick->midi_settings.notes[0];
 
@@ -192,7 +192,7 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
             Globals::println_to_console(kick->midi_settings.active_note);
 
             snare->set_effect(PlayMidi);
-            snare->setup_midi(None, Synthesizers::volca, 127, 0, 1, 0.1);
+            snare->setup_midi(CC_None, Synthesizers::volca, 127, 0, 1, 0.1);
             snare->midi_settings.notes.push_back(active_score->notes[0] + 24);
             snare->midi_settings.active_note = snare->midi_settings.notes[0];
 

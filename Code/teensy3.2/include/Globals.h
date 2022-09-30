@@ -50,7 +50,7 @@ enum EffectsType
 
 enum CC_Type
 {
-  None = -1,
+  CC_None = -1,
 
   // mikroKORG CC channels:
   mKORG_Osc2_semitone = 18,

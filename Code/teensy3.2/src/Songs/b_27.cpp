@@ -36,9 +36,9 @@ void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom1->midi_settings.notes.push_back(notes[idx]);
             Drumset::tom1->midi_settings.active_note = notes[idx];
 
-            Drumset::snare->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-            Drumset::standtom->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-            Drumset::tom1->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+            Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+            Drumset::standtom->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+            Drumset::tom1->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
 
             Drumset::snare->set_effect(PlayMidi);
             Drumset::standtom->set_effect(PlayMidi);

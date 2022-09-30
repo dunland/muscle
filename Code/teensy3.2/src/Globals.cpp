@@ -455,7 +455,7 @@ String Globals::CCTypeToHumanReadable(CC_Type type)
 {
 	switch (type)
 	{
-		case None: 					return "None"; 				break;
+		case CC_None: 					return "None"; 				break;
 		case dd200_DelayTime: 		return "dTim"; 				break;
 		case mKORG_Osc2_semitone: 	return "O2smi"; 			break;
 		case dd200_param:			return "dprm";				break;
@@ -526,6 +526,6 @@ CC_Type Globals::int_to_cc_type(int integer) // TODO: can this not be done with 
 		Globals::print_to_console("could not convert integer ");
 		Globals::print_to_console(integer);
 		Globals::println_to_console("to CC_Type. Reset to None.");
-		return None;
+		return CC_None;
 	}
 }

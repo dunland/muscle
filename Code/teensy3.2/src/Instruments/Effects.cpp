@@ -559,7 +559,7 @@ void Instrument::shuffle_cc(boolean force_ = false)
       {
         midi_settings.random_cc_chan = int(random(128));
         midi_settings.cc_chan = Globals::int_to_cc_type(midi_settings.random_cc_chan);
-      } while (midi_settings.cc_chan == None);
+      } while (midi_settings.cc_chan == CC_None);
 
       score.ready_to_shuffle = false;
       Globals::print_to_console("cc_chan of ");
