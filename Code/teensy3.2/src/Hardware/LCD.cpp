@@ -12,13 +12,19 @@ volatile boolean Hardware::FLAG_CLEAR_LCD = false;
 // ------------------------------------------------------------------------------
 void Hardware::lcd_display()
 {
+    // clear LCD display three times per second:
+    static unsigned long last_clear = 0;
+    if (millis() > last_clear + 333)
+    {
+        lcd->clear();
+        last_clear = millis();
+    }
+    // ------------- Machine-State-dependent display: -------------------
     switch (Globals::machine_state)
     {
+    // -------------------------- RUNNING -------------------------------
     case Running:
     {
-        lcd->setCursor(0, 0);
-        lcd->print("running");
-
         // switch if any instrument has CC mode:
         int instruments_with_CC_mode = 0;
         for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
@@ -57,11 +63,12 @@ void Hardware::lcd_display()
     }
     break;
 
+    // -------------------------- CALIBRATION ---------------------------
     case Calibrating:
     {
         switch (Calibration::calibration_mode)
         {
-        //level 1: display instrument with sensitivity values
+        // level 1: display instrument with sensitivity values
         case Select_Instrument:
 
             // display instrument:
@@ -129,7 +136,7 @@ void Hardware::lcd_display()
 
             lcd->setCursor(0, 1);
             lcd->print("counts:");
-            lcd->setCursor(8,1);
+            lcd->setCursor(8, 1);
             lcd->print(Calibration::recent_threshold_crossings);
 
             break;
@@ -166,7 +173,7 @@ void Hardware::lcd_display()
 
             lcd->setCursor(0, 1);
             lcd->print("counts:");
-            lcd->setCursor(8,1);
+            lcd->setCursor(8, 1);
             lcd->print(Calibration::recent_threshold_crossings);
 
             break;

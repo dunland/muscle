@@ -30,7 +30,7 @@
 // ----------------------------- settings -----------------------------
 const String VERSION_NUMBER = "0.3.0";
 const boolean DO_PRINT_JSON = false;
-const boolean DO_PRINT_TO_CONSOLE = false;
+const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
 const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
 const boolean USING_TSUNAMI = false;
@@ -193,7 +193,7 @@ void setup()
     }
   }
 
-  test_SD();
+  // test_SD();
   SD.begin(BUILTIN_SDCARD);
 
   // delay(1000); // alternative to line above, if run with external power (no computer)
@@ -213,13 +213,13 @@ void setup()
 
   // if (USING_TSUNAMI)
   // {
-    //   delay(1000);              // wait for Tsunami to finish reset // redundant?
-    //   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
-    //   delay(100);
-    //   Globals::tsunami.stopAllTracks(); // in case Tsunami was already playing.
-    //   Globals::tsunami.samplerateOffset(0, 0);
-    //   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
-    //   delay(100);                          // some time for Tsunami to respond with version string
+  //   delay(1000);              // wait for Tsunami to finish reset // redundant?
+  //   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
+  //   delay(100);
+  //   Globals::tsunami.stopAllTracks(); // in case Tsunami was already playing.
+  //   Globals::tsunami.samplerateOffset(0, 0);
+  //   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
+  //   delay(100);                          // some time for Tsunami to respond with version string
   // }
 
   // LCD
@@ -304,8 +304,8 @@ void setup()
   pogoNumberOne = new Song("pogoNumberOne");
   roeskur = new Song("roeskur");
   alhambra = new Song("alhambra");
-  wueste = new Song("wueste");                // non-existent!
-  mrWimbledon = new Song("mrWimbledon");      // non-existent!
+  wueste = new Song("wueste");           // non-existent!
+  mrWimbledon = new Song("mrWimbledon"); // non-existent!
   theodolit = new Song("theodolit");
   kupferUndGold = new Song("kupferUndGold");
 
@@ -317,11 +317,11 @@ void setup()
   Globals::songlist.push_back(zitteraal);     // besen
   Globals::songlist.push_back(alhambra);      // alhambra
   Globals::songlist.push_back(randomVoice);   // jam
-  Globals::songlist.push_back(mrWimbledon);    // mr wimbledon
+  Globals::songlist.push_back(mrWimbledon);   // mr wimbledon
   Globals::songlist.push_back(roeskur);       // roeskur
   Globals::songlist.push_back(sattelstein);   // sattelstein
-  Globals::songlist.push_back(theodolit);    // theodolit
-  Globals::songlist.push_back(kupferUndGold);    // kupfer und gold
+  Globals::songlist.push_back(theodolit);     // theodolit
+  Globals::songlist.push_back(kupferUndGold); // kupfer und gold
 
   Globals::active_song = Globals::songlist.at(0);
 
@@ -433,7 +433,7 @@ void loop()
   {
     if (Globals::bSendMidiClock)
       MIDI.sendRealTime(midi::Clock);
-          noInterrupts();
+    noInterrupts();
     Globals::sendMidiClock = false;
     interrupts();
   }

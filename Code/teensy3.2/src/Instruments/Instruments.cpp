@@ -433,7 +433,7 @@ Instrument *Drumset::standtom = new Instrument(INPUT_PIN_STANDTOM, Standtom1);
 Instrument *Drumset::crash1 = new Instrument(INPUT_PIN_CRASH1, Crash1);
 Instrument *Drumset::ride = new Instrument(INPUT_PIN_RIDE, Ride);
 
-std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom2, Drumset::standtom, Drumset::tom1};
+std::vector<Instrument *> Drumset::instruments = {Drumset::hihat, Drumset::snare, Drumset::kick, Drumset::standtom};
 
 // instantiate external MIDI devices:
 Synthesizer *Synthesizers::mKorg = new Synthesizer(MIDI_CHANNEL_MICROKORG, "mKRG");

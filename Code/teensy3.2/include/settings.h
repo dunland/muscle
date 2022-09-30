@@ -48,18 +48,18 @@
 #define PUSHBUTTON 28 // 7 on teensy3.2
 
 //////////////////////////////// PIEZO INPUTS /////////////////////////
-#define INPUT_PIN_CRASH1 A7
-#define INPUT_PIN_KICK A1
-#define INPUT_PIN_STANDTOM A2
-#define INPUT_PIN_RIDE A4
-#define INPUT_PIN_SNARE A0
-#define INPUT_PIN_HIHAT A6
-#define INPUT_PIN_TOM1 A5
-#define INPUT_PIN_TOM2 A3
+#define INPUT_PIN_CRASH1 A9
+#define INPUT_PIN_KICK A4
+#define INPUT_PIN_STANDTOM A5
+#define INPUT_PIN_RIDE A8
+#define INPUT_PIN_SNARE A3
+#define INPUT_PIN_HIHAT A2
+#define INPUT_PIN_TOM1 A6
+#define INPUT_PIN_TOM2 A7
 
-#define SNARE_THRESHOLD 115
-#define SNARE_CROSSINGS 5
-#define SNARE_DELAY_AFTER_STROKE 5
+#define SNARE_THRESHOLD 40
+#define SNARE_CROSSINGS 3
+#define SNARE_DELAY_AFTER_STROKE 10
 #define SNARE_FIRST_STROKE true
 
 #define HIHAT_THRESHOLD 100
