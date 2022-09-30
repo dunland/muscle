@@ -65,7 +65,6 @@ public:
   static Encoder *myEnc;
   static int encoder_value;
   static int encoder_count;
-  static int asd;
   static int encoder_maxVal;
 
   static void checkEncoder();

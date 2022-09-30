@@ -1,7 +1,7 @@
 /*
    SUPER MUSCLE
    ------------------------------------
-   October 2020-July 2022
+   October 2020-September 2022
    by David Unland david[at]davidunland[dot]de
    github.com/dunland/muscle
    ------------------------------------
@@ -283,7 +283,7 @@ void setup()
   }
   Globals::println_to_console("-----------------------------------------------");
 
-  // ---------------------------------- SCORE -------------------------
+  // ---------------------------------- SONGS -------------------------
   // doubleSquirrel = new Score("doubleSquirrel");
   monitoring = new Song("monitoring");
   sattelstein = new Song("sattelstein");
