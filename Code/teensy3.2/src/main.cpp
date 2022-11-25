@@ -60,6 +60,9 @@ Song *wueste;
 Song *mrWimbledon;
 Song *theodolit;
 Song *kupferUndGold;
+Song *ferdinandPiech;
+Song *queen;
+Song *donnerwetter;
 
 Rhythmics *rhythmics;
 
@@ -251,26 +254,33 @@ void setup()
   pogoNumberOne = new Song("pogoNumberOne");
   roeskur = new Song("roeskur");
   alhambra = new Song("alhambra");
-  wueste = new Song("wueste");           // non-existent!
-  mrWimbledon = new Song("mrWimbledon"); // non-existent!
+  wueste = new Song("wueste");                 // non-existent!
+  mrWimbledon = new Song("mrWimbledon");       // non-existent!
+  ferdinandPiech = new Song("ferdinandPiech"); // non-existent!
+  queen = new Song("queen");                   // non-existent!
+  donnerwetter = new Song("donnerwetter");     // non-existent!
   theodolit = new Song("theodolit");
   kupferUndGold = new Song("kupferUndGold");
 
   Globals::songlist.push_back(monitoring);
-  Globals::songlist.push_back(control_dd200); // intro
-  Globals::songlist.push_back(pogoNumberOne); // pogo
-  Globals::songlist.push_back(hutschnur);     // hutschnur
-  Globals::songlist.push_back(randomVoice);   // jam
-  Globals::songlist.push_back(wueste);        // wueste
-  Globals::songlist.push_back(zitteraal);     // besen
-  Globals::songlist.push_back(randomVoice);   // jam
-  Globals::songlist.push_back(alhambra);      // alhambra
-  Globals::songlist.push_back(randomVoice);   // jam
-  Globals::songlist.push_back(mrWimbledon);   // mr wimbledon
-  Globals::songlist.push_back(roeskur);       // roeskur
-  Globals::songlist.push_back(sattelstein);   // sattelstein
-  Globals::songlist.push_back(theodolit);     // theodolit
-  Globals::songlist.push_back(kupferUndGold); // kupfer und gold
+  Globals::songlist.push_back(control_dd200);  // intro
+  Globals::songlist.push_back(pogoNumberOne);  // pogo
+  Globals::songlist.push_back(hutschnur);      // hutschnur
+  Globals::songlist.push_back(randomVoice);    // jam
+  Globals::songlist.push_back(wueste);         // wueste
+  Globals::songlist.push_back(zitteraal);      // besen
+  Globals::songlist.push_back(randomVoice);    // jam
+  Globals::songlist.push_back(alhambra);       // alhambra
+  Globals::songlist.push_back(randomVoice);    // jam
+  Globals::songlist.push_back(mrWimbledon);    // mr wimbledon
+  Globals::songlist.push_back(roeskur);        // roeskur
+  Globals::songlist.push_back(queen);          // queen
+  Globals::songlist.push_back(sattelstein);    // sattelstein
+  Globals::songlist.push_back(ferdinandPiech); // ferdinandPiech
+  Globals::songlist.push_back(kupferUndGold);  // kupfer und gold
+  Globals::songlist.push_back(theodolit);      // theodolit
+  Globals::songlist.push_back(donnerwetter);   // donnerwetter I
+  Globals::songlist.push_back(control_dd200);  // donnerwetter II
 
   Globals::active_song = Globals::songlist.at(0);
 

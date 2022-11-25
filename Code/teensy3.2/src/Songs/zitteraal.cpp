@@ -19,6 +19,7 @@ void Song::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::hihat->set_effect(TapTempo);
 
             Synthesizers::mKorg->sendProgramChange(62, MIDI); // corresponds A.87
+            Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 80, MIDI); // set loudness to 80
             Synthesizers::whammy->sendProgramChange(58, MIDI); // HARMONY UP 5TH / UP 6TH
 
             delay(50);

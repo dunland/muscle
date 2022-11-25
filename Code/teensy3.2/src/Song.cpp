@@ -170,14 +170,14 @@ void Song::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback f
     {
         run_kupferUndGold(MIDI);
     }
-    else if (name == "wueste")
+    else if (name == "mrWimbledon" || name == "queen" || name == "wueste" || name == "ferdinandPiech") 
     {
         run_monitoring(MIDI);
     }
-    else if (name == "mrWimbledon")
+    else if (name == "donnerwetter")
     {
-        run_monitoring(MIDI);
-    }
+        run_donnerwetter(MIDI);
+    }    
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////
