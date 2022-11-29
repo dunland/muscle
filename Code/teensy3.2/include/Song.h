@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 
 #include <Globals.h>
 #include <vector>
@@ -11,9 +12,9 @@ class Synthesizer;
 class Song
 {
 public:
-    Song(String name_)
+    Song(std::function<void()> * callback_function)
     {
-        name = name_;
+        trigger_function = callback_function;
         // setup names of elements for display on Serial Monitor:
         beat_sum.tag = "v";
         beat_regularity.tag = "r";
@@ -25,6 +26,7 @@ public:
     }
 
     String name; // name to be displayed on LCD
+    void *trigger_function;
 
     int step = 0;
     std::vector<int> steps;
@@ -36,8 +38,8 @@ public:
     {
         int min_tempo = 0;
         int max_tempo = 999;
-        int tapTempoResetTime = 0; // time to restart tapTempo if not used for this long
-        unsigned int tapTempoTimeOut = 2000;   // do not count second tap, if time gap to first one exceeds this
+        int tapTempoResetTime = 0;           // time to restart tapTempo if not used for this long
+        unsigned int tapTempoTimeOut = 2000; // do not count second tap, if time gap to first one exceeds this
     } tempo;
 
     // TODO: make this a functional bool and reset instruments etc when calling (and deactivate it automatically)!
