@@ -440,5 +440,6 @@ Synthesizer *Synthesizers::mKorg = new Synthesizer(MIDI_CHANNEL_MICROKORG, "mKRG
 Synthesizer *Synthesizers::volca = new Synthesizer(MIDI_CHANNEL_VOLCA, "vlca");
 Synthesizer *Synthesizers::dd200 = new Synthesizer(MIDI_CHANNEL_DD200, "d200");
 Synthesizer *Synthesizers::whammy = new Synthesizer(MIDI_CHANNEL_WHAMMY, "whmy");
+Synthesizer *Synthesizers::kaossPad3 = new Synthesizer(MIDI_CHANNEL_KP3, "KP3");
 
 std::vector<Synthesizer *> Synthesizers::synths = {Synthesizers::mKorg, Synthesizers::volca, Synthesizers::whammy, Synthesizers::dd200};

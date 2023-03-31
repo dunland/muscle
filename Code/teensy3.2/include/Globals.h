@@ -77,7 +77,20 @@ enum CC_Type
   dd200_mod = 21,
   dd200_param = 22,
   dd200_OnOff = 27,
-  dd200_DelayDepth = 94
+  dd200_DelayDepth = 94,
+
+  // KP3 CC Channels:
+  KP3_touch_pad_x = 12,
+  KP3_touch_pad_y = 93,
+  KP3_touch_pad_on_off = 92,
+  KP3_Level_Slider = 93,
+  KP3_FX_Depth = 94,
+  KP3_Hold = 95,
+  KP3_Sample_A = 36,
+  KP3_Sample_B = 37,
+  KP3_Sample_C = 38,
+  KP3_Sample_D = 39
+
 };
 
 class TOPOGRAPHY

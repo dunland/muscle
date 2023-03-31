@@ -9,9 +9,9 @@
 //////////////////////////// CONTROL DD200 /////////////////////////////
 void Song::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    static float delay_time = 0;
-    static float delay_depth = 0;
-    static float delay_level = 0;
+    // static float delay_time = 0;
+    // static float delay_depth = 0;
+    // static float delay_level = 0;
 
     switch (step)
     {
