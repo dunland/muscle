@@ -193,6 +193,7 @@ class Synthesizers
     static Synthesizer *volca; // create a KORG Volca Keys instrument called volca
     static Synthesizer *dd200;
     static Synthesizer *whammy;
+    static Synthesizer *kaossPad3;
 
     static std::vector<Synthesizer*> synths;
 };
