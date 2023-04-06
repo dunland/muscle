@@ -98,10 +98,10 @@ void Song::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback f
     {
         run_randomVoice(MIDI);
     }
-    else if (name == "monitoring")
-    {
-        run_monitoring(MIDI);
-    }
+    // else if (name == "monitoring")
+    // {
+    //     run_monitoring(MIDI);
+    // }
     else if (name == "sattelstein")
     {
         run_sattelstein(MIDI);

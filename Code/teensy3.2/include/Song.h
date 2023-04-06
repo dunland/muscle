@@ -12,9 +12,12 @@ class Synthesizer;
 class Song
 {
 public:
-    Song(std::function<void()> * callback_function)
+
+    typedef std::function<void(midi::MidiInterface<HardwareSerial>)> Callback;
+    Callback trigger_function;
+
+    Song(Callback f, String name_) : trigger_function(f)
     {
-        trigger_function = callback_function;
         // setup names of elements for display on Serial Monitor:
         beat_sum.tag = "v";
         beat_regularity.tag = "r";
@@ -23,10 +26,10 @@ public:
         notes.push_back(int(random(36, 48)));
         Globals::print_to_console("active_score->note[0] = ");
         Globals::println_to_console(notes[0]);
+        name = name_;
     }
 
     String name; // name to be displayed on LCD
-    void *trigger_function;
 
     int step = 0;
     std::vector<int> steps;
@@ -61,51 +64,51 @@ public:
 
     // ---------------------------- SONGS: ---------------------------
     // STANDARD RUN: select according to score->name
-    void run(midi::MidiInterface<HardwareSerial> MIDI); // iterates through all score steps, executing the current step functions
+    // void run(midi::MidiInterface<HardwareSerial> MIDI); // iterates through all score steps, executing the current step functions
 
-    void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI); // TODO: tentative, as this should be dynamic later..
+    static void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI); // TODO: tentative, as this should be dynamic later..
 
-    void run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_a72(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_a72(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void runVisuals(midi::MidiInterface<HardwareSerial> MIDI);
+    static void runVisuals(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_roeskur(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_roeskur(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_b_27(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_b_27(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_b_36(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_b_36(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_alhambra(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_alhambra(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_theodolit(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_theodolit(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI);
+    static void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI);
 
     // ------------------------------- MODES: (deprecated) ------------
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
