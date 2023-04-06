@@ -1,7 +1,7 @@
 /*
    SUPER MUSCLE
    ------------------------------------
-   October 2020-September 2022
+   October 2020-December 2022
    by David Unland david[at]davidunland[dot]de
    github.com/dunland/muscle
    ------------------------------------
@@ -269,16 +269,16 @@ void setup()
   Globals::songlist.push_back(randomVoice);    // jam
   Globals::songlist.push_back(wueste);         // wueste
   Globals::songlist.push_back(zitteraal);      // besen
-  Globals::songlist.push_back(randomVoice);    // jam
   Globals::songlist.push_back(alhambra);       // alhambra
   Globals::songlist.push_back(randomVoice);    // jam
   Globals::songlist.push_back(mrWimbledon);    // mr wimbledon
   Globals::songlist.push_back(roeskur);        // roeskur
-  Globals::songlist.push_back(queen);          // queen
   Globals::songlist.push_back(sattelstein);    // sattelstein
-  Globals::songlist.push_back(ferdinandPiech); // ferdinandPiech
   Globals::songlist.push_back(kupferUndGold);  // kupfer und gold
   Globals::songlist.push_back(theodolit);      // theodolit
+  // --------------------------------------------------------------
+  Globals::songlist.push_back(monitoring);     // zugabe:
+  Globals::songlist.push_back(ferdinandPiech); // ferdinandPiech
   Globals::songlist.push_back(donnerwetter);   // donnerwetter I
   Globals::songlist.push_back(control_dd200);  // donnerwetter II
 
