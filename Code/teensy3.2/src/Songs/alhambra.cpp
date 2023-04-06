@@ -8,6 +8,7 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
 {
     static int program;
     static int valueXgoal, valueYgoal, valueX, valueY;
+
     switch (step)
     {
     case 0:
@@ -63,8 +64,8 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-        step = 1;
-        setup = true;
+        Synthesizers::kaossPad3->sendControlChange(92, 0, MIDI); // Touch Pad off
+        proceed_to_next_score();
         break;
     }
 }
