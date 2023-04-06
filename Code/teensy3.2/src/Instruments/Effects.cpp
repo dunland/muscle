@@ -73,7 +73,7 @@ void Instrument::getTapTempo()
 
   case 1:                                                                              // first hit
 
-    if (millis() > timeSinceFirstTap + Globals::active_song->tempo.tapTempoResetTime) // reinitiate tap if not used for ten seconds
+    if (millis() > timeSinceFirstTap + Song::tempo.tapTempoResetTime) // reinitiate tap if not used for ten seconds
     {
       num_of_taps = 0;
       clock_sum = 0;
@@ -86,7 +86,7 @@ void Instrument::getTapTempo()
 
   case 2: // second hit
 
-    if (millis() < timeSinceFirstTap + Globals::active_song->tempo.tapTempoTimeOut) // only record tap if interval was not too long
+    if (millis() < timeSinceFirstTap + Song::tempo.tapTempoTimeOut) // only record tap if interval was not too long
     {
       num_of_taps++;
       clock_sum += millis() - timeSinceFirstTap;
@@ -121,7 +121,7 @@ void Instrument::getTapTempo()
       tapState = 1;
     }
 
-    if (timeSinceFirstTap > Globals::active_song->tempo.tapTempoTimeOut) // forget tap if time was too long
+    if (timeSinceFirstTap > Song::tempo.tapTempoTimeOut) // forget tap if time was too long
     {
       tapState = 1;
       // Globals::println_to_console(("too long...");
@@ -229,9 +229,9 @@ void Instrument::mainNoteIteration(Synthesizer *synth_, midi::MidiInterface<Hard
 
   if (millis() > lastNoteChange + 4000) // only do this once in an interval of 4 seconds, because there are always many hits on a cymbal..
   {
-    synth_->sendNoteOff(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);                      // turn previous note off
-    Globals::active_song->note_idx = (Globals::active_song->note_idx + 1) % Globals::active_song->notes.size(); // iterate note pointer
-    synth_->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);                       // turn next note on
+    synth_->sendNoteOff(Song::notes[Song::note_idx], MIDI);                      // turn previous note off
+    Song::note_idx = (Song::note_idx + 1) % Song::notes.size(); // iterate note pointer
+    synth_->sendNoteOn(Song::notes[Song::note_idx], MIDI);                       // turn next note on
 
     lastNoteChange = millis();
   }
@@ -486,19 +486,19 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, 
     topography.smoothen_dataArray(); // erases "noise" from arrays if SNR>snr_threshold
 
     // reset slot for volume
-    Globals::active_song->topo_midi_effect.reset();
+    Song::topo_midi_effect.reset();
 
     // sum up all topographies of all instruments:
     for (Instrument *instr : instruments) // of each instrument
     {
       if (instr->effect == TopographyMidiEffect)
-        Globals::active_song->topo_midi_effect.add(&topography);
+        Song::topo_midi_effect.add(&topography);
     }
-    Globals::active_song->topo_midi_effect.smoothen_dataArray();
+    Song::topo_midi_effect.smoothen_dataArray();
 
     // ------------ result-> change volume and play MIDI --------
     // ----------------------------------------------------------
-    int vol = min(Globals::active_song->topo_midi_effect.a_16[Globals::current_16th_count] * 13, 255);
+    int vol = min(Song::topo_midi_effect.a_16[Globals::current_16th_count] * 13, 255);
 
     if (topography.a_16[Globals::current_16th_count] > 0)
       midi_settings.synth->sendControlChange(midi_settings.cc_chan, vol, MIDI);

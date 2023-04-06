@@ -51,10 +51,10 @@ void Hardware::footswitch_pressed()
     break;
 
   case (Reset_Topo_and_Proceed_Score):
-    if (Globals::active_song->beat_sum.average_smooth >= Globals::active_song->beat_sum.activation_thresh) // score proceed criterion reached
+    if (Song::beat_sum.average_smooth >= Song::beat_sum.activation_thresh) // score proceed criterion reached
     {
       Globals::println_to_console("regularity height > 10: reset!");
-      Globals::active_song->increase_step(); // go to next score step
+      Song::increase_step(); // go to next score step
       for (auto &instrument : Drumset::instruments)
         for (int j = 0; j < 16; j++)
           instrument->topography.a_16[j] = 0;
@@ -62,14 +62,14 @@ void Hardware::footswitch_pressed()
       Globals::println_to_console("all instrument topographies were reset.");
 
       for (int j = 0; j < 16; j++)
-        Globals::active_song->beat_sum.a_16[j] = 0; // reset topography
-      Globals::active_song->beat_sum.average_smooth = 0;
+        Song::beat_sum.a_16[j] = 0; // reset topography
+      Song::beat_sum.average_smooth = 0;
     }
 
     else // not enough strokes to proceed yet.
     {
       Globals::print_to_console("regularity too low to proceed.. is at ");
-      Globals::println_to_console(Globals::active_song->beat_sum.average_smooth);
+      Globals::println_to_console(Song::beat_sum.average_smooth);
     }
 
     // either way, shuffle instruments with Random_CC_Effect:
@@ -119,13 +119,13 @@ void Hardware::footswitch_released()
     {
       instrument->shuffle_cc(false);
       instrument->set_effect(Change_CC);
-      Globals::active_song->increase_step(); // go to next score step
+      Song::increase_step(); // go to next score step
     }
     break;
 
   // increment score:
   case (Increment_Score):
-    Globals::active_song->increase_step(); // go to next score step
+    Song::increase_step(); // go to next score step
     break;
 
   default:
@@ -252,7 +252,7 @@ void Hardware::display_scores()
 
   // step
   lcd->setCursor(14, 1);
-  lcd->print(Globals::active_song->step);
+  lcd->print(Song::step);
 }
 
 // display midi values of instruments with FX-Type CC_Change
@@ -320,7 +320,7 @@ void Hardware::checkPushButton()
     switch (Globals::machine_state)
     {
     case Running:
-      Globals::active_song->proceed_to_next_score();
+      Song::proceed_to_next_score();
       break;
 
     case Calibration:

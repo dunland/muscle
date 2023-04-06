@@ -4,24 +4,24 @@
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Song::run_roeskur(midi::MidiInterface<HardwareSerial> MIDI)
+void run_roeskur(midi::MidiInterface<HardwareSerial> MIDI)
 {
 
     // static Synthesizer *mKorg = Synthesizers::mKorg;
     // static int noteIdx = 0;
 
-    switch (step)
+    switch(Song::step)
     {
     case 0:
-    if (setup)
+    if (Song::setup)
     {
         Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT / UP 2 OCT
-        setup = false;
+        Song::setup = false;
     }
         break;
 
     default:
-        proceed_to_next_score();
+        Song::proceed_to_next_score();
         break;
     }
 }

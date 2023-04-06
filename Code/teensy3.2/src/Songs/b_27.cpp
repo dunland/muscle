@@ -5,15 +5,15 @@
 #include <Notes.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
+void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
 {
 
     Notes notes[3] = {Note_D6, Note_F7, Note_G7};
 
-    switch (step)
+    switch (Song::step)
     {
     case 0:
-        if (setup)
+        if (Song::setup)
         {
             Synthesizers::mKorg->sendProgramChange(78, MIDI); // load b_27
 
@@ -23,17 +23,17 @@ void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
             // Drumset::standtom->midi_settings.notes = {Note_D6, Note_F7, Note_G7};
             // Drumset::tom1->midi_settings.notes = {Note_D6, Note_F7, Note_G7};
 
-            int idx = random(sizeof(notes));
-            Drumset::kick->midi_settings.notes.push_back(notes[idx]);
+            int idx = random(sizeof(Song::notes));
+            Drumset::kick->midi_settings.notes.push_back(Song::notes[idx]);
             Drumset::kick->midi_settings.active_note = notes[idx];
-            idx = random(sizeof(notes));
-            Drumset::snare->midi_settings.notes.push_back(notes[idx]);
+            idx = random(sizeof(Song::notes));
+            Drumset::snare->midi_settings.notes.push_back(Song::notes[idx]);
             Drumset::snare->midi_settings.active_note = notes[idx];
-            idx = random(sizeof(notes));
-            Drumset::standtom->midi_settings.notes.push_back(notes[idx]);
+            idx = random(sizeof(Song::notes));
+            Drumset::standtom->midi_settings.notes.push_back(Song::notes[idx]);
             Drumset::standtom->midi_settings.active_note = notes[idx];
-            idx = random(sizeof(notes));
-            Drumset::tom1->midi_settings.notes.push_back(notes[idx]);
+            idx = random(sizeof(Song::notes));
+            Drumset::tom1->midi_settings.notes.push_back(Song::notes[idx]);
             Drumset::tom1->midi_settings.active_note = notes[idx];
 
             Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
@@ -44,7 +44,7 @@ void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::standtom->set_effect(PlayMidi);
             Drumset::tom1->set_effect(PlayMidi);
 
-            setup = false;
+            Song::setup = false;
         }
 
         if (Drumset::kick->timing.wasHit)
@@ -55,16 +55,16 @@ void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1:
-        if (setup)
+        if (Song::setup)
         {
-            int idx = random(sizeof(notes));
+            int idx = random(sizeof(Song::notes));
             Drumset::kick->midi_settings.active_note = notes[idx];
-            idx = random(sizeof(notes));
+            idx = random(sizeof(Song::notes));
             Drumset::snare->midi_settings.active_note = notes[idx];
-            setup = false;
-            idx = random(sizeof(notes));
+            Song::setup = false;
+            idx = random(sizeof(Song::notes));
             Drumset::standtom->midi_settings.active_note = notes[idx];
-            idx = random(sizeof(notes));
+            idx = random(sizeof(Song::notes));
             Drumset::tom1->midi_settings.active_note = notes[idx];
         }
 
@@ -76,8 +76,8 @@ void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-        step = 1;
-        setup = true;
+        Song::step = 1;
+        Song::setup = true;
         break;
     }
 }

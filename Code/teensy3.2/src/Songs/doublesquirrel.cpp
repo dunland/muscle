@@ -9,7 +9,7 @@
 // THIS SONG IS COMPOSED FOR microKORG A.63
 // SCORE, stepwise:
 // step proceeds if footswitch is pressed (in mode RESET_AND_PROCEED_SCORE) when regularity is high enough
-void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make this much more automatic!!
+void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make this much more automatic!!
 {
     static Song *active_score = Globals::active_song;
 
@@ -124,7 +124,7 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
 
         Hardware::footswitch_mode = Reset_Topo_and_Proceed_Score;
 
-        static std::vector<int> locrian_mode = {notes[0] + 1, notes[0] + 3, notes[0] + 5, notes[0] + 6, notes[0] + 8, notes[0] + 11};
+        static std::vector<int> locrian_mode = {active_score->notes[0] + 1, active_score->notes[0] + 3, active_score->notes[0] + 5, active_score->notes[0] + 6, active_score->notes[0] + 8, active_score->notes[0] + 11};
 
         // setup score note seed:
         Globals::print_to_console("active_score->notes[0] = ");
@@ -335,12 +335,12 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
         // break;
 
     default:
-        proceed_to_next_score();
+        Song::proceed_to_next_score();
         break;
     }
 
     // vibrate if new score is ready:
-    if (Globals::active_song->beat_sum.ready())
+    if (Song::beat_sum.ready())
     {
         digitalWrite(VIBR, HIGH);
         Globals::println_to_console("ready to go to next score step! hit footswitch!");

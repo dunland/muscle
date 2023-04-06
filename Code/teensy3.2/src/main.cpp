@@ -235,33 +235,33 @@ void setup()
 
   // ---------------------------------- SCORE -------------------------
   // doubleSquirrel = new Score("doubleSquirrel");
-  monitoring = new Song(std::bind(Song::run_monitoring, MIDI, "monitoring"));
+  monitoring = new Song(std::bind(run_monitoring, MIDI));
 
-  sattelstein = new Song(std::bind(Song::run_sattelstein, MIDI));
+  sattelstein = new Song(std::bind(run_sattelstein, MIDI));
   sattelstein->setTempoRange(150, 170); // TODO: make this work!
-  elektrosmoff = new Song(std::bind(Song::run_elektrosmoff, MIDI));
-  randomVoice = new Song(std::bind(Song::run_randomVoice, MIDI));
-  zitteraal = new Song(std::bind(Song::run_zitteraal, MIDI));
-  control_dd200 = new Song(std::bind(Song::run_control_dd200, MIDI));
-  dd200_timeControl = new Song(std::bind(Song::run_dd200_timeControl, MIDI));
-  a_72 = new Song(std::bind(Song::run_a72, MIDI));
-  b_27 = new Song(std::bind(Song::run_b_27, MIDI));
-  b_36 = new Song(std::bind(Song::run_b_36, MIDI));
-  whammyMountains = Song(std::bind(Song::run_whammyMountains, MIDI));
-  hutschnur = new Song(std::bind(Song::run_hutschnur, MIDI));
-  control_volca = new Song(std::bind(Song::run_control_volca, MIDI));
-  runVisuals = new Song(std::bind(Song::runVisuals, MIDI));
-  nanokontrol = new Song(std::bind(Song::run_nanokontrol, MIDI));
-  pogoNumberOne = new Song(std::bind(Song::run_PogoNumberOne, MIDI));
-  roeskur = new Song(std::bind(Song::run_roeskur, MIDI));
-  alhambra = new Song(std::bind(Song::run_alhambra, MIDI));
-  wueste = new Song(std::bind(Song::run_monitoring, MIDI));
-  mrWimbledon = new Song(std::bind(Song::run_monitoring, MIDI));
-  ferdinandPiech = new Song(std::bind(Song::run_monitoring, MIDI));
-  queen = new Song(std::bind(Song::run_monitoring, MIDI));
-  donnerwetter = new Song(std::bind(Song::run_donnerwetter, MIDI));
-  theodolit = new Song(std::bind(Song::run_theodolit, MIDI));
-  kupferUndGold = new Song(std::bind(Song::run_kupferUndGold, MIDI));
+  elektrosmoff = new Song(std::bind(run_elektrosmoff, MIDI));
+  randomVoice = new Song(std::bind(run_randomVoice, MIDI));
+  zitteraal = new Song(std::bind(run_zitteraal, MIDI));
+  control_dd200 = new Song(std::bind(run_control_dd200, MIDI));
+  dd200_timeControl = new Song(std::bind(run_dd200_timeControl, MIDI));
+  a_72 = new Song(std::bind(run_a72, MIDI));
+  b_27 = new Song(std::bind(run_b_27, MIDI));
+  b_36 = new Song(std::bind(run_b_36, MIDI));
+  whammyMountains = new Song(std::bind(run_whammyMountains, MIDI));
+  hutschnur = new Song(std::bind(run_hutschnur, MIDI));
+  control_volca = new Song(std::bind(run_control_volca, MIDI));
+  runVisuals = new Song(std::bind(run_visuals, MIDI));
+  nanokontrol = new Song(std::bind(run_nanokontrol, MIDI));
+  pogoNumberOne = new Song(std::bind(run_PogoNumberOne, MIDI));
+  roeskur = new Song(std::bind(run_roeskur, MIDI));
+  alhambra = new Song(std::bind(run_alhambra, MIDI));
+  wueste = new Song(std::bind(run_monitoring, MIDI));
+  mrWimbledon = new Song(std::bind(run_monitoring, MIDI));
+  ferdinandPiech = new Song(std::bind(run_monitoring, MIDI));
+  queen = new Song(std::bind(run_monitoring, MIDI));
+  donnerwetter = new Song(std::bind(run_donnerwetter, MIDI));
+  theodolit = new Song(std::bind(run_theodolit, MIDI));
+  kupferUndGold = new Song(std::bind(run_kupferUndGold, MIDI));
 
   Globals::songlist.push_back(monitoring);
   Globals::songlist.push_back(control_dd200);  // intro
@@ -389,7 +389,7 @@ void loop()
 
   if (Globals::current_beat_pos != last_beat_pos) // run once per 32nd-step
   {
-    Globals::active_song->trigger_function(MIDI);
+    Song::trigger_function(MIDI);
 
     //----------------------- SCORE END -------------------------------
 

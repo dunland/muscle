@@ -6,6 +6,11 @@
 /////////////////////////////////// SETUP FUNCTIONS /////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 
+bool Song::setup = false;
+int Song::step = 0;
+int Song::note_idx = 0;        // points at active (bass-)note
+int Song::note_change_pos = 0; // defines at what position to increase note_idx
+
 void Song::set_notes(std::vector<int> list)
 {
     // clear notes list:
@@ -47,8 +52,8 @@ void Song::proceed_to_next_score()
     Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::songlist.size();
     Globals::active_song = Globals::songlist[Globals::active_score_pointer];
     // ...and begin at step 0:
-    Globals::active_song->step = 0;
-    Globals::active_song->setup = true;
+    Song::step = 0;
+    Song::setup = true;
 
     for (auto &instrument : Drumset::instruments)
         instrument->effect = Monitor;
@@ -67,8 +72,8 @@ void Song::proceed_to_next_score()
 // set tempo of the score:
 void Song::setTempoRange(int min_tempo_, int max_tempo_)
 {
-    tempo.min_tempo = min_tempo_;
-    tempo.max_tempo = max_tempo_;
+    Song::tempo.min_tempo = min_tempo_;
+    Song::tempo.max_tempo = max_tempo_;
 }
 
 // reset all instruments to "Monitor" mode
@@ -84,101 +89,101 @@ void Song::resetInstruments()
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////// STANDARD RUN //////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void Song::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback function and set upon Song creation!
-{
-    if (name == "elektrosmoff")
-    {
-        run_elektrosmoff(MIDI);
-    }
-    else if (name == "doubleSquirrel")
-    {
-        run_doubleSquirrel(MIDI);
-    }
-    else if (name == "randomVoice")
-    {
-        run_randomVoice(MIDI);
-    }
-    // else if (name == "monitoring")
-    // {
-    //     run_monitoring(MIDI);
-    // }
-    else if (name == "sattelstein")
-    {
-        run_sattelstein(MIDI);
-    }
-    else if (name == "dd200")
-    {
-        run_control_dd200(MIDI);
-    }
-    else if (name == "dd200_timeControl")
-    {
-        run_dd200_timeControl(MIDI);
-    }
-    else if (name == "A.72")
-    {
-        run_a72(MIDI);
-    }
-    else if (name == "whammyMountains")
-    {
-        run_whammyMountains(MIDI);
-    }
-    else if (name == "hutschnur")
-    {
-        run_hutschnur(MIDI);
-    }
-    else if (name == "control_volca")
-    {
-        run_control_volca(MIDI);
-    }
-    else if (name == "runVisuals")
-    {
-        runVisuals(MIDI);
-    }
-    else if (name == "zitteraal")
-    {
-        run_zitteraal(MIDI);
-    }
-    else if (name == "nanokontrol")
-    {
-        run_nanokontrol(MIDI);
-    }
-    else if (name == "pogoNumberOne")
-    {
-        run_PogoNumberOne(MIDI);
-    }
-    else if (name == "roeskur")
-    {
-        run_roeskur(MIDI);
-    }
-    else if (name == "b_27")
-    {
-        run_b_27(MIDI);
-    }
-    else if (name == "b_36")
-    {
-        run_b_36(MIDI);
-    }
-    else if (name == "alhambra")
-    {
-        run_alhambra(MIDI);
-    }
-    else if (name == "theodolit")
-    {
-        run_theodolit(MIDI);
-    }
-    else if (name == "kupferUndGold")
-    {
-        run_kupferUndGold(MIDI);
-    }
-    else if (name == "mrWimbledon" || name == "queen" || name == "wueste" || name == "ferdinandPiech") 
-    {
-        run_monitoring(MIDI);
-    }
-    else if (name == "donnerwetter")
-    {
-        run_donnerwetter(MIDI);
-    }    
-}
+// void Song::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback function and set upon Song creation!
+// {
+//     if (name == "elektrosmoff")
+//     {
+//         run_elektrosmoff(MIDI);
+//     }
+//     else if (name == "doubleSquirrel")
+//     {
+//         run_doubleSquirrel(MIDI);
+//     }
+//     else if (name == "randomVoice")
+//     {
+//         run_randomVoice(MIDI);
+//     }
+//     // else if (name == "monitoring")
+//     // {
+//     //     run_monitoring(MIDI);
+//     // }
+//     else if (name == "sattelstein")
+//     {
+//         run_sattelstein(MIDI);
+//     }
+//     else if (name == "dd200")
+//     {
+//         run_control_dd200(MIDI);
+//     }
+//     else if (name == "dd200_timeControl")
+//     {
+//         run_dd200_timeControl(MIDI);
+//     }
+//     else if (name == "A.72")
+//     {
+//         run_a72(MIDI);
+//     }
+//     else if (name == "whammyMountains")
+//     {
+//         run_whammyMountains(MIDI);
+//     }
+//     else if (name == "hutschnur")
+//     {
+//         run_hutschnur(MIDI);
+//     }
+//     else if (name == "control_volca")
+//     {
+//         run_control_volca(MIDI);
+//     }
+//     else if (name == "runVisuals")
+//     {
+//         runVisuals(MIDI);
+//     }
+//     else if (name == "zitteraal")
+//     {
+//         run_zitteraal(MIDI);
+//     }
+//     else if (name == "nanokontrol")
+//     {
+//         run_nanokontrol(MIDI);
+//     }
+//     else if (name == "pogoNumberOne")
+//     {
+//         run_PogoNumberOne(MIDI);
+//     }
+//     else if (name == "roeskur")
+//     {
+//         run_roeskur(MIDI);
+//     }
+//     else if (name == "b_27")
+//     {
+//         run_b_27(MIDI);
+//     }
+//     else if (name == "b_36")
+//     {
+//         run_b_36(MIDI);
+//     }
+//     else if (name == "alhambra")
+//     {
+//         run_alhambra(MIDI);
+//     }
+//     else if (name == "theodolit")
+//     {
+//         run_theodolit(MIDI);
+//     }
+//     else if (name == "kupferUndGold")
+//     {
+//         run_kupferUndGold(MIDI);
+//     }
+//     else if (name == "mrWimbledon" || name == "queen" || name == "wueste" || name == "ferdinandPiech") 
+//     {
+//         run_monitoring(MIDI);
+//     }
+//     else if (name == "donnerwetter")
+//     {
+//         run_donnerwetter(MIDI);
+//     }    
+// }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////
 void Song::add_bassNote(int note)

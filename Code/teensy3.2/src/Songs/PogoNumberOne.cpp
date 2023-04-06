@@ -4,22 +4,22 @@
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void Song::run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI)
+void run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI)
 {
 
-    switch (step)
+    switch(Song::step)
     {
     case 0:
-        if (setup)
+        if (Song::setup)
         {
             Synthesizers::whammy->sendProgramChange(42, MIDI); // WHAMMY UP 2 OCT
             Hardware::footswitch_mode = Increment_Score;
-            setup = false;
+            Song::setup = false;
         }
         break;
 
     default:
-        proceed_to_next_score();
+        Song::proceed_to_next_score();
         break;
     }
 }
