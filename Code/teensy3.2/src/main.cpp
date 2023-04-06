@@ -63,6 +63,7 @@ Song *kupferUndGold;
 Song *ferdinandPiech;
 Song *queen;
 Song *donnerwetter;
+Song *randomSelect;
 
 Rhythmics *rhythmics;
 
@@ -261,8 +262,10 @@ void setup()
   donnerwetter = new Song("donnerwetter");     // non-existent!
   theodolit = new Song("theodolit");
   kupferUndGold = new Song("kupferUndGold");
+  randomSelect = new Song("randomSelect");
 
   Globals::songlist.push_back(monitoring);
+  Globals::songlist.push_back(randomSelect);
   Globals::songlist.push_back(control_dd200);  // intro
   Globals::songlist.push_back(pogoNumberOne);  // pogo
   Globals::songlist.push_back(hutschnur);      // hutschnur

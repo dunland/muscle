@@ -178,6 +178,10 @@ void Song::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback f
     {
         run_donnerwetter(MIDI);
     }    
+    else if (name == "randomSelect")
+    {
+        run_randomSelect(MIDI);
+    }
 }
 
 //////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////
