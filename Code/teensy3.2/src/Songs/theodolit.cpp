@@ -9,10 +9,10 @@ void Song::run_theodolit(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup)
+        if (setup_song())
         {
             Synthesizers::whammy->sendProgramChange(58, MIDI); // HARMONY 5TH → UP OCT
-            setup = false;
+            
         }
         break;
 

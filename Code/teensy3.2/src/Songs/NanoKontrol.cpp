@@ -11,13 +11,13 @@ void Song::run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:  // A.43
-        if (setup)
+        if (setup_song())
         {
             Hardware::footswitch_mode = Increment_Score;
             // Globals::machine_state = NanoKontrol_Test;
             Drumset::snare->setup_midi(mKORG_LFO2_Rate, Synthesizers::mKorg, 127, 30, 18.0, -0.11);
             Drumset::snare->set_effect(Change_CC);
-            setup = false;
+            
             Synthesizers::mKorg->sendNoteOn(notes[note_idx], MIDI);
         }
         break;

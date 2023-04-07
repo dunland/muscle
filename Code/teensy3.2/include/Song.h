@@ -41,7 +41,12 @@ public:
     } tempo;
 
     // TODO: make this a functional bool and reset instruments etc when calling (and deactivate it automatically)!
-    boolean setup = true; // when true, current score_step's setup function is executed.
+    bool setup_state; // when true, current score_step's setup function is executed.
+    bool setup_song();
+
+
+    // bool r = fknopf;
+    // fknopf
 
     // TODO: move this to Rhythmics
     TOPOGRAPHY beat_sum;         // sum of all instrument topographies

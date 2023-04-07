@@ -10,9 +10,8 @@ void Song::run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
         case 0:
-        if (setup)
+        if (setup_song())
         {
-            setup = false;
             Drumset::snare->set_effect(Change_CC);
             //TODO: Drumset::snare->setup_midi(mKORG_Filter_Type, mKorg, 60, 40, 20, -0.05):
         }
@@ -28,7 +27,7 @@ void Song::run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1:
-        if (setup)
+        if (setup_song())
         {
             resetInstruments(); // reset all instruments to "Monitor" mode
             notes = {Note_B5, Note_E5, Note_B6, Note_E6};
@@ -55,7 +54,7 @@ void Song::run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom1->midi_settings.active_note = Drumset::tom1->midi_settings.notes[3];
             Drumset::tom1->set_effect(PlayMidi);
 
-            setup = false;
+            
         }
 
         break;

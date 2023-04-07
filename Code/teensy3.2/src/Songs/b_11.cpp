@@ -11,10 +11,9 @@ void run_b_11(midi::MidiInterface<HardwareSerial> MIDI)
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->setup)
+        if (Globals::active_song->setup_song())
         {
             Synthesizers::mKorg->sendProgramChange(64, MIDI); // b.11
-            Globals::active_song->setup = false;
         }
 
         if (Drumset::snare->timing.wasHit)

@@ -25,7 +25,7 @@ void Song::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1: // change CC ("Reflex") + PlayMidi
-        if (setup)
+        if (setup_song())
         {
             Hardware::footswitch_mode = Increment_Score;
 
@@ -54,12 +54,12 @@ void Song::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
 
             playSingleNote(Synthesizers::mKorg, MIDI);
 
-            setup = false;
+            
         }
         break;
 
     case 2: // change CC only
-        if (setup)
+        if (setup_song())
         {
             // Hardware::footswitch_mode = Experimental;
             Drumset::kick->shuffle_cc(true); // set a random midi CC channel
@@ -80,14 +80,14 @@ void Song::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
 
             playSingleNote(Synthesizers::mKorg, MIDI);
 
-            setup = false;
+            
         }
 
         break;
 
     default: // start over again
         step = 1;
-        setup = true;
+        setup_state = true;
         Synthesizers::mKorg->notes[notes[note_idx]] = false;
         // proceed_to_next_score();
         break;

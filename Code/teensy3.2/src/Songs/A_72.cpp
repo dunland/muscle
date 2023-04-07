@@ -17,7 +17,7 @@ void Song::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup)
+        if (setup_song())
         {
 
             resetInstruments();
@@ -43,7 +43,7 @@ void Song::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[0];
             Drumset::snare->set_effect(PlayMidi);
 
-            setup = false;
+            
         }
         playSingleNote(Synthesizers::mKorg, MIDI);
 
@@ -60,12 +60,12 @@ void Song::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1:
-        if (setup)
+        if (setup_song())
         {
             int val = (Synthesizers::mKorg->midi_values[mKORG_TimbreSelect] == 0) ? 127 : 0;
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, val, MIDI); // Select Timbre 2
 
-            setup = false;
+            
         }
         playSingleNote(Synthesizers::mKorg, MIDI);
 
@@ -73,7 +73,7 @@ void Song::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
 
     default:
         step = 1;
-        setup = true;
+        setup_state = true;
         note_increase = (note_increase == 4) ? 5 : 4;
         notes.push_back(notes[note_idx] + note_increase);
         note_idx++;

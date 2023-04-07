@@ -11,12 +11,12 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup)
+        if (setup_song())
         {
             Synthesizers::whammy->sendProgramChange(0, MIDI); // HARMONY UP 2 OCT
             Synthesizers::mKorg->sendProgramChange(34, MIDI); // load b_27
             Synthesizers::kaossPad3->sendControlChange(92, 127, MIDI); // Touch Pad on
-            setup = false;
+            
         }
         // static int val = 0;
         // Synthesizers::kaossPad3->sendProgramChange(val, MIDI); // Touch Pad on
@@ -27,12 +27,12 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1:
-        if (setup)
+        if (setup_song())
         {
             // program = int(random(97));
             program = 58;
             Synthesizers::kaossPad3->sendProgramChange(program, MIDI);
-            setup = false;
+            
         }
 
         if (Drumset::snare->timing.wasHit){
@@ -64,7 +64,7 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
 
     default:
         step = 1;
-        setup = true;
+        setup_state = true;
         break;
     }
 }

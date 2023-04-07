@@ -20,10 +20,10 @@ void Song::run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup)
+        if (setup_song())
         {
             sel_song_int = list_of_songs.at(random(sizeof(list_of_songs)));
-            setup = false;
+            
         }
 
         switch (sel_song_int)

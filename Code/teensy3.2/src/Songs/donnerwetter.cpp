@@ -22,7 +22,7 @@ void Song::run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 1: // some ramp effect on snare. Works fine with DD200-DUAL mode @ ~150 BPM quarter notes
 
-        if (setup)
+        if (setup_song())
         {
             Hardware::footswitch_mode = Increment_Score;
             resetInstruments();
@@ -32,7 +32,7 @@ void Song::run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
 
-            setup = false;
+            
         }
 
         /* CC-values are printed automatically */

@@ -13,7 +13,7 @@ void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup)
+        if (setup_song())
         {
             Synthesizers::mKorg->sendProgramChange(78, MIDI); // load b_27
 
@@ -44,7 +44,7 @@ void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::standtom->set_effect(PlayMidi);
             Drumset::tom1->set_effect(PlayMidi);
 
-            setup = false;
+            
         }
 
         if (Drumset::kick->timing.wasHit)
@@ -55,13 +55,13 @@ void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1:
-        if (setup)
+        if (setup_song())
         {
             int idx = random(sizeof(notes));
             Drumset::kick->midi_settings.active_note = notes[idx];
             idx = random(sizeof(notes));
             Drumset::snare->midi_settings.active_note = notes[idx];
-            setup = false;
+            
             idx = random(sizeof(notes));
             Drumset::standtom->midi_settings.active_note = notes[idx];
             idx = random(sizeof(notes));
@@ -77,7 +77,7 @@ void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
 
     default:
         step = 1;
-        setup = true;
+        setup_state = true;
         break;
     }
 }

@@ -10,11 +10,11 @@ void Song::run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup)
+        if (setup_song())
         {
             Synthesizers::whammy->sendProgramChange(42, MIDI); // WHAMMY UP 2 OCT
             Hardware::footswitch_mode = Increment_Score;
-            setup = false;
+            
         }
         break;
 

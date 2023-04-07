@@ -13,10 +13,10 @@ void Song::run_roeskur(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-    if (setup)
+    if (setup_song())
     {
         Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT / UP 2 OCT
-        setup = false;
+        
     }
         break;
 

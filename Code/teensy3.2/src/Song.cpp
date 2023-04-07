@@ -3,6 +3,13 @@
 #include <Instruments.h>
 #include <Hardware.h>
 
+bool Song::setup_song(){
+
+    bool currentState = setup_state;
+    setup_state = false;
+    return currentState;
+}
+
 /////////////////////////////////// SETUP FUNCTIONS /////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -34,7 +41,7 @@ void Song::set_step_function(int trigger_step, Instrument *instrument, EffectsTy
 void Song::increase_step()
 {
     step++;
-    setup = true;
+    setup_state = true;
     Serial.println("step");
     Serial.println(step);
     Hardware::lcd->clear();
@@ -48,7 +55,7 @@ void Song::proceed_to_next_score()
     Globals::active_song = Globals::songlist[Globals::active_score_pointer];
     // ...and begin at step 0:
     Globals::active_song->step = 0;
-    Globals::active_song->setup = true;
+    Globals::active_song->setup_state = true;
 
     for (auto &instrument : Drumset::instruments)
         instrument->effect = Monitor;

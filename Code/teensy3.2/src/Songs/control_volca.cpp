@@ -14,9 +14,9 @@ void Song::run_control_volca(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup)
+        if (setup_song())
         {
-            setup = false;
+            
         }
 
         if (Drumset::kick->timing.wasHit)

@@ -9,7 +9,7 @@ void Song::run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup)
+        if (setup_song())
         {
             Hardware::footswitch_mode = Increment_Score;
             resetInstruments();
@@ -24,7 +24,7 @@ void Song::run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
                 }
             }
 
-            setup = false;
+            
         }
         break;
 
