@@ -13,8 +13,6 @@ static std::vector<int> list_of_songs = {
     12   // A.25
 };
 
-void *run_selected_song();
-
 void Song::run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
 {
     static int sel_song_int;
@@ -25,7 +23,6 @@ void Song::run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
         if (setup)
         {
             sel_song_int = list_of_songs.at(random(sizeof(list_of_songs)));
-            Synthesizers::mKorg->sendProgramChange(sel_song_int, MIDI); // get random entry; start random predefined program
             setup = false;
         }
 

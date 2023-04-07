@@ -13,6 +13,7 @@ void run_b_11(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (Globals::active_song->setup)
         {
+            Synthesizers::mKorg->sendProgramChange(64, MIDI); // b.11
             Globals::active_song->setup = false;
         }
 
