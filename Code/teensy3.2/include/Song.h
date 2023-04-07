@@ -30,11 +30,11 @@ public:
 
     String name; // name to be displayed on LCD
 
-    static int step;
+    int step = 0;
     std::vector<int> steps;
-    static int note_idx;        // points at active (bass-)note
-    static int note_change_pos; // defines at what position to increase note_idx
-    static std::vector<int> notes;
+    int note_idx = 0;        // points at active (bass-)note
+    int note_change_pos; // defines at what position to increase note_idx
+    std::vector<int> notes;
 
     struct tempo
     {
@@ -42,42 +42,40 @@ public:
         int max_tempo = 999;
         int tapTempoResetTime = 0;           // time to restart tapTempo if not used for this long
         unsigned int tapTempoTimeOut = 2000; // do not count second tap, if time gap to first one exceeds this
-    };
-
-    static tempo tempo;
+    } tempo;
 
     // TODO: make this a functional bool and reset instruments etc when calling (and deactivate it automatically)!
-    static bool setup; // when true, current score_step's setup function is executed.
+    bool setup = false; // when true, current score_step's setup function is executed.
 
     // TODO: move this to Rhythmics
-    static TOPOGRAPHY beat_sum;         // sum of all instrument topographies
-    static TOPOGRAPHY beat_regularity;  // for advance of step
-    static TOPOGRAPHY topo_midi_effect; // for TopographyMidiEffect
+    TOPOGRAPHY beat_sum;         // sum of all instrument topographies
+    TOPOGRAPHY beat_regularity;  // for advance of step
+    TOPOGRAPHY topo_midi_effect; // for TopographyMidiEffect
 
     // --------------------------- SETUP etc: -------------------------
-    static void set_step_function(int trigger_step, Instrument *instrument, EffectsType); // TODO: set score-step-functions here
-    static void set_notes(std::vector<int> list);
-    static void add_bassNote(int note); // adds a NOTE to notes[]
-    static void increase_step();
-    static void proceed_to_next_score();
-    static void setTempoRange(int min_tempo_, int max_tempo_);
-    static void resetInstruments();
+    void set_step_function(int trigger_step, Instrument *instrument, EffectsType); // TODO: set score-step-functions here
+    void set_notes(std::vector<int> list);
+    void add_bassNote(int note); // adds a NOTE to notes[]
+    void increase_step();
+    void proceed_to_next_score();
+    void setTempoRange(int min_tempo_, int max_tempo_);
+    void resetInstruments();
 
     // ---------------------------- SONGS: ---------------------------
     // STANDARD RUN: select according to score->name
     // void run(midi::MidiInterface<HardwareSerial> MIDI); // iterates through all score steps, executing the current step functions
     // ------------------------------- MODES: (deprecated) ------------
-    static void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
+    void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
 
-    static void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on, never off)
+    void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on, never off)
 
-    static void playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);
+    void playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);
 
-    static void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
+    void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
 
-    static void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // creates an envelope for volume filter via topography
+    void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // creates an envelope for volume filter via topography
 
-    static void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // changes the delay times on each 16th-step
+    void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // changes the delay times on each 16th-step
 
     // void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
 };

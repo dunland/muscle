@@ -7,10 +7,10 @@
 // 1: playMidi+CC_Change; 2: change_cc only
 void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    switch(Song::step)
+    switch(Globals::active_song->step)
     {
     case 0:
-        Song::resetInstruments(); // reset all instruments to "Monitor" mode
+        Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
         Synthesizers::mKorg->sendProgramChange(int(random(0, 128)), MIDI);
         // notes.push_back(int(random(24, 48)));
         Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
@@ -21,11 +21,11 @@ void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
         Drumset::standtom->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
         Drumset::tom2->setup_midi(CC_None, Synthesizers::mKorg, 115, 15, 20, -0.06);
 
-        Song::step = 1;
+        Globals::active_song->step = 1;
         break;
 
     case 1: // change CC ("Reflex") + PlayMidi
-        if (Song::setup)
+        if (Globals::active_song->setup)
         {
             Hardware::footswitch_mode = Increment_Score;
 
@@ -52,14 +52,14 @@ void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom2->set_effect(PlayMidi);
             Drumset::hihat->set_effect(TapTempo);
 
-            Song::playSingleNote(Synthesizers::mKorg, MIDI);
+            Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
 
-            Song::setup = false;
+            Globals::active_song->setup = false;
         }
         break;
 
     case 2: // change CC only
-        if (Song::setup)
+        if (Globals::active_song->setup)
         {
             // Hardware::footswitch_mode = Experimental;
             Drumset::kick->shuffle_cc(true); // set a random midi CC channel
@@ -78,18 +78,18 @@ void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom2->set_effect(Change_CC);
             Drumset::hihat->set_effect(TapTempo);
 
-            Song::playSingleNote(Synthesizers::mKorg, MIDI);
+            Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
 
-            Song::setup = false;
+            Globals::active_song->setup = false;
         }
 
         break;
 
     default: // start over again
-        Song::step = 1;
-        Song::setup = true;
-        Synthesizers::mKorg->notes[Song::notes[Song::note_idx]] = false;
-        // Song::proceed_to_next_score();
+        Globals::active_song->step = 1;
+        Globals::active_song->setup = true;
+        Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] = false;
+        // Globals::active_song->proceed_to_next_score();
         break;
     }
 }

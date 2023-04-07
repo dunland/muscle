@@ -389,7 +389,7 @@ void loop()
 
   if (Globals::current_beat_pos != last_beat_pos) // run once per 32nd-step
   {
-    Song::trigger_function(MIDI);
+    Globals::active_song->trigger_function(MIDI);
 
     //----------------------- SCORE END -------------------------------
 

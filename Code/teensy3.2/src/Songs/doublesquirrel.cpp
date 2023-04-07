@@ -335,12 +335,12 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
         // break;
 
     default:
-        Song::proceed_to_next_score();
+        Globals::active_song->proceed_to_next_score();
         break;
     }
 
     // vibrate if new score is ready:
-    if (Song::beat_sum.ready())
+    if (Globals::active_song->beat_sum.ready())
     {
         digitalWrite(VIBR, HIGH);
         Globals::println_to_console("ready to go to next score step! hit footswitch!");

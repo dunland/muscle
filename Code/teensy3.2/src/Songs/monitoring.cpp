@@ -6,14 +6,14 @@
 ///////////////////////////// MONITORING //////////////////////////////
 void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    switch (Song::step)
+    switch (Globals::active_song->step)
     {
     case 0:
-        if (Song::setup)
+        if (Globals::active_song->setup)
         {
             Hardware::footswitch_mode = Increment_Score;
-            Song::resetInstruments();
-            Song::notes.clear();
+            Globals::active_song->resetInstruments();
+            Globals::active_song->notes.clear();
 
             // turn off all currently playing MIDI notes:
             for (int channel = 1; channel < 3; channel++)
@@ -24,12 +24,12 @@ void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
                 }
             }
 
-            Song::setup = false;
+            Globals::active_song->setup = false;
         }
         break;
 
     default:
-        Song::proceed_to_next_score();
+        Globals::active_song->proceed_to_next_score();
         break;
     }
 }

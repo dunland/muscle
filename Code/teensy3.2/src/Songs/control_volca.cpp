@@ -11,12 +11,12 @@ void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI)
     static uint64_t lastNoteSent = 0;
     Synthesizer *volca = Synthesizers::volca;
 
-    switch (Song::step)
+    switch (Globals::active_song->step)
     {
     case 0:
-        if (Song::setup)
+        if (Globals::active_song->setup)
         {
-            Song::setup = false;
+            Globals::active_song->setup = false;
         }
 
         if (Drumset::kick->timing.wasHit)
@@ -35,7 +35,7 @@ void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-    Song::proceed_to_next_score();
+    Globals::active_song->proceed_to_next_score();
         break;
     }
 }

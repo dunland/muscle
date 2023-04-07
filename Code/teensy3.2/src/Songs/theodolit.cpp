@@ -6,18 +6,18 @@
 //////////////////////////// CONTROL DD200 /////////////////////////////
 void run_theodolit(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    switch(Song::step)
+    switch(Globals::active_song->step)
     {
     case 0:
-        if (Song::setup)
+        if (Globals::active_song->setup)
         {
             Synthesizers::whammy->sendProgramChange(58, MIDI); // HARMONY 5TH → UP OCT
-            Song::setup = false;
+            Globals::active_song->setup = false;
         }
         break;
 
     default:
-        Song::proceed_to_next_score();
+        Globals::active_song->proceed_to_next_score();
         break;
     }
 }
