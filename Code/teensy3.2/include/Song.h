@@ -122,3 +122,15 @@ public:
 
     // void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
 };
+
+void run_A_15(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_A_25(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_b_11(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_b_36(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_b_63(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_b_73(midi::MidiInterface<HardwareSerial> MIDI);
