@@ -58,6 +58,7 @@ public:
   static void lcd_display();
   static void display_scores();
   static void display_Midi_values(); // display midi values of instruments with FX-Type CC_Change
+  static void display_Midi_channels(); // display midi channel of instruments with FX-Type CC_Change
   static menu *lcd_menu;
 
   // --------------------------------------------------------------------
