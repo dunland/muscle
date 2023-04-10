@@ -42,7 +42,7 @@ public:
 
     // TODO: make this a functional bool and reset instruments etc when calling (and deactivate it automatically)!
     bool setup_state; // when true, current score_step's setup function is executed.
-    bool setup_song();
+    bool get_setup_state();
 
 
     // bool r = fknopf;

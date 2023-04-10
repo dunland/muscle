@@ -10,7 +10,7 @@ void Song::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup_song())
+        if (get_setup_state())
         {
             Globals::bSendMidiClock = true;
             Song::resetInstruments();                        // reset all instruments to "Monitor" mode
@@ -24,7 +24,7 @@ void Song::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1: // play notes G2 and G3
-        if (setup_song())
+        if (get_setup_state())
         {
             
         }
@@ -36,7 +36,7 @@ void Song::run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 2: // stop playing notes and leave
-        if (setup_song())
+        if (get_setup_state())
         {
             Synthesizers::mKorg->sendNoteOff(55, MIDI); // play note 55 (G) if it is not playing at the moment
             Synthesizers::mKorg->sendNoteOff(43, MIDI); // play note 43 (G) if it is not playing at the moment

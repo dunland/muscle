@@ -22,7 +22,7 @@ void Song::run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 1: // some ramp effect on snare. Works fine with DD200-DUAL mode @ ~150 BPM quarter notes
 
-        if (setup_song())
+        if (get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
             resetInstruments();

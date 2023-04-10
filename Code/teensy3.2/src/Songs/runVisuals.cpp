@@ -13,7 +13,7 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0: // nix
-        if (setup_song())
+        if (get_setup_state())
         {
             resetInstruments();
             notes.clear();
@@ -25,7 +25,7 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1: // Theodolit
-        if (setup_song())
+        if (get_setup_state())
         {
             
             Serial.println("Theodolit");
@@ -37,7 +37,7 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 2: // Improvisation
             /* crash and ride increase delay_time, automatic decrease */
-        if (setup_song())
+        if (get_setup_state())
         {
             
             Serial.println("Improvisation");
@@ -81,7 +81,7 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 3: // Sattelstein 1
             /* keine Noten */
-        if (setup_song())
+        if (get_setup_state())
         {
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3, MIDI);
@@ -94,7 +94,7 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 4: // Sattelstein 2
         /* play notes G2 and G3 */
-        if (setup_song())
+        if (get_setup_state())
         {
             
             Serial.println("Sattelstein");
@@ -110,7 +110,7 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 5: // KupferUndGold
-        if (setup_song())
+        if (get_setup_state())
         {
             resetInstruments();
             notes.clear();

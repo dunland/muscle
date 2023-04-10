@@ -13,7 +13,7 @@ void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup_song())
+        if (get_setup_state())
         {
             Synthesizers::mKorg->sendProgramChange(78, MIDI); // load b_27
 
@@ -55,7 +55,7 @@ void Song::run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1:
-        if (setup_song())
+        if (get_setup_state())
         {
             int idx = random(sizeof(notes));
             Drumset::kick->midi_settings.active_note = notes[idx];

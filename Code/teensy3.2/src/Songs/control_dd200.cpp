@@ -18,7 +18,7 @@ void Song::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 0: // some ramp effect on snare. Used as intro for Concert at Stasi's. Works fine with DD200-DUAL mode @ ~150 BPM quarter notes
 
-        if (setup_song())
+        if (get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
             resetInstruments();

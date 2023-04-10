@@ -3,7 +3,7 @@
 #include <Instruments.h>
 #include <Hardware.h>
 
-bool Song::setup_song(){
+bool Song::get_setup_state(){
 
     bool currentState = setup_state;
     setup_state = false;

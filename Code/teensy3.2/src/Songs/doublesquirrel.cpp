@@ -145,7 +145,7 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
         break;
 
     case 1:                      // fade in the synth's amplitude
-        if (active_score->setup_song()) // score setup is run once and reset when next score step is activated.
+        if (active_score->get_setup_state()) // score setup is run once and reset when next score step is activated.
         {
             // assign effects to instruments:
             // the hihat will change the allocated (AmpLevel) value on the synth, whenever hit:
@@ -177,7 +177,7 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
              snare -> play note
           */
 
-        if (active_score->setup_song())
+        if (active_score->get_setup_state())
         {
             // assign effects to instruments:
             kick->set_effect(PlayMidi);
@@ -204,7 +204,7 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
 
     case 3:
         static int note_iterator;
-        if (active_score->setup_song())
+        if (active_score->get_setup_state())
         {
             note_iterator = int(random(32));
         }
@@ -219,7 +219,7 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
         // snare, kick, ride, crash = FX
         static float step_factor;
 
-        if (active_score->setup_song())
+        if (active_score->get_setup_state())
         {
             active_score->beat_sum.activation_thresh = 10;
             step_factor = 127 / active_score->beat_sum.activation_thresh;
@@ -257,7 +257,7 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
 
         // active_score->set_ramp(...);
 
-        if (active_score->setup_song())
+        if (active_score->get_setup_state())
         {
             active_score->beat_sum.activation_thresh = 15;
             snare->effect = Change_CC;
@@ -281,7 +281,7 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
     {
         static int random_note_change = int(random(32));
 
-        if (active_score->setup_song())
+        if (active_score->get_setup_state())
         {
             active_score->beat_sum.activation_thresh = 15;
 
@@ -307,7 +307,7 @@ void Song::run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO:
 
     {
         static int random_note_change = int(random(32));
-        if (active_score->setup_song())
+        if (active_score->get_setup_state())
         {
             // active_score->add_bassNote(active_score->notes[0] + int(random(6)));
 

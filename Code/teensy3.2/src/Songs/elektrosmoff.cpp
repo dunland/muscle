@@ -10,7 +10,7 @@ void Song::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0: // Vocoder not activated
-        if (setup_song())
+        if (get_setup_state())
         {
             Synthesizers::mKorg->sendProgramChange(56, MIDI); // selects mKORG Voice A.57
             Song::resetInstruments();                        // reset all instruments to "Monitor" mode
@@ -22,7 +22,7 @@ void Song::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1: // Snare → Vocoder fade in
-        if (setup_song())
+        if (get_setup_state())
         {
             Synthesizers::mKorg->sendControlChange(mKORG_DelayDepth, 0, MIDI);
             Drumset::snare->midi_settings.active_note = 55;                               // G = 55
@@ -43,7 +43,7 @@ void Song::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 2: // Snare → increase delay depth
-        if (setup_song())
+        if (get_setup_state())
         {
             Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 127, MIDI);
             Drumset::snare->midi_settings.cc_val = 0;
@@ -53,7 +53,7 @@ void Song::run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 3: // kill switch
-        if (setup_song())
+        if (get_setup_state())
         {
             Drumset::snare->set_effect(Monitor);
             Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 0, MIDI);

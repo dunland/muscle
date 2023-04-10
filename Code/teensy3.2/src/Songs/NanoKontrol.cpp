@@ -11,7 +11,7 @@ void Song::run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:  // A.43
-        if (setup_song())
+        if (get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
             // Globals::machine_state = NanoKontrol_Test;

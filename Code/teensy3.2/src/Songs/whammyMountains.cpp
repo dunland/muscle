@@ -18,7 +18,7 @@ void Song::run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
     {
 
     case 0: // continuous test mode
-        if (setup_song())
+        if (get_setup_state())
         {
             /* ------- general initialization routine -------------- */
             Hardware::footswitch_mode = Increment_Score;
@@ -64,7 +64,7 @@ void Song::run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
     case 1:
 
         /* CONTROLLING DIGITECH WHAMMY VIA DRUMS AT MIDI CHANNEL 4 // CLASSIC MODE (pitch)*/
-        if (setup_song())
+        if (get_setup_state())
         {
             
         }

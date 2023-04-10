@@ -25,7 +25,7 @@ void Song::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1: // change CC ("Reflex") + PlayMidi
-        if (setup_song())
+        if (get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
 
@@ -51,21 +51,17 @@ void Song::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom1->set_effect(PlayMidi);
             Drumset::tom2->set_effect(PlayMidi);
             Drumset::hihat->set_effect(TapTempo);
-
-            playSingleNote(Synthesizers::mKorg, MIDI);
-
-            
         }
         break;
 
     case 2: // change CC only
-        if (setup_song())
+        if (get_setup_state())
         {
             // Hardware::footswitch_mode = Experimental;
-            Drumset::kick->shuffle_cc(true); // set a random midi CC channel
-            Drumset::snare->shuffle_cc(true); // set a random midi CC channel
-            Drumset::tom1->shuffle_cc(true); // set a random midi CC channel
-            Drumset::tom2->shuffle_cc(true); // set a random midi CC channel
+            Drumset::kick->shuffle_cc(true);     // set a random midi CC channel
+            Drumset::snare->shuffle_cc(true);    // set a random midi CC channel
+            Drumset::tom1->shuffle_cc(true);     // set a random midi CC channel
+            Drumset::tom2->shuffle_cc(true);     // set a random midi CC channel
             Drumset::standtom->shuffle_cc(true); // set a random midi CC channel
 
             // Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
@@ -78,9 +74,8 @@ void Song::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom2->set_effect(Change_CC);
             Drumset::hihat->set_effect(TapTempo);
 
+            Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127, MIDI);
             playSingleNote(Synthesizers::mKorg, MIDI);
-
-            
         }
 
         break;

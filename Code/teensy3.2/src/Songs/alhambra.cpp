@@ -11,7 +11,7 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup_song())
+        if (get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(0, MIDI); // HARMONY UP 2 OCT
             Synthesizers::mKorg->sendProgramChange(34, MIDI); // load b_27
@@ -27,7 +27,7 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1:
-        if (setup_song())
+        if (get_setup_state())
         {
             // program = int(random(97));
             program = 58;

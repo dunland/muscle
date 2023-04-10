@@ -17,7 +17,7 @@ void Song::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup_song())
+        if (get_setup_state())
         {
 
             resetInstruments();
@@ -60,7 +60,7 @@ void Song::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1:
-        if (setup_song())
+        if (get_setup_state())
         {
             int val = (Synthesizers::mKorg->midi_values[mKORG_TimbreSelect] == 0) ? 127 : 0;
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, val, MIDI); // Select Timbre 2

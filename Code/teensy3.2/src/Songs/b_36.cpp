@@ -10,10 +10,10 @@ void Song::run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
         case 0:
-        if (setup_song())
+        if (get_setup_state())
         {
             Drumset::snare->set_effect(Change_CC);
-            //TODO: Drumset::snare->setup_midi(mKORG_Filter_Type, mKorg, 60, 40, 20, -0.05):
+            Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127, MIDI); // arp on
         }
 
         // TODO: test this! will simultaneous hit be detected?
@@ -21,13 +21,13 @@ void Song::run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
         {
             static int which_type; // 0~3=24LPF,12LPF,12BPF,12HPF
             which_type = (which_type + 1) % 4;
-            //TODO: Synthesizers::mKorg->sendControlChange(mKORG_Filter_Type, which_type, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_Filter_Type, which_type, MIDI);
         }
 
         break;
 
     case 1:
-        if (setup_song())
+        if (get_setup_state())
         {
             resetInstruments(); // reset all instruments to "Monitor" mode
             notes = {Note_B5, Note_E5, Note_B6, Note_E6};

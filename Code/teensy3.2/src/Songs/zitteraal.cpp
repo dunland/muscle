@@ -10,7 +10,7 @@ void Song::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0: // Snare → Vocoder (D+F)
-        if (setup_song())
+        if (get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
             resetInstruments();
@@ -36,7 +36,7 @@ void Song::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1: // turn notes off
-        if (setup_song())
+        if (get_setup_state())
         {
             Synthesizers::mKorg->sendNoteOff(Note_D6, MIDI);
             Synthesizers::mKorg->sendNoteOff(Note_F6, MIDI);

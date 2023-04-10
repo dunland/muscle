@@ -11,7 +11,7 @@ void run_b_11(midi::MidiInterface<HardwareSerial> MIDI)
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->setup_song())
+        if (Globals::active_song->get_setup_state())
         {
             Synthesizers::mKorg->sendProgramChange(64, MIDI); // b.11
         }

@@ -20,40 +20,46 @@ void Song::run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
     switch (step)
     {
     case 0:
-        if (setup_song())
+        if (get_setup_state())
         {
             sel_song_int = list_of_songs.at(random(sizeof(list_of_songs)));
-            
         }
 
         switch (sel_song_int)
         {
         case 85:
             run_b_36(MIDI);
+            this->name = "b_36";
             break;
 
         case 64:
             run_b_11(MIDI);
+            this->name = "b_11";
             break;
 
         case 114:
             run_b_73(MIDI);
+            this->name = "b_73";
             break;
 
         case 27:
             run_b_27(MIDI);
+            this->name = "b_27";
             break;
 
         case 106:
-            run_b_36(MIDI);
+            run_b_63(MIDI);
+            this->name = "b_63";
             break;
 
         case 4:
             run_A_15(MIDI);
+            this->name = "A_15";
             break;
 
         case 12:
             run_A_25(MIDI);
+            this->name = "A_25";
             break;
 
         default:
