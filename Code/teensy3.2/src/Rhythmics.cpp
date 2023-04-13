@@ -36,7 +36,6 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         // -------------------------- full notes: -------------------------
         if (Globals::current_beat_pos == 0)
         {
-
         }
 
         // ------------------------- quarter notes: -----------------------
@@ -69,6 +68,7 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
             Globals::print_to_console(instrument->output_string);
             instrument->output_string = "\t";
         }
+            Globals::println_to_console("");
 
         // sum up all topographies of all instruments:
         // Globals::active_score->beat_sum.reset();

@@ -11,7 +11,7 @@ void run_b_73(midi::MidiInterface<HardwareSerial> MIDI)
     {
     case 0:
         Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
-        Synthesizers::mKorg->sendProgramChange(int(random(0, 128)), MIDI);
+        Synthesizers::mKorg->sendProgramChange(114, MIDI);
         // notes.push_back(int(random(24, 48)));
         Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
 

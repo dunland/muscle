@@ -3,7 +3,8 @@
 #include <Instruments.h>
 #include <Hardware.h>
 
-bool Song::get_setup_state(){
+bool Song::get_setup_state()
+{
 
     bool currentState = setup_state;
     setup_state = false;
@@ -165,6 +166,26 @@ void Song::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback f
     {
         run_b_36(MIDI);
     }
+    else if (name == "b_11")
+    {
+        run_b_11(MIDI);
+    }
+    else if (name == "b_73")
+    {
+        run_b_73(MIDI);
+    }
+    else if (name == "b_63")
+    {
+        run_b_63(MIDI);
+    }
+    else if (name == "A_15")
+    {
+        run_A_15(MIDI);
+    }
+    else if (name == "A_25")
+    {
+        run_A_25(MIDI);
+    }
     else if (name == "alhambra")
     {
         run_alhambra(MIDI);
@@ -177,14 +198,14 @@ void Song::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback f
     {
         run_kupferUndGold(MIDI);
     }
-    else if (name == "mrWimbledon" || name == "queen" || name == "wueste" || name == "ferdinandPiech") 
+    else if (name == "mrWimbledon" || name == "queen" || name == "wueste" || name == "ferdinandPiech")
     {
         run_monitoring(MIDI);
     }
     else if (name == "donnerwetter")
     {
         run_donnerwetter(MIDI);
-    }    
+    }
     else if (name == "randomSelect")
     {
         run_randomSelect(MIDI);

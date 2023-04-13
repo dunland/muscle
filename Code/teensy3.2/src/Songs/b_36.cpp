@@ -9,11 +9,12 @@ void Song::run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (step)
     {
-        case 0:
+    case 0:
         if (get_setup_state())
         {
             Drumset::snare->set_effect(Change_CC);
             Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127, MIDI); // arp on
+            Synthesizers::mKorg->sendProgramChange(85, MIDI);
         }
 
         // TODO: test this! will simultaneous hit be detected?
@@ -53,8 +54,6 @@ void Song::run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom1->midi_settings.notes.push_back(notes[3]);
             Drumset::tom1->midi_settings.active_note = Drumset::tom1->midi_settings.notes[3];
             Drumset::tom1->set_effect(PlayMidi);
-
-            
         }
 
         break;

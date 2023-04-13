@@ -14,6 +14,7 @@ void run_b_11(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::mKorg->sendProgramChange(64, MIDI); // b.11
+            Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
         }
 
         if (Drumset::snare->timing.wasHit)
@@ -29,6 +30,8 @@ void run_b_11(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
+        Globals::active_song->setup_state = true;
+        Globals::active_song->step = 0;
         break;
     }
 }

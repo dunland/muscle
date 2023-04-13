@@ -9,7 +9,7 @@ void run_A_15(midi::MidiInterface<HardwareSerial> MIDI) // wie randomVoices
     {
     case 0:
         Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
-        Synthesizers::mKorg->sendProgramChange(int(random(0, 128)), MIDI);
+        Synthesizers::mKorg->sendProgramChange(4, MIDI); // A.15
         // notes.push_back(int(random(24, 48)));
         Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
 
@@ -22,7 +22,7 @@ void run_A_15(midi::MidiInterface<HardwareSerial> MIDI) // wie randomVoices
         Globals::active_song->step = 1;
         break;
 
-    case 1: // change CC ("Reflex") + PlayMidi
+    case 1: // PlayMidi
         if (Globals::active_song->get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;

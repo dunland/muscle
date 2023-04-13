@@ -15,7 +15,7 @@ void run_A_25(midi::MidiInterface<HardwareSerial> MIDI)
             Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127, MIDI); // Apreggiator on
 
             Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
-            Synthesizers::mKorg->sendProgramChange(int(random(0, 128)), MIDI);
+            Synthesizers::mKorg->sendProgramChange(12, MIDI);
             // notes.push_back(int(random(24, 48)));
             Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
 
@@ -30,7 +30,7 @@ void run_A_25(midi::MidiInterface<HardwareSerial> MIDI)
 
         break;
 
-    case 1: // change CC ("Reflex") + PlayMidi
+    case 1: //  PlayMidi
         if (Globals::active_song->get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
