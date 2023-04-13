@@ -13,10 +13,9 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (get_setup_state())
         {
-            Synthesizers::whammy->sendProgramChange(0, MIDI); // HARMONY UP 2 OCT
-            Synthesizers::mKorg->sendProgramChange(34, MIDI); // load b_27
+            Synthesizers::whammy->sendProgramChange(0, MIDI);          // HARMONY UP 2 OCT
+            Synthesizers::mKorg->sendProgramChange(34, MIDI);          // load b_27
             Synthesizers::kaossPad3->sendControlChange(92, 127, MIDI); // Touch Pad on
-            
         }
         // static int val = 0;
         // Synthesizers::kaossPad3->sendProgramChange(val, MIDI); // Touch Pad on
@@ -32,21 +31,19 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
             // program = int(random(97));
             program = 58;
             Synthesizers::kaossPad3->sendProgramChange(program, MIDI);
-            
         }
 
-        if (Drumset::snare->timing.wasHit){
+        if (Drumset::snare->timing.wasHit)
+        {
             valueXgoal = int(random(128));
             valueYgoal = int(random(128));
         }
 
         // successive approximation:
         valueX = (valueX < valueXgoal) ? valueX + (valueXgoal - valueX) / 5 : valueX - (valueX - valueXgoal) / 5;
-            Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_x, valueX, MIDI);
+        Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_x, valueX, MIDI);
         valueY = (valueY < valueYgoal) ? valueY + (valueYgoal - valueY) / 5 : valueY - (valueY - valueYgoal) / 5;
-            Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_y, valueY, MIDI);
-
-
+        Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_y, valueY, MIDI);
 
         // Hardware::lcd->setCursor(9, 1);
         // Hardware::lcd->print("P:");
@@ -63,8 +60,7 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-        step = 1;
-        setup_state = true;
+        Synthesizers::kaossPad3->sendControlChange(92, 0, MIDI); // Touch Pad off
         break;
     }
 }

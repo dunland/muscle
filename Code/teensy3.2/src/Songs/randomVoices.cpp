@@ -75,8 +75,8 @@ void Song::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::hihat->set_effect(TapTempo);
 
             Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127, MIDI);
-            playSingleNote(Synthesizers::mKorg, MIDI);
         }
+        playSingleNote(Synthesizers::mKorg, MIDI);
 
         break;
 

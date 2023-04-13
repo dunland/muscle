@@ -23,9 +23,13 @@ void Song::run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
                     MIDI.sendNoteOff(note_number, 127, channel);
                 }
             }
-
-            
         }
+        
+        Hardware::lcd->setCursor(0, 0);
+        Hardware::lcd->print(Globals::current_BPM);
+        Hardware::lcd->setCursor(3, 0);
+        Hardware::lcd->print("BPM");
+
         break;
 
     default:

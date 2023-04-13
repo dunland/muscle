@@ -58,9 +58,11 @@ void Song::proceed_to_next_score()
     Globals::active_song->step = 0;
     Globals::active_song->setup_state = true;
 
+    // reset effects:
     for (auto &instrument : Drumset::instruments)
         instrument->effect = Monitor;
 
+    // turn off all notes:
     for (auto &synth : Synthesizers::synths)
     {
         for (int note = 0; note < 127; note++)
