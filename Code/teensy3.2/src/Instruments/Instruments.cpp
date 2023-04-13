@@ -290,10 +290,7 @@ void Instrument::setInstrumentPrintString()
 ////////////////////////////// TRIGGERS ///////////////////////////////
 void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
 {
-  // always count up topography:
-  // countup_topography();
-  // topography.smoothen_dataArray();
-  // Serial.print("hit/");
+  // print instrument name to receive using external programs via Serial connection:
   Serial.println(Globals::DrumtypeToHumanreadable(drumtype));
   Hardware::lcd->setCursor(12, 0);
   Hardware::lcd->print(Globals::DrumtypeToHumanreadable(drumtype));

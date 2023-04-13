@@ -12,10 +12,15 @@ void run_b_63(midi::MidiInterface<HardwareSerial> MIDI)
         {
             Synthesizers::mKorg->sendProgramChange(106, MIDI);
             Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127, MIDI); // Apreggiator on
-            Drumset::snare->set_effect(TapTempo);
+            Drumset::hihat->set_effect(TapTempo);
+            for (Instrument *instrument : Drumset::instruments)
+            {
+            //    instrument->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, random(100), 0.05);
+                instrument->set_effect(Random_CC_Effect);
+                // instrument->shuffle_cc(true);
+            }
 
             Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
-
         }
         break;
 

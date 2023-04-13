@@ -28,8 +28,9 @@ void Song::run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
         switch (sel_song_int)
         {
         case 85:
-            run_b_36(MIDI);
-            this->name = "b_36";
+            // run_b_36(MIDI);
+            // this->name = "b_36";
+            // TODO: Globals::active_song = *song; // SONST WIRD SONG::SETUP NICHT AUSGEFÜHRT!
             break;
 
         case 64:
