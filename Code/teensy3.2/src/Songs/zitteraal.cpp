@@ -10,7 +10,7 @@ void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
     switch(Globals::active_song->step)
     {
     case 0: // Snare → Vocoder (D+F)
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
             Globals::active_song->resetInstruments();
@@ -25,7 +25,7 @@ void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
             delay(50);
             Synthesizers::mKorg->sendNoteOn(Note_D6, MIDI);
             Synthesizers::mKorg->sendNoteOn(Note_F6, MIDI);
-            Globals::active_song->setup = false;
+            
         }
 
         Hardware::lcd->setCursor(0, 0);
@@ -36,12 +36,12 @@ void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1: // turn notes off
-        if (Globals::active_song->setup)
+        if Globals::active_song->get_setup_state())
         {
             Synthesizers::mKorg->sendNoteOff(Note_D6, MIDI);
             Synthesizers::mKorg->sendNoteOff(Note_F6, MIDI);
             Synthesizers::mKorg->sendProgramChange(62, MIDI); // restart to stop Arp
-            Globals::active_song->setup = false;
+            
         }
 
         Hardware::lcd->setCursor(0, 0);

@@ -5,14 +5,12 @@
 
 void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    static int delay_time;
-
     switch(Globals::active_song->step)
     {
     case 0: // just using midi clock
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
-            Globals::active_song->setup = false;
+            
             Drumset::hihat->set_effect(TapTempo);
         }
         Hardware::lcd->setCursor(0, 0);
@@ -21,10 +19,10 @@ void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1: // crash triggers dd200-time-reallocation
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             delay_time = 0;
-            Globals::active_song->setup = false;
+            
             Drumset::hihat->set_effect(TapTempo);
         }
 

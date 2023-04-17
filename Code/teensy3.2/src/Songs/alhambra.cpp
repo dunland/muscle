@@ -11,7 +11,7 @@ void run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(0, MIDI); // HARMONY UP 2 OCT
             Synthesizers::mKorg->sendProgramChange(34, MIDI); // load b_27
@@ -19,20 +19,21 @@ void run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1:
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Synthesizers::kaossPad3->sendControlChange(92, 127, MIDI); // Touch Pad on
             Synthesizers::kaossPad3->sendProgramChange(58, MIDI);
         }
 
-        if (Drumset::snare->timing.wasHit){
+        if (Drumset::snare->timing.wasHit)
+        {
             valueXgoal = int(random(128));
             valueYgoal = int(random(128));
         }
 
         // successive approximation:
         valueX = (valueX < valueXgoal) ? valueX + (valueXgoal - valueX) / 5 : valueX - (valueX - valueXgoal) / 5;
-            Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_x, valueX, MIDI);
+        Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_x, valueX, MIDI);
         valueY = (valueY < valueYgoal) ? valueY + (valueYgoal - valueY) / 5 : valueY - (valueY - valueYgoal) / 5;
             Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_y, valueY, MIDI);
 

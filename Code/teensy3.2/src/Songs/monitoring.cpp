@@ -9,7 +9,7 @@ void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
             Globals::active_song->resetInstruments();
@@ -23,9 +23,13 @@ void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
                     MIDI.sendNoteOff(note_number, 127, channel);
                 }
             }
-
-            Globals::active_song->setup = false;
         }
+        
+        Hardware::lcd->setCursor(0, 0);
+        Hardware::lcd->print(Globals::current_BPM);
+        Hardware::lcd->setCursor(3, 0);
+        Hardware::lcd->print("BPM");
+
         break;
 
     default:

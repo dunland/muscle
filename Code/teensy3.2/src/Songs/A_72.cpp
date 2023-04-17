@@ -17,7 +17,7 @@ void run_a72(midi::MidiInterface<HardwareSerial> MIDI)
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
@@ -42,7 +42,7 @@ void run_a72(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[0];
             Drumset::snare->set_effect(PlayMidi);
 
-            Globals::active_song->setup = false;
+            
         }
         Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
 
@@ -59,12 +59,12 @@ void run_a72(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1:
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             int val = (Synthesizers::mKorg->midi_values[mKORG_TimbreSelect] == 0) ? 127 : 0;
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, val, MIDI); // Select Timbre 2
 
-            Globals::active_song->setup = false;
+            
         }
         Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
 
@@ -72,7 +72,7 @@ void run_a72(midi::MidiInterface<HardwareSerial> MIDI)
 
     default:
         Globals::active_song->step = 1;
-        Globals::active_song->setup = true;
+        Globals::active_song->setup_state = true;
         note_increase = (note_increase == 4) ? 5 : 4;
         Globals::active_song->notes.push_back(Globals::active_song->notes[Globals::active_song->note_idx] + note_increase);
         Globals::active_song->note_idx++;

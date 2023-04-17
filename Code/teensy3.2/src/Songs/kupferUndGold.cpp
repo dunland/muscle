@@ -9,42 +9,42 @@ void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI)
     switch(Globals::active_song->step)
     {
     case 0: // Intro
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT → UP 2 OCT
-            Globals::active_song->setup = false;
+            
         }
         break;
 
     case 1: // Fetz
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(58, MIDI); // HARMONY UP 5TH → UP  OCT
-            Globals::active_song->setup = false;
+            
         }
         break;
 
     case 2: // Gesangpart
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT → UP 2 OCT
-            Globals::active_song->setup = false;
+            
         }
         break;
 
     case 3: // Groove
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(61, MIDI); // HARMONY UP OCT → UP 10TH
-            Globals::active_song->setup = false;
+            
         }
         break;
 
     case 4: // Finale
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT → UP 2 OCT
-            Globals::active_song->setup = false;
+            
         }
         break;
 

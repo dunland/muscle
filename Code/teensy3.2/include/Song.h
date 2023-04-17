@@ -12,7 +12,6 @@ class Synthesizer;
 class Song
 {
 public:
-
     typedef std::function<void(midi::MidiInterface<HardwareSerial>)> Callback;
     Callback trigger_function;
 
@@ -32,7 +31,7 @@ public:
 
     int step = 0;
     std::vector<int> steps;
-    int note_idx = 0;        // points at active (bass-)note
+    int note_idx = 0;    // points at active (bass-)note
     int note_change_pos; // defines at what position to increase note_idx
     std::vector<int> notes;
 
@@ -45,7 +44,8 @@ public:
     } tempo;
 
     // TODO: make this a functional bool and reset instruments etc when calling (and deactivate it automatically)!
-    bool setup = false; // when true, current score_step's setup function is executed.
+    bool setup_state; // when true, current score_step's setup function is executed.
+    bool get_setup_state();
 
     // TODO: move this to Rhythmics
     TOPOGRAPHY beat_sum;         // sum of all instrument topographies
@@ -80,46 +80,75 @@ public:
     // void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
 };
 
-    void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI);
+void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI);
+void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI); // TODO: tentative, as this should be dynamic later..
+void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI); // TODO: tentative, as this should be dynamic later..
 
-    void run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI);
+void run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI);
+void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_a72(midi::MidiInterface<HardwareSerial> MIDI);
+void run_a72(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
+void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI);
+void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI);
+void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI);
+void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI);
+void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_visuals(midi::MidiInterface<HardwareSerial> MIDI);
+void run_visuals(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI);
+void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI);
+void run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI);
+void run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_roeskur(midi::MidiInterface<HardwareSerial> MIDI);
+void run_roeskur(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_b_27(midi::MidiInterface<HardwareSerial> MIDI);
+void run_b_27(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_b_36(midi::MidiInterface<HardwareSerial> MIDI);
+void run_b_36(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_alhambra(midi::MidiInterface<HardwareSerial> MIDI);
+void run_alhambra(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_theodolit(midi::MidiInterface<HardwareSerial> MIDI);
+void run_theodolit(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI);
+void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI);
+void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI);
+
+// ------------------------------- MODES: (deprecated) ------------
+void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
+
+void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on, never off)
+
+void playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);
+
+void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
+
+void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // creates an envelope for volume filter via topography
+
+void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // changes the delay times on each 16th-step
+
+// void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
+
+void run_A_15(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_A_25(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_b_11(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_b_36(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_b_63(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_b_73(midi::MidiInterface<HardwareSerial> MIDI);

@@ -9,7 +9,7 @@
 //////////////////////////// CONTROL DD200 /////////////////////////////
 void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    switch(Globals::active_song->step)
+    switch (Globals::active_song->step)
     {
 
     case 0: // nothing
@@ -18,7 +18,7 @@ void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 1: // some ramp effect on snare. Works fine with DD200-DUAL mode @ ~150 BPM quarter notes
 
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
             Globals::active_song->resetInstruments();
@@ -27,8 +27,6 @@ void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::hihat->set_effect(Monitor);
             Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
-
-            Globals::active_song->setup = false;
         }
 
         /* CC-values are printed automatically */

@@ -27,7 +27,7 @@
 // ----------------------------- settings -----------------------------
 const String VERSION_NUMBER = "0.2.36";
 const boolean DO_PRINT_JSON = false;
-const boolean DO_PRINT_TO_CONSOLE = false;
+const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
 const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
 const boolean USING_TSUNAMI = false;
@@ -47,6 +47,11 @@ Song *dd200_timeControl;
 Song *a_72;
 Song *b_27;
 Song *b_36;
+Song *b_11;
+Song *b_73;
+Song *b_63;
+Song *A_15;
+Song *A_25;
 Song *whammyMountains;
 Song *hutschnur;
 Song *control_volca;
@@ -63,6 +68,7 @@ Song *kupferUndGold;
 Song *ferdinandPiech;
 Song *queen;
 Song *donnerwetter;
+Song *randomSelect;
 
 Rhythmics *rhythmics;
 
@@ -236,7 +242,12 @@ void setup()
   // ---------------------------------- SCORE -------------------------
   // doubleSquirrel = new Score("doubleSquirrel");
   monitoring = new Song(std::bind(run_monitoring, MIDI));
-
+  b_11 = new Song(std::bind(run_b_11, MIDI));
+  b_73 = new Song(std::bind(run_b_73, MIDI));
+  b_63 = new Song(std::bind(run_b_63, MIDI));
+  A_15 = new Song(std::bind(run_A_15, MIDI));
+  A_25 = new Song(std::bind(run_A_25, MIDI));
+  randomSelect = new Song(std::bind(run_randomSelect, MIDI));
   sattelstein = new Song(std::bind(run_sattelstein, MIDI));
   sattelstein->setTempoRange(150, 170); // TODO: make this work!
   elektrosmoff = new Song(std::bind(run_elektrosmoff, MIDI));
@@ -263,6 +274,15 @@ void setup()
   theodolit = new Song(std::bind(run_theodolit, MIDI));
   kupferUndGold = new Song(std::bind(run_kupferUndGold, MIDI));
 
+  Globals::songlist.push_back(b_11);
+  Globals::songlist.push_back(b_73);
+  Globals::songlist.push_back(b_63);
+  Globals::songlist.push_back(A_15);
+  Globals::songlist.push_back(A_25);
+
+  Globals::songlist.push_back(monitoring);
+  Globals::songlist.push_back(randomSelect);
+
   Globals::songlist.push_back(monitoring);
   Globals::songlist.push_back(control_dd200);  // intro
   Globals::songlist.push_back(pogoNumberOne);  // pogo
@@ -282,7 +302,7 @@ void setup()
   Globals::songlist.push_back(ferdinandPiech); // ferdinandPiech
   Globals::songlist.push_back(donnerwetter);   // donnerwetter I
   Globals::songlist.push_back(control_dd200);  // donnerwetter II
-
+  
   Globals::active_song = Globals::songlist.at(0);
 
   // link midi synth to instruments:

@@ -18,7 +18,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 0: // some ramp effect on snare. Used as intro for Concert at Stasi's. Works fine with DD200-DUAL mode @ ~150 BPM quarter notes
 
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
             Globals::active_song->resetInstruments();
@@ -28,7 +28,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
 
-            Globals::active_song->setup = false;
+            
         }
 
         /* CC-values are printed automatically */

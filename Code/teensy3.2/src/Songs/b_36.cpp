@@ -10,7 +10,25 @@ void run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->setup)
+        if (Globals::active_song->get_setup_state())
+        {
+            Drumset::snare->set_effect(Change_CC);
+            Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127, MIDI); // arp on
+            Synthesizers::mKorg->sendProgramChange(85, MIDI);
+        }
+
+        // TODO: test this! will simultaneous hit be detected?
+        if (Drumset::snare->timing.wasHit && Drumset::standtom->timing.wasHit)
+        {
+            static int which_type; // 0~3=24LPF,12LPF,12BPF,12HPF
+            which_type = (which_type + 1) % 4;
+            Synthesizers::mKorg->sendControlChange(mKORG_Filter_Type, which_type, MIDI);
+        }
+
+        break;
+
+    case 1:
+        if (Globals::active_song->get_setup_state())
         {
             Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
             Globals::active_song->notes = {Note_B5, Note_E5, Note_B6, Note_E6};
@@ -36,8 +54,6 @@ void run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom1->midi_settings.notes.push_back(Globals::active_song->notes[3]);
             Drumset::tom1->midi_settings.active_note = Drumset::tom1->midi_settings.notes[3];
             Drumset::tom1->set_effect(PlayMidi);
-
-            Globals::active_song->setup = false;
         }
 
         break;
