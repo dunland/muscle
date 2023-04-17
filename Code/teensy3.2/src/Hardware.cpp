@@ -197,19 +197,30 @@ void Hardware::lcd_display()
     if (instruments_with_CC_mode > 3)
     {
       static unsigned long last_running_state_switch = 0;
-      static boolean running_mode = true;
+      static int running_mode = 0;
 
       if (millis() > (last_running_state_switch + 3000))
       {
-        running_mode = !running_mode;
+        running_mode = (running_mode + 1) % 3;
         Hardware::lcd->clear();
         last_running_state_switch = millis();
       }
 
-      if (running_mode == true) // mode A: display scores
+      switch (running_mode)
+      {
+      case 0: // mode A: display scores
         Hardware::display_scores();
-      else // mode B: display Midi Values
+        break;
+      case 1: // mode B: display Midi Values
         Hardware::display_Midi_values();
+        break;
+      case 2: // mode C: show CC-channel
+        Hardware::display_Midi_channels();
+        break;
+      default:
+        running_mode = 0;
+        break;
+      }
     }
     else
     {
@@ -237,7 +248,7 @@ void Hardware::lcd_display()
     break;
 
   default:
-  /* define what to display elsewhere... */
+    /* define what to display elsewhere... */
     break;
   }
   }
@@ -268,6 +279,23 @@ void Hardware::display_Midi_values()
       Hardware::lcd->setCursor(((pos % 4) * 4) + 1, int(pos >= 4));
       Hardware::lcd->print(int(Drumset::instruments[i]->midi_settings.cc_val));
 
+      pos++;
+    }
+  }
+}
+
+// display midi CHANNEL of instruments with FX-Type CC_Change
+void Hardware::display_Midi_channels(){
+int pos = 0;
+
+  for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
+  {
+    if (Drumset::instruments[i]->effect == Change_CC)
+    {
+      Hardware::lcd->setCursor(((pos % 4) * 4), int(pos >= 4));
+      Hardware::lcd->print("|");
+      Hardware::lcd->setCursor(((pos % 4) * 4) + 1, int(pos >= 4));
+      Hardware::lcd->print(int(Drumset::instruments[i]->midi_settings.cc_chan));
       pos++;
     }
   }
@@ -444,7 +472,7 @@ void Synthesizer::sendControlChange(CC_Type cc_type, int val, midi::MidiInterfac
 
 void Synthesizer::sendControlChange(int cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI)
 {
-midi_values[cc_type] = val;
+  midi_values[cc_type] = val;
 
   if (cc_type < 0)
   {
