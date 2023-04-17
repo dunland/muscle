@@ -40,7 +40,7 @@ midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as 
 // Score *doubleSquirrel;
 Song *monitoring;
 Song *sattelstein;
-Song *elektrosmoff;
+Song *host;
 Song *randomVoice;
 Song *control_dd200;
 Song *dd200_timeControl;
@@ -56,7 +56,7 @@ Song *whammyMountains;
 Song *hutschnur;
 Song *control_volca;
 Song *runVisuals;
-Song *zitteraal;
+Song *besen;
 Song *nanokontrol;
 Song *pogoNumberOne;
 Song *roeskur;
@@ -250,9 +250,9 @@ void setup()
   randomSelect = new Song(std::bind(run_randomSelect, MIDI));
   sattelstein = new Song(std::bind(run_sattelstein, MIDI));
   sattelstein->setTempoRange(150, 170); // TODO: make this work!
-  elektrosmoff = new Song(std::bind(run_elektrosmoff, MIDI));
+  host = new Song(std::bind(run_host, MIDI));
   randomVoice = new Song(std::bind(run_randomVoice, MIDI));
-  zitteraal = new Song(std::bind(run_zitteraal, MIDI));
+  besen = new Song(std::bind(run_besen, MIDI));
   control_dd200 = new Song(std::bind(run_control_dd200, MIDI));
   dd200_timeControl = new Song(std::bind(run_dd200_timeControl, MIDI));
   a_72 = new Song(std::bind(run_a72, MIDI));
@@ -289,7 +289,7 @@ void setup()
   Globals::songlist.push_back(hutschnur);      // hutschnur
   Globals::songlist.push_back(randomVoice);    // jam
   Globals::songlist.push_back(wueste);         // wueste
-  Globals::songlist.push_back(zitteraal);      // besen
+  Globals::songlist.push_back(besen);      // besen
   Globals::songlist.push_back(alhambra);       // alhambra
   Globals::songlist.push_back(randomVoice);    // jam
   Globals::songlist.push_back(mrWimbledon);    // mr wimbledon

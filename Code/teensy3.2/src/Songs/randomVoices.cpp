@@ -77,7 +77,7 @@ void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
             Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127, MIDI);
             Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
         }
-        playSingleNote(Synthesizers::mKorg, MIDI);
+        Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
 
         break;
 

@@ -5,6 +5,8 @@
 
 void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI)
 {
+    static int delay_time;
+    
     switch(Globals::active_song->step)
     {
     case 0: // just using midi clock

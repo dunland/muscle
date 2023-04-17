@@ -13,14 +13,14 @@ static std::vector<int> list_of_songs = {
     12   // A.25
 };
 
-void Song::run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
+void run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
 {
     static int sel_song_int;
 
-    switch (step)
+    switch (Globals::active_song->step)
     {
     case 0:
-        if (get_setup_state())
+        if (Globals::active_song->get_setup_state())
         {
             sel_song_int = list_of_songs.at(random(sizeof(list_of_songs)));
         }
@@ -29,38 +29,38 @@ void Song::run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
         {
         case 85:
             // run_b_36(MIDI);
-            // this->name = "b_36";
+            // Globals::active_song->name = "b_36";
             // TODO: Globals::active_song = *song; // SONST WIRD SONG::SETUP NICHT AUSGEFÜHRT!
             break;
 
         case 64:
             run_b_11(MIDI);
-            this->name = "b_11";
+            Globals::active_song->name = "b_11";
             break;
 
         case 114:
             run_b_73(MIDI);
-            this->name = "b_73";
+            Globals::active_song->name = "b_73";
             break;
 
         case 27:
             run_b_27(MIDI);
-            this->name = "b_27";
+            Globals::active_song->name = "b_27";
             break;
 
         case 106:
             run_b_63(MIDI);
-            this->name = "b_63";
+            Globals::active_song->name = "b_63";
             break;
 
         case 4:
             run_A_15(MIDI);
-            this->name = "A_15";
+            Globals::active_song->name = "A_15";
             break;
 
         case 12:
             run_A_25(MIDI);
-            this->name = "A_25";
+            Globals::active_song->name = "A_25";
             break;
 
         default:

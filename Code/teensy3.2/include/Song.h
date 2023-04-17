@@ -86,7 +86,7 @@ void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI);
 
 void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI); // TODO: tentative, as this should be dynamic later..
 
-void run_elektrosmoff(midi::MidiInterface<HardwareSerial> MIDI);
+void run_host(midi::MidiInterface<HardwareSerial> MIDI);
 
 void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI);
 
@@ -104,7 +104,7 @@ void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI);
 
 void run_visuals(midi::MidiInterface<HardwareSerial> MIDI);
 
-void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI);
+void run_besen(midi::MidiInterface<HardwareSerial> MIDI);
 
 void run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI);
 

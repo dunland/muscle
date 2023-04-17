@@ -5,7 +5,7 @@
 #include <Notes.h>
 
 //////////////////////////// ZITTERAAL /////////////////////////////
-void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
+void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch(Globals::active_song->step)
     {
@@ -36,7 +36,7 @@ void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1: // turn notes off
-        if Globals::active_song->get_setup_state())
+        if (Globals::active_song->get_setup_state())
         {
             Synthesizers::mKorg->sendNoteOff(Note_D6, MIDI);
             Synthesizers::mKorg->sendNoteOff(Note_F6, MIDI);
