@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Song::run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
+void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
 {
     /*
     WHAMMY MIDI CHANNEL = 4
@@ -14,20 +14,20 @@ void Song::run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
     static Synthesizer *whammy = Synthesizers::whammy;
     static int val = 0;
 
-    switch (step)
+    switch(Globals::active_song->step)
     {
 
     case 0: // continuous test mode
-        if (setup)
+        if (Globals::active_song->setup)
         {
             /* ------- general initialization routine -------------- */
             Hardware::footswitch_mode = Increment_Score;
-            resetInstruments();
-            notes.clear();
+            Globals::active_song->resetInstruments();
+            Globals::active_song->notes.clear();
 
             whammy->sendProgramChange(1, MIDI); // selects Whammy ↑2 OCT
 
-            setup = false;
+            Globals::active_song->setup = false;
         }
 
         /* ---------------- general loop here ---------------------- */
@@ -64,9 +64,9 @@ void Song::run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
     case 1:
 
         /* CONTROLLING DIGITECH WHAMMY VIA DRUMS AT MIDI CHANNEL 4 // CLASSIC MODE (pitch)*/
-        if (setup)
+        if (Globals::active_song->setup)
         {
-            setup = false;
+            Globals::active_song->setup = false;
         }
 
         if (Drumset::snare->timing.wasHit) // snare increases expression by 5
@@ -108,7 +108,7 @@ void Song::run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-        increase_step();
+        Globals::active_song->increase_step();
         break;
     }
 }

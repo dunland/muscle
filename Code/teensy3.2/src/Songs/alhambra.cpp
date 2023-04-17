@@ -4,36 +4,25 @@
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
+void run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    static int program;
     static int valueXgoal, valueYgoal, valueX, valueY;
 
-    switch (step)
+    switch (Globals::active_song->step)
     {
     case 0:
-        if (setup)
+        if (Globals::active_song->setup)
         {
             Synthesizers::whammy->sendProgramChange(0, MIDI); // HARMONY UP 2 OCT
             Synthesizers::mKorg->sendProgramChange(34, MIDI); // load b_27
-            Synthesizers::kaossPad3->sendControlChange(92, 127, MIDI); // Touch Pad on
-            setup = false;
         }
-        // static int val = 0;
-        // Synthesizers::kaossPad3->sendProgramChange(val, MIDI); // Touch Pad on
-        // Hardware::lcd->setCursor(0,0);
-        // Hardware::lcd->print(val);
-        // delay(500);
-        // val++;
         break;
 
     case 1:
-        if (setup)
+        if (Globals::active_song->setup)
         {
-            // program = int(random(97));
-            program = 58;
-            Synthesizers::kaossPad3->sendProgramChange(program, MIDI);
-            setup = false;
+            Synthesizers::kaossPad3->sendControlChange(92, 127, MIDI); // Touch Pad on
+            Synthesizers::kaossPad3->sendProgramChange(58, MIDI);
         }
 
         if (Drumset::snare->timing.wasHit){
@@ -47,12 +36,6 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
         valueY = (valueY < valueYgoal) ? valueY + (valueYgoal - valueY) / 5 : valueY - (valueY - valueYgoal) / 5;
             Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_y, valueY, MIDI);
 
-
-
-        // Hardware::lcd->setCursor(9, 1);
-        // Hardware::lcd->print("P:");
-        // Hardware::lcd->setCursor(11, 1);
-        // Hardware::lcd->print(program);
         Hardware::lcd->setCursor(6, 0);
         Hardware::lcd->print("X:");
         Hardware::lcd->setCursor(8, 0);
@@ -65,7 +48,7 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
 
     default:
         Synthesizers::kaossPad3->sendControlChange(92, 0, MIDI); // Touch Pad off
-        proceed_to_next_score();
+        Globals::active_song->proceed_to_next_score();
         break;
     }
 }

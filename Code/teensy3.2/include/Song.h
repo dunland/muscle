@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 
 #include <Globals.h>
 #include <vector>
@@ -11,9 +12,12 @@ class Synthesizer;
 class Song
 {
 public:
-    Song(String name_)
+
+    typedef std::function<void(midi::MidiInterface<HardwareSerial>)> Callback;
+    Callback trigger_function;
+
+    Song(Callback f) : trigger_function(f)
     {
-        name = name_;
         // setup names of elements for display on Serial Monitor:
         beat_sum.tag = "v";
         beat_regularity.tag = "r";
@@ -29,19 +33,19 @@ public:
     int step = 0;
     std::vector<int> steps;
     int note_idx = 0;        // points at active (bass-)note
-    int note_change_pos = 0; // defines at what position to increase note_idx
+    int note_change_pos; // defines at what position to increase note_idx
     std::vector<int> notes;
 
     struct tempo
     {
         int min_tempo = 0;
         int max_tempo = 999;
-        int tapTempoResetTime = 0; // time to restart tapTempo if not used for this long
-        unsigned int tapTempoTimeOut = 2000;   // do not count second tap, if time gap to first one exceeds this
+        int tapTempoResetTime = 0;           // time to restart tapTempo if not used for this long
+        unsigned int tapTempoTimeOut = 2000; // do not count second tap, if time gap to first one exceeds this
     } tempo;
 
     // TODO: make this a functional bool and reset instruments etc when calling (and deactivate it automatically)!
-    boolean setup = true; // when true, current score_step's setup function is executed.
+    bool setup = false; // when true, current score_step's setup function is executed.
 
     // TODO: move this to Rhythmics
     TOPOGRAPHY beat_sum;         // sum of all instrument topographies
@@ -59,11 +63,26 @@ public:
 
     // ---------------------------- SONGS: ---------------------------
     // STANDARD RUN: select according to score->name
-    void run(midi::MidiInterface<HardwareSerial> MIDI); // iterates through all score steps, executing the current step functions
+    // void run(midi::MidiInterface<HardwareSerial> MIDI); // iterates through all score steps, executing the current step functions
+    // ------------------------------- MODES: (deprecated) ------------
+    void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
 
-    void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI);
+    void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on, never off)
+
+    void playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);
+
+    void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
+
+    void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // creates an envelope for volume filter via topography
+
+    void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // changes the delay times on each 16th-step
+
+    // void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
+};
 
     void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI);
+
+    void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI);
 
     void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI); // TODO: tentative, as this should be dynamic later..
 
@@ -83,7 +102,7 @@ public:
 
     void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI);
 
-    void runVisuals(midi::MidiInterface<HardwareSerial> MIDI);
+    void run_visuals(midi::MidiInterface<HardwareSerial> MIDI);
 
     void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI);
 
@@ -104,19 +123,3 @@ public:
     void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI);
 
     void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI);
-
-    // ------------------------------- MODES: (deprecated) ------------
-    void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
-
-    void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on, never off)
-
-    void playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);
-
-    void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
-
-    void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // creates an envelope for volume filter via topography
-
-    void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // changes the delay times on each 16th-step
-
-    // void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
-};

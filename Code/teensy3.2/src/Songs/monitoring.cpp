@@ -4,16 +4,16 @@
 #include <Hardware.h>
 
 ///////////////////////////// MONITORING //////////////////////////////
-void Song::run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
+void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    switch (step)
+    switch (Globals::active_song->step)
     {
     case 0:
-        if (setup)
+        if (Globals::active_song->setup)
         {
             Hardware::footswitch_mode = Increment_Score;
-            resetInstruments();
-            notes.clear();
+            Globals::active_song->resetInstruments();
+            Globals::active_song->notes.clear();
 
             // turn off all currently playing MIDI notes:
             for (int channel = 1; channel < 3; channel++)
@@ -24,12 +24,12 @@ void Song::run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
                 }
             }
 
-            setup = false;
+            Globals::active_song->setup = false;
         }
         break;
 
     default:
-        proceed_to_next_score();
+        Globals::active_song->proceed_to_next_score();
         break;
     }
 }

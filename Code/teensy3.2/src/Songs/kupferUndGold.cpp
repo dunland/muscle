@@ -4,52 +4,52 @@
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Song::run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI)
+void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    switch (step)
+    switch(Globals::active_song->step)
     {
     case 0: // Intro
-        if (setup)
+        if (Globals::active_song->setup)
         {
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT → UP 2 OCT
-            setup = false;
+            Globals::active_song->setup = false;
         }
         break;
 
     case 1: // Fetz
-        if (setup)
+        if (Globals::active_song->setup)
         {
             Synthesizers::whammy->sendProgramChange(58, MIDI); // HARMONY UP 5TH → UP  OCT
-            setup = false;
+            Globals::active_song->setup = false;
         }
         break;
 
     case 2: // Gesangpart
-        if (setup)
+        if (Globals::active_song->setup)
         {
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT → UP 2 OCT
-            setup = false;
+            Globals::active_song->setup = false;
         }
         break;
 
     case 3: // Groove
-        if (setup)
+        if (Globals::active_song->setup)
         {
             Synthesizers::whammy->sendProgramChange(61, MIDI); // HARMONY UP OCT → UP 10TH
-            setup = false;
+            Globals::active_song->setup = false;
         }
         break;
 
     case 4: // Finale
-        if (setup)
+        if (Globals::active_song->setup)
         {
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT → UP 2 OCT
-            setup = false;
+            Globals::active_song->setup = false;
         }
         break;
 
     default:
-        proceed_to_next_score();
+        Globals::active_song->proceed_to_next_score();
         break;
     }
 }

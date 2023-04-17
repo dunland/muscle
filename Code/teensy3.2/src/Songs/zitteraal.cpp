@@ -5,16 +5,16 @@
 #include <Notes.h>
 
 //////////////////////////// ZITTERAAL /////////////////////////////
-void Song::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
+void run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    switch (step)
+    switch(Globals::active_song->step)
     {
     case 0: // Snare → Vocoder (D+F)
-        if (setup)
+        if (Globals::active_song->setup)
         {
             Hardware::footswitch_mode = Increment_Score;
-            resetInstruments();
-            notes.clear();
+            Globals::active_song->resetInstruments();
+            Globals::active_song->notes.clear();
 
             Drumset::hihat->set_effect(TapTempo);
 
@@ -25,7 +25,7 @@ void Song::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
             delay(50);
             Synthesizers::mKorg->sendNoteOn(Note_D6, MIDI);
             Synthesizers::mKorg->sendNoteOn(Note_F6, MIDI);
-            setup = false;
+            Globals::active_song->setup = false;
         }
 
         Hardware::lcd->setCursor(0, 0);
@@ -36,12 +36,12 @@ void Song::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 1: // turn notes off
-        if (setup)
+        if (Globals::active_song->setup)
         {
             Synthesizers::mKorg->sendNoteOff(Note_D6, MIDI);
             Synthesizers::mKorg->sendNoteOff(Note_F6, MIDI);
             Synthesizers::mKorg->sendProgramChange(62, MIDI); // restart to stop Arp
-            setup = false;
+            Globals::active_song->setup = false;
         }
 
         Hardware::lcd->setCursor(0, 0);
@@ -53,9 +53,9 @@ void Song::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
 
     // case 2: // finale: crash 2 triggert noten
 
-    //     if (setup)
+    //     if (Globals::active_song->setup)
     //     {
-    //         setup = false;
+    //         Globals::active_song->setup = false;
     //         Synthesizers::mKorg->sendProgramChange(42, MIDI); // corresponds A.63
     //         delay(50);
     //         Synthesizers::mKorg->sendNoteOn(Note_D6, MIDI);
@@ -111,7 +111,7 @@ void Song::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
     //     break;
 
     // case 3:
-    //     if (setup)
+    //     if (Globals::active_song->setup)
     //     {
     //         Synthesizers::mKorg->sendNoteOff(Note_D6, MIDI);
     //         Synthesizers::mKorg->sendNoteOff(Note_G6, MIDI);
@@ -125,7 +125,7 @@ void Song::run_zitteraal(midi::MidiInterface<HardwareSerial> MIDI)
     //     break;
 
     default:
-        proceed_to_next_score();
+        Globals::active_song->proceed_to_next_score();
         break;
     }
 }

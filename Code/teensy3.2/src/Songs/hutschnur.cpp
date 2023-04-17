@@ -4,19 +4,19 @@
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Song::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
+void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
 {
 
     // static Synthesizer *mKorg = Synthesizers::mKorg;
     // static int noteIdx = 0;
 
-    switch (step)
+    switch(Globals::active_song->step)
     {
     case 0:
-        if (setup)
+        if (Globals::active_song->setup)
         {
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT / UP 2 OCT
-            setup = false;
+            Globals::active_song->setup = false;
         }
         break;
 
@@ -24,7 +24,7 @@ void Song::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
         case 1:
 
         // start Vocoder A.86
-          if (setup)
+          if (Globals::active_song->setup)
             {
                 // ------- general initialization routine --------------
                 Hardware::footswitch_mode = Increment_Score;
@@ -45,7 +45,7 @@ void Song::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
                 notes.push_back(43); // G
                 notes.push_back(38); // G
 
-                setup = false;
+                Globals::active_song->setup = false;
             }
 
             // ---------------- general loop here ----------------------
@@ -100,7 +100,7 @@ void Song::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
 
     default:
         // increase_step();
-        proceed_to_next_score();
+        Globals::active_song->proceed_to_next_score();
         break;
     }
 }

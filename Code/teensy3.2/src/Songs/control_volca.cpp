@@ -5,18 +5,18 @@
 #include <Notes.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void Song::run_control_volca(midi::MidiInterface<HardwareSerial> MIDI)
+void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI)
 {
     static int grundton = Note_D4;
     static uint64_t lastNoteSent = 0;
     Synthesizer *volca = Synthesizers::volca;
 
-    switch (step)
+    switch (Globals::active_song->step)
     {
     case 0:
-        if (setup)
+        if (Globals::active_song->setup)
         {
-            setup = false;
+            Globals::active_song->setup = false;
         }
 
         if (Drumset::kick->timing.wasHit)
@@ -35,7 +35,7 @@ void Song::run_control_volca(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-    proceed_to_next_score();
+    Globals::active_song->proceed_to_next_score();
         break;
     }
 }

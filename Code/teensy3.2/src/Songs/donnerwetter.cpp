@@ -7,13 +7,9 @@
 */
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Song::run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
+void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    // static float delay_time = 0;
-    // static float delay_depth = 0;
-    // static float delay_level = 0;
-
-    switch (step)
+    switch(Globals::active_song->step)
     {
 
     case 0: // nothing
@@ -22,17 +18,17 @@ void Song::run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 1: // some ramp effect on snare. Works fine with DD200-DUAL mode @ ~150 BPM quarter notes
 
-        if (setup)
+        if (Globals::active_song->setup)
         {
             Hardware::footswitch_mode = Increment_Score;
-            resetInstruments();
-            notes.clear();
+            Globals::active_song->resetInstruments();
+            Globals::active_song->notes.clear();
 
             Drumset::hihat->set_effect(Monitor);
             Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
 
-            setup = false;
+            Globals::active_song->setup = false;
         }
 
         /* CC-values are printed automatically */
@@ -44,8 +40,8 @@ void Song::run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
 
     default:
         Synthesizers::mKorg->sendNoteOff(31, MIDI);
-        proceed_to_next_score();
-        step = 0;
+        Globals::active_song->proceed_to_next_score();
+        Globals::active_song->step = 0;
         break;
     }
 }
