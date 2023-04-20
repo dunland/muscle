@@ -36,40 +36,6 @@ const boolean USING_TSUNAMI = false;
 midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 // typedef midi::MidiInterface<HardwareSerial> MidiInterface;
 
-// Songs:
-// Score *doubleSquirrel;
-Song *monitoring;
-Song *sattelstein;
-Song *host;
-Song *randomVoice;
-Song *control_dd200;
-Song *dd200_timeControl;
-Song *a_72;
-Song *b_27;
-Song *b_36;
-Song *b_11;
-Song *b_73;
-Song *b_63;
-Song *A_15;
-Song *A_25;
-Song *whammyMountains;
-Song *hutschnur;
-Song *control_volca;
-Song *runVisuals;
-Song *besen;
-Song *nanokontrol;
-Song *pogoNumberOne;
-Song *roeskur;
-Song *alhambra;
-Song *wueste;
-Song *mrWimbledon;
-Song *theodolit;
-Song *kupferUndGold;
-Song *ferdinandPiech;
-Song *queen;
-Song *donnerwetter;
-Song *randomSelect;
-
 Rhythmics *rhythmics;
 
 // ------------------------- interrupt timers -------------------------
@@ -241,68 +207,39 @@ void setup()
 
   // ---------------------------------- SCORE -------------------------
   // doubleSquirrel = new Score("doubleSquirrel");
-  monitoring = new Song(std::bind(run_monitoring, MIDI));
-  b_11 = new Song(std::bind(run_b_11, MIDI));
-  b_73 = new Song(std::bind(run_b_73, MIDI));
-  b_63 = new Song(std::bind(run_b_63, MIDI));
-  A_15 = new Song(std::bind(run_A_15, MIDI));
-  A_25 = new Song(std::bind(run_A_25, MIDI));
-  randomSelect = new Song(std::bind(run_randomSelect, MIDI));
-  sattelstein = new Song(std::bind(run_sattelstein, MIDI));
-  sattelstein->setTempoRange(150, 170); // TODO: make this work!
-  host = new Song(std::bind(run_host, MIDI));
-  randomVoice = new Song(std::bind(run_randomVoice, MIDI));
-  besen = new Song(std::bind(run_besen, MIDI));
-  control_dd200 = new Song(std::bind(run_control_dd200, MIDI));
-  dd200_timeControl = new Song(std::bind(run_dd200_timeControl, MIDI));
-  a_72 = new Song(std::bind(run_a72, MIDI));
-  b_27 = new Song(std::bind(run_b_27, MIDI));
-  b_36 = new Song(std::bind(run_b_36, MIDI));
-  whammyMountains = new Song(std::bind(run_whammyMountains, MIDI));
-  hutschnur = new Song(std::bind(run_hutschnur, MIDI));
-  control_volca = new Song(std::bind(run_control_volca, MIDI));
-  runVisuals = new Song(std::bind(run_visuals, MIDI));
-  nanokontrol = new Song(std::bind(run_nanokontrol, MIDI));
-  pogoNumberOne = new Song(std::bind(run_PogoNumberOne, MIDI));
-  roeskur = new Song(std::bind(run_roeskur, MIDI));
-  alhambra = new Song(std::bind(run_alhambra, MIDI));
-  wueste = new Song(std::bind(run_monitoring, MIDI));
-  mrWimbledon = new Song(std::bind(run_monitoring, MIDI));
-  ferdinandPiech = new Song(std::bind(run_monitoring, MIDI));
-  queen = new Song(std::bind(run_monitoring, MIDI));
-  donnerwetter = new Song(std::bind(run_donnerwetter, MIDI));
-  theodolit = new Song(std::bind(run_theodolit, MIDI));
-  kupferUndGold = new Song(std::bind(run_kupferUndGold, MIDI));
+  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_b_11, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_b_73, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_b_63, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_A_15, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_A_25, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_sattelstein, MIDI)));
+  Globals::songlist.at(sizeof(Globals::songlist))->setTempoRange(150, 170); // TODO: make this work!
+  Globals::songlist.push_back(new Song(std::bind(run_host, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_randomVoice, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_besen, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_control_dd200, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_dd200_timeControl, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_a72, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_b_27, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_b_36, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_whammyMountains, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_hutschnur, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_control_volca, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_visuals, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_nanokontrol, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_PogoNumberOne, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_roeskur, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_alhambra, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_donnerwetter, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_theodolit, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_kupferUndGold, MIDI)));
 
-  Globals::songlist.push_back(b_11);
-  Globals::songlist.push_back(b_73);
-  Globals::songlist.push_back(b_63);
-  Globals::songlist.push_back(A_15);
-  Globals::songlist.push_back(A_25);
-
-  Globals::songlist.push_back(monitoring);
-  Globals::songlist.push_back(randomSelect);
-
-  Globals::songlist.push_back(monitoring);
-  Globals::songlist.push_back(control_dd200);  // intro
-  Globals::songlist.push_back(pogoNumberOne);  // pogo
-  Globals::songlist.push_back(hutschnur);      // hutschnur
-  Globals::songlist.push_back(randomVoice);    // jam
-  Globals::songlist.push_back(wueste);         // wueste
-  Globals::songlist.push_back(besen);      // besen
-  Globals::songlist.push_back(alhambra);       // alhambra
-  Globals::songlist.push_back(randomVoice);    // jam
-  Globals::songlist.push_back(mrWimbledon);    // mr wimbledon
-  Globals::songlist.push_back(roeskur);        // roeskur
-  Globals::songlist.push_back(sattelstein);    // sattelstein
-  Globals::songlist.push_back(kupferUndGold);  // kupfer und gold
-  Globals::songlist.push_back(theodolit);      // theodolit
-  // --------------------------------------------------------------
-  Globals::songlist.push_back(monitoring);     // zugabe:
-  Globals::songlist.push_back(ferdinandPiech); // ferdinandPiech
-  Globals::songlist.push_back(donnerwetter);   // donnerwetter I
-  Globals::songlist.push_back(control_dd200);  // donnerwetter II
-  
   Globals::active_song = Globals::songlist.at(0);
 
   // link midi synth to instruments:
