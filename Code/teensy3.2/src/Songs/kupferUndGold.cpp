@@ -11,8 +11,8 @@ void Song::run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI)
     case 0: // Intro
         if (setup)
         {
-            Synthesizers::dd200->sendControlChange(dd200_OnOff, 127, MIDI);
             Synthesizers::dd200->sendProgramChange(4, MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 127, MIDI);
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3, MIDI);
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT → UP 2 OCT
             setup = false;
