@@ -19,7 +19,6 @@ void Song::run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, 4, MIDI);
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
 
-
             Synthesizers::mKorg->sendProgramChange(34, MIDI); // load b_27
             Synthesizers::kaossPad3->sendControlChange(92, 127, MIDI); // Touch Pad on
             setup = false;

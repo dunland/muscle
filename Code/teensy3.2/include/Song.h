@@ -109,6 +109,8 @@ public:
 
     void run_ferdinandPiech(midi::MidiInterface<HardwareSerial> MIDI);
 
+    void run_intro(midi::MidiInterface<HardwareSerial> MIDI);
+
     // ------------------------------- MODES: (deprecated) ------------
     void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
 

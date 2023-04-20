@@ -63,6 +63,7 @@ Song *kupferUndGold;
 Song *ferdinandPiech;
 Song *queen;
 Song *donnerwetter;
+Song *intro;
 
 Rhythmics *rhythmics;
 
@@ -236,6 +237,8 @@ void setup()
   // ---------------------------------- SCORE -------------------------
   // doubleSquirrel = new Score("doubleSquirrel");
   monitoring = new Song("monitoring");
+  intro = new Song("intro");
+
   sattelstein = new Song("sattelstein");
   sattelstein->setTempoRange(150, 170); // TODO: make this work!
   elektrosmoff = new Song("elektrosmoff");
@@ -264,7 +267,7 @@ void setup()
 
   //------------------------ setlist ---------------------------
   Globals::songlist.push_back(monitoring);
-  Globals::songlist.push_back(control_dd200);  // intro
+  Globals::songlist.push_back(intro);  // intro
   Globals::songlist.push_back(pogoNumberOne);  // pogo
   Globals::songlist.push_back(hutschnur);      // hutschnur
   Globals::songlist.push_back(randomVoice);    // jam
