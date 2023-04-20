@@ -11,6 +11,10 @@ void Song::run_theodolit(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (setup)
         {
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
+            Synthesizers::dd200->sendProgramChange(3, MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 14, MIDI); // 518 BPM
+
             Synthesizers::whammy->sendProgramChange(58, MIDI); // HARMONY 5TH → UP OCT
             setup = false;
         }

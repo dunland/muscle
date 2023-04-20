@@ -15,6 +15,7 @@ void Song::run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (setup)
         {
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT / UP 2 OCT
             setup = false;
         }

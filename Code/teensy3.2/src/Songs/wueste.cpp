@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void Song::run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI)
+void Song::run_wueste(midi::MidiInterface<HardwareSerial> MIDI)
 {
 
     switch (step)
@@ -12,12 +12,8 @@ void Song::run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (setup)
         {
-
-            Synthesizers::whammy->sendProgramChange(42, MIDI); // WHAMMY UP 2 OCT
-
-            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
-            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 4, MIDI);
-            Synthesizers::dd200->sendProgramChange(3, MIDI);  // Program #3
+            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 13, MIDI);
+            Synthesizers::dd200->sendProgramChange(1, MIDI);  // Program #1
             Hardware::footswitch_mode = Increment_Score;
             setup = false;
         }

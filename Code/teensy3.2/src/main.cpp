@@ -1,7 +1,7 @@
 /*
    SUPER MUSCLE
    ------------------------------------
-   October 2020-December 2022
+   October 2020-April 2023
    by David Unland david[at]davidunland[dot]de
    github.com/dunland/muscle
    ------------------------------------
@@ -25,7 +25,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.36";
+const String VERSION_NUMBER = "0.2.37";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = false;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -262,6 +262,7 @@ void setup()
   theodolit = new Song("theodolit");
   kupferUndGold = new Song("kupferUndGold");
 
+  //------------------------ setlist ---------------------------
   Globals::songlist.push_back(monitoring);
   Globals::songlist.push_back(control_dd200);  // intro
   Globals::songlist.push_back(pogoNumberOne);  // pogo
@@ -274,8 +275,8 @@ void setup()
   Globals::songlist.push_back(mrWimbledon);    // mr wimbledon
   Globals::songlist.push_back(roeskur);        // roeskur
   Globals::songlist.push_back(sattelstein);    // sattelstein
-  Globals::songlist.push_back(kupferUndGold);  // kupfer und gold
   Globals::songlist.push_back(theodolit);      // theodolit
+  Globals::songlist.push_back(kupferUndGold);  // kupfer und gold
   // --------------------------------------------------------------
   Globals::songlist.push_back(monitoring);     // zugabe:
   Globals::songlist.push_back(ferdinandPiech); // ferdinandPiech
