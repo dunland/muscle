@@ -275,17 +275,16 @@ void setup()
   Globals::songlist.push_back(zitteraal);      // besen
   Globals::songlist.push_back(alhambra);       // alhambra
   Globals::songlist.push_back(randomVoice);    // jam
-  Globals::songlist.push_back(mrWimbledon);    // mr wimbledon
   Globals::songlist.push_back(roeskur);        // roeskur
+  Globals::songlist.push_back(mrWimbledon);    // mr wimbledon
+  Globals::songlist.push_back(randomVoice);    // jam
   Globals::songlist.push_back(sattelstein);    // sattelstein
   Globals::songlist.push_back(theodolit);      // theodolit
   Globals::songlist.push_back(kupferUndGold);  // kupfer und gold
   // --------------------------------------------------------------
   Globals::songlist.push_back(monitoring);     // zugabe:
   Globals::songlist.push_back(ferdinandPiech); // ferdinandPiech
-  Globals::songlist.push_back(donnerwetter);   // donnerwetter I
-  Globals::songlist.push_back(control_dd200);  // donnerwetter II
-
+  Globals::songlist.push_back(donnerwetter);   // donnerwetter
   Globals::active_song = Globals::songlist.at(0);
 
   // link midi synth to instruments:
