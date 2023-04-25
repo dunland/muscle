@@ -19,6 +19,11 @@ void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
             Globals::tapInterval = 392; // 153 BPM
             Globals::current_BPM = 60000 / Globals::tapInterval;
             Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+
+            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 4, MIDI); // 496 ms
+            Synthesizers::dd200->sendProgramChange(4, MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI); // ATTENTION: must be after programChange!
+
         }
         break;
 

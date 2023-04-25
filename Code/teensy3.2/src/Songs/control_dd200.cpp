@@ -24,7 +24,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
 
-            Drumset::hihat->set_effect(Monitor);
+            Drumset::hihat->set_effect(TapTempo);
             Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
 

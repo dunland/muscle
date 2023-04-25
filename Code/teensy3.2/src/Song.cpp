@@ -91,7 +91,7 @@ void Song::resetInstruments()
     //TODO: also reset synthesizers' CC values and turn notes off!
 }
 
-//////////////////////////////////// MUSICAL FUNCTIONS //////////////////////////
+//////////////////////////// MUSICAL FUNCTIONS ////////////////////////
 void Song::add_bassNote(int note)
 {
     notes.push_back(note);

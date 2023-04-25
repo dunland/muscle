@@ -1,7 +1,7 @@
 /*
    SUPER MUSCLE
    ------------------------------------
-   October 2020-December 2022
+   October 2020-April 2023
    by David Unland david[at]davidunland[dot]de
    github.com/dunland/muscle
    ------------------------------------
@@ -25,7 +25,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.36";
+const String VERSION_NUMBER = "0.2.37";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -69,6 +69,7 @@ Song *ferdinandPiech;
 Song *queen;
 Song *donnerwetter;
 Song *randomSelect;
+Song *intro;
 
 Rhythmics *rhythmics;
 
@@ -249,6 +250,8 @@ void setup()
   A_25 = new Song(std::bind(run_A_25, MIDI));
   randomSelect = new Song(std::bind(run_randomSelect, MIDI));
   sattelstein = new Song(std::bind(run_sattelstein, MIDI));
+  intro = new Song(std::bind(run_intro, MIDI));
+
   sattelstein->setTempoRange(150, 170); // TODO: make this work!
   host = new Song(std::bind(run_host, MIDI));
   randomVoice = new Song(std::bind(run_randomVoice, MIDI));
@@ -283,8 +286,9 @@ void setup()
   Globals::songlist.push_back(monitoring);
   Globals::songlist.push_back(randomSelect);
 
+  //------------------------ setlist ---------------------------
   Globals::songlist.push_back(monitoring);
-  Globals::songlist.push_back(control_dd200);  // intro
+  Globals::songlist.push_back(intro);  // intro
   Globals::songlist.push_back(pogoNumberOne);  // pogo
   Globals::songlist.push_back(hutschnur);      // hutschnur
   Globals::songlist.push_back(randomVoice);    // jam
@@ -292,17 +296,16 @@ void setup()
   Globals::songlist.push_back(besen);      // besen
   Globals::songlist.push_back(alhambra);       // alhambra
   Globals::songlist.push_back(randomVoice);    // jam
-  Globals::songlist.push_back(mrWimbledon);    // mr wimbledon
   Globals::songlist.push_back(roeskur);        // roeskur
+  Globals::songlist.push_back(mrWimbledon);    // mr wimbledon
+  Globals::songlist.push_back(randomVoice);    // jam
   Globals::songlist.push_back(sattelstein);    // sattelstein
-  Globals::songlist.push_back(kupferUndGold);  // kupfer und gold
   Globals::songlist.push_back(theodolit);      // theodolit
+  Globals::songlist.push_back(kupferUndGold);  // kupfer und gold
   // --------------------------------------------------------------
   Globals::songlist.push_back(monitoring);     // zugabe:
   Globals::songlist.push_back(ferdinandPiech); // ferdinandPiech
-  Globals::songlist.push_back(donnerwetter);   // donnerwetter I
-  Globals::songlist.push_back(control_dd200);  // donnerwetter II
-  
+  Globals::songlist.push_back(donnerwetter);   // donnerwetter
   Globals::active_song = Globals::songlist.at(0);
 
   // link midi synth to instruments:

@@ -17,6 +17,8 @@ void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
             Globals::active_song->notes.clear();
 
             Drumset::hihat->set_effect(TapTempo);
+            Synthesizers::dd200->sendProgramChange(3, MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
 
             Synthesizers::mKorg->sendProgramChange(62, MIDI); // corresponds A.87
             Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 80, MIDI); // set loudness to 80
