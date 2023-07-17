@@ -50,7 +50,7 @@ public:
     typedef std::function<void(midi::MidiInterface<HardwareSerial>)> Callback;
     Callback trigger_function;
 
-    Song(Callback f) : trigger_function(f)
+    Song(Callback f, String songName) : trigger_function(f)
     {
         // setup names of elements for display on Serial Monitor:
         // beat_sum.tag = "v";
@@ -60,6 +60,7 @@ public:
         notes.push_back(int(random(36, 48)));
         Devtools::print_to_console("active_score->note[0] = ");
         Devtools::println_to_console(notes[0]);
+        name = songName;
     }
 
     String name; // name to be displayed on LCD
@@ -122,7 +123,7 @@ void run_host(midi::MidiInterface<HardwareSerial> MIDI);
 
 void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI);
 
-void run_a72(midi::MidiInterface<HardwareSerial> MIDI);
+void run_a_72(midi::MidiInterface<HardwareSerial> MIDI);
 
 void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
 

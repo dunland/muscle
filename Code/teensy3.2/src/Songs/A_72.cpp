@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void run_a72(midi::MidiInterface<HardwareSerial> MIDI)
+void run_a_72(midi::MidiInterface<HardwareSerial> MIDI)
 {
     // each step:
     // - switch between Timbre 1 and 2
@@ -42,7 +42,7 @@ void run_a72(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[0];
             Drumset::snare->set_effect(PlayMidi);
 
-            
+
         }
         Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
 
@@ -64,7 +64,7 @@ void run_a72(midi::MidiInterface<HardwareSerial> MIDI)
             int val = (Synthesizers::mKorg->midi_values[mKORG_TimbreSelect] == 0) ? 127 : 0;
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, val, MIDI); // Select Timbre 2
 
-            
+
         }
         Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
 
