@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void run_a_72(midi::MidiInterface<HardwareSerial> MIDI)
+void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
 {
     // each step:
     // - switch between Timbre 1 and 2
@@ -34,12 +34,12 @@ void run_a_72(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::standtom->set_effect(Change_CC);
             Drumset::standtom->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 127, 29, 5, -0.05);
 
-            Drumset::kick->midi_settings.notes.push_back(Globals::active_song->notes[0] + 44);
-            Drumset::kick->midi_settings.active_note = Drumset::kick->midi_settings.notes[0];
+            Drumset::kick->midi.notes.push_back(Globals::active_song->notes[0] + 44);
+            Drumset::kick->midi.active_note = Drumset::kick->midi.notes[0];
             Drumset::kick->set_effect(PlayMidi);
 
-            Drumset::snare->midi_settings.notes.push_back(Globals::active_song->notes[0] + 49);
-            Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[0];
+            Drumset::snare->midi.notes.push_back(Globals::active_song->notes[0] + 49);
+            Drumset::snare->midi.active_note = Drumset::snare->midi.notes[0];
             Drumset::snare->set_effect(PlayMidi);
 
 

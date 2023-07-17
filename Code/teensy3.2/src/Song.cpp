@@ -267,10 +267,6 @@ void Song::set_notes(std::vector<int> list)
     Devtools::println_to_console("");
 }
 
-void Song::set_step_function(int trigger_step, Instrument *instrument, EffectsType effect_)
-{
-}
-
 void Song::increase_step()
 {
     step++;
@@ -281,11 +277,13 @@ void Song::increase_step()
 }
 
 // proceed to step 0 of next score and set all instruments effects to "Monitor":
-void Song::proceed_to_next_score()
+void Song::proceed_to_next_score() // TODO: make this a callback function/the songs' individual "tidyUp function", so they can be programmed individually.
 {
     // proceed to next score in list:
     Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::songlist.size();
     Globals::active_song = Globals::songlist.at(Globals::active_score_pointer);
+    Devtools::print_to_console("switching to song ");
+    Devtools::println_to_console(Globals::active_song->name);
     // ...and begin at step 0:
     Globals::active_song->step = 0;
     Globals::active_song->setup_state = true;

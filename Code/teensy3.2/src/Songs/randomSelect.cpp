@@ -17,23 +17,20 @@ void run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
 {
     static int sel_song_int = 0;
 
+    // TODO: create songs here and free memory next time. this way, the songs do not have to be in the main setlist!
+
     if (Globals::active_song->get_setup_state())
     {
-        sel_song_int = list_of_songs.at(random(sizeof(list_of_songs)));
+        sel_song_int = list_of_songs.at(int(random(list_of_songs.size() - 1)));
     }
 
     switch (sel_song_int)
     {
     case 85:
         Globals::active_song = Globals::get_song("b_36");
-        // run_b_36(MIDI);
-        // Globals::active_song->name = "b_36";
-        // TODO: Globals::active_song = *song; // SONST WIRD SONG::SETUP NICHT AUSGEFÜHRT!
         break;
 
     case 64:
-        // run_b_11(MIDI);
-        // Globals::active_song->name = "b_11";
         Globals::active_song = Globals::get_song("b_11");
         break;
 

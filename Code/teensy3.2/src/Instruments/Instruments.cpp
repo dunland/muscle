@@ -12,29 +12,29 @@ void Instrument::set_notes(std::vector<int> list)
 {
   for (uint8_t i = 0; i < list.size(); i++)
   {
-    midi_settings.notes.push_back(list[i]);
+    midi.notes.push_back(list[i]);
   }
 }
 
 // setup midi settings with params
 void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor)
 {
-  midi_settings.cc_chan = cc_type;
-  midi_settings.synth = synth;
-  midi_settings.cc_max = cc_max;
-  midi_settings.cc_min = cc_min;
-  midi_settings.cc_increase_factor = cc_increase_factor;
-  midi_settings.cc_tidyUp_factor = cc_tidyUp_factor;
+  midi.cc_chan = cc_type;
+  midi.synth = synth;
+  midi.cc_max = cc_max;
+  midi.cc_min = cc_min;
+  midi.cc_increase_factor = cc_increase_factor;
+  midi.cc_tidyUp_factor = cc_tidyUp_factor;
 
-  midi_settings.cc_standard = (cc_tidyUp_factor > 0) ? midi_settings.cc_min : midi_settings.cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
+  midi.cc_standard = (cc_tidyUp_factor > 0) ? midi.cc_min : midi.cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
 }
 
 // setup midi without params
 // TODO: this one seems broken! fix it!
 // void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth)
 // {
-//   midi_settings.cc_chan = cc_type;
-//   midi_settings.synth = synth;
+//   midi.cc_chan = cc_type;
+//   midi.synth = synth;
 // }
 
 // set instrument sensitivity
@@ -58,7 +58,7 @@ void Instrument::set_effect(EffectsType effect_)
   switch (effect_)
   {
   case PlayMidi:
-    if (midi_settings.notes.size() > 0 && midi_settings.active_note > 0)
+    if (midi.notes.size() > 0 && midi.active_note > 0)
     {
       effect = effect_;
       Devtools::println_to_console("done.");
@@ -72,7 +72,7 @@ void Instrument::set_effect(EffectsType effect_)
   case Reflex_and_PlayMidi:
     score.ready_to_shuffle = true;
     shuffle_cc(false);
-    if (midi_settings.notes.size() > 0 && midi_settings.active_note > 0)
+    if (midi.notes.size() > 0 && midi.active_note > 0)
     {
       effect = effect_;
       Devtools::println_to_console("done.");
@@ -345,7 +345,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
     random_change_cc_in(MIDI);
     break;
   case MainNoteIteration:
-    mainNoteIteration(midi_settings.synth, MIDI);
+    mainNoteIteration(midi.synth, MIDI);
     break;
 
   case Reflex_and_PlayMidi: // combines PlayMidi and Change_CC

@@ -52,7 +52,7 @@ void run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-        Synthesizers::kaossPad3->sendControlChange(92, 0, MIDI); // Touch Pad off
+        Synthesizers::kaossPad3->sendControlChange(92, 0, MIDI); // Touch Pad off // TODO: execute this when leaving the song with push button! at best, by using callback functions for song.proceed_to_next_score
         Globals::active_song->proceed_to_next_score();
         break;
     }

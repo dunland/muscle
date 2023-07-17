@@ -49,7 +49,7 @@ public:
 
     } timing;
 
-    struct MIDI
+    struct MIDI_SETTINGS
     {
         std::vector<int> notes;
         int active_note;
@@ -63,7 +63,7 @@ public:
         float cc_tidyUp_factor = -0.1; // factor by which MIDI vals decay/increase each loop
         Synthesizer *synth;            // associated midi-instrument to address
 
-    } midi_settings;
+    } midi;
 
     struct SCORE
     {
@@ -85,7 +85,7 @@ public:
         int tsunami_track; // tracks will be allocated in tsunami_beat_playback
         int tsunami_channel = 0;
 
-        boolean ready_to_shuffle = false; // a flag for Random_CC_Effect: resets midi_settings.cc_chan to random (once) when true
+        boolean ready_to_shuffle = false; // a flag for Random_CC_Effect: resets midi.cc_chan to random (once) when true
 
     } score;
 

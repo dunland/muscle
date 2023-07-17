@@ -13,26 +13,26 @@
 
 void Instrument::change_cc_in(midi::MidiInterface<HardwareSerial> MIDI) // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 {
-  midi_settings.cc_val += midi_settings.cc_increase_factor;
-  midi_settings.cc_val = min(midi_settings.cc_val, midi_settings.cc_max);
-  midi_settings.synth->sendControlChange(midi_settings.cc_chan, int(min(midi_settings.cc_val, 127)), MIDI);
-  output_string = String(midi_settings.cc_val);
+  midi.cc_val += midi.cc_increase_factor;
+  midi.cc_val = min(midi.cc_val, midi.cc_max);
+  midi.synth->sendControlChange(midi.cc_chan, int(min(midi.cc_val, 127)), MIDI);
+  output_string = String(midi.cc_val);
   output_string += "\t";
 }
 
 void Instrument::random_change_cc_in(midi::MidiInterface<HardwareSerial> MIDI) // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 {
-  midi_settings.cc_val += midi_settings.cc_increase_factor;
-  midi_settings.cc_val = min(midi_settings.cc_val, midi_settings.cc_max);
-  midi_settings.synth->sendControlChange(midi_settings.random_cc_chan, int(min(midi_settings.cc_val, 127)), MIDI);
-  output_string = String(midi_settings.cc_val);
+  midi.cc_val += midi.cc_increase_factor;
+  midi.cc_val = min(midi.cc_val, midi.cc_max);
+  midi.synth->sendControlChange(midi.random_cc_chan, int(min(midi.cc_val, 127)), MIDI);
+  output_string = String(midi.cc_val);
   output_string += "\t";
 }
 
 // plays a Midi note:
 void Instrument::playMidi(midi::MidiInterface<HardwareSerial> MIDI)
 {
-  midi_settings.synth->sendNoteOn(midi_settings.active_note, MIDI);
+  midi.synth->sendNoteOn(midi.active_note, MIDI);
   score.last_notePlayed = millis();
 }
 
@@ -177,7 +177,7 @@ void Instrument::swell_rec(midi::MidiInterface<HardwareSerial> MIDI) // remember
 
     // start MIDI note and proceed to next state
     score.swell_state = 2;
-    // MIDI.sendNoteOn(midi_settings.active_note, 127, midi_settings.synth);
+    // MIDI.sendNoteOn(midi.active_note, 127, midi.synth);
 
     // lastSwellRec = millis();
   }
@@ -248,10 +248,10 @@ void Instrument::sendMidiNotes_timed(midi::MidiInterface<HardwareSerial> MIDI)
     {
       setInstrumentPrintString();
       // TODO: SHOULD BE HANDLED LIKE FOOTSWITCHLOOPER!
-      midi_settings.synth->sendNoteOn(midi_settings.active_note, MIDI);
+      midi.synth->sendNoteOn(midi.active_note, MIDI);
     }
     else
-      midi_settings.synth->sendNoteOff(midi_settings.active_note, MIDI);
+      midi.synth->sendNoteOff(midi.active_note, MIDI);
   }
 }
 
@@ -289,7 +289,7 @@ void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // upda
       output_string += "\t";
 
       if (!Globals::footswitch_is_pressed)
-        midi_settings.synth->sendControlChange(midi_settings.cc_chan, score.swell_val * score.swell_factor, MIDI);
+        midi.synth->sendControlChange(midi.cc_chan, score.swell_val * score.swell_factor, MIDI);
 
       /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
         finding the right CC# on microKORG: (manual p.61):
@@ -297,7 +297,7 @@ void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // upda
         2. choose parameter to find out via EDIT SELECT 1 & 2
         (3. reset that parameter, if you like) */
 
-      // MIDI.sendNoteOn(notes_list[instr], 127, midi_settings.synth); // also play a note on each hit?
+      // MIDI.sendNoteOn(notes_list[instr], 127, midi.synth); // also play a note on each hit?
       // if (effect == CymbalSwell)
       // {
       //   if (Globals::tsunami.isTrackPlaying(score.tsunami_track))
@@ -323,7 +323,7 @@ void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // upda
         score.swell_val = 10;
         score.swell_beatPos_sum = 0;
         score.swell_beatStep = 0;
-        midi_settings.synth->sendNoteOff(midi_settings.active_note, MIDI);
+        midi.synth->sendNoteOff(midi.active_note, MIDI);
       }
     }
   }
@@ -502,7 +502,7 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, 
     int vol = min(Globals::active_song->topo_midi_effect.a_16[Globals::current_16th_count] * 13, 255);
 
     if (topography.a_16[Globals::current_16th_count] > 0)
-      midi_settings.synth->sendControlChange(midi_settings.cc_chan, vol, MIDI);
+      midi.synth->sendControlChange(midi.cc_chan, vol, MIDI);
 
     // Debug:
     Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
@@ -526,10 +526,10 @@ void Instrument::turnMidiNoteOff(midi::MidiInterface<HardwareSerial> MIDI)
 {
   if (millis() > score.last_notePlayed + 200) // Swell effect turns notes off itself
   {
-    midi_settings.synth->sendNoteOff(midi_settings.active_note, MIDI);
+    midi.synth->sendNoteOff(midi.active_note, MIDI);
     // Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
     // Devtools::print_to_console(": turning midi note ");
-    // Devtools::print_to_console(midi_settings.active_note);
+    // Devtools::print_to_console(midi.active_note);
     // Devtools::println_to_console(" off.");
   }
 }
@@ -537,10 +537,10 @@ void Instrument::turnMidiNoteOff(midi::MidiInterface<HardwareSerial> MIDI)
 // TODO: make this decrease with 32nd-notes.
 void Instrument::change_cc_out(midi::MidiInterface<HardwareSerial> MIDI) // changes (mostly decreases) value of CC effect each loop (!)
 {
-  midi_settings.cc_val += midi_settings.cc_tidyUp_factor;
-  midi_settings.cc_val = min(max(midi_settings.cc_val, midi_settings.cc_min), midi_settings.cc_max);
-  midi_settings.synth->sendControlChange(midi_settings.cc_chan, int(min(midi_settings.cc_val, 127)), MIDI);
-  output_string = String(midi_settings.cc_val);
+  midi.cc_val += midi.cc_tidyUp_factor;
+  midi.cc_val = min(max(midi.cc_val, midi.cc_min), midi.cc_max);
+  midi.synth->sendControlChange(midi.cc_chan, int(min(midi.cc_val, 127)), MIDI);
+  output_string = String(midi.cc_val);
   output_string += "\t";
 }
 
@@ -549,7 +549,7 @@ void Instrument::shuffle_cc(boolean force_ = false)
 {
   if (score.ready_to_shuffle || force_ == true)
   {
-    if (midi_settings.cc_val == midi_settings.cc_standard || force_ == true)
+    if (midi.cc_val == midi.cc_standard || force_ == true)
     {
 
       // ATTENTION:
@@ -558,22 +558,22 @@ void Instrument::shuffle_cc(boolean force_ = false)
 
       do
       {
-        midi_settings.random_cc_chan = int(random(128));
-        midi_settings.cc_chan = Globals::int_to_cc_type(midi_settings.random_cc_chan);
-      } while (midi_settings.cc_chan == CC_None);
+        midi.random_cc_chan = int(random(128));
+        midi.cc_chan = Globals::int_to_cc_type(midi.random_cc_chan);
+      } while (midi.cc_chan == CC_None);
 
       score.ready_to_shuffle = false;
       Devtools::print_to_console("cc_chan of ");
       Devtools::print_to_console(drumtype);
       Devtools::print_to_console(" is ");
-      Devtools::println_to_console(midi_settings.cc_chan);
+      Devtools::println_to_console(midi.cc_chan);
     }
     else
     {
       Devtools::print_to_console("waiting for cc_val to be at standard: ");
-      Devtools::print_to_console(midi_settings.cc_val);
+      Devtools::print_to_console(midi.cc_val);
       Devtools::print_to_console("/");
-      Devtools::println_to_console(midi_settings.cc_standard);
+      Devtools::println_to_console(midi.cc_standard);
     }
   }
   else

@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.37";
+const String VERSION_NUMBER = "0.2.38";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -206,62 +206,63 @@ void setup()
   }
   Devtools::println_to_console("-----------------------------------------------");
 
-  // ---------------------------------- SCORE -------------------------
-  // doubleSquirrel = new Score("doubleSquirrel");
-  // Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_b_11, MIDI), "b_11"));
+  // -------------------------------- songlist ------------------------
+  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI), "monitoring"));
+  Globals::songlist.push_back(new Song(std::bind(run_intro, MIDI), "intro"));
+  Globals::songlist.push_back(new Song(std::bind(run_PogoNumberOne, MIDI), "pogoNumberOne"));
+  Globals::songlist.push_back(new Song(std::bind(run_hutschnur, MIDI), "hutschnur"));
   Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI), "randomSelect"));
+  Globals::songlist.push_back(new Song(std::bind(run_wueste, MIDI), "wueste"));
+  Globals::songlist.push_back(new Song(std::bind(run_besen, MIDI), "besen"));
+  Globals::songlist.push_back(new Song(std::bind(run_alhambra, MIDI), "alhambra"));
+  Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI), "randomSelect"));
+  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI), "mrWimbledon"));
+  Globals::songlist.push_back(new Song(std::bind(run_roeskur, MIDI), "roeskur"));
+  Globals::songlist.push_back(new Song(std::bind(run_sattelstein, MIDI), "sattelstein"));
+  Globals::songlist.push_back(new Song(std::bind(run_theodolit, MIDI), "theodolit"));
+  Globals::songlist.push_back(new Song(std::bind(run_kupferUndGold, MIDI), "kupferUndGold"));
+  Globals::songlist.push_back(new Song(std::bind(run_donnerwetter, MIDI), "donnerwetter"));
+  Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI), "randomSelect"));
+
+  Globals::songlist.push_back(new Song(std::bind(run_b_11, MIDI), "b_11"));
   Globals::songlist.push_back(new Song(std::bind(run_b_73, MIDI), "b_73"));
   Globals::songlist.push_back(new Song(std::bind(run_b_63, MIDI), "b_63"));
   Globals::songlist.push_back(new Song(std::bind(run_A_15, MIDI), "A_15"));
   Globals::songlist.push_back(new Song(std::bind(run_A_25, MIDI), "A_25"));
-  // Globals::songlist.push_back(new Song(std::bind(run_sattelstein, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_A_72, MIDI), "A_72"));
+  Globals::songlist.push_back(new Song(std::bind(run_b_27, MIDI), "b_27"));
+  Globals::songlist.push_back(new Song(std::bind(run_b_36, MIDI), "b_36"));
   // Globals::songlist.at(sizeof(Globals::songlist))->setTempoRange(150, 170); // TODO: make this work!
   // Globals::songlist.push_back(new Song(std::bind(run_host, MIDI)));
   // Globals::songlist.push_back(new Song(std::bind(run_randomVoice, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_besen, MIDI)));
   // Globals::songlist.push_back(new Song(std::bind(run_control_dd200, MIDI)));
   // Globals::songlist.push_back(new Song(std::bind(run_dd200_timeControl, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_a_72, MIDI), "A_72"));
-  Globals::songlist.push_back(new Song(std::bind(run_b_27, MIDI), "b_27"));
-  Globals::songlist.push_back(new Song(std::bind(run_b_36, MIDI), "b_36"));
   // Globals::songlist.push_back(new Song(std::bind(run_whammyMountains, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_hutschnur, MIDI)));
   // Globals::songlist.push_back(new Song(std::bind(run_control_volca, MIDI)));
   // Globals::songlist.push_back(new Song(std::bind(run_visuals, MIDI)));
   // Globals::songlist.push_back(new Song(std::bind(run_nanokontrol, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_PogoNumberOne, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_roeskur, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_alhambra, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_donnerwetter, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_theodolit, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_kupferUndGold, MIDI)));
 
   Globals::active_song = Globals::songlist.at(0);
 
   // link midi synth to instruments:
-  Drumset::snare->midi_settings.synth = Synthesizers::mKorg;
-  Drumset::kick->midi_settings.synth = Synthesizers::mKorg;
-  Drumset::hihat->midi_settings.synth = Synthesizers::mKorg;
-  Drumset::crash1->midi_settings.synth = Synthesizers::mKorg;
-  Drumset::ride->midi_settings.synth = Synthesizers::mKorg;
-  Drumset::tom1->midi_settings.synth = Synthesizers::mKorg;
-  Drumset::tom2->midi_settings.synth = Synthesizers::mKorg;
-  Drumset::standtom->midi_settings.synth = Synthesizers::mKorg;
+  Drumset::snare->midi.synth = Synthesizers::mKorg;
+  Drumset::kick->midi.synth = Synthesizers::mKorg;
+  Drumset::hihat->midi.synth = Synthesizers::mKorg;
+  Drumset::crash1->midi.synth = Synthesizers::mKorg;
+  Drumset::ride->midi.synth = Synthesizers::mKorg;
+  Drumset::tom1->midi.synth = Synthesizers::mKorg;
+  Drumset::tom2->midi.synth = Synthesizers::mKorg;
+  Drumset::standtom->midi.synth = Synthesizers::mKorg;
 
   // an initial midi note must be defined, otherwise there is a problem with the tidyUp function
-  // Drumset::snare->midi_settings.active_note = 50;
-  // Drumset::kick->midi_settings.active_note = 50;
-  // Drumset::hihat->midi_settings.active_note = 50;
-  // Drumset::crash1->midi_settings.active_note = 50;
-  // Drumset::ride->midi_settings.active_note = 50;
-  // Drumset::tom2->midi_settings.active_note = 50;
-  // Drumset::standtom->midi_settings.active_note = 50;
-  // Drumset::cowbell->midi_settings.active_note = 50;
+  // Drumset::snare->midi.active_note = 50;
+  // Drumset::kick->midi.active_note = 50;
+  // Drumset::hihat->midi.active_note = 50;
+  // Drumset::crash1->midi.active_note = 50;
+  // Drumset::ride->midi.active_note = 50;
+  // Drumset::tom2->midi.active_note = 50;
+  // Drumset::standtom->midi.active_note = 50;
+  // Drumset::cowbell->midi.active_note = 50;
 
   // assign startup instrument effects:
   Drumset::hihat->effect = Monitor;

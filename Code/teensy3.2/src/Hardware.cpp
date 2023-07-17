@@ -277,7 +277,7 @@ void Hardware::display_Midi_values()
       Hardware::lcd->setCursor(((pos % 4) * 4), int(pos >= 4));
       Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[i]->drumtype)[0]);
       Hardware::lcd->setCursor(((pos % 4) * 4) + 1, int(pos >= 4));
-      Hardware::lcd->print(int(Drumset::instruments[i]->midi_settings.cc_val));
+      Hardware::lcd->print(int(Drumset::instruments[i]->midi.cc_val));
 
       pos++;
     }
@@ -295,7 +295,7 @@ int pos = 0;
       Hardware::lcd->setCursor(((pos % 4) * 4), int(pos >= 4));
       Hardware::lcd->print("|");
       Hardware::lcd->setCursor(((pos % 4) * 4) + 1, int(pos >= 4));
-      Hardware::lcd->print(int(Drumset::instruments[i]->midi_settings.cc_chan));
+      Hardware::lcd->print(int(Drumset::instruments[i]->midi.cc_chan));
       pos++;
     }
   }

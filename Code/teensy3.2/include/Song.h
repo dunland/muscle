@@ -79,7 +79,6 @@ public:
         unsigned int tapTempoTimeOut = 2000; // do not count second tap, if time gap to first one exceeds this
     } tempo;
 
-    // TODO: make this a functional bool and reset instruments etc when calling (and deactivate it automatically)!
     bool setup_state; // when true, current score_step's setup function is executed.
     bool get_setup_state();
 
@@ -89,7 +88,6 @@ public:
     TOPOGRAPHY topo_midi_effect; // for TopographyMidiEffect
 
     // --------------------------- SETUP etc: -------------------------
-    void set_step_function(int trigger_step, Instrument *instrument, EffectsType); // TODO: set score-step-functions here
     void set_notes(std::vector<int> list);
     void add_bassNote(int note); // adds a NOTE to notes[]
     void increase_step();
@@ -123,7 +121,7 @@ void run_host(midi::MidiInterface<HardwareSerial> MIDI);
 
 void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI);
 
-void run_a_72(midi::MidiInterface<HardwareSerial> MIDI);
+void run_A_72(midi::MidiInterface<HardwareSerial> MIDI);
 
 void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
 
@@ -160,6 +158,8 @@ void run_ferdinandPiech(midi::MidiInterface<HardwareSerial> MIDI);
 void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI);
 
 void run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI);
+
+void run_wueste(midi::MidiInterface<HardwareSerial> MIDI);
 
 void run_intro(midi::MidiInterface<HardwareSerial> MIDI);
 

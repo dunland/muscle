@@ -55,16 +55,16 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
         //     note_idx = (note_idx + 1) % locrian_mode.size();
         //     active_score->note_idx = (active_score->note_idx + 1) % active_score->notes.size();
 
-        //     kick->midi_settings.active_note = kick->midi_settings.notes[note_idx];
+        //     kick->midi.active_note = kick->midi.notes[note_idx];
         //     kick->set_effect(PlayMidi);
 
-        //     snare->midi_settings.active_note = snare->midi_settings.notes[note_idx] + 12;
+        //     snare->midi.active_note = snare->midi.notes[note_idx] + 12;
         //     snare->set_effect(PlayMidi);
 
-        //     tom2->midi_settings.active_note = tom2->midi_settings.notes[(note_idx + 1) % tom2->midi_settings.notes.size()];
+        //     tom2->midi.active_note = tom2->midi.notes[(note_idx + 1) % tom2->midi.notes.size()];
         //     tom2->set_effect(PlayMidi);
 
-        //     standtom->midi_settings.active_note = standtom->midi_settings.notes[(note_idx + 2) % standtom->midi_settings.notes.size()];
+        //     standtom->midi.active_note = standtom->midi.notes[(note_idx + 2) % standtom->midi.notes.size()];
         //     standtom->set_effect(PlayMidi);
 
         //     // add locrian mode
@@ -164,9 +164,9 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
         }
 
         Devtools::print_to_console("amplevel_val = ");
-        Devtools::println_to_console(hihat->midi_settings.cc_val);
+        Devtools::println_to_console(hihat->midi.cc_val);
 
-        if (hihat->midi_settings.cc_val >= 127)
+        if (hihat->midi.cc_val >= 127)
         {
             active_score->beat_sum.activation_thresh = 0; // score step is ready
         }
@@ -182,23 +182,23 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
             // assign effects to instruments:
             kick->set_effect(PlayMidi);
             kick->setup_midi(CC_None, Synthesizers::volca, 127, 0, 1, 0.1);
-            kick->midi_settings.notes.push_back(active_score->notes[0] + 12 + 7);
-            kick->midi_settings.active_note = kick->midi_settings.notes[0];
+            kick->midi.notes.push_back(active_score->notes[0] + 12 + 7);
+            kick->midi.active_note = kick->midi.notes[0];
 
             Devtools::print_to_console("note for kick is: ");
-            Devtools::print_to_console(kick->midi_settings.notes[0]);
+            Devtools::print_to_console(kick->midi.notes[0]);
             Devtools::print_to_console(" active note:");
-            Devtools::println_to_console(kick->midi_settings.active_note);
+            Devtools::println_to_console(kick->midi.active_note);
 
             snare->set_effect(PlayMidi);
             snare->setup_midi(CC_None, Synthesizers::volca, 127, 0, 1, 0.1);
-            snare->midi_settings.notes.push_back(active_score->notes[0] + 24);
-            snare->midi_settings.active_note = snare->midi_settings.notes[0];
+            snare->midi.notes.push_back(active_score->notes[0] + 24);
+            snare->midi.active_note = snare->midi.notes[0];
 
             Devtools::print_to_console("note for snare is: ");
-            Devtools::print_to_console(snare->midi_settings.notes[0]);
+            Devtools::print_to_console(snare->midi.notes[0]);
             Devtools::print_to_console(" active note:");
-            Devtools::println_to_console(snare->midi_settings.active_note);
+            Devtools::println_to_console(snare->midi.active_note);
         }
         break;
 
@@ -271,7 +271,7 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
         osc2_semitone_val = max(0, min(127, osc2_semitone_val));
 
         Devtools::print_to_console("\n -- Osc2-tune = ");
-        Devtools::print_to_console(snare->midi_settings.cc_val);
+        Devtools::print_to_console(snare->midi.cc_val);
         Devtools::println_to_console(" --");
 
         break;
@@ -312,11 +312,11 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
             // active_score->add_bassNote(active_score->notes[0] + int(random(6)));
 
             snare->effect = PlayMidi;
-            snare->midi_settings.active_note = active_score->notes[0] + 24 + 7;
+            snare->midi.active_note = active_score->notes[0] + 24 + 7;
             tom2->effect = PlayMidi;
-            tom2->midi_settings.active_note = active_score->notes[0] + 24 + 3;
+            tom2->midi.active_note = active_score->notes[0] + 24 + 3;
             standtom->effect = PlayMidi;
-            standtom->midi_settings.active_note = active_score->notes[0] + 12 + 4;
+            standtom->midi.active_note = active_score->notes[0] + 12 + 4;
 
             kick->effect = Monitor;
         }

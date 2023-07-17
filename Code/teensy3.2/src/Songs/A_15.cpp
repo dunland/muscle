@@ -27,20 +27,20 @@ void run_A_15(midi::MidiInterface<HardwareSerial> MIDI) // wie randomVoices
         {
             Hardware::footswitch_mode = Increment_Score;
 
-            Drumset::kick->midi_settings.notes.push_back(int(random(0, 128)));
-            Drumset::kick->midi_settings.active_note = Drumset::kick->midi_settings.notes[0];
+            Drumset::kick->midi.notes.push_back(int(random(0, 128)));
+            Drumset::kick->midi.active_note = Drumset::kick->midi.notes[0];
 
-            Drumset::snare->midi_settings.notes.push_back(int(random(12, 72)));
-            Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[0];
+            Drumset::snare->midi.notes.push_back(int(random(12, 72)));
+            Drumset::snare->midi.active_note = Drumset::snare->midi.notes[0];
 
-            Drumset::tom1->midi_settings.notes.push_back(int(random(12, 72)));
-            Drumset::tom1->midi_settings.active_note = Drumset::tom1->midi_settings.notes[0];
+            Drumset::tom1->midi.notes.push_back(int(random(12, 72)));
+            Drumset::tom1->midi.active_note = Drumset::tom1->midi.notes[0];
 
-            Drumset::tom2->midi_settings.notes.push_back(int(random(12, 72)));
-            Drumset::tom2->midi_settings.active_note = Drumset::tom2->midi_settings.notes[0];
+            Drumset::tom2->midi.notes.push_back(int(random(12, 72)));
+            Drumset::tom2->midi.active_note = Drumset::tom2->midi.notes[0];
 
-            Drumset::standtom->midi_settings.notes.push_back(int(random(12, 72)));
-            Drumset::standtom->midi_settings.active_note = Drumset::standtom->midi_settings.notes[0];
+            Drumset::standtom->midi.notes.push_back(int(random(12, 72)));
+            Drumset::standtom->midi.active_note = Drumset::standtom->midi.notes[0];
             // Drumset::standtom->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 115, 15, 10, -0.6);
 
             Drumset::kick->set_effect(PlayMidi);
