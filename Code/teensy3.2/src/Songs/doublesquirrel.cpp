@@ -102,8 +102,8 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
 
         //     // define interval when to change notes:
         //     // rhythmic_iterator = int(random(32));
-        //     // Globals::print_to_console("rhythmic_iterator = ");
-        //     // Globals::println_to_console(rhythmic_iterator);
+        //     // Devtools::print_to_console("rhythmic_iterator = ");
+        //     // Devtools::println_to_console(rhythmic_iterator);
 
         //     // proceed in note lists:
         //     note_idx = (note_idx + 1) % locrian_mode.size();
@@ -127,8 +127,8 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
         static std::vector<int> locrian_mode = {active_score->notes[0] + 1, active_score->notes[0] + 3, active_score->notes[0] + 5, active_score->notes[0] + 6, active_score->notes[0] + 8, active_score->notes[0] + 11};
 
         // setup score note seed:
-        Globals::print_to_console("active_score->notes[0] = ");
-        Globals::println_to_console(active_score->notes[0]);
+        Devtools::print_to_console("active_score->notes[0] = ");
+        Devtools::println_to_console(active_score->notes[0]);
         // set start values for microKORG:
 
         Synthesizers::mKorg->sendControlChange(mKORG_Cutoff, 50, MIDI); // sets cc_value and sends MIDI-ControlChange
@@ -163,8 +163,8 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
             active_score->playSingleNote(Synthesizers::mKorg, MIDI); // start playing a bass note on synth
         }
 
-        Globals::print_to_console("amplevel_val = ");
-        Globals::println_to_console(hihat->midi_settings.cc_val);
+        Devtools::print_to_console("amplevel_val = ");
+        Devtools::println_to_console(hihat->midi_settings.cc_val);
 
         if (hihat->midi_settings.cc_val >= 127)
         {
@@ -185,20 +185,20 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
             kick->midi_settings.notes.push_back(active_score->notes[0] + 12 + 7);
             kick->midi_settings.active_note = kick->midi_settings.notes[0];
 
-            Globals::print_to_console("note for kick is: ");
-            Globals::print_to_console(kick->midi_settings.notes[0]);
-            Globals::print_to_console(" active note:");
-            Globals::println_to_console(kick->midi_settings.active_note);
+            Devtools::print_to_console("note for kick is: ");
+            Devtools::print_to_console(kick->midi_settings.notes[0]);
+            Devtools::print_to_console(" active note:");
+            Devtools::println_to_console(kick->midi_settings.active_note);
 
             snare->set_effect(PlayMidi);
             snare->setup_midi(CC_None, Synthesizers::volca, 127, 0, 1, 0.1);
             snare->midi_settings.notes.push_back(active_score->notes[0] + 24);
             snare->midi_settings.active_note = snare->midi_settings.notes[0];
 
-            Globals::print_to_console("note for snare is: ");
-            Globals::print_to_console(snare->midi_settings.notes[0]);
-            Globals::print_to_console(" active note:");
-            Globals::println_to_console(snare->midi_settings.active_note);
+            Devtools::print_to_console("note for snare is: ");
+            Devtools::print_to_console(snare->midi_settings.notes[0]);
+            Devtools::print_to_console(" active note:");
+            Devtools::println_to_console(snare->midi_settings.active_note);
         }
         break;
 
@@ -270,9 +270,9 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
         osc2_semitone_val = max(0, (min(64, active_score->beat_sum.average_smooth * (127 / 15))));
         osc2_semitone_val = max(0, min(127, osc2_semitone_val));
 
-        Globals::print_to_console("\n -- Osc2-tune = ");
-        Globals::print_to_console(snare->midi_settings.cc_val);
-        Globals::println_to_console(" --");
+        Devtools::print_to_console("\n -- Osc2-tune = ");
+        Devtools::print_to_console(snare->midi_settings.cc_val);
+        Devtools::println_to_console(" --");
 
         break;
 
@@ -296,7 +296,7 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
             Synthesizers::mKorg->sendControlChange(mKORG_Osc2_tune, 0, MIDI);
             active_score->add_bassNote(active_score->notes[0] + int(random(6)));
             // active_score->note_change_pos = int(random(8, 16)); // change at a rate between quarter and half notes
-            
+
         }
 
         active_score->playRhythmicNotes(Synthesizers::mKorg, MIDI, random_note_change);
@@ -337,7 +337,7 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
     if (Globals::active_song->beat_sum.ready())
     {
         digitalWrite(VIBR, HIGH);
-        Globals::println_to_console("ready to go to next score step! hit footswitch!");
+        Devtools::println_to_console("ready to go to next score step! hit footswitch!");
     }
     else
         digitalWrite(VIBR, LOW);

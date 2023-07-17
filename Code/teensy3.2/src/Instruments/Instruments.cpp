@@ -49,11 +49,11 @@ void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfte
 // set effect without handle for variable:
 void Instrument::set_effect(EffectsType effect_)
 {
-  Globals::print_to_console("Setting effect for ");
-  Globals::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
-  Globals::print_to_console(" to ");
-  Globals::print_to_console(Globals::EffectstypeToHumanReadable(effect_));
-  Globals::print_to_console("... ");
+  Devtools::print_to_console("Setting effect for ");
+  Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
+  Devtools::print_to_console(" to ");
+  Devtools::print_to_console(Globals::EffectstypeToHumanReadable(effect_));
+  Devtools::print_to_console("... ");
 
   switch (effect_)
   {
@@ -61,11 +61,11 @@ void Instrument::set_effect(EffectsType effect_)
     if (midi_settings.notes.size() > 0 && midi_settings.active_note > 0)
     {
       effect = effect_;
-      Globals::println_to_console("done.");
+      Devtools::println_to_console("done.");
     }
     else
     {
-      Globals::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
+      Devtools::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
     }
     break;
 
@@ -75,11 +75,11 @@ void Instrument::set_effect(EffectsType effect_)
     if (midi_settings.notes.size() > 0 && midi_settings.active_note > 0)
     {
       effect = effect_;
-      Globals::println_to_console("done.");
+      Devtools::println_to_console("done.");
     }
     else
     {
-      Globals::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
+      Devtools::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
     }
     break;
 
@@ -87,18 +87,18 @@ void Instrument::set_effect(EffectsType effect_)
     score.ready_to_shuffle = true;
     shuffle_cc(false);
     effect = effect_;
-    Globals::println_to_console("done.");
+    Devtools::println_to_console("done.");
     break;
 
   case TapTempo:
     Globals::bSendMidiClock = true;
     effect = effect_;
-    Globals::println_to_console("done.");
+    Devtools::println_to_console("done.");
     break;
 
   default:
     effect = effect_;
-    Globals::println_to_console("done.");
+    Devtools::println_to_console("done.");
     break;
   }
 }
@@ -165,14 +165,14 @@ void Instrument::calculateNoiseFloor()
   unsigned long beginNoiseFloorCaluclation = millis();
   int led_idx = 0;
 
-  Globals::print_to_console("calculating noiseFloor for ");
-  Globals::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
-  Globals::print_to_console(" (A");
-  Globals::print_to_console(pin - 14);
-  Globals::print_to_console(")");
-  if (Globals::use_responsiveCalibration)
+  Devtools::print_to_console("calculating noiseFloor for ");
+  Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
+  Devtools::print_to_console(" (A");
+  Devtools::print_to_console(pin - 14);
+  Devtools::print_to_console(")");
+  if (Devtools::use_responsiveCalibration)
   {
-    Globals::print_to_console(" ..waiting for stroke");
+    Devtools::print_to_console(" ..waiting for stroke");
     Hardware::lcd->setCursor(0, 0);
     Hardware::lcd->print("waiting for stroke");
     Hardware::lcd->setCursor(0, 1);
@@ -187,7 +187,7 @@ void Instrument::calculateNoiseFloor()
         {
           if (n % 100 == 0)
           {
-            Globals::print_to_console(" . ");
+            Devtools::print_to_console(" . ");
             digitalWrite(led, toggleState);
             toggleState = !toggleState;
           }
@@ -195,7 +195,7 @@ void Instrument::calculateNoiseFloor()
         }
         break;
       };       // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
-    Globals::print_to_console(" >!<");
+    Devtools::print_to_console(" >!<");
     delay(1000); // should be long enough for drum not to oscillate anymore
   }
 
@@ -205,7 +205,7 @@ void Instrument::calculateNoiseFloor()
   {
     if (n % 100 == 0)
     {
-      Globals::print_to_console(" . ");
+      Devtools::print_to_console(" . ");
       digitalWrite(led, toggleState);
       toggleState = !toggleState;
     }
@@ -214,8 +214,8 @@ void Instrument::calculateNoiseFloor()
   sensitivity.noiseFloor = totalSamples / 400;
   digitalWrite(led, LOW);
   led_idx++;
-  Globals::print_to_console("noiseFloor = ");
-  Globals::println_to_console(sensitivity.noiseFloor);
+  Devtools::print_to_console("noiseFloor = ");
+  Devtools::println_to_console(sensitivity.noiseFloor);
 
   // turn LEDs off again:
   digitalWrite(led, LOW);
@@ -394,7 +394,7 @@ void Instrument::perform(std::vector<Instrument *> instruments, midi::MidiInterf
 
 void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
 {
-  // Globals::println_to_console("tidying up");
+  // Devtools::println_to_console("tidying up");
   switch (effect)
   {
   case PlayMidi:

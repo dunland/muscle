@@ -17,6 +17,7 @@
 // #include <Tsunami.h>
 #include <settings.h>
 #include <Globals.h>
+#include <Devtools.h>
 #include <Instruments.h>
 #include <Hardware.h>
 #include <Song.h>
@@ -60,10 +61,10 @@ void printNormalizedValues(boolean printNorm_criterion)
     {
       for (auto &instrument : Drumset::instruments)
       {
-        Globals::print_to_console(pinValue(instrument));
-        Globals::print_to_console("\t");
+        Devtools::print_to_console(pinValue(instrument));
+        Devtools::print_to_console("\t");
       }
-      Globals::println_to_console("");
+      Devtools::println_to_console("");
     }
     lastMillis = millis();
   }
@@ -93,10 +94,10 @@ void setup()
 {
   //---------------------- Global / Debug values ----------------------
 
-  Globals::use_responsiveCalibration = DO_USE_RESPONSIVE_CALIBRATION;
-  Globals::do_print_beat_sum = DO_PRINT_BEAT_SUM; // prints active_score->beat_sum topography array
-  Globals::do_print_to_console = DO_PRINT_TO_CONSOLE;
-  Globals::do_print_JSON = DO_PRINT_JSON;
+  Devtools::use_responsiveCalibration = DO_USE_RESPONSIVE_CALIBRATION;
+  Devtools::do_print_beat_sum = DO_PRINT_BEAT_SUM; // prints active_score->beat_sum topography array
+  Devtools::do_print_to_console = DO_PRINT_TO_CONSOLE;
+  Devtools::do_print_JSON = DO_PRINT_JSON;
 
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
@@ -116,8 +117,8 @@ void setup()
 
     if (millis() > wait_for_Serial + 5000)
     {
-      Globals::do_print_JSON = false;
-      Globals::do_print_to_console = false;
+      Devtools::do_print_JSON = false;
+      Devtools::do_print_to_console = false;
       break;
     }
   }
@@ -189,56 +190,56 @@ void setup()
     instrument->calculateNoiseFloor();
 
   // print startup information:
-  Globals::println_to_console("\n..calculating noiseFloor done.");
-  Globals::println_to_console("-----------------------------------------------");
-  Globals::println_to_console("calibration values set as follows:");
-  Globals::println_to_console("instr\tthrshld\tcrosses\tnoiseFloor");
+  Devtools::println_to_console("\n..calculating noiseFloor done.");
+  Devtools::println_to_console("-----------------------------------------------");
+  Devtools::println_to_console("calibration values set as follows:");
+  Devtools::println_to_console("instr\tthrshld\tcrosses\tnoiseFloor");
   for (Instrument *instrument : Drumset::instruments)
   {
-    Globals::print_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
-    Globals::print_to_console("\t");
-    Globals::print_to_console(instrument->sensitivity.threshold);
-    Globals::print_to_console("\t");
-    Globals::print_to_console(instrument->sensitivity.crossings);
-    Globals::print_to_console("\t");
-    Globals::println_to_console(instrument->sensitivity.noiseFloor);
+    Devtools::print_to_console(Globals::DrumtypeToHumanreadable(instrument->drumtype));
+    Devtools::print_to_console("\t");
+    Devtools::print_to_console(instrument->sensitivity.threshold);
+    Devtools::print_to_console("\t");
+    Devtools::print_to_console(instrument->sensitivity.crossings);
+    Devtools::print_to_console("\t");
+    Devtools::println_to_console(instrument->sensitivity.noiseFloor);
   }
-  Globals::println_to_console("-----------------------------------------------");
+  Devtools::println_to_console("-----------------------------------------------");
 
   // ---------------------------------- SCORE -------------------------
   // doubleSquirrel = new Score("doubleSquirrel");
-  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
+  Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_b_11, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_b_73, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_b_63, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_A_15, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_A_25, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_sattelstein, MIDI)));
-  Globals::songlist.at(sizeof(Globals::songlist))->setTempoRange(150, 170); // TODO: make this work!
-  Globals::songlist.push_back(new Song(std::bind(run_host, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_randomVoice, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_besen, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_control_dd200, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_dd200_timeControl, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_sattelstein, MIDI)));
+  // Globals::songlist.at(sizeof(Globals::songlist))->setTempoRange(150, 170); // TODO: make this work!
+  // Globals::songlist.push_back(new Song(std::bind(run_host, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_randomVoice, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_besen, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_control_dd200, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_dd200_timeControl, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_a72, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_b_27, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_b_36, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_whammyMountains, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_hutschnur, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_control_volca, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_visuals, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_nanokontrol, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_PogoNumberOne, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_roeskur, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_alhambra, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_donnerwetter, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_theodolit, MIDI)));
-  Globals::songlist.push_back(new Song(std::bind(run_kupferUndGold, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_whammyMountains, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_hutschnur, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_control_volca, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_visuals, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_nanokontrol, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_PogoNumberOne, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_roeskur, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_alhambra, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_donnerwetter, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_theodolit, MIDI)));
+  // Globals::songlist.push_back(new Song(std::bind(run_kupferUndGold, MIDI)));
 
   Globals::active_song = Globals::songlist.at(0);
 

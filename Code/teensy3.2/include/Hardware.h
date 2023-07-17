@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Globals.h>
+#include <Devtools.h>
 #include <MIDI.h>
 #include <LiquidCrystal.h>
 #include <Encoder.h>
@@ -101,8 +102,8 @@ public:
   {
     midi_channel = midi_channel_;
     name = name_;
-    Globals::print_to_console("initialized synthesizer with midi channel ");
-    Globals::println_to_console(midi_channel);
+    Devtools::print_to_console("initialized synthesizer with midi channel ");
+    Devtools::println_to_console(midi_channel);
 
     // set all notes to false:
     for (int i = 0; i < 127; i++)

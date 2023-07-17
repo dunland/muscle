@@ -97,10 +97,10 @@ void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print(val);
 
-        Globals::print_to_console("whammy channel: ");
-        Globals::println_to_console(channel);
-        Globals::print_to_console("whammy value: ");
-        Globals::print_to_console(val);
+        Devtools::print_to_console("whammy channel: ");
+        Devtools::println_to_console(channel);
+        Devtools::print_to_console("whammy value: ");
+        Devtools::print_to_console(val);
 
         break;
 

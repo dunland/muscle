@@ -1,3 +1,4 @@
+#include <Devtools.h>
 #include <Instruments.h>
 #include <MIDI.h>
 // #include <Tsunami.h>
@@ -37,7 +38,7 @@ void Instrument::playMidi(midi::MidiInterface<HardwareSerial> MIDI)
 
 void Instrument::monitor() // just prints what is being played.
 {
-  if (Globals::printStrokes)
+  if (Devtools::printStrokes)
   {
     setInstrumentPrintString();
   }
@@ -45,14 +46,14 @@ void Instrument::monitor() // just prints what is being played.
 
 void Instrument::toggleRhythmSlot()
 {
-  if (Globals::printStrokes)
+  if (Devtools::printStrokes)
     setInstrumentPrintString();
   score.read_rhythm_slot[Globals::current_eighth_count] = !score.read_rhythm_slot[Globals::current_eighth_count];
 }
 
 void Instrument::footswitch_recordSlots() // record what is being played and replay it later
 {
-  if (Globals::printStrokes)
+  if (Devtools::printStrokes)
     setInstrumentPrintString();
   score.set_rhythm_slot[Globals::current_eighth_count] = true;
 }
@@ -77,7 +78,7 @@ void Instrument::getTapTempo()
     {
       num_of_taps = 0;
       clock_sum = 0;
-      Globals::println_to_console("-----------TAP RESET!-----------\n");
+      Devtools::println_to_console("-----------TAP RESET!-----------\n");
     }
     timeSinceFirstTap = millis(); // record time of first hit
     tapState = 2;                 // next: wait for second hit
@@ -91,7 +92,7 @@ void Instrument::getTapTempo()
       num_of_taps++;
       clock_sum += millis() - timeSinceFirstTap;
       Globals::tapInterval = clock_sum / num_of_taps;
-      Globals::print_to_console("new tap Tempo is ");
+      Devtools::print_to_console("new tap Tempo is ");
 
       // check if score tempo was set, else define quarters are > 300 ms (< 200 BPM)
       // int quarter_timing = (Globals::active_score->tempo.min_tempo > 0) ? Globals::active_score->tempo.min_tempo : 300;
@@ -102,20 +103,20 @@ void Instrument::getTapTempo()
       {
         Globals::current_BPM = 60000 / Globals::tapInterval;
         Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
-        Globals::print_to_console(60000 / Globals::tapInterval);
-        Globals::print_to_console(" bpm (");
-        Globals::print_to_console(Globals::tapInterval);
-        Globals::println_to_console(" ms interval: quarter-notes)");
+        Devtools::print_to_console(60000 / Globals::tapInterval);
+        Devtools::print_to_console(" bpm (");
+        Devtools::print_to_console(Globals::tapInterval);
+        Devtools::println_to_console(" ms interval: quarter-notes)");
       }
       // else if (Globals::tapInterval >= 60000 / (Globals::active_score->tempo.min_tempo * 2) && Globals::tapInterval <= 60000 / (Globals::active_score->tempo.max_tempo * 2)) // eighth-notes when fast tapping
       else if (Globals::tapInterval < 300)
       {
         Globals::current_BPM = (60000 / Globals::tapInterval) / 2;                                    // BPM >= 180 → strokes are 8th-notes, BPM half-time
         Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 8 / 128); // 8 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
-        Globals::print_to_console((60000 / Globals::tapInterval) / 2);
-        Globals::print_to_console(" bpm (");
-        Globals::print_to_console(Globals::tapInterval);
-        Globals::println_to_console(" ms interval: 8th-notes)");
+        Devtools::print_to_console((60000 / Globals::tapInterval) / 2);
+        Devtools::print_to_console(" bpm (");
+        Devtools::print_to_console(Globals::tapInterval);
+        Devtools::println_to_console(" ms interval: 8th-notes)");
       }
 
       tapState = 1;
@@ -124,7 +125,7 @@ void Instrument::getTapTempo()
     if (timeSinceFirstTap > Globals::active_song->tempo.tapTempoTimeOut) // forget tap if time was too long
     {
       tapState = 1;
-      // Globals::println_to_console(("too long...");
+      // Devtools::println_to_console(("too long...");
     }
     // }
     break;
@@ -215,7 +216,7 @@ void Instrument::swell_rec(midi::MidiInterface<HardwareSerial> MIDI) // remember
 // increase slot position of current 16th beat when instrument hit:
 void Instrument::countup_topography()
 {
-  if (Globals::printStrokes)
+  if (Devtools::printStrokes)
   {
     setInstrumentPrintString();
   }
@@ -427,16 +428,16 @@ void Instrument::tsunamiLink()
     //   // set playback speed according to current_BPM:
     //   int sr_offset;
     //   float r = Globals::current_BPM / float(Globals::track_bpm[tracknum]);
-    //   Globals::print_to_console("r = ");
-    //   Globals::println_to_console(r);
+    //   Devtools::print_to_console("r = ");
+    //   Devtools::println_to_console(r);
     //   if (!(r > 2) && !(r < 0.5))
     //   {
     //     // samplerateOffset scales playback speeds from 0.5 to 1 to 2
     //     // and maps to -32768 to 0 to 32767
     //     sr_offset = (r >= 1) ? 32767 * (r - 1) : -32768 + 32768 * 2 * (r - 0.5);
     //     sr_offset = int(sr_offset);
-    //     Globals::print_to_console("sr_offset = ");
-    //     Globals::println_to_console(sr_offset);
+    //     Devtools::print_to_console("sr_offset = ");
+    //     Devtools::println_to_console(sr_offset);
     //   }
     //   else
     //   {
@@ -447,32 +448,32 @@ void Instrument::tsunamiLink()
     //   Globals::tsunami.samplerateOffset(score.tsunami_channel, sr_offset); // TODO: link channels to instruments
     //   Globals::tsunami.trackGain(tracknum, trackLevel);
     //   Globals::tsunami.trackPlayPoly(tracknum, score.tsunami_channel, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
-    //   Globals::print_to_console("starting to play track ");
-    //   Globals::println_to_console(tracknum);
+    //   Devtools::print_to_console("starting to play track ");
+    //   Devtools::println_to_console(tracknum);
     // } // track playing end
   }   // threshold end
 
   // Debug:
-  Globals::print_to_console("[");
+  Devtools::print_to_console("[");
   for (int i = 0; i < 8; i++)
   {
-    Globals::print_to_console(topography.a_8[i]);
+    Devtools::print_to_console(topography.a_8[i]);
     if (i < 7)
-      Globals::print_to_console(", ");
+      Devtools::print_to_console(", ");
   }
-  Globals::print_to_console("]\t");
-  //  Globals::print_to_console(beat_topo_entries);
-  //  Globals::print_to_console("\t");
-  //  Globals::print_to_console(beat_topo_squared_sum);
-  //  Globals::print_to_console("\t");
-  //  Globals::print_to_console(beat_topo_regular_sum);
-  //  Globals::print_to_console("\t");
-  //  Globals::print_to_console(topography.average_smooth);
-  Globals::print_to_console("\t");
+  Devtools::print_to_console("]\t");
+  //  Devtools::print_to_console(beat_topo_entries);
+  //  Devtools::print_to_console("\t");
+  //  Devtools::print_to_console(beat_topo_squared_sum);
+  //  Devtools::print_to_console("\t");
+  //  Devtools::print_to_console(beat_topo_regular_sum);
+  //  Devtools::print_to_console("\t");
+  //  Devtools::print_to_console(topography.average_smooth);
+  Devtools::print_to_console("\t");
   int trackLevel = min(-40 + (topography.average_smooth * 5), 0);
-  Globals::print_to_console(trackLevel);
-  Globals::print_to_console("dB\t->");
-  Globals::println_to_console(tracknum);
+  Devtools::print_to_console(trackLevel);
+  Devtools::print_to_console("dB\t->");
+  Devtools::println_to_console(tracknum);
 }
 // --------------------------------------------------------------------
 
@@ -504,16 +505,16 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, 
       midi_settings.synth->sendControlChange(midi_settings.cc_chan, vol, MIDI);
 
     // Debug:
-    Globals::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
-    Globals::printTopoArray(&topography);
-    // Globals::print_to_console(":\t[");
+    Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
+    topography.print();
+    // Devtools::print_to_console(":\t[");
     // for (int j = 0; j < 16; j++)
     // {
-    //   Globals::print_to_console(topography.a_16[j]);
+    //   Devtools::print_to_console(topography.a_16[j]);
     //   if (j < 15)
-    //     Globals::print_to_console(",");
+    //     Devtools::print_to_console(",");
     // }
-    // Globals::println_to_console("]");
+    // Devtools::println_to_console("]");
   } // end only once per 16th-step
 }
 
@@ -526,10 +527,10 @@ void Instrument::turnMidiNoteOff(midi::MidiInterface<HardwareSerial> MIDI)
   if (millis() > score.last_notePlayed + 200) // Swell effect turns notes off itself
   {
     midi_settings.synth->sendNoteOff(midi_settings.active_note, MIDI);
-    // Globals::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
-    // Globals::print_to_console(": turning midi note ");
-    // Globals::print_to_console(midi_settings.active_note);
-    // Globals::println_to_console(" off.");
+    // Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
+    // Devtools::print_to_console(": turning midi note ");
+    // Devtools::print_to_console(midi_settings.active_note);
+    // Devtools::println_to_console(" off.");
   }
 }
 
@@ -562,21 +563,21 @@ void Instrument::shuffle_cc(boolean force_ = false)
       } while (midi_settings.cc_chan == CC_None);
 
       score.ready_to_shuffle = false;
-      Globals::print_to_console("cc_chan of ");
-      Globals::print_to_console(drumtype);
-      Globals::print_to_console(" is ");
-      Globals::println_to_console(midi_settings.cc_chan);
+      Devtools::print_to_console("cc_chan of ");
+      Devtools::print_to_console(drumtype);
+      Devtools::print_to_console(" is ");
+      Devtools::println_to_console(midi_settings.cc_chan);
     }
     else
     {
-      Globals::print_to_console("waiting for cc_val to be at standard: ");
-      Globals::print_to_console(midi_settings.cc_val);
-      Globals::print_to_console("/");
-      Globals::println_to_console(midi_settings.cc_standard);
+      Devtools::print_to_console("waiting for cc_val to be at standard: ");
+      Devtools::print_to_console(midi_settings.cc_val);
+      Devtools::print_to_console("/");
+      Devtools::println_to_console(midi_settings.cc_standard);
     }
   }
   else
   {
-    Globals::println_to_console("could not shuffle CC, because !score.ready_to_shuffle");
+    Devtools::println_to_console("could not shuffle CC, because !score.ready_to_shuffle");
   }
 }

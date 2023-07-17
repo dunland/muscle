@@ -169,7 +169,7 @@ void NanoKontrol::parseData()
 
     std::string str = strtokIndx;
 
-    if (strcmp("channel", address2) == 0)
+    if (strcmp("channel", address2) == 0) // comparing Strings
         incomingChannel = incomingInt;
     else if (strcmp("value", address2) == 0)
         incomingValue = incomingInt;

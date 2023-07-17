@@ -17,61 +17,49 @@ void run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
 {
     static int sel_song_int;
 
-    switch (Globals::active_song->step)
+    if (Globals::active_song->get_setup_state())
     {
-    case 0:
-        if (Globals::active_song->get_setup_state())
-        {
-            sel_song_int = list_of_songs.at(random(sizeof(list_of_songs)));
-        }
+        sel_song_int = list_of_songs.at(random(sizeof(list_of_songs)));
+    }
 
-        switch (sel_song_int)
-        {
-        case 85:
-            // run_b_36(MIDI);
-            // Globals::active_song->name = "b_36";
-            // TODO: Globals::active_song = *song; // SONST WIRD SONG::SETUP NICHT AUSGEFÜHRT!
-            break;
+    switch (sel_song_int)
+    {
+    case 85:
+        Globals::active_song = Globals::get_song("b_36");
+        // run_b_36(MIDI);
+        // Globals::active_song->name = "b_36";
+        // TODO: Globals::active_song = *song; // SONST WIRD SONG::SETUP NICHT AUSGEFÜHRT!
+        break;
 
-        case 64:
-            run_b_11(MIDI);
-            Globals::active_song->name = "b_11";
-            break;
+    case 64:
+        // run_b_11(MIDI);
+        // Globals::active_song->name = "b_11";
+        Globals::active_song = Globals::get_song("b_11");
+        break;
 
-        case 114:
-            run_b_73(MIDI);
-            Globals::active_song->name = "b_73";
-            break;
+    case 114:
+        Globals::active_song = Globals::get_song("b_73");
+        break;
 
-        case 27:
-            run_b_27(MIDI);
-            Globals::active_song->name = "b_27";
-            break;
+    case 27:
+        Globals::active_song = Globals::get_song("b_27");
+        break;
 
-        case 106:
-            run_b_63(MIDI);
-            Globals::active_song->name = "b_63";
-            break;
+    case 106:
+        Globals::active_song = Globals::get_song("b_63");
+        break;
 
-        case 4:
-            run_A_15(MIDI);
-            Globals::active_song->name = "A_15";
-            break;
+    case 4:
+        Globals::active_song = Globals::get_song("A_15");
+        break;
 
-        case 12:
-            run_A_25(MIDI);
-            Globals::active_song->name = "A_25";
-            break;
-
-        default:
-            Serial.print("No Song at ");
-            Serial.println(sel_song_int);
-            break;
-        }
-
+    case 12:
+        Globals::active_song = Globals::get_song("A_25");
         break;
 
     default:
+        Devtools::print_to_console("No Song at ");
+        Devtools::println_to_console(sel_song_int);
         break;
     }
 }
