@@ -1,7 +1,7 @@
 /*
    SUPER MUSCLE
    ------------------------------------
-   October 2020-December 2022
+   October 2020-April 2023
    by David Unland david[at]davidunland[dot]de
    github.com/dunland/muscle
    ------------------------------------
@@ -26,7 +26,7 @@
 #include <Calibration.h>
 
 // ----------------------------- settings -----------------------------
-const String VERSION_NUMBER = "0.2.36";
+const String VERSION_NUMBER = "0.2.37";
 const boolean DO_PRINT_JSON = false;
 const boolean DO_PRINT_TO_CONSOLE = true;
 const boolean DO_PRINT_BEAT_SUM = false;
@@ -211,6 +211,7 @@ void setup()
   // Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_b_11, MIDI)));
+  Globals::songlist.at(Globals::songlist.size() - 1)->name = "b_11";
   Globals::songlist.push_back(new Song(std::bind(run_b_73, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_b_63, MIDI)));
   Globals::songlist.push_back(new Song(std::bind(run_A_15, MIDI)));

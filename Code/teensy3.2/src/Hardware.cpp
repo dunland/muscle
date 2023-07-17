@@ -259,7 +259,7 @@ void Hardware::display_scores()
 {
   // score name
   lcd->setCursor(0, 1);
-  lcd->print(Globals::songlist[Globals::active_score_pointer]->name);
+  lcd->print(Globals::active_song->name);
 
   // step
   lcd->setCursor(14, 1);

@@ -12,8 +12,11 @@ void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
     switch (Globals::active_song->step)
     {
 
-    case 0: // nothing
-
+    case 0:
+        if (Globals::active_song->get_setup_state())
+        {
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
+        }
         break;
 
     case 1: // some ramp effect on snare. Works fine with DD200-DUAL mode @ ~150 BPM quarter notes
@@ -24,7 +27,7 @@ void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
 
-            Drumset::hihat->set_effect(Monitor);
+            Drumset::hihat->set_effect(TapTempo);
             Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
         }

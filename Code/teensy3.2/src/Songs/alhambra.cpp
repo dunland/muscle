@@ -14,6 +14,10 @@ void run_alhambra(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(0, MIDI); // HARMONY UP 2 OCT
+            Synthesizers::dd200->sendProgramChange(3, MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 4, MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
+
             Synthesizers::mKorg->sendProgramChange(34, MIDI); // load b_27
         }
         break;

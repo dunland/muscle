@@ -285,7 +285,7 @@ void Song::proceed_to_next_score()
 {
     // proceed to next score in list:
     Globals::active_score_pointer = (Globals::active_score_pointer + 1) % Globals::songlist.size();
-    Globals::active_song = Globals::songlist[Globals::active_score_pointer];
+    Globals::active_song = Globals::active_song;
     // ...and begin at step 0:
     Globals::active_song->step = 0;
     Globals::active_song->setup_state = true;
