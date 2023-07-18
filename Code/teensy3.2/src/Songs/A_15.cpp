@@ -50,6 +50,8 @@ void run_A_15(midi::MidiInterface<HardwareSerial> MIDI) // wie randomVoices
             Drumset::tom2->set_effect(PlayMidi);
             Drumset::hihat->set_effect(TapTempo);
         }
+        Hardware::lcd->setCursor(0,0);
+        Hardware::lcd->print("playMidi");
         break;
 
     case 2: // change CC only
@@ -75,6 +77,8 @@ void run_A_15(midi::MidiInterface<HardwareSerial> MIDI) // wie randomVoices
             Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127, MIDI);
             Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
         }
+        Hardware::lcd->setCursor(0,0);
+        Hardware::lcd->print("changeCC");
 
         break;
 

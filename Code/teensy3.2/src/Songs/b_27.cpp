@@ -10,7 +10,7 @@ void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
         Notes notes[3] = {Note_D6, Note_F7, Note_G7};
         switch (Globals::active_song->step)
         {
-        case 0:
+        case 0: // setup only
                 if (Globals::active_song->get_setup_state())
                 {
                         Synthesizers::mKorg->sendProgramChange(78, MIDI); // load b_27
@@ -50,7 +50,7 @@ void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
 
                 break;
 
-        case 1:
+        case 1: // kick resets mKORG OSC2semitone
 
                 if (Globals::active_song->get_setup_state())
                 {
@@ -69,6 +69,9 @@ void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
                 {
                         Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, int(map(-5, -24, 24, 0, 127)), MIDI);
                 }
+
+                Hardware::lcd->setCursor(0,0);
+                Hardware::lcd->print("kickOSC2");
 
                 break;
 

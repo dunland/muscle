@@ -52,6 +52,10 @@ void run_b_73(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom2->set_effect(PlayMidi);
             Drumset::hihat->set_effect(TapTempo);
         }
+
+        Hardware::lcd->setCursor(0,0);
+        Hardware::lcd->print("playMidi");
+
         break;
 
     default: // start over again

@@ -22,6 +22,8 @@ void run_b_63(midi::MidiInterface<HardwareSerial> MIDI)
 
             Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
         }
+        Hardware::lcd->setCursor(0,0);
+        Hardware::lcd->print("simpleARP");
         break;
 
     default: // just restart

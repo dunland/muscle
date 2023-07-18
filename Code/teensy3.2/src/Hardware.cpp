@@ -262,8 +262,28 @@ void Hardware::display_scores()
   lcd->print(Globals::active_song->name);
 
   // step
-  lcd->setCursor(14, 1);
+  lcd->setCursor(Globals::active_song->name.length(), 1);
+  lcd->print(".");
+  lcd->setCursor(Globals::active_song->name.length() + 1, 1);
   lcd->print(Globals::active_song->step);
+
+  // scroll when name longer than 14:
+  if (Globals::active_song->name.length() > 14)
+  {
+    // TODO: test simple autoscroll() and noAutoscroll()
+    static unsigned long lastScroll = millis();
+    static int scrollPos = 0;
+    static bool goRight = true;
+    if (millis() > lastScroll + 300)
+    {
+      if (scrollPos == Globals::active_song->name.length() || scrollPos < 0)
+        goRight = !goRight;
+      if (goRight)
+        lcd->scrollDisplayRight();
+      else
+        lcd->scrollDisplayLeft();
+    }
+  }
 }
 
 // display midi values of instruments with FX-Type CC_Change
@@ -285,8 +305,9 @@ void Hardware::display_Midi_values()
 }
 
 // display midi CHANNEL of instruments with FX-Type CC_Change
-void Hardware::display_Midi_channels(){
-int pos = 0;
+void Hardware::display_Midi_channels()
+{
+  int pos = 0;
 
   for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
   {

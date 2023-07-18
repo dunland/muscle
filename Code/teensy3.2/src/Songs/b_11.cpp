@@ -27,6 +27,10 @@ void run_b_11(midi::MidiInterface<HardwareSerial> MIDI)
         current_val = (current_val < gravitate) ? current_val + (gravitate - current_val) / 5 : current_val - (current_val - gravitate) / 2;
 
         Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, current_val, MIDI);
+
+        Hardware::lcd->setCursor(0,0);
+        Hardware::lcd->print(current_val);
+
         break;
 
     default:
