@@ -224,14 +224,14 @@ void setup()
   Globals::songlist.push_back(new Song(std::bind(run_donnerwetter, MIDI), "donnerwetter"));
   Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI), "randomSelect"));
 
-  Globals::songlist.push_back(new Song(std::bind(run_b_11, MIDI), "b_11"));
-  Globals::songlist.push_back(new Song(std::bind(run_b_73, MIDI), "b_73"));
-  Globals::songlist.push_back(new Song(std::bind(run_b_63, MIDI), "b_63"));
-  Globals::songlist.push_back(new Song(std::bind(run_A_15, MIDI), "A_15"));
-  Globals::songlist.push_back(new Song(std::bind(run_A_25, MIDI), "A_25"));
-  Globals::songlist.push_back(new Song(std::bind(run_A_72, MIDI), "A_72"));
-  Globals::songlist.push_back(new Song(std::bind(run_b_27, MIDI), "b_27"));
-  Globals::songlist.push_back(new Song(std::bind(run_b_36, MIDI), "b_36"));
+  // Globals::songlist.push_back(new Song(std::bind(run_b_11, MIDI), "b_11"));
+  // Globals::songlist.push_back(new Song(std::bind(run_b_73, MIDI), "b_73"));
+  // Globals::songlist.push_back(new Song(std::bind(run_b_63, MIDI), "b_63"));
+  // Globals::songlist.push_back(new Song(std::bind(run_A_15, MIDI), "A_15"));
+  // Globals::songlist.push_back(new Song(std::bind(run_A_25, MIDI), "A_25"));
+  // Globals::songlist.push_back(new Song(std::bind(run_A_72, MIDI), "A_72"));
+  // Globals::songlist.push_back(new Song(std::bind(run_b_27, MIDI), "b_27"));
+  // Globals::songlist.push_back(new Song(std::bind(run_b_36, MIDI), "b_36"));
   // Globals::songlist.at(sizeof(Globals::songlist))->setTempoRange(150, 170); // TODO: make this work!
   // Globals::songlist.push_back(new Song(std::bind(run_host, MIDI)));
   // Globals::songlist.push_back(new Song(std::bind(run_randomVoice, MIDI)));

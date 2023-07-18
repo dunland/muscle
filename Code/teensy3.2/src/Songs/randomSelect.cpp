@@ -16,42 +16,53 @@ static std::vector<int> list_of_songs = {
 void run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
 {
     static int sel_song_int = 0;
-
-    // TODO: create songs here and free memory next time. this way, the songs do not have to be in the main setlist!
+    static Song *randomSong;
 
     if (Globals::active_song->get_setup_state())
     {
         sel_song_int = list_of_songs.at(int(random(list_of_songs.size() - 1)));
+        if (Globals::active_song != randomSong)
+            {
+                delete randomSong;
+                randomSong = nullptr;
+            }
     }
 
     switch (sel_song_int)
     {
     case 85:
-        Globals::active_song = Globals::get_song("b_36");
+        randomSong = new Song(std::bind(run_b_36, MIDI), "b_36");
+        Globals::active_song = randomSong;
         break;
 
     case 64:
-        Globals::active_song = Globals::get_song("b_11");
+        randomSong = new Song(std::bind(run_b_11, MIDI), "b_11");
+        Globals::active_song = randomSong;
         break;
 
     case 114:
-        Globals::active_song = Globals::get_song("b_73");
+        randomSong = new Song(std::bind(run_b_73, MIDI), "b_73");
+        Globals::active_song = randomSong;
         break;
 
     case 27:
-        Globals::active_song = Globals::get_song("b_27");
+        randomSong = new Song(std::bind(run_b_27, MIDI), "b_27");
+        Globals::active_song = randomSong;
         break;
 
     case 106:
-        Globals::active_song = Globals::get_song("b_63");
+        randomSong = new Song(std::bind(run_b_63, MIDI), "b_63");
+        Globals::active_song = randomSong;
         break;
 
     case 4:
-        Globals::active_song = Globals::get_song("A_15");
+        randomSong = new Song(std::bind(run_A_15, MIDI), "A_15");
+        Globals::active_song = randomSong;
         break;
 
     case 12:
-        Globals::active_song = Globals::get_song("A_25");
+        randomSong = new Song(std::bind(run_A_25, MIDI), "A_25");
+        Globals::active_song = randomSong;
         break;
 
     default:
