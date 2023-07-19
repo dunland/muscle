@@ -8,7 +8,7 @@ void run_A_25(midi::MidiInterface<HardwareSerial> MIDI)
 
     switch (Globals::active_song->step)
     {
-    case 0:
+    case 0: // setup only
 
         if (Globals::active_song->get_setup_state())
         {
@@ -58,6 +58,9 @@ void run_A_25(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom2->set_effect(PlayMidi);
             Drumset::hihat->set_effect(TapTempo);
         }
+        Hardware::lcd->setCursor(0,0);
+        Hardware::lcd->print("PlayMidi");
+
         break;
 
     case 2: // change CC only
@@ -81,8 +84,15 @@ void run_A_25(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::hihat->set_effect(TapTempo);
 
             Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127, MIDI);
-            Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
+            // Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
         }
+
+        static int randomNote = int(random(16,72));
+        if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[randomNote] == false)
+            Synthesizers::mKorg->sendNoteOn(randomNote, MIDI);
+
+        Hardware::lcd->setCursor(0,0);
+        Hardware::lcd->print("changeCC");
 
         break;
 

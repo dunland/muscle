@@ -21,17 +21,17 @@ void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
                         // Drumset::standtom->midi.notes = {Note_D6, Note_F7, Note_G7};
                         // Drumset::tom1->midi.notes = {Note_D6, Note_F7, Note_G7};
 
-                        int idx = random(sizeof(Globals::active_song->notes));
-                        Drumset::kick->midi.notes.push_back(Globals::active_song->notes[idx]);
+                        int idx = random(sizeof(notes));
+                        Drumset::kick->midi.notes.push_back(notes[idx]);
                         Drumset::kick->midi.active_note = notes[idx];
-                        idx = random(sizeof(Globals::active_song->notes));
-                        Drumset::snare->midi.notes.push_back(Globals::active_song->notes[idx]);
+                        idx = random(sizeof(notes));
+                        Drumset::snare->midi.notes.push_back(notes[idx]);
                         Drumset::snare->midi.active_note = notes[idx];
-                        idx = random(sizeof(Globals::active_song->notes));
-                        Drumset::standtom->midi.notes.push_back(Globals::active_song->notes[idx]);
+                        idx = random(sizeof(notes));
+                        Drumset::standtom->midi.notes.push_back(notes[idx]);
                         Drumset::standtom->midi.active_note = notes[idx];
-                        idx = random(sizeof(Globals::active_song->notes));
-                        Drumset::tom1->midi.notes.push_back(Globals::active_song->notes[idx]);
+                        idx = random(sizeof(notes));
+                        Drumset::tom1->midi.notes.push_back(notes[idx]);
                         Drumset::tom1->midi.active_note = notes[idx];
 
                         Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
@@ -43,38 +43,40 @@ void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
                         Drumset::tom1->set_effect(PlayMidi);
                 }
 
+                if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[Drumset::snare->midi.active_note - 12] == false)
+                        Synthesizers::mKorg->sendNoteOn(Drumset::snare->midi.active_note - 12, MIDI);
+
                 if (Drumset::kick->timing.wasHit)
                 {
-                        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, int(map(-5, -24, 24, 0, 127)), MIDI);
+                        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, int(random(0, 127)), MIDI);
                 }
 
-                Hardware::lcd->setCursor(0,0);
+                Hardware::lcd->setCursor(0, 0);
                 Hardware::lcd->print("kickOSC2");
-
 
                 break;
 
-        case 1: // kick resets mKORG OSC2semitone
+        case 1: // change notes -- kick resets mKORG OSC2semitone
 
                 if (Globals::active_song->get_setup_state())
                 {
-                        int idx = random(sizeof(Globals::active_song->notes));
+                        int idx = random(sizeof(notes));
                         Drumset::kick->midi.active_note = notes[idx];
-                        idx = random(sizeof(Globals::active_song->notes));
+                        idx = random(sizeof(notes));
                         Drumset::snare->midi.active_note = notes[idx];
 
                         idx = random(sizeof(notes));
                         Drumset::standtom->midi.active_note = notes[idx];
-                        idx = random(sizeof(Globals::active_song->notes));
+                        idx = random(sizeof(notes));
                         Drumset::tom1->midi.active_note = notes[idx];
                 }
 
                 if (Drumset::kick->timing.wasHit)
                 {
-                        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, int(map(-5, -24, 24, 0, 127)), MIDI);
+                        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, int(random(0, 127)), MIDI);
                 }
 
-                Hardware::lcd->setCursor(0,0);
+                Hardware::lcd->setCursor(0, 0);
                 Hardware::lcd->print("kickOSC2");
 
                 break;

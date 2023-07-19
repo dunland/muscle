@@ -8,7 +8,7 @@ void run_A_15(midi::MidiInterface<HardwareSerial> MIDI) // wie randomVoices
     switch (Globals::active_song->step)
     {
     case 0:
-        Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
+        Globals::active_song->resetInstruments();        // reset all instruments to "Monitor" mode
         Synthesizers::mKorg->sendProgramChange(4, MIDI); // A.15
         // notes.push_back(int(random(24, 48)));
         Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
@@ -50,7 +50,7 @@ void run_A_15(midi::MidiInterface<HardwareSerial> MIDI) // wie randomVoices
             Drumset::tom2->set_effect(PlayMidi);
             Drumset::hihat->set_effect(TapTempo);
         }
-        Hardware::lcd->setCursor(0,0);
+        Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print("playMidi");
         break;
 
@@ -75,9 +75,14 @@ void run_A_15(midi::MidiInterface<HardwareSerial> MIDI) // wie randomVoices
             Drumset::hihat->set_effect(TapTempo);
 
             Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127, MIDI);
-            Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
+            // Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
         }
-        Hardware::lcd->setCursor(0,0);
+
+        static int randomNote = int(random(16,72));
+        if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[randomNote] == false)
+            Synthesizers::mKorg->sendNoteOn(randomNote, MIDI);
+
+        Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print("changeCC");
 
         break;

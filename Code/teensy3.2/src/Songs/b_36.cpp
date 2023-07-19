@@ -9,12 +9,13 @@ void run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
 {
     switch (Globals::active_song->step)
     {
-    case 0:
+    case 0: // snare+standtom --> change mKORG Filter Type
         if (Globals::active_song->get_setup_state())
         {
+            Synthesizers::mKorg->sendProgramChange(85, MIDI);
+
             Drumset::snare->set_effect(Change_CC);
             Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127, MIDI); // arp on
-            Synthesizers::mKorg->sendProgramChange(85, MIDI);
         }
 
         // TODO: test this! will simultaneous hit be detected?
@@ -25,9 +26,12 @@ void run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
             Synthesizers::mKorg->sendControlChange(mKORG_Filter_Type, which_type, MIDI);
         }
 
+        Hardware::lcd->setCursor(3,0);
+        Hardware::lcd->print("Snare+ST");
+
         break;
 
-    case 1:
+    case 1: // PlayMidi
         if (Globals::active_song->get_setup_state())
         {
             Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
@@ -55,6 +59,9 @@ void run_b_36(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom1->midi.active_note = Drumset::tom1->midi.notes[3];
             Drumset::tom1->set_effect(PlayMidi);
         }
+
+        Hardware::lcd->setCursor(3,0);
+        Hardware::lcd->print("PlayMidi");
 
         break;
 

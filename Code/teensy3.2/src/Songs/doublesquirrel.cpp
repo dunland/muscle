@@ -144,7 +144,7 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
 
         break;
 
-    case 1:                      // fade in the synth's amplitude
+    case 1:                                  // fade in the synth's amplitude
         if (active_score->get_setup_state()) // score setup is run once and reset when next score step is activated.
         {
             // assign effects to instruments:
@@ -160,8 +160,12 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
             crash1->effect = Monitor;
             standtom->effect = Monitor;
 
-            active_score->playSingleNote(Synthesizers::mKorg, MIDI); // start playing a bass note on synth
+            // active_score->playSingleNote(Synthesizers::mKorg, MIDI); // start playing a bass note on synth
         }
+
+        static int randomNote = int(random(16,72));
+        if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[randomNote] == false)
+            Synthesizers::mKorg->sendNoteOn(randomNote, MIDI);
 
         Devtools::print_to_console("amplevel_val = ");
         Devtools::println_to_console(hihat->midi.cc_val);
@@ -236,7 +240,6 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
             kick->setup_midi(mKORG_Amplevel, Synthesizers::mKorg, 127, 80, -35, 0.1);
             ride->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
             crash1->setup_midi(mKORG_Patch_3_Depth, Synthesizers::mKorg, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
-
         }
 
         // change cutoff with overall beat_sum until at max
@@ -296,7 +299,6 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
             Synthesizers::mKorg->sendControlChange(mKORG_Osc2_tune, 0, MIDI);
             active_score->add_bassNote(active_score->notes[0] + int(random(6)));
             // active_score->note_change_pos = int(random(8, 16)); // change at a rate between quarter and half notes
-
         }
 
         active_score->playRhythmicNotes(Synthesizers::mKorg, MIDI, random_note_change);

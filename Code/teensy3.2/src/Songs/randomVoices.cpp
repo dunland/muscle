@@ -7,7 +7,7 @@
 // 1: playMidi+CC_Change; 2: change_cc only
 void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    switch(Globals::active_song->step)
+    switch (Globals::active_song->step)
     {
     case 0:
         Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
@@ -75,9 +75,13 @@ void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::hihat->set_effect(TapTempo);
 
             Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127, MIDI);
-            Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
+            // Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
         }
-        Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
+        // Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
+
+        static int randomNote = int(random(16,72));
+        if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[randomNote] == false)
+            Synthesizers::mKorg->sendNoteOn(randomNote, MIDI);
 
         break;
 

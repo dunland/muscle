@@ -375,17 +375,17 @@ void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSer
 }
 
 // ----------------- play note only once (turn on never off):
-// TODO: if this is running, re-play note whenever it is turned off (due to too many notes..)
-void Song::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
-{
-    if (notes.size() > 0)
-    {
-        if (synth->notes[note_idx] == false)
-            synth->sendNoteOn(notes[note_idx], MIDI);
-    }
-    else
-        Devtools::println_to_console("cannot play MIDI note, because Score::notes is empty.");
-}
+// TODO: FIX THIS! if this is running, re-play note whenever it is turned off (due to too many notes..)
+// void Song::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
+// {
+//     if (notes.size() > 0)
+//     {
+//         if (synth->notes[note_idx] == false)
+//             synth->sendNoteOn(notes[note_idx], MIDI);
+//     }
+//     else
+//         Devtools::println_to_console("cannot play MIDI note, because Score::notes is empty.");
+// }
 
 // play last 3 notes in list:
 void Song::playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)

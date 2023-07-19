@@ -14,8 +14,12 @@ void run_b_11(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::mKorg->sendProgramChange(64, MIDI); // b.11
-            Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
+            // Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
         }
+
+        static int randomNote = int(random(16,72));
+        if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[randomNote] == false)
+            Synthesizers::mKorg->sendNoteOn(randomNote, MIDI);
 
         if (Drumset::snare->timing.wasHit)
             current_val -= 10;
@@ -28,7 +32,7 @@ void run_b_11(midi::MidiInterface<HardwareSerial> MIDI)
 
         Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, current_val, MIDI);
 
-        Hardware::lcd->setCursor(0,0);
+        Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print(current_val);
 
         break;

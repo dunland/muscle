@@ -28,8 +28,8 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
             delay(200);
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, 1, MIDI); // Select Timbre 2
 
-            Drumset::ride->set_effect(Change_CC);
-            Drumset::ride->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 127, 29, 3, -0.035);
+            Drumset::tom1->set_effect(Change_CC);
+            Drumset::tom1->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 127, 29, 3, -0.035);
 
             Drumset::standtom->set_effect(Change_CC);
             Drumset::standtom->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 127, 29, 5, -0.05);
@@ -42,9 +42,9 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::snare->midi.active_note = Drumset::snare->midi.notes[0];
             Drumset::snare->set_effect(PlayMidi);
 
-
         }
-        Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
+        if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] == false)
+            Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);
 
         // increasing amplitude until max:
         static float val = 0;
@@ -63,10 +63,10 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
         {
             int val = (Synthesizers::mKorg->midi_values[mKORG_TimbreSelect] == 0) ? 127 : 0;
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, val, MIDI); // Select Timbre 2
-
-
         }
-        Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
+
+        if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] == false)
+            Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);
 
         break;
 
