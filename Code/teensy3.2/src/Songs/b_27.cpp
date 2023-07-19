@@ -48,6 +48,10 @@ void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
                         Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, int(map(-5, -24, 24, 0, 127)), MIDI);
                 }
 
+                Hardware::lcd->setCursor(0,0);
+                Hardware::lcd->print("kickOSC2");
+
+
                 break;
 
         case 1: // kick resets mKORG OSC2semitone
