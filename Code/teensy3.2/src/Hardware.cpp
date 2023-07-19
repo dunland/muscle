@@ -267,23 +267,39 @@ void Hardware::display_scores()
   lcd->setCursor(Globals::active_song->name.length() + 1, 1);
   lcd->print(Globals::active_song->step);
 
-  // scroll when name longer than 14:
-  if (Globals::active_song->name.length() > 14)
+  // TODO: scroll when name longer than 14:
+  /* if (Globals::active_song->name.length() > 14)
   {
-    // TODO: test simple autoscroll() and noAutoscroll()
     static unsigned long lastScroll = millis();
-    static int scrollPos = 0;
+    static u_int8_t scrollPos = 0;
     static bool goRight = true;
     if (millis() > lastScroll + 300)
     {
-      if (scrollPos == Globals::active_song->name.length() || scrollPos < 0)
-        goRight = !goRight;
+      if (scrollPos == Globals::active_song->name.length() || scrollPos == 0)
+        {
+          goRight = !goRight;
+          Serial.println("change scroll");
+        }
       if (goRight)
-        lcd->scrollDisplayRight();
+      {
+        lcd->autoscroll(); // right justify
+        // lcd->scrollDisplayRight();
+        Serial.println("scroll right");
+      }
       else
-        lcd->scrollDisplayLeft();
+      {
+        lcd->noAutoscroll();
+        // lcd->scrollDisplayLeft();
+        Serial.println("scroll left");
+      }
+
+      lastScroll = millis();
+      scrollPos = (scrollPos + 1) % Globals::active_song->name.length();
+      Serial.print("scrollPos = ");
+      Serial.println(scrollPos);
     }
   }
+  */
 }
 
 // display midi values of instruments with FX-Type CC_Change
