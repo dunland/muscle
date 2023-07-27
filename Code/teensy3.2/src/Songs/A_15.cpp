@@ -19,7 +19,7 @@ void run_A_15(midi::MidiInterface<HardwareSerial> MIDI) // wie randomVoices
         Drumset::standtom->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
         Drumset::tom2->setup_midi(CC_None, Synthesizers::mKorg, 115, 15, 20, -0.06);
 
-        Globals::active_song->step = 1;
+        Globals::active_song->increase_step();
         break;
 
     case 1: // PlayMidi

@@ -16,7 +16,7 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
 
     switch (Globals::active_song->step)
     {
-    case 0:
+    case 0: // increase amplitude until max
         if (Globals::active_song->get_setup_state())
         {
             Globals::active_song->resetInstruments();
@@ -53,9 +53,11 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
 
         Hardware::lcd->setCursor(10, 0);
         Hardware::lcd->print(val);
+        Hardware::lcd->setCursor(0,0);
+        Hardware::lcd->print("incrAmp:");
 
         if (Synthesizers::mKorg->midi_values[mKORG_Amplevel] >= 126)
-            Globals::active_song->step = 1;
+            Globals::active_song->increase_step();
         break;
 
     case 1:
@@ -71,7 +73,7 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-        Globals::active_song->step = 1;
+        Globals::active_song->step = 1; // reset
         Globals::active_song->setup_state = true;
         note_increase = (note_increase == 4) ? 5 : 4;
         Globals::active_song->notes.push_back(Globals::active_song->notes[Globals::active_song->note_idx] + note_increase);

@@ -82,7 +82,7 @@ void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
                 break;
 
         default:
-                Globals::active_song->step = 1;
+                Globals::active_song->step = 1; // reset
                 Globals::active_song->setup_state = true;
                 break;
         }

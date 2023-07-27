@@ -21,7 +21,7 @@ void run_b_73(midi::MidiInterface<HardwareSerial> MIDI)
         Drumset::standtom->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
         Drumset::tom2->setup_midi(CC_None, Synthesizers::mKorg, 115, 15, 20, -0.06);
 
-        Globals::active_song->step = 1;
+        Globals::active_song->increase_step();
         break;
 
     case 1: // Instruments: PlayMidi
@@ -29,20 +29,20 @@ void run_b_73(midi::MidiInterface<HardwareSerial> MIDI)
         {
             Hardware::footswitch_mode = Increment_Score;
 
-            Drumset::kick->midi.notes.push_back(int(random(0, 128)));
-            Drumset::kick->midi.active_note = Drumset::kick->midi.notes[0];
+            Drumset::kick->midi.notes.push_back(int(random(21, 128)));
+            Drumset::kick->midi.active_note = Drumset::kick->midi.notes.size() - 1;
 
-            Drumset::snare->midi.notes.push_back(int(random(12, 72)));
-            Drumset::snare->midi.active_note = Drumset::snare->midi.notes[0];
+            Drumset::snare->midi.notes.push_back(int(random(33, 72)));
+            Drumset::snare->midi.active_note = Drumset::snare->midi.notes.size() - 1;
 
-            Drumset::tom1->midi.notes.push_back(int(random(12, 72)));
-            Drumset::tom1->midi.active_note = Drumset::tom1->midi.notes[0];
+            Drumset::tom1->midi.notes.push_back(int(random(33, 72)));
+            Drumset::tom1->midi.active_note = Drumset::tom1->midi.notes.size() - 1;
 
-            Drumset::tom2->midi.notes.push_back(int(random(12, 72)));
-            Drumset::tom2->midi.active_note = Drumset::tom2->midi.notes[0];
+            Drumset::tom2->midi.notes.push_back(int(random(33, 72)));
+            Drumset::tom2->midi.active_note = Drumset::tom2->midi.notes.size() - 1;
 
-            Drumset::standtom->midi.notes.push_back(int(random(12, 72)));
-            Drumset::standtom->midi.active_note = Drumset::standtom->midi.notes[0];
+            Drumset::standtom->midi.notes.push_back(int(random(33, 72)));
+            Drumset::standtom->midi.active_note = Drumset::standtom->midi.notes.size() - 1;
             // Drumset::standtom->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 115, 15, 10, -0.6);
 
             Drumset::kick->set_effect(PlayMidi);
@@ -59,7 +59,7 @@ void run_b_73(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default: // start over again
-        Globals::active_song->step = 1;
+        Globals::active_song->step = 1; // reset
         Globals::active_song->setup_state = true;
         Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] = false;
         // proceed_to_next_score();

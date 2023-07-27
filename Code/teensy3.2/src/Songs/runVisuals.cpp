@@ -20,14 +20,14 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
 
             Hardware::footswitch_mode = Increment_Score;
 
-            Globals::active_song->step = 1;
+            Globals::active_song->increase_step();
         }
         break;
 
     case 1: // Theodolit
         if (Globals::active_song->get_setup_state())
         {
-            
+
             Serial.println("Theodolit");
         }
         Hardware::lcd->setCursor(0, 0);
@@ -39,7 +39,7 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
             /* crash and ride increase delay_time, automatic decrease */
         if (Globals::active_song->get_setup_state())
         {
-            
+
             Serial.println("Improvisation");
 
             Globals::active_song->notes.push_back(31);                              // G
@@ -85,7 +85,7 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
         {
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3, MIDI);
-            
+
         }
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print("Sattelstein");
@@ -96,7 +96,7 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
         /* play notes G2 and G3 */
         if (Globals::active_song->get_setup_state())
         {
-            
+
             Serial.println("Sattelstein");
             Globals::current_BPM = 139;
         }
@@ -120,7 +120,7 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
             Serial.println("KupferUndGold");
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57 to stop notes
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3, MIDI); // delay_time = 82!
-            
+
         }
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print("KupferUndGold");

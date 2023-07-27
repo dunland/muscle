@@ -140,7 +140,7 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
         Synthesizers::mKorg->sendControlChange(mKORG_Resonance, 13, MIDI);
         Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 0, MIDI);
 
-        active_score->step = 1;
+        active_score->increase_step();
 
         break;
 

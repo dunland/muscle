@@ -13,10 +13,11 @@ class Instrument
 {
 
 public:
-    Instrument(int pin_, DrumType drumtype_)
+    Instrument(int pin_, DrumType drumtype_, std::vector<int> note_input = {int(random(21, 128))})
     {
         pin = pin_;
         drumtype = drumtype_;
+        set_notes(note_input); // assigns one random note so the array is not empty if not provided otherwise in input parameters
     }
 
     int pin;
@@ -46,6 +47,7 @@ public:
         boolean stroke_flag = false;
         int countsCopy;
         boolean wasHit = false;
+        unsigned long lastHit = 0;
 
     } timing;
 

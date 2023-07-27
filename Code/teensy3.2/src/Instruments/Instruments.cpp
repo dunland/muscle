@@ -288,6 +288,7 @@ void Instrument::setInstrumentPrintString()
 ///////////////////////////////////////////////////////////////////////
 
 ////////////////////////////// TRIGGERS ///////////////////////////////
+// defines what happens when instrument was hit within this beat
 void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
 {
   // print instrument name to receive using external programs via Serial connection:
