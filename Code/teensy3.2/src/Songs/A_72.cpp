@@ -48,7 +48,7 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
 
         // increasing amplitude until max:
         static float val = 0;
-        val += 0.5;
+        val += 0.05;
         Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, int(val), MIDI);
 
         Hardware::lcd->setCursor(10, 0);

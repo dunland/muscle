@@ -61,6 +61,7 @@ public:
         Devtools::print_to_console("active_score->note[0] = ");
         Devtools::println_to_console(notes[0]);
         name = songName;
+        setup_state = true;
     }
 
     String name; // name to be displayed on LCD
