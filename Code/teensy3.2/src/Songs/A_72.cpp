@@ -12,13 +12,16 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
     // - increase note-index
     // → play latest 4 notes
 
-    int note_increase = 4; // notes are in turns added by 4 or 5
+    // int note_increase = 4; // notes are in turns added by 4 or 5
+    static float val;
 
     switch (Globals::active_song->step)
     {
     case 0: // increase amplitude until max
         if (Globals::active_song->get_setup_state())
         {
+            val = 60;
+
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
             Globals::active_song->notes.push_back(int(random(12, 24)));
@@ -47,8 +50,7 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
             Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);
 
         // increasing amplitude until max:
-        static float val = 0;
-        val += 0.05;
+        val += 0.075;
         Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, int(val), MIDI);
 
         Hardware::lcd->setCursor(10, 0);
@@ -73,11 +75,14 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-        Globals::active_song->step = 1; // reset
-        Globals::active_song->setup_state = true;
-        note_increase = (note_increase == 4) ? 5 : 4;
-        Globals::active_song->notes.push_back(Globals::active_song->notes[Globals::active_song->note_idx] + note_increase);
-        Globals::active_song->note_idx++;
+        // Globals::active_song->step = 1; // reset
+        // Globals::active_song->setup_state = true;
+        // note_increase = (note_increase == 4) ? 5 : 4;
+        // Globals::active_song->notes.push_back(Globals::active_song->notes[Globals::active_song->note_idx] + note_increase);
+        // Globals::active_song->note_idx++;
+        Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 0, MIDI); // arp off
+        Globals::active_song->proceed_to_next_score();
+
         break;
     }
 }
