@@ -2,16 +2,18 @@
 #include <MIDI.h>
 #include <Instruments.h>
 #include <Hardware.h>
+#include <Notes.h>
 
 //////////////////////////// A.72 /////////////////////////////
 void run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI)
 {
-
     switch(Globals::active_song->step)
     {
     case 0:
         if (Globals::active_song->get_setup_state())
         {
+             Globals::active_song->notes.list = {Note_D5, Note_E5, Note_A4, Note_D6, Note_E6};
+
             Globals::bSendMidiClock = false;
             Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 0, MIDI); // Apreggiator on
             Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_on_off, 0, MIDI); // Apreggiator on

@@ -12,6 +12,8 @@ void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
     case 0: // Snare → Vocoder (D+F)
         if (Globals::active_song->get_setup_state())
         {
+            Globals::active_song->notes.list = {Note_D4, Note_F4, Note_D8, Note_F8};
+
             Hardware::footswitch_mode = Increment_Score;
             Globals::active_song->resetInstrumentsFX();
             Globals::active_song->notes.list.clear();

@@ -2,6 +2,7 @@
 #include <MIDI.h>
 #include <Instruments.h>
 #include <Hardware.h>
+#include <Notes.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
 void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
@@ -15,6 +16,8 @@ void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (Globals::active_song->get_setup_state())
         {
+            Globals::active_song->notes.list = {Note_D5, Note_A6, Note_C7, Note_D8, Note_E8};
+
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT / UP 2 OCT
 

@@ -2,6 +2,7 @@
 #include <MIDI.h>
 #include <Instruments.h>
 #include <Hardware.h>
+#include <Notes.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
 void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI)
@@ -11,11 +12,13 @@ void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI)
     case 0: // Intro
         if (Globals::active_song->get_setup_state())
         {
+            Globals::active_song->notes.list = {Note_A4, Note_B5, Note_A5, Note_C6, Note_D6, Note_A6};
+
             Synthesizers::dd200->sendProgramChange(4, MIDI);
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 127, MIDI);
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3, MIDI);
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT → UP 2 OCT
-            
+
         }
         break;
 
@@ -23,7 +26,7 @@ void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(58, MIDI); // HARMONY UP 5TH → UP  OCT
-            
+
         }
         break;
 
@@ -31,7 +34,7 @@ void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT → UP 2 OCT
-            
+
         }
         break;
 
@@ -39,7 +42,7 @@ void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(61, MIDI); // HARMONY UP OCT → UP 10TH
-            
+
         }
         break;
 
@@ -47,7 +50,7 @@ void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT → UP 2 OCT
-            
+
         }
         break;
 

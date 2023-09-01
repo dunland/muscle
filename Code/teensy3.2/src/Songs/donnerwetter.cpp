@@ -2,6 +2,7 @@
 #include <MIDI.h>
 #include <Instruments.h>
 #include <Hardware.h>
+#include <Notes.h>
 /*
     DD-200 test code compendium
 */
@@ -15,6 +16,9 @@ void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (Globals::active_song->get_setup_state())
         {
+
+            Globals::active_song->notes.list = {Note_C4, Note_E4, Note_C6, Note_F8, Note_G8};
+
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
         }
         break;

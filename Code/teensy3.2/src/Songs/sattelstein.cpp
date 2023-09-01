@@ -2,6 +2,7 @@
 #include <MIDI.h>
 #include <Instruments.h>
 #include <Hardware.h>
+#include <Notes.h>
 
 //////////////////////////// SATTELSTEIN /////////////////////////////
 // THIS SONG IS COMPOSED FOR microKORG A.57
@@ -12,6 +13,8 @@ void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (Globals::active_song->get_setup_state())
         {
+            Globals::active_song->notes.list = {Note_G3, Note_G4, Note_C4, Note_G5, Note_C5};
+
             Globals::bSendMidiClock = true;
             Globals::active_song->resetInstrumentsFX();         // reset all instruments to "Monitor" mode
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
