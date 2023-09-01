@@ -124,11 +124,11 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
 
         Hardware::footswitch_mode = Reset_Topo_and_Proceed_Score;
 
-        static std::vector<int> locrian_mode = {active_score->notes[0] + 1, active_score->notes[0] + 3, active_score->notes[0] + 5, active_score->notes[0] + 6, active_score->notes[0] + 8, active_score->notes[0] + 11};
+        static std::vector<int> locrian_mode = {active_score->notes.list[0] + 1, active_score->notes.list[0] + 3, active_score->notes.list[0] + 5, active_score->notes.list[0] + 6, active_score->notes.list[0] + 8, active_score->notes.list[0] + 11};
 
         // setup score note seed:
-        Devtools::print_to_console("active_score->notes[0] = ");
-        Devtools::println_to_console(active_score->notes[0]);
+        Devtools::print_to_console("active_score->notes.list[0] = ");
+        Devtools::println_to_console(active_score->notes.list[0]);
         // set start values for microKORG:
 
         Synthesizers::mKorg->sendControlChange(mKORG_Cutoff, 50, MIDI); // sets cc_value and sends MIDI-ControlChange
@@ -186,7 +186,7 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
             // assign effects to instruments:
             kick->set_effect(PlayMidi);
             kick->setup_midi(CC_None, Synthesizers::volca, 127, 0, 1, 0.1);
-            kick->midi.notes.push_back(active_score->notes[0] + 12 + 7);
+            kick->midi.notes.push_back(active_score->notes.list[0] + 12 + 7);
             kick->midi.active_note = kick->midi.notes[0];
 
             Devtools::print_to_console("note for kick is: ");
@@ -196,7 +196,7 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
 
             snare->set_effect(PlayMidi);
             snare->setup_midi(CC_None, Synthesizers::volca, 127, 0, 1, 0.1);
-            snare->midi.notes.push_back(active_score->notes[0] + 24);
+            snare->midi.notes.push_back(active_score->notes.list[0] + 24);
             snare->midi.active_note = snare->midi.notes[0];
 
             Devtools::print_to_console("note for snare is: ");
@@ -297,7 +297,7 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
             Synthesizers::mKorg->sendControlChange(mKORG_Resonance, 31, MIDI);
             Synthesizers::mKorg->sendControlChange(mKORG_Cutoff, 28, MIDI);
             Synthesizers::mKorg->sendControlChange(mKORG_Osc2_tune, 0, MIDI);
-            active_score->add_bassNote(active_score->notes[0] + int(random(6)));
+            active_score->add_bassNote(active_score->notes.list[0] + int(random(6)));
             // active_score->note_change_pos = int(random(8, 16)); // change at a rate between quarter and half notes
         }
 
@@ -311,14 +311,14 @@ void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI) // TODO: make 
         static int random_note_change = int(random(32));
         if (active_score->get_setup_state())
         {
-            // active_score->add_bassNote(active_score->notes[0] + int(random(6)));
+            // active_score->add_bassNote(active_score->notes.list[0] + int(random(6)));
 
             snare->effect = PlayMidi;
-            snare->midi.active_note = active_score->notes[0] + 24 + 7;
+            snare->midi.active_note = active_score->notes.list[0] + 24 + 7;
             tom2->effect = PlayMidi;
-            tom2->midi.active_note = active_score->notes[0] + 24 + 3;
+            tom2->midi.active_note = active_score->notes.list[0] + 24 + 3;
             standtom->effect = PlayMidi;
-            standtom->midi.active_note = active_score->notes[0] + 12 + 4;
+            standtom->midi.active_note = active_score->notes.list[0] + 12 + 4;
 
             kick->effect = Monitor;
         }

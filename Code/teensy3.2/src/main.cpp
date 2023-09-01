@@ -305,6 +305,7 @@ void loop()
   // (define what should happen when instruments are hit)
   for (auto &instrument : Drumset::instruments)
   {
+    int i = 0;
     // if (instrument->effect == PlayMidi_rawPin || instrument->effect == CC_Effect_rawPin)
     //  instrument->trigger(instrument, MIDI);
 
@@ -314,10 +315,11 @@ void loop()
       instrument->trigger(MIDI);        // runs trigger function according to instrument's EffectType
       instrument->timing.wasHit = true; // a flag to show that the instrument was hit (for transmission via JSON)
 
-      Synthesizers::volca->sendNoteOn(instrument->midi.notes[0], MIDI);
+      Synthesizers::volca->sendNoteOn(Globals::active_song->notes.getNote(i), MIDI);
 
       instrument->timing.lastHit = millis();
     }
+    i++;
   }
 
   ///////////////////////////// TIMED ACTIONS /////////////////////////

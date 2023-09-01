@@ -246,23 +246,28 @@ bool Song::get_setup_state()
     return currentState;
 }
 
+// int Song::notes.listgetNote(int index){
+
+//     return notes.list.at(index % sizeof(notes.list));
+// }
+
 void Song::set_notes(std::vector<int> list)
 {
     // clear notes list:
-    notes.clear();
+    notes.list.clear();
 
     // add notes from list:
     for (uint8_t i = 0; i < list.size(); i++)
     {
-        notes.push_back(list[i]);
+        notes.list.push_back(list[i]);
     }
 
     // print list:
     Devtools::print_to_console("Score::notes:");
-    for (uint8_t i = 0; i < notes.size(); i++)
+    for (uint8_t i = 0; i < notes.list.size(); i++)
     {
         Devtools::print_to_console(" ");
-        Devtools::print_to_console(notes[i]);
+        Devtools::print_to_console(notes.list[i]);
     }
     Devtools::println_to_console("");
 }
@@ -312,7 +317,7 @@ void Song::setTempoRange(int min_tempo_, int max_tempo_)
 }
 
 // reset all instruments to "Monitor" mode
-void Song::resetInstruments()
+void Song::resetInstrumentsFX()
 {
     for (auto &drum : Drumset::instruments)
     {
@@ -324,13 +329,13 @@ void Song::resetInstruments()
 //////////////////////////// MUSICAL FUNCTIONS ////////////////////////
 void Song::add_bassNote(int note)
 {
-    notes.push_back(note);
+    notes.list.push_back(note);
     Devtools::print_to_console("note ");
     Devtools::print_to_console(note);
     Devtools::print_to_console(" has been added to Score::notes [ ");
-    for (uint8_t i = 0; i < notes.size(); i++)
+    for (uint8_t i = 0; i < notes.list.size(); i++)
     {
-        Devtools::print_to_console(notes[i]);
+        Devtools::print_to_console(notes.list[i]);
         Devtools::print_to_console(" ");
     }
     Devtools::println_to_console("]");
@@ -349,18 +354,18 @@ void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSer
     if ((Globals::current_beat_pos + 1) % note_change_pos == 0)
     {
         // play note
-        synth->sendNoteOff(notes[note_idx], MIDI);
-        synth->sendNoteOn(notes[note_idx], MIDI);
+        synth->sendNoteOff(notes.list[note_idx], MIDI);
+        synth->sendNoteOn(notes.list[note_idx], MIDI);
         Devtools::print_to_console("\tplaying Score::note:");
-        Devtools::println_to_console(notes[note_idx]);
+        Devtools::println_to_console(notes.list[note_idx]);
 
         // change note
-        if (notes.size() > 1)
+        if (notes.list.size() > 1)
         {
             note_idx++;
-            if (note_idx > int(notes.size()) - 1)
+            if (note_idx > int(notes.list.size()) - 1)
                 note_idx = 0;
-            //  = (note_idx + 1) % notes.size(); // iterate through the bass notes
+            //  = (note_idx + 1) % notes.list.size(); // iterate through the bass notes
             Devtools::print_to_console("\tnote_idx = ");
             Devtools::println_to_console(note_idx);
         }
@@ -369,19 +374,19 @@ void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSer
 
     // if (Globals::current_beat_pos == 0) // at beginninng of each bar
     // {
-    //     Devtools::print_to_console("\tnotes.size() = ");
-    //     Devtools::println_to_console(int(notes.size()));
+    //     Devtools::print_to_console("\tnotes.list.size() = ");
+    //     Devtools::println_to_console(int(notes.list.size()));
     // }
 }
 
 // ----------------- play note only once (turn on never off):
-// TODO: FIX THIS! if this is running, re-play note whenever it is turned off (due to too many notes..)
+// TODO: FIX THIS! if this is running, re-play note whenever it is turned off (due to too many notes.list.)
 // void Song::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
 // {
-//     if (notes.size() > 0)
+//     if (notes.list.size() > 0)
 //     {
-//         if (synth->notes[note_idx] == false)
-//             synth->sendNoteOn(notes[note_idx], MIDI);
+//         if (synth->notes.list[note_idx] == false)
+//             synth->sendNoteOn(notes.list[note_idx], MIDI);
 //     }
 //     else
 //         Devtools::println_to_console("cannot play MIDI note, because Score::notes is empty.");
@@ -390,27 +395,27 @@ void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSer
 // play last 3 notes in list:
 void Song::playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
 {
-    if (notes.size() == 1)
+    if (notes.list.size() == 1)
     {
         if (synth->notes[note_idx] == false)
-            synth->sendNoteOn(notes[note_idx], MIDI);
+            synth->sendNoteOn(notes.list[note_idx], MIDI);
     }
 
-    else if (notes.size() == 2)
+    else if (notes.list.size() == 2)
     {
         for (int i = 0; i < 2; i++)
         {
             if (synth->notes[note_idx] == false)
-                synth->sendNoteOn(notes[note_idx - i], MIDI);
+                synth->sendNoteOn(notes.list[note_idx - i], MIDI);
         }
     }
 
-    else if (notes.size() >= 3)
+    else if (notes.list.size() >= 3)
     {
         for (int i = 0; i < 3; i++)
         {
             if (synth->notes[note_idx] == false)
-                synth->sendNoteOn(notes[note_idx - i], MIDI);
+                synth->sendNoteOn(notes.list[note_idx - i], MIDI);
         }
     }
 }

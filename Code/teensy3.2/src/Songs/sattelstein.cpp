@@ -13,7 +13,7 @@ void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Globals::bSendMidiClock = true;
-            Globals::active_song->resetInstruments();         // reset all instruments to "Monitor" mode
+            Globals::active_song->resetInstrumentsFX();         // reset all instruments to "Monitor" mode
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
             Hardware::footswitch_mode = Increment_Score;
             Globals::tapInterval = 392; // 153 BPM

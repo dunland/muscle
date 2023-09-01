@@ -20,8 +20,8 @@ void run_intro(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
-            Globals::active_song->resetInstruments();
-            Globals::active_song->notes.clear();
+            Globals::active_song->resetInstrumentsFX();
+            Globals::active_song->notes.list.clear();
 
             Drumset::hihat->set_effect(TapTempo);
             Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);

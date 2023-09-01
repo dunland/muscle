@@ -22,8 +22,8 @@ void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
         {
             /* ------- general initialization routine -------------- */
             Hardware::footswitch_mode = Increment_Score;
-            Globals::active_song->resetInstruments();
-            Globals::active_song->notes.clear();
+            Globals::active_song->resetInstrumentsFX();
+            Globals::active_song->notes.list.clear();
 
             whammy->sendProgramChange(1, MIDI); // selects Whammy ↑2 OCT
         }

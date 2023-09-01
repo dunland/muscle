@@ -8,7 +8,7 @@ void run_A_15(midi::MidiInterface<HardwareSerial> MIDI) // wie randomVoices
     switch (Globals::active_song->step)
     {
     case 0:
-        Globals::active_song->resetInstruments();        // reset all instruments to "Monitor" mode
+        Globals::active_song->resetInstrumentsFX();        // reset all instruments to "Monitor" mode
         Synthesizers::mKorg->sendProgramChange(4, MIDI); // A.15
         // notes.push_back(int(random(24, 48)));
         Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
@@ -90,7 +90,7 @@ void run_A_15(midi::MidiInterface<HardwareSerial> MIDI) // wie randomVoices
     default: // start over again
         Globals::active_song->step = 1;
         Globals::active_song->setup_state = true;
-        Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] = false;
+        Synthesizers::mKorg->notes[Globals::active_song->notes.list[Globals::active_song->note_idx]] = false;
         // proceed_to_next_score();
         break;
     }

@@ -13,7 +13,7 @@ void run_host(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::mKorg->sendProgramChange(56, MIDI); // selects mKORG Voice A.57
-            Globals::active_song->resetInstruments();         // reset all instruments to "Monitor" mode
+            Globals::active_song->resetInstrumentsFX();         // reset all instruments to "Monitor" mode
             Drumset::snare->set_effect(Monitor);
             Hardware::footswitch_mode = Increment_Score;
             Synthesizers::mKorg->midi_values[mKORG_DelayDepth] = 0;

@@ -51,7 +51,7 @@ const CC_Type mKorg_controlValues[17] = {
 void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 {
     Song *active_score = Globals::active_song;
-    size_t capacity = JSON_ARRAY_SIZE(active_score->notes.size()) + 9 * JSON_ARRAY_SIZE(16) + 9 * JSON_OBJECT_SIZE(8) + 2 * JSON_OBJECT_SIZE(9);
+    size_t capacity = JSON_ARRAY_SIZE(active_score->notes.list.size()) + 9 * JSON_ARRAY_SIZE(16) + 9 * JSON_OBJECT_SIZE(8) + 2 * JSON_OBJECT_SIZE(9);
     DynamicJsonDocument doc(capacity);
 
     // ---------------------- Global values ---------------------------
@@ -62,11 +62,11 @@ void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 
     // -------------------------- Score -------------------------------
     JsonArray score_notes = score.createNestedArray("notes");
-    for (uint8_t i = 0; i < active_score->notes.size(); i++)
+    for (uint8_t i = 0; i < active_score->notes.list.size(); i++)
     {
-        score_notes.add(active_score->notes[i]);
+        score_notes.add(active_score->notes.list[i]);
     }
-    score["note"] = active_score->notes[active_score->note_idx];
+    score["note"] = active_score->notes.list[active_score->note_idx];
 
     // Score topographies:
     JsonArray score_topo = score.createNestedArray("topo");

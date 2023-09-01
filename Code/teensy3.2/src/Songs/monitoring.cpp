@@ -15,8 +15,8 @@ void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
         Synthesizers::kaossPad3->sendControlChange(92, 0, MIDI); // Touch Pad off - JUST BECAUSE ALHAMBRA IS BEFORE!// TODO: execute this when leaving the song with push button! at best, by using callback functions for song.proceed_to_next_score
 
             Hardware::footswitch_mode = Increment_Score;
-            Globals::active_song->resetInstruments();
-            Globals::active_song->notes.clear();
+            Globals::active_song->resetInstrumentsFX();
+            Globals::active_song->notes.list.clear();
 
             // turn off all currently playing MIDI notes:
             for (int channel = 1; channel < 3; channel++)

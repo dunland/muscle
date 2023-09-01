@@ -13,8 +13,8 @@ void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
-            Globals::active_song->resetInstruments();
-            Globals::active_song->notes.clear();
+            Globals::active_song->resetInstrumentsFX();
+            Globals::active_song->notes.list.clear();
 
             Drumset::hihat->set_effect(TapTempo);
             Synthesizers::dd200->sendProgramChange(3, MIDI);
@@ -27,7 +27,7 @@ void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
             delay(50);
             Synthesizers::mKorg->sendNoteOn(Note_D6, MIDI);
             Synthesizers::mKorg->sendNoteOn(Note_F6, MIDI);
-            
+
         }
 
         Hardware::lcd->setCursor(0, 0);
@@ -43,7 +43,7 @@ void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
             Synthesizers::mKorg->sendNoteOff(Note_D6, MIDI);
             Synthesizers::mKorg->sendNoteOff(Note_F6, MIDI);
             Synthesizers::mKorg->sendProgramChange(62, MIDI); // restart to stop Arp
-            
+
         }
 
         Hardware::lcd->setCursor(0, 0);

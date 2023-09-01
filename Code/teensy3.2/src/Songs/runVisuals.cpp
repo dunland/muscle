@@ -15,8 +15,8 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
     case 0: // nix
         if (Globals::active_song->get_setup_state())
         {
-            Globals::active_song->resetInstruments();
-            Globals::active_song->notes.clear();
+            Globals::active_song->resetInstrumentsFX();
+            Globals::active_song->notes.list.clear();
 
             Hardware::footswitch_mode = Increment_Score;
 
@@ -42,7 +42,7 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
 
             Serial.println("Improvisation");
 
-            Globals::active_song->notes.push_back(31);                              // G
+            Globals::active_song->notes.list.push_back(31);                              // G
             Synthesizers::mKorg->sendProgramChange(91, MIDI); // switches to Voice B.44
 
             Drumset::hihat->set_effect(TapTempo);
@@ -112,8 +112,8 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
     case 5: // KupferUndGold
         if (Globals::active_song->get_setup_state())
         {
-            Globals::active_song->resetInstruments();
-            Globals::active_song->notes.clear();
+            Globals::active_song->resetInstrumentsFX();
+            Globals::active_song->notes.list.clear();
             Synthesizers::mKorg->sendNoteOff(55, MIDI); // play note 55 (G) if it is not playing at the moment
             Synthesizers::mKorg->sendNoteOff(43, MIDI); // play note 43 (G) if it is not playing at the moment
 

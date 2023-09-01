@@ -17,7 +17,7 @@ void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
         {
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
             Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT / UP 2 OCT
-            
+
         }
         break;
 
@@ -29,7 +29,7 @@ void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
             {
                 // ------- general initialization routine --------------
                 Hardware::footswitch_mode = Increment_Score;
-                resetInstruments();
+                resetInstrumentsFX();
                 notes.clear();
 
                 mKorg->sendProgramChange(61, MIDI); // selects mKORG Voice A.26

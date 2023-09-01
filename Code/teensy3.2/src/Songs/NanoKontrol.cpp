@@ -17,13 +17,13 @@ void run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI)
             // Globals::machine_state = NanoKontrol_Test;
             Drumset::snare->setup_midi(mKORG_LFO2_Rate, Synthesizers::mKorg, 127, 30, 18.0, -0.11);
             Drumset::snare->set_effect(Change_CC);
-            
-            Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);
+
+            Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes.list[Globals::active_song->note_idx], MIDI);
         }
         break;
 
     default:
-        Synthesizers::mKorg->sendNoteOff(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);
+        Synthesizers::mKorg->sendNoteOff(Globals::active_song->notes.list[Globals::active_song->note_idx], MIDI);
         Globals::active_song->note_idx = (Globals::active_song->note_idx + 1) % sizeof(Globals::active_song->notes);
         Globals::active_song->step = 0;
         // Globals::machine_state = Running;

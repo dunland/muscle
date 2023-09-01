@@ -230,9 +230,9 @@ void Instrument::mainNoteIteration(Synthesizer *synth_, midi::MidiInterface<Hard
 
   if (millis() > lastNoteChange + 4000) // only do this once in an interval of 4 seconds, because there are always many hits on a cymbal..
   {
-    synth_->sendNoteOff(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);                      // turn previous note off
-    Globals::active_song->note_idx = (Globals::active_song->note_idx + 1) % Globals::active_song->notes.size(); // iterate note pointer
-    synth_->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);                       // turn next note on
+    synth_->sendNoteOff(Globals::active_song->notes.list[Globals::active_song->note_idx], MIDI);                      // turn previous note off
+    Globals::active_song->note_idx = (Globals::active_song->note_idx + 1) % Globals::active_song->notes.list.size(); // iterate note pointer
+    synth_->sendNoteOn(Globals::active_song->notes.list[Globals::active_song->note_idx], MIDI);                       // turn next note on
 
     lastNoteChange = millis();
   }

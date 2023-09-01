@@ -13,6 +13,12 @@ void run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Globals::bSendMidiClock = false;
+            Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 0, MIDI); // Apreggiator on
+            Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_on_off, 0, MIDI); // Apreggiator on
+            Synthesizers::kaossPad3->sendControlChange(KP3_Sample_A, 0, MIDI); // Apreggiator on
+            Synthesizers::kaossPad3->sendControlChange(KP3_Sample_B, 0, MIDI); // Apreggiator on
+            Synthesizers::kaossPad3->sendControlChange(KP3_Sample_C, 0, MIDI); // Apreggiator on
+            Synthesizers::kaossPad3->sendControlChange(KP3_Sample_D, 0, MIDI); // Apreggiator on
 
             Synthesizers::whammy->sendProgramChange(42, MIDI); // WHAMMY UP 2 OCT
 
