@@ -1,11 +1,11 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 #include <Notes.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
+void run_b_27()
 {
         Notes notes[3] = {Note_D6, Note_F7, Note_G7};
         switch (Globals::active_song->step)
@@ -13,7 +13,7 @@ void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
         case 0: // setup only
                 if (Globals::active_song->get_setup_state())
                 {
-                        Synthesizers::mKorg->sendProgramChange(78, MIDI); // load b_27
+                        Synthesizers::mKorg->sendProgramChange(78); // load b_27
 
                         // first initialize notes. otherwise effect cannot be set. THIS IS STUPID TODO: fix this!
                         // Drumset::kick->midi.notes = {Note_D6, Note_F7, Note_G7};
@@ -44,11 +44,11 @@ void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
                 }
 
                 if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[Drumset::snare->midi.active_note - 12] == false)
-                        Synthesizers::mKorg->sendNoteOn(Drumset::snare->midi.active_note - 12, MIDI);
+                        Synthesizers::mKorg->sendNoteOn(Drumset::snare->midi.active_note - 12);
 
                 if (Drumset::kick->timing.wasHit)
                 {
-                        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, int(random(0, 127)), MIDI);
+                        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, int(random(0, 127)));
                 }
 
                 Hardware::lcd->setCursor(0, 0);
@@ -73,7 +73,7 @@ void run_b_27(midi::MidiInterface<HardwareSerial> MIDI)
 
                 if (Drumset::kick->timing.wasHit)
                 {
-                        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, int(random(0, 127)), MIDI);
+                        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, int(random(0, 127)));
                 }
 
                 Hardware::lcd->setCursor(0, 0);

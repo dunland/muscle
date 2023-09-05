@@ -1,11 +1,11 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 #include <Notes.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI)
+void run_control_volca()
 {
     static int grundton = Note_D4;
     static uint64_t lastNoteSent = 0;
@@ -16,17 +16,17 @@ void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (Globals::active_song->get_setup_state())
         {
-            
+
         }
 
         if (Drumset::kick->timing.wasHit)
         {
-            volca->sendNoteOn(grundton, MIDI);
+            volca->sendNoteOn(grundton);
             lastNoteSent = millis();
         }
 
         if (millis() > lastNoteSent + 50){
-            volca->sendNoteOff(grundton, MIDI);
+            volca->sendNoteOff(grundton);
         }
 
         // Hardware::lcd->setCursor(10, 0);

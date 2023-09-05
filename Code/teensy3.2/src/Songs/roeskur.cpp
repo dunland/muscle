@@ -1,10 +1,10 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void run_roeskur(midi::MidiInterface<HardwareSerial> MIDI)
+void run_roeskur()
 {
 
     // static Synthesizer *mKorg = Synthesizers::mKorg;
@@ -15,8 +15,8 @@ void run_roeskur(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
     if (Globals::active_song->get_setup_state())
     {
-        Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT / UP 2 OCT
-        
+        Synthesizers::whammy->sendProgramChange(62); // HARMONY UP OCT / UP 2 OCT
+
     }
         break;
 

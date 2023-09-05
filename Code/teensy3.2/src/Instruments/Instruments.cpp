@@ -1,5 +1,5 @@
 #include <Instruments.h>
-#include <MIDI.h>
+
 // #include <Tsunami.h>
 #include <Song.h>
 #include <Hardware.h>
@@ -289,7 +289,7 @@ void Instrument::setInstrumentPrintString()
 
 ////////////////////////////// TRIGGERS ///////////////////////////////
 // defines what happens when instrument was hit within this beat
-void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::trigger()
 {
   // print instrument name to receive using external programs via Serial connection:
   Serial.println(Globals::DrumtypeToHumanreadable(drumtype));
@@ -301,7 +301,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
   {
   case PlayMidi:
     monitor();
-    playMidi(MIDI);
+    playMidi();
     break;
 
   case Monitor:
@@ -321,7 +321,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
     break;
 
   case Swell:
-    swell_rec(MIDI);
+    swell_rec();
     break;
 
   // TODO:
@@ -331,27 +331,27 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
 
   case CymbalSwell: // swell-effect for loudness on field recordings (use on cymbals e.g.)
     // TODO: UNTESTED! (2020-10-09)
-    swell_rec(MIDI);
+    swell_rec();
     break;
   case TopographyMidiEffect:
     // countup_topography(instrument);
     break;
 
   case Change_CC:
-    change_cc_in(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    change_cc_in(); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
     monitor();
     break;
 
   case Random_CC_Effect:
-    random_change_cc_in(MIDI);
+    random_change_cc_in();
     break;
   case MainNoteIteration:
-    mainNoteIteration(midi.synth, MIDI);
+    mainNoteIteration(midi.synth);
     break;
 
   case Reflex_and_PlayMidi: // combines PlayMidi and Change_CC
-    playMidi(MIDI);
-    change_cc_in(MIDI);
+    playMidi();
+    change_cc_in();
     break;
 
   default:
@@ -362,26 +362,26 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
 ///////////////////////////// TIMED EFFECTS ///////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-void Instrument::perform(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::perform(std::vector<Instrument *> instruments)
 {
   switch (effect)
   {
 
   case ToggleRhythmSlot:
-    sendMidiNotes_timed(MIDI);
+    sendMidiNotes_timed();
     break;
 
   case FootSwitchLooper:
     setInstrumentSlots();
-    sendMidiNotes_timed(MIDI);
+    sendMidiNotes_timed();
     break;
 
   case Swell:
-    swell_perform(MIDI);
+    swell_perform();
     break;
 
   case TopographyMidiEffect:
-    topography_midi_effects(instruments, MIDI);
+    topography_midi_effects(instruments);
     break;
 
   default:
@@ -393,26 +393,26 @@ void Instrument::perform(std::vector<Instrument *> instruments, midi::MidiInterf
 ///////////////////////////////////////////////////////////////////////
 /* destructor for playing MIDI notes etc */
 
-void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::tidyUp()
 {
   // Devtools::println_to_console("tidying up");
   switch (effect)
   {
   case PlayMidi:
-    turnMidiNoteOff(MIDI);
+    turnMidiNoteOff();
     break;
 
   case Reflex_and_PlayMidi:
-    turnMidiNoteOff(MIDI);
+    turnMidiNoteOff();
     shuffle_cc(false);
     break;
 
   case Change_CC:
-    change_cc_out(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    change_cc_out(); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
     break;
 
   case Random_CC_Effect:
-    change_cc_out(MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    change_cc_out(); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
     shuffle_cc(false);
     break;
 

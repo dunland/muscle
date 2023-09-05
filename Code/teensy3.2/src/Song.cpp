@@ -1,5 +1,5 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
@@ -341,7 +341,7 @@ void Song::add_bassNote(int note)
 ///////////////////////////////////////////////////////////////////////
 
 // play note, repeatedly:
-void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int rhythmic_iterator) // initiates a continuous bass note from score
+void Song::playRhythmicNotes(Synthesizer *synth, int rhythmic_iterator) // initiates a continuous bass note from score
 {
     if (rhythmic_iterator != 0)
         note_change_pos = rhythmic_iterator;
@@ -349,8 +349,8 @@ void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSer
     if ((Globals::current_beat_pos + 1) % note_change_pos == 0)
     {
         // play note
-        synth->sendNoteOff(notes[note_idx], MIDI);
-        synth->sendNoteOn(notes[note_idx], MIDI);
+        synth->sendNoteOff(notes[note_idx]);
+        synth->sendNoteOn(notes[note_idx]);
         Devtools::print_to_console("\tplaying Score::note:");
         Devtools::println_to_console(notes[note_idx]);
 
@@ -376,24 +376,24 @@ void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSer
 
 // ----------------- play note only once (turn on never off):
 // TODO: FIX THIS! if this is running, re-play note whenever it is turned off (due to too many notes..)
-// void Song::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
+// void Song::playSingleNote(Synthesizer *synth, ) // initiates a continuous bass note from score
 // {
 //     if (notes.size() > 0)
 //     {
 //         if (synth->notes[note_idx] == false)
-//             synth->sendNoteOn(notes[note_idx], MIDI);
+//             synth->sendNoteOn(notes[note_idx];
 //     }
 //     else
 //         Devtools::println_to_console("cannot play MIDI note, because Score::notes is empty.");
 // }
 
 // play last 3 notes in list:
-void Song::playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
+void Song::playLastThreeNotes(Synthesizer *synth)
 {
     if (notes.size() == 1)
     {
         if (synth->notes[note_idx] == false)
-            synth->sendNoteOn(notes[note_idx], MIDI);
+            synth->sendNoteOn(notes[note_idx]);
     }
 
     else if (notes.size() == 2)
@@ -401,7 +401,7 @@ void Song::playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSe
         for (int i = 0; i < 2; i++)
         {
             if (synth->notes[note_idx] == false)
-                synth->sendNoteOn(notes[note_idx - i], MIDI);
+                synth->sendNoteOn(notes[note_idx - i]);
         }
     }
 
@@ -410,36 +410,36 @@ void Song::playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSe
         for (int i = 0; i < 3; i++)
         {
             if (synth->notes[note_idx] == false)
-                synth->sendNoteOn(notes[note_idx - i], MIDI);
+                synth->sendNoteOn(notes[note_idx - i]);
         }
     }
 }
 
-void Song::envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI)
+void Song::envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography)
 {
     int cutoff_val = topography->a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
 
     cutoff_val = max(20, cutoff_val);  // must be at least 20
     cutoff_val = min(cutoff_val, 127); // must not be greater than 127
-    synth->sendControlChange(mKORG_Cutoff, cutoff_val, MIDI);
+    synth->sendControlChange(mKORG_Cutoff, cutoff_val);
 }
 
-void Song::envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth)
+void Song::envelope_volume(TOPOGRAPHY *topography, Synthesizer *synth)
 {
     int amp_val = topography->a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
     // amp_val = max(0, amp_val);                                    // must be at least 0
     amp_val = min(amp_val, 127); // must not be greater than 127
-    synth->sendControlChange(mKORG_Amplevel, amp_val, MIDI);
+    synth->sendControlChange(mKORG_Amplevel, amp_val);
 }
 
-void Song::crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth)
+void Song::crazyDelays(Instrument *instrument, Synthesizer *synth)
 {
     int delaytime = instrument->topography.a_16[Globals::current_16th_count] * 13; // create cutoff value as a factor of topography height
     delaytime = min(delaytime, 127);                                               // must not be greater than 127
-    synth->sendControlChange(mKORG_DelayTime, delaytime, MIDI);
+    synth->sendControlChange(mKORG_DelayTime, delaytime);
 }
 
-// void Score::set_ramp(midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration)
+// void Score::set_ramp(, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration)
 // {
 //     static boolean ramp_start = true;
 //     static int value;

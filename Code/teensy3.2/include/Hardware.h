@@ -2,7 +2,6 @@
 
 #include <Globals.h>
 #include <Devtools.h>
-#include <MIDI.h>
 #include <LiquidCrystal.h>
 #include <Encoder.h>
 
@@ -38,6 +37,10 @@ struct menu
 class Hardware
 {
 public:
+
+  static void begin_MIDI();
+  static void sendMidiClock();
+
   ////////////////////////////////// FOOT SWITCH ////////////////////////
   ///////////////////////////////////////////////////////////////////////
 
@@ -119,13 +122,13 @@ public:
   boolean notes[127];
   int midi_values[127];
 
-  void sendControlChange(CC_Type cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI); // sets cc_value (used for JSON comm) and sends MIDI-ControlChange
+  void sendControlChange(CC_Type cc_type, int val); // sets cc_value (used for JSON comm) and sends MIDI-ControlChange
 
-  void sendControlChange(int cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI); // sets cc_value using an integer and sends MIDI-ControlChange // for Random_CC_Effect
+  void sendControlChange(int cc_type, int val); // sets cc_value using an integer and sends MIDI-ControlChange // for Random_CC_Effect
 
-  void sendNoteOn(int note, midi::MidiInterface<HardwareSerial> MIDI);
+  void sendNoteOn(int note);
 
-  void sendNoteOff(int note, midi::MidiInterface<HardwareSerial> MIDI);
+  void sendNoteOff(int note);
 
-  void sendProgramChange(int number, midi::MidiInterface<HardwareSerial> MIDI);
+  void sendProgramChange(int number);
 };

@@ -1,10 +1,10 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
+void run_hutschnur()
 {
 
     // static Synthesizer *mKorg = Synthesizers::mKorg;
@@ -15,9 +15,9 @@ void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
-            Synthesizers::whammy->sendProgramChange(62, MIDI); // HARMONY UP OCT / UP 2 OCT
-            
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0);
+            Synthesizers::whammy->sendProgramChange(62); // HARMONY UP OCT / UP 2 OCT
+
         }
         break;
 
@@ -32,7 +32,7 @@ void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
                 resetInstruments();
                 notes.clear();
 
-                mKorg->sendProgramChange(61, MIDI); // selects mKORG Voice A.26
+                mKorg->sendProgramChange(61); // selects mKORG Voice A.26
 
                 notes.push_back(28); // E
                 notes.push_back(40); // E
@@ -53,8 +53,8 @@ void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
 
             // if (Drumset::snare->timing.wasHit)
             // {
-            //     mKorg->sendNoteOn(notes[noteIdx], MIDI);
-            //     mKorg->sendNoteOn(notes[noteIdx + 1], MIDI);
+            //     mKorg->sendNoteOn(notes[noteIdx];
+            //     mKorg->sendNoteOn(notes[noteIdx + 1];
             // }
 
             // change notes via crash
@@ -67,13 +67,13 @@ void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
                     // turn last notes off:
                     if (noteIdx != 0)
                     {
-                        mKorg->sendNoteOff(notes[noteIdx - 2], MIDI);
-                        mKorg->sendNoteOff(notes[noteIdx - 1], MIDI);
+                        mKorg->sendNoteOff(notes[noteIdx - 2];
+                        mKorg->sendNoteOff(notes[noteIdx - 1];
                     }
                     else if (noteIdx == 0)
                     {
-                        mKorg->sendNoteOff(notes[7], MIDI);
-                        mKorg->sendNoteOff(notes[8], MIDI);
+                        mKorg->sendNoteOff(notes[7];
+                        mKorg->sendNoteOff(notes[8];
                     }
 
                     // increase noteIdx
@@ -83,8 +83,8 @@ void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI)
             }
 
             // send noteOn permanently
-            mKorg->sendNoteOn(notes[noteIdx], MIDI);
-            mKorg->sendNoteOn(notes[noteIdx + 1], MIDI);
+            mKorg->sendNoteOn(notes[noteIdx];
+            mKorg->sendNoteOn(notes[noteIdx + 1];
 
             // print info to display:
             Hardware::lcd->setCursor(0, 0);

@@ -1,6 +1,6 @@
 #include <Devtools.h>
 #include <Instruments.h>
-#include <MIDI.h>
+
 // #include <Tsunami.h>
 #include <Song.h>
 #include <Hardware.h>
@@ -11,28 +11,28 @@
 
 ///////////////////////////// TRIGGER EFFECTS /////////////////////////
 
-void Instrument::change_cc_in(midi::MidiInterface<HardwareSerial> MIDI) // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+void Instrument::change_cc_in() // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 {
   midi.cc_val += midi.cc_increase_factor;
   midi.cc_val = min(midi.cc_val, midi.cc_max);
-  midi.synth->sendControlChange(midi.cc_chan, int(min(midi.cc_val, 127)), MIDI);
+  midi.synth->sendControlChange(midi.cc_chan, int(min(midi.cc_val, 127)));
   output_string = String(midi.cc_val);
   output_string += "\t";
 }
 
-void Instrument::random_change_cc_in(midi::MidiInterface<HardwareSerial> MIDI) // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+void Instrument::random_change_cc_in() // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 {
   midi.cc_val += midi.cc_increase_factor;
   midi.cc_val = min(midi.cc_val, midi.cc_max);
-  midi.synth->sendControlChange(midi.random_cc_chan, int(min(midi.cc_val, 127)), MIDI);
+  midi.synth->sendControlChange(midi.random_cc_chan, int(min(midi.cc_val, 127)));
   output_string = String(midi.cc_val);
   output_string += "\t";
 }
 
 // plays a Midi note:
-void Instrument::playMidi(midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::playMidi()
 {
-  midi.synth->sendNoteOn(midi.active_note, MIDI);
+  midi.synth->sendNoteOn(midi.active_note);
   score.last_notePlayed = millis();
 }
 
@@ -160,7 +160,7 @@ void Instrument::getTapTempo()
   ------🎵------🎵-------🎵------🎵------ play MIDI note
 
   ---------------------------------------------------------------------*/
-void Instrument::swell_rec(midi::MidiInterface<HardwareSerial> MIDI) // remembers beat stroke position
+void Instrument::swell_rec() // remembers beat stroke position
 {
   /* works pretty much just like the tapTempo, but repeats the triggered drums on external MIDI instrument (-> swell_beat() in TIMED INTERVALS) */
   setInstrumentPrintString();
@@ -224,15 +224,15 @@ void Instrument::countup_topography()
 }
 
 // increase note_idx of Score class:
-void Instrument::mainNoteIteration(Synthesizer *synth_, midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::mainNoteIteration(Synthesizer *synth_)
 {
   static unsigned long lastNoteChange = 0;
 
   if (millis() > lastNoteChange + 4000) // only do this once in an interval of 4 seconds, because there are always many hits on a cymbal..
   {
-    synth_->sendNoteOff(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);                      // turn previous note off
+    synth_->sendNoteOff(Globals::active_song->notes[Globals::active_song->note_idx]);                      // turn previous note off
     Globals::active_song->note_idx = (Globals::active_song->note_idx + 1) % Globals::active_song->notes.size(); // iterate note pointer
-    synth_->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);                       // turn next note on
+    synth_->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx]);                       // turn next note on
 
     lastNoteChange = millis();
   }
@@ -240,7 +240,7 @@ void Instrument::mainNoteIteration(Synthesizer *synth_, midi::MidiInterface<Hard
 
 ///////////////////////////// TIMED EFFECTS ///////////////////////////
 
-void Instrument::sendMidiNotes_timed(midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::sendMidiNotes_timed()
 {
   if (Globals::current_eighth_count != Globals::last_eighth_count) // in 8th-interval
   {
@@ -248,10 +248,10 @@ void Instrument::sendMidiNotes_timed(midi::MidiInterface<HardwareSerial> MIDI)
     {
       setInstrumentPrintString();
       // TODO: SHOULD BE HANDLED LIKE FOOTSWITCHLOOPER!
-      midi.synth->sendNoteOn(midi.active_note, MIDI);
+      midi.synth->sendNoteOn(midi.active_note);
     }
     else
-      midi.synth->sendNoteOff(midi.active_note, MIDI);
+      midi.synth->sendNoteOff(midi.active_note);
   }
 }
 
@@ -264,7 +264,7 @@ void Instrument::setInstrumentSlots()
 // -------------------- SOUND SWELL: REPLAY STROKES -------------------
 // --------------------------------------------------------------------
 
-void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // updates once a 32nd-beat-step
+void Instrument::swell_perform() // updates once a 32nd-beat-step
 {
   if (score.swell_state == 2)
   {
@@ -289,7 +289,7 @@ void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // upda
       output_string += "\t";
 
       if (!Globals::footswitch_is_pressed)
-        midi.synth->sendControlChange(midi.cc_chan, score.swell_val * score.swell_factor, MIDI);
+        midi.synth->sendControlChange(midi.cc_chan, score.swell_val * score.swell_factor);
 
       /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
         finding the right CC# on microKORG: (manual p.61):
@@ -323,7 +323,7 @@ void Instrument::swell_perform(midi::MidiInterface<HardwareSerial> MIDI) // upda
         score.swell_val = 10;
         score.swell_beatPos_sum = 0;
         score.swell_beatStep = 0;
-        midi.synth->sendNoteOff(midi.active_note, MIDI);
+        midi.synth->sendNoteOff(midi.active_note);
       }
     }
   }
@@ -479,7 +479,7 @@ void Instrument::tsunamiLink()
 
 // TODO: make this a static function of Score
 // ---------- MIDI playback according to beat_topography --------
-void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::topography_midi_effects(std::vector<Instrument *> instruments)
 {
   if (Globals::current_16th_count != Globals::last_16th_count) // do this only once per 16th step
   {
@@ -502,7 +502,7 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, 
     int vol = min(Globals::active_song->topo_midi_effect.a_16[Globals::current_16th_count] * 13, 255);
 
     if (topography.a_16[Globals::current_16th_count] > 0)
-      midi.synth->sendControlChange(midi.cc_chan, vol, MIDI);
+      midi.synth->sendControlChange(midi.cc_chan, vol);
 
     // Debug:
     Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
@@ -522,11 +522,11 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments, 
 ///////////////////////////////////////////////////////////////////////
 /* destructor for playing MIDI notes etc */
 
-void Instrument::turnMidiNoteOff(midi::MidiInterface<HardwareSerial> MIDI)
+void Instrument::turnMidiNoteOff()
 {
   if (millis() > score.last_notePlayed + 200) // Swell effect turns notes off itself
   {
-    midi.synth->sendNoteOff(midi.active_note, MIDI);
+    midi.synth->sendNoteOff(midi.active_note);
     // Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
     // Devtools::print_to_console(": turning midi note ");
     // Devtools::print_to_console(midi.active_note);
@@ -535,11 +535,11 @@ void Instrument::turnMidiNoteOff(midi::MidiInterface<HardwareSerial> MIDI)
 }
 
 // TODO: make this decrease with 32nd-notes.
-void Instrument::change_cc_out(midi::MidiInterface<HardwareSerial> MIDI) // changes (mostly decreases) value of CC effect each loop (!)
+void Instrument::change_cc_out() // changes (mostly decreases) value of CC effect each loop (!)
 {
   midi.cc_val += midi.cc_tidyUp_factor;
   midi.cc_val = min(max(midi.cc_val, midi.cc_min), midi.cc_max);
-  midi.synth->sendControlChange(midi.cc_chan, int(min(midi.cc_val, 127)), MIDI);
+  midi.synth->sendControlChange(midi.cc_chan, int(min(midi.cc_val, 127)));
   output_string = String(midi.cc_val);
   output_string += "\t";
 }

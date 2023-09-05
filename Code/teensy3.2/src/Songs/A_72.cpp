@@ -1,10 +1,10 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
+void run_A_72()
 {
     // each step:
     // - switch between Timbre 1 and 2
@@ -27,9 +27,9 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
             Globals::active_song->notes.push_back(int(random(12, 24)));
 
             Hardware::footswitch_mode = Increment_Score;
-            Synthesizers::mKorg->sendProgramChange(49, MIDI); // switches to Voice A.72
+            Synthesizers::mKorg->sendProgramChange(49); // switches to Voice A.72
             delay(200);
-            Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, 1, MIDI); // Select Timbre 2
+            Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, 1); // Select Timbre 2
 
             Drumset::tom1->set_effect(Change_CC);
             Drumset::tom1->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 127, 29, 3, -0.035);
@@ -47,11 +47,11 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
 
         }
         if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] == false)
-            Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);
+            Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx]);
 
         // increasing amplitude until max:
         val += 0.075;
-        Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, int(val), MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, int(val));
 
         Hardware::lcd->setCursor(10, 0);
         Hardware::lcd->print(val);
@@ -66,11 +66,11 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             int val = (Synthesizers::mKorg->midi_values[mKORG_TimbreSelect] == 0) ? 127 : 0;
-            Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, val, MIDI); // Select Timbre 2
+            Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, val); // Select Timbre 2
         }
 
         if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] == false)
-            Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);
+            Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx]);
 
         break;
 
@@ -80,7 +80,7 @@ void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
         // note_increase = (note_increase == 4) ? 5 : 4;
         // Globals::active_song->notes.push_back(Globals::active_song->notes[Globals::active_song->note_idx] + note_increase);
         // Globals::active_song->note_idx++;
-        Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 0, MIDI); // arp off
+        Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 0); // arp off
         Globals::active_song->proceed_to_next_score();
 
         break;

@@ -1,9 +1,9 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
-void run_A_25(midi::MidiInterface<HardwareSerial> MIDI)
+void run_A_25()
 {
 
     switch (Globals::active_song->step)
@@ -12,10 +12,10 @@ void run_A_25(midi::MidiInterface<HardwareSerial> MIDI)
 
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127, MIDI); // Apreggiator on
+            Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127); // Apreggiator on
 
             Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
-            Synthesizers::mKorg->sendProgramChange(12, MIDI);
+            Synthesizers::mKorg->sendProgramChange(12);
             // notes.push_back(int(random(24, 48)));
             Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
 
@@ -83,13 +83,13 @@ void run_A_25(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom2->set_effect(Change_CC);
             Drumset::hihat->set_effect(TapTempo);
 
-            Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127, MIDI);
-            // Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127);
+            // Globals::active_song->playSingleNote(Synthesizers::mKorg;
         }
 
         static int randomNote = int(random(16,72));
         if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[randomNote] == false)
-            Synthesizers::mKorg->sendNoteOn(randomNote, MIDI);
+            Synthesizers::mKorg->sendNoteOn(randomNote);
 
         Hardware::lcd->setCursor(0,0);
         Hardware::lcd->print("changeCC");

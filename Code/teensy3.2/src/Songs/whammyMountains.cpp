@@ -1,10 +1,10 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
+void run_whammyMountains()
 {
     /*
     WHAMMY MIDI CHANNEL = 4
@@ -25,7 +25,7 @@ void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
 
-            whammy->sendProgramChange(1, MIDI); // selects Whammy ↑2 OCT
+            whammy->sendProgramChange(1); // selects Whammy ↑2 OCT
         }
 
         /* ---------------- general loop here ---------------------- */
@@ -38,14 +38,14 @@ void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
         if (millis() > (lastChannelUp + 500))
         {
             channel = (channel + 1) % 21;
-            whammy->sendProgramChange(channel, MIDI); // sequentially change program
+            whammy->sendProgramChange(channel); // sequentially change program
             lastChannelUp = millis();
         }
 
         if (millis() > (lastValUp + 250))
         {
             val = (val + 1) % 128;
-            whammy->sendControlChange(11, val, MIDI); // 11 is for Expression Pedal
+            whammy->sendControlChange(11, val); // 11 is for Expression Pedal
             lastValUp = millis();
         }
 
@@ -69,24 +69,24 @@ void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI)
         if (Drumset::snare->timing.wasHit) // snare increases expression by 5
         {
             val = (val + 5) % 128;
-            whammy->sendControlChange(11, val, MIDI);
+            whammy->sendControlChange(11, val);
         }
 
         if (Drumset::kick->timing.wasHit) // kick decreases expression by 1
         {
             val = (val > 0) ? (val - 1) % 128 : 0;
-            whammy->sendControlChange(11, val, MIDI);
+            whammy->sendControlChange(11, val);
         }
 
         if (Drumset::crash1->timing.wasHit) // crash changes program up
         {
             channel = (channel + 1) % 21;
-            whammy->sendProgramChange(channel, MIDI);
+            whammy->sendProgramChange(channel);
         }
         if (Drumset::standtom->timing.wasHit) // ride changes program down
         {
             channel = (channel > 0) ? (channel - 1) % 21 : 0;
-            whammy->sendProgramChange(channel, MIDI);
+            whammy->sendProgramChange(channel);
         }
 
         // print channel

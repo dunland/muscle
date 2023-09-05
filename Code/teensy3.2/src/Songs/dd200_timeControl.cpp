@@ -1,18 +1,18 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
-void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI)
+void run_dd200_timeControl()
 {
     static int delay_time;
-    
+
     switch(Globals::active_song->step)
     {
     case 0: // just using midi clock
         if (Globals::active_song->get_setup_state())
         {
-            
+
             Drumset::hihat->set_effect(TapTempo);
         }
         Hardware::lcd->setCursor(0, 0);
@@ -24,7 +24,7 @@ void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             delay_time = 0;
-            
+
             Drumset::hihat->set_effect(TapTempo);
         }
 
@@ -59,7 +59,7 @@ void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI)
                     // }
                 }
                 delay_time = Hardware::dd_200_midi_interval_map[idx];
-                Synthesizers::dd200->sendControlChange(dd200_DelayTime, delay_time, MIDI);
+                Synthesizers::dd200->sendControlChange(dd200_DelayTime, delay_time);
                 previous_tapInterval = Globals::tapInterval;
             }
         }
@@ -74,7 +74,7 @@ void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-        Synthesizers::mKorg->sendNoteOff(31, MIDI);
+        Synthesizers::mKorg->sendNoteOff(31);
         Globals::active_song->proceed_to_next_score();
         break;
     }

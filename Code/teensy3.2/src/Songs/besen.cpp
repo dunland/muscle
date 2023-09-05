@@ -1,11 +1,11 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 #include <Notes.h>
 
 //////////////////////////// ZITTERAAL /////////////////////////////
-void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
+void run_besen()
 {
     switch(Globals::active_song->step)
     {
@@ -17,17 +17,17 @@ void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
             Globals::active_song->notes.clear();
 
             Drumset::hihat->set_effect(TapTempo);
-            Synthesizers::dd200->sendProgramChange(3, MIDI);
-            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
+            Synthesizers::dd200->sendProgramChange(3);
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0);
 
-            Synthesizers::mKorg->sendProgramChange(62, MIDI); // corresponds A.87
-            Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 80, MIDI); // set loudness to 80
-            Synthesizers::whammy->sendProgramChange(58, MIDI); // HARMONY UP 5TH / UP 6TH
+            Synthesizers::mKorg->sendProgramChange(62); // corresponds A.87
+            Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 80); // set loudness to 80
+            Synthesizers::whammy->sendProgramChange(58); // HARMONY UP 5TH / UP 6TH
 
             delay(50);
-            Synthesizers::mKorg->sendNoteOn(Note_D6, MIDI);
-            Synthesizers::mKorg->sendNoteOn(Note_F6, MIDI);
-            
+            Synthesizers::mKorg->sendNoteOn(Note_D6);
+            Synthesizers::mKorg->sendNoteOn(Note_F6);
+
         }
 
         Hardware::lcd->setCursor(0, 0);
@@ -40,10 +40,10 @@ void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
     case 1: // turn notes off
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::mKorg->sendNoteOff(Note_D6, MIDI);
-            Synthesizers::mKorg->sendNoteOff(Note_F6, MIDI);
-            Synthesizers::mKorg->sendProgramChange(62, MIDI); // restart to stop Arp
-            
+            Synthesizers::mKorg->sendNoteOff(Note_D6);
+            Synthesizers::mKorg->sendNoteOff(Note_F6);
+            Synthesizers::mKorg->sendProgramChange(62); // restart to stop Arp)
+
         }
 
         Hardware::lcd->setCursor(0, 0);
@@ -58,10 +58,10 @@ void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
     //     if (Globals::active_song->setup)
     //     {
     //         Globals::active_song->setup = false;
-    //         Synthesizers::mKorg->sendProgramChange(42, MIDI); // corresponds A.63
+    //         Synthesizers::mKorg->sendProgramChange(42; // corresponds A.63
     //         delay(50);
-    //         Synthesizers::mKorg->sendNoteOn(Note_D6, MIDI);
-    //         Synthesizers::mKorg->sendNoteOn(Note_G6, MIDI);
+    //         Synthesizers::mKorg->sendNoteOn(Note_D6;
+    //         Synthesizers::mKorg->sendNoteOn(Note_G6;
     //     }
 
     //     static int sub_part = 0;
@@ -71,33 +71,33 @@ void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
     //     {
     //         if (sub_part == 0)
     //         {
-    //             Synthesizers::mKorg->sendNoteOff(Note_D6, MIDI);
-    //             Synthesizers::mKorg->sendNoteOff(Note_G6, MIDI);
+    //             Synthesizers::mKorg->sendNoteOff(Note_D6;
+    //             Synthesizers::mKorg->sendNoteOff(Note_G6;
 
-    //             Synthesizers::mKorg->sendNoteOn(Note_D6, MIDI);
-    //             Synthesizers::mKorg->sendNoteOn(Note_Bb5, MIDI);
+    //             Synthesizers::mKorg->sendNoteOn(Note_D6;
+    //             Synthesizers::mKorg->sendNoteOn(Note_Bb5;
 
     //             sub_part = 1;
     //         }
 
     //         else if (sub_part == 1)
     //         {
-    //             Synthesizers::mKorg->sendNoteOff(Note_D6, MIDI);
-    //             Synthesizers::mKorg->sendNoteOff(Note_Bb5, MIDI);
+    //             Synthesizers::mKorg->sendNoteOff(Note_D6;
+    //             Synthesizers::mKorg->sendNoteOff(Note_Bb5;
 
-    //             Synthesizers::mKorg->sendNoteOn(Note_D6, MIDI);
-    //             Synthesizers::mKorg->sendNoteOn(Note_C7, MIDI);
+    //             Synthesizers::mKorg->sendNoteOn(Note_D6;
+    //             Synthesizers::mKorg->sendNoteOn(Note_C7;
 
     //             sub_part = 2;
     //         }
 
     //         else if (sub_part == 2)
     //         {
-    //             Synthesizers::mKorg->sendNoteOff(Note_D6, MIDI);
-    //             Synthesizers::mKorg->sendNoteOff(Note_C7, MIDI);
+    //             Synthesizers::mKorg->sendNoteOff(Note_D6;
+    //             Synthesizers::mKorg->sendNoteOff(Note_C7;
 
-    //             Synthesizers::mKorg->sendNoteOn(Note_D6, MIDI);
-    //             Synthesizers::mKorg->sendNoteOn(Note_G6, MIDI);
+    //             Synthesizers::mKorg->sendNoteOn(Note_D6;
+    //             Synthesizers::mKorg->sendNoteOn(Note_G6;
 
     //             sub_part = 0;
     //         }
@@ -115,11 +115,11 @@ void run_besen(midi::MidiInterface<HardwareSerial> MIDI)
     // case 3:
     //     if (Globals::active_song->setup)
     //     {
-    //         Synthesizers::mKorg->sendNoteOff(Note_D6, MIDI);
-    //         Synthesizers::mKorg->sendNoteOff(Note_G6, MIDI);
-    //         Synthesizers::mKorg->sendNoteOff(Note_Bb5, MIDI);
-    //         Synthesizers::mKorg->sendNoteOff(Note_C7, MIDI);
-    //         Synthesizers::mKorg->sendProgramChange(42, MIDI); // restart A.63 to stop notes
+    //         Synthesizers::mKorg->sendNoteOff(Note_D6;
+    //         Synthesizers::mKorg->sendNoteOff(Note_G6;
+    //         Synthesizers::mKorg->sendNoteOff(Note_Bb5;
+    //         Synthesizers::mKorg->sendNoteOff(Note_C7;
+    //         Synthesizers::mKorg->sendProgramChange(42; // restart A.63 to stop notes
     //     }
 
     //     Hardware::lcd->setCursor(10, 1);

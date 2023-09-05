@@ -1,10 +1,10 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI)
+void run_PogoNumberOne()
 {
 
     switch(Globals::active_song->step)
@@ -14,12 +14,12 @@ void run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI)
         {
             Globals::bSendMidiClock = false;
 
-            Synthesizers::whammy->sendProgramChange(42, MIDI); // WHAMMY UP 2 OCT
+            Synthesizers::whammy->sendProgramChange(42); // WHAMMY UP 2 OCT
 
-            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 4, MIDI);
-            Synthesizers::dd200->sendProgramChange(3, MIDI);  // Program #3
+            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 4);
+            Synthesizers::dd200->sendProgramChange(3);  // Program #3
 
-            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI); // ATTENTION: must be after programChange!
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0); // ATTENTION: must be after programChange!
             Hardware::footswitch_mode = Increment_Score;
 
         }
