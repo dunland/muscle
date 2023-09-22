@@ -4,20 +4,23 @@
 #include <Hardware.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Song::run_theodolit(midi::MidiInterface<HardwareSerial> MIDI)
+void run_theodolit(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    switch (step)
+    switch (Globals::active_song->step)
     {
     case 0:
-        if (setup)
+        if (Globals::active_song->get_setup_state())
         {
+            Synthesizers::dd200->sendProgramChange(3, MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI); // ATTENTION: must be after programChange!
+            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 14, MIDI); // 518 BPM
+
             Synthesizers::whammy->sendProgramChange(58, MIDI); // HARMONY 5TH → UP OCT
-            setup = false;
         }
         break;
 
     default:
-        proceed_to_next_score();
+        Globals::active_song->proceed_to_next_score();
         break;
     }
 }

@@ -5,80 +5,68 @@
 
 //////////////////////////// RANDOM VOICE /////////////////////////////
 // 1: playMidi+CC_Change; 2: change_cc only
-void Song::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
+void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
 {
-    switch (step)
+    switch (Globals::active_song->step)
     {
     case 0:
-        resetInstruments(); // reset all instruments to "Monitor" mode
+        Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
         Synthesizers::mKorg->sendProgramChange(int(random(0, 128)), MIDI);
-        notes.push_back(int(random(24, 48)));
-        step = 1;
+        // notes.push_back(int(random(24, 48)));
+        Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+
+        Drumset::kick->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+        Drumset::tom1->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+        Drumset::tom2->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 50, -0.1);
+        Drumset::standtom->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+        Drumset::tom2->setup_midi(CC_None, Synthesizers::mKorg, 115, 15, 20, -0.06);
+
+        Globals::active_song->step = 1;
         break;
 
     case 1: // change CC ("Reflex") + PlayMidi
-        if (setup)
+        if (Globals::active_song->get_setup_state())
         {
-            // Drumset::snare->midi_settings.active_note = notes[note_idx] + 18;
-            // Drumset::kick->midi_settings.active_note = notes[note_idx] + 6;
-            // Drumset::tom2->midi_settings.active_note = notes[note_idx] + 16;
-            // Drumset::standtom->midi_settings.active_note = notes[note_idx] + 12;
             Hardware::footswitch_mode = Increment_Score;
 
+            Drumset::kick->midi.notes.push_back(int(random(0, 128)));
+            Drumset::kick->midi.active_note = Drumset::kick->midi.notes[0];
+
+            Drumset::snare->midi.notes.push_back(int(random(12, 72)));
+            Drumset::snare->midi.active_note = Drumset::snare->midi.notes[0];
+
+            Drumset::tom1->midi.notes.push_back(int(random(12, 72)));
+            Drumset::tom1->midi.active_note = Drumset::tom1->midi.notes[0];
+
+            Drumset::tom2->midi.notes.push_back(int(random(12, 72)));
+            Drumset::tom2->midi.active_note = Drumset::tom2->midi.notes[0];
+
+            Drumset::standtom->midi.notes.push_back(int(random(12, 72)));
+            Drumset::standtom->midi.active_note = Drumset::standtom->midi.notes[0];
+            // Drumset::standtom->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 115, 15, 10, -0.6);
+
             Drumset::kick->set_effect(PlayMidi);
-            Drumset::kick->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-            Drumset::kick->shuffle_cc(true); // set a random midi CC channel
-            Drumset::kick->midi_settings.notes.push_back(notes[0] + 12 + 7);
-            Drumset::kick->midi_settings.active_note = Drumset::kick->midi_settings.notes[0];
-
             Drumset::snare->set_effect(PlayMidi);
-            Drumset::snare->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-            Drumset::snare->shuffle_cc(true); // set a random midi CC channel
-            Drumset::snare->midi_settings.notes.push_back(notes[0] + int(random(12)));
-            Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[0];
-
-            Drumset::tom1->set_effect(PlayMidi);
-            Drumset::tom1->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-            Drumset::tom1->shuffle_cc(true); // set a random midi CC channel
-            Drumset::tom1->midi_settings.notes.push_back(notes[0] + 12 + int(random(12)));
-            Drumset::tom1->midi_settings.active_note = Drumset::tom1->midi_settings.notes[0];
-
-            Drumset::tom2->set_effect(PlayMidi);
-            // Drumset::tom2->setup_midi(None, Synthesizers::mKorg, 127, 0, 50, -0.1);
-            Drumset::tom2->shuffle_cc(true); // set a random midi CC channel
-            Drumset::tom2->midi_settings.notes.push_back(notes[0] + 12 + 5);
-            Drumset::tom2->midi_settings.active_note = Drumset::tom2->midi_settings.notes[0];
-
             Drumset::standtom->set_effect(PlayMidi);
-            // Drumset::standtom->setup_midi(None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-            Drumset::standtom->shuffle_cc(true); // set a random midi CC channel
-            Drumset::standtom->midi_settings.notes.push_back(notes[0] + 12 + 7);
-            Drumset::standtom->midi_settings.active_note = Drumset::standtom->midi_settings.notes[0];
-
-            Drumset::standtom->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 115, 15, 10, -0.6);
-            Drumset::tom2->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 115, 15, 20, -0.06);
-
-            Drumset::kick->set_effect(PlayMidi);
-            Drumset::snare->set_effect(PlayMidi);
-            Drumset::standtom->set_effect(Change_CC);
-            Drumset::tom1->set_effect(Change_CC);
-            Drumset::tom2->set_effect(Change_CC);
+            Drumset::tom1->set_effect(PlayMidi);
+            Drumset::tom2->set_effect(PlayMidi);
             Drumset::hihat->set_effect(TapTempo);
-
-            playSingleNote(Synthesizers::mKorg, MIDI);
-
-            setup = false;
         }
         break;
 
     case 2: // change CC only
-        if (setup)
+        if (Globals::active_song->get_setup_state())
         {
             // Hardware::footswitch_mode = Experimental;
+            Drumset::kick->shuffle_cc(true);     // set a random midi CC channel
+            Drumset::snare->shuffle_cc(true);    // set a random midi CC channel
+            Drumset::tom1->shuffle_cc(true);     // set a random midi CC channel
+            Drumset::tom2->shuffle_cc(true);     // set a random midi CC channel
+            Drumset::standtom->shuffle_cc(true); // set a random midi CC channel
 
-            Drumset::kick->set_effect(Change_CC);
-            Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
+            // Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
+            Drumset::kick->set_effect(Change_CC);
             Drumset::tom1->set_effect(Change_CC);
             Drumset::tom2->set_effect(Change_CC);
             Drumset::standtom->set_effect(Change_CC);
@@ -86,18 +74,22 @@ void Song::run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::tom2->set_effect(Change_CC);
             Drumset::hihat->set_effect(TapTempo);
 
-            playSingleNote(Synthesizers::mKorg, MIDI);
-
-            setup = false;
+            Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127, MIDI);
+            // Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
         }
+        // Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
+
+        static int randomNote = int(random(16,72));
+        if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[randomNote] == false)
+            Synthesizers::mKorg->sendNoteOn(randomNote, MIDI);
 
         break;
 
     default: // start over again
-        step = 1;
-        setup = true;
-        Synthesizers::mKorg->notes[notes[note_idx]] = false;
-        // proceed_to_next_score();
+        Globals::active_song->step = 1;
+        Globals::active_song->setup_state = true;
+        Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] = false;
+        // Globals::active_song->proceed_to_next_score();
         break;
     }
 }

@@ -1,0 +1,7 @@
+song: must initiate name:
+	void wueste:
+	name = "wueste"
+	
+Song:
+	trigger:
+	song.trigger_function()

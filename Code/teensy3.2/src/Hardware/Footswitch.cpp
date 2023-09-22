@@ -3,6 +3,7 @@
 #include <Instruments.h>
 #include <Calibration.h>
 #include <settings.h>
+#include <Devtools.h>
 
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -52,13 +53,13 @@ void Hardware::footswitch_pressed()
   case (Reset_Topo_and_Proceed_Score):
     if (Globals::active_song->beat_sum.average_smooth >= Globals::active_song->beat_sum.activation_thresh) // score proceed criterion reached
     {
-      Globals::println_to_console("regularity height > 10: reset!");
+      Devtools::println_to_console("regularity height > 10: reset!");
       Globals::active_song->increase_step(); // go to next score step
       for (auto &instrument : Drumset::instruments)
         for (int j = 0; j < 16; j++)
           instrument->topography.a_16[j] = 0;
 
-      Globals::println_to_console("all instrument topographies were reset.");
+      Devtools::println_to_console("all instrument topographies were reset.");
 
       for (int j = 0; j < 16; j++)
         Globals::active_song->beat_sum.a_16[j] = 0; // reset topography
@@ -67,8 +68,8 @@ void Hardware::footswitch_pressed()
 
     else // not enough strokes to proceed yet.
     {
-      Globals::print_to_console("regularity too low to proceed.. is at ");
-      Globals::println_to_console(Globals::active_song->beat_sum.average_smooth);
+      Devtools::print_to_console("regularity too low to proceed.. is at ");
+      Devtools::println_to_console(Globals::active_song->beat_sum.average_smooth);
     }
 
     // either way, shuffle instruments with Random_CC_Effect:
@@ -89,7 +90,7 @@ void Hardware::footswitch_pressed()
     //   break;
 
   default:
-    Globals::println_to_console("Footswitch mode not defined!");
+    Devtools::println_to_console("Footswitch mode not defined!");
     break;
   }
 }
@@ -144,12 +145,12 @@ void Hardware::checkFootSwitch()
     if (switch_state == LOW)
     {
       footswitch_pressed();
-      Globals::println_to_console("Footswitch pressed.");
+      Devtools::println_to_console("Footswitch pressed.");
     }
     else
     {
       footswitch_released();
-      Globals::println_to_console("Footswitch released.");
+      Devtools::println_to_console("Footswitch released.");
     }
     last_switch_state = switch_state;
     last_switch_toggle = millis();

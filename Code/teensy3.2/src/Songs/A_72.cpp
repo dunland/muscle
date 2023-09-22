@@ -4,7 +4,7 @@
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void Song::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
+void run_A_72(midi::MidiInterface<HardwareSerial> MIDI)
 {
     // each step:
     // - switch between Timbre 1 and 2
@@ -12,71 +12,77 @@ void Song::run_a72(midi::MidiInterface<HardwareSerial> MIDI)
     // - increase note-index
     // → play latest 4 notes
 
-    int note_increase = 4; // notes are in turns added by 4 or 5
+    // int note_increase = 4; // notes are in turns added by 4 or 5
+    static float val;
 
-    switch (step)
+    switch (Globals::active_song->step)
     {
-    case 0:
-        if (setup)
+    case 0: // increase amplitude until max
+        if (Globals::active_song->get_setup_state())
         {
+            val = 60;
 
-            resetInstruments();
-            notes.clear();
-            notes.push_back(int(random(12, 24)));
+            Globals::active_song->resetInstruments();
+            Globals::active_song->notes.clear();
+            Globals::active_song->notes.push_back(int(random(12, 24)));
 
             Hardware::footswitch_mode = Increment_Score;
             Synthesizers::mKorg->sendProgramChange(49, MIDI); // switches to Voice A.72
             delay(200);
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, 1, MIDI); // Select Timbre 2
 
-            Drumset::ride->set_effect(Change_CC);
-            Drumset::ride->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 127, 29, 3, -0.035);
+            Drumset::tom1->set_effect(Change_CC);
+            Drumset::tom1->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 127, 29, 3, -0.035);
 
             Drumset::standtom->set_effect(Change_CC);
             Drumset::standtom->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 127, 29, 5, -0.05);
 
-            Drumset::kick->midi_settings.notes.push_back(notes[0] + 44);
-            Drumset::kick->midi_settings.active_note = Drumset::kick->midi_settings.notes[0];
+            Drumset::kick->midi.notes.push_back(Globals::active_song->notes[0] + 44);
+            Drumset::kick->midi.active_note = Drumset::kick->midi.notes[0];
             Drumset::kick->set_effect(PlayMidi);
 
-            Drumset::snare->midi_settings.notes.push_back(notes[0] + 49);
-            Drumset::snare->midi_settings.active_note = Drumset::snare->midi_settings.notes[0];
+            Drumset::snare->midi.notes.push_back(Globals::active_song->notes[0] + 49);
+            Drumset::snare->midi.active_note = Drumset::snare->midi.notes[0];
             Drumset::snare->set_effect(PlayMidi);
 
-            setup = false;
         }
-        playSingleNote(Synthesizers::mKorg, MIDI);
+        if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] == false)
+            Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);
 
         // increasing amplitude until max:
-        static float val = 0;
-        val += 0.5;
+        val += 0.075;
         Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, int(val), MIDI);
 
         Hardware::lcd->setCursor(10, 0);
         Hardware::lcd->print(val);
+        Hardware::lcd->setCursor(0,0);
+        Hardware::lcd->print("incrAmp:");
 
         if (Synthesizers::mKorg->midi_values[mKORG_Amplevel] >= 126)
-            step = 1;
+            Globals::active_song->increase_step();
         break;
 
     case 1:
-        if (setup)
+        if (Globals::active_song->get_setup_state())
         {
             int val = (Synthesizers::mKorg->midi_values[mKORG_TimbreSelect] == 0) ? 127 : 0;
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, val, MIDI); // Select Timbre 2
-
-            setup = false;
         }
-        playSingleNote(Synthesizers::mKorg, MIDI);
+
+        if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] == false)
+            Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx], MIDI);
 
         break;
 
     default:
-        step = 1;
-        setup = true;
-        note_increase = (note_increase == 4) ? 5 : 4;
-        notes.push_back(notes[note_idx] + note_increase);
-        note_idx++;
+        // Globals::active_song->step = 1; // reset
+        // Globals::active_song->setup_state = true;
+        // note_increase = (note_increase == 4) ? 5 : 4;
+        // Globals::active_song->notes.push_back(Globals::active_song->notes[Globals::active_song->note_idx] + note_increase);
+        // Globals::active_song->note_idx++;
+        Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 0, MIDI); // arp off
+        Globals::active_song->proceed_to_next_score();
+
         break;
     }
 }

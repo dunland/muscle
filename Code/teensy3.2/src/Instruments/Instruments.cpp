@@ -12,29 +12,29 @@ void Instrument::set_notes(std::vector<int> list)
 {
   for (uint8_t i = 0; i < list.size(); i++)
   {
-    midi_settings.notes.push_back(list[i]);
+    midi.notes.push_back(list[i]);
   }
 }
 
 // setup midi settings with params
 void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor)
 {
-  midi_settings.cc_chan = cc_type;
-  midi_settings.synth = synth;
-  midi_settings.cc_max = cc_max;
-  midi_settings.cc_min = cc_min;
-  midi_settings.cc_increase_factor = cc_increase_factor;
-  midi_settings.cc_tidyUp_factor = cc_tidyUp_factor;
+  midi.cc_chan = cc_type;
+  midi.synth = synth;
+  midi.cc_max = cc_max;
+  midi.cc_min = cc_min;
+  midi.cc_increase_factor = cc_increase_factor;
+  midi.cc_tidyUp_factor = cc_tidyUp_factor;
 
-  midi_settings.cc_standard = (cc_tidyUp_factor > 0) ? midi_settings.cc_min : midi_settings.cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
+  midi.cc_standard = (cc_tidyUp_factor > 0) ? midi.cc_min : midi.cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
 }
 
 // setup midi without params
 // TODO: this one seems broken! fix it!
 // void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth)
 // {
-//   midi_settings.cc_chan = cc_type;
-//   midi_settings.synth = synth;
+//   midi.cc_chan = cc_type;
+//   midi.synth = synth;
 // }
 
 // set instrument sensitivity
@@ -49,37 +49,37 @@ void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfte
 // set effect without handle for variable:
 void Instrument::set_effect(EffectsType effect_)
 {
-  Globals::print_to_console("Setting effect for ");
-  Globals::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
-  Globals::print_to_console(" to ");
-  Globals::print_to_console(Globals::EffectstypeToHumanReadable(effect_));
-  Globals::print_to_console("... ");
+  Devtools::print_to_console("Setting effect for ");
+  Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
+  Devtools::print_to_console(" to ");
+  Devtools::print_to_console(Globals::EffectstypeToHumanReadable(effect_));
+  Devtools::print_to_console("... ");
 
   switch (effect_)
   {
   case PlayMidi:
-    if (midi_settings.notes.size() > 0 && midi_settings.active_note > 0)
+    if (midi.notes.size() > 0 && midi.active_note > 0)
     {
       effect = effect_;
-      Globals::println_to_console("done.");
+      Devtools::println_to_console("done.");
     }
     else
     {
-      Globals::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
+      Devtools::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
     }
     break;
 
   case Reflex_and_PlayMidi:
     score.ready_to_shuffle = true;
     shuffle_cc(false);
-    if (midi_settings.notes.size() > 0 && midi_settings.active_note > 0)
+    if (midi.notes.size() > 0 && midi.active_note > 0)
     {
       effect = effect_;
-      Globals::println_to_console("done.");
+      Devtools::println_to_console("done.");
     }
     else
     {
-      Globals::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
+      Devtools::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
     }
     break;
 
@@ -87,18 +87,18 @@ void Instrument::set_effect(EffectsType effect_)
     score.ready_to_shuffle = true;
     shuffle_cc(false);
     effect = effect_;
-    Globals::println_to_console("done.");
+    Devtools::println_to_console("done.");
     break;
 
   case TapTempo:
     Globals::bSendMidiClock = true;
     effect = effect_;
-    Globals::println_to_console("done.");
+    Devtools::println_to_console("done.");
     break;
 
   default:
     effect = effect_;
-    Globals::println_to_console("done.");
+    Devtools::println_to_console("done.");
     break;
   }
 }
@@ -165,14 +165,14 @@ void Instrument::calculateNoiseFloor()
   unsigned long beginNoiseFloorCaluclation = millis();
   int led_idx = 0;
 
-  Globals::print_to_console("calculating noiseFloor for ");
-  Globals::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
-  Globals::print_to_console(" (A");
-  Globals::print_to_console(pin - 14);
-  Globals::print_to_console(")");
-  if (Globals::use_responsiveCalibration)
+  Devtools::print_to_console("calculating noiseFloor for ");
+  Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
+  Devtools::print_to_console(" (A");
+  Devtools::print_to_console(pin - 14);
+  Devtools::print_to_console(")");
+  if (Devtools::use_responsiveCalibration)
   {
-    Globals::print_to_console(" ..waiting for stroke");
+    Devtools::print_to_console(" ..waiting for stroke");
     Hardware::lcd->setCursor(0, 0);
     Hardware::lcd->print("waiting for stroke");
     Hardware::lcd->setCursor(0, 1);
@@ -187,7 +187,7 @@ void Instrument::calculateNoiseFloor()
         {
           if (n % 100 == 0)
           {
-            Globals::print_to_console(" . ");
+            Devtools::print_to_console(" . ");
             digitalWrite(led, toggleState);
             toggleState = !toggleState;
           }
@@ -195,7 +195,7 @@ void Instrument::calculateNoiseFloor()
         }
         break;
       };       // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
-    Globals::print_to_console(" >!<");
+    Devtools::print_to_console(" >!<");
     delay(1000); // should be long enough for drum not to oscillate anymore
   }
 
@@ -205,7 +205,7 @@ void Instrument::calculateNoiseFloor()
   {
     if (n % 100 == 0)
     {
-      Globals::print_to_console(" . ");
+      Devtools::print_to_console(" . ");
       digitalWrite(led, toggleState);
       toggleState = !toggleState;
     }
@@ -214,8 +214,8 @@ void Instrument::calculateNoiseFloor()
   sensitivity.noiseFloor = totalSamples / 400;
   digitalWrite(led, LOW);
   led_idx++;
-  Globals::print_to_console("noiseFloor = ");
-  Globals::println_to_console(sensitivity.noiseFloor);
+  Devtools::print_to_console("noiseFloor = ");
+  Devtools::println_to_console(sensitivity.noiseFloor);
 
   // turn LEDs off again:
   digitalWrite(led, LOW);
@@ -288,13 +288,11 @@ void Instrument::setInstrumentPrintString()
 ///////////////////////////////////////////////////////////////////////
 
 ////////////////////////////// TRIGGERS ///////////////////////////////
+// defines what happens when instrument was hit within this beat
 void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
 {
-  // always count up topography:
-  // countup_topography();
-  // topography.smoothen_dataArray();
-  // Serial.print("hit/");
-  Globals::println_to_console(Globals::DrumtypeToHumanreadable(drumtype));
+  // print instrument name to receive using external programs via Serial connection:
+  Serial.println(Globals::DrumtypeToHumanreadable(drumtype));
   Hardware::lcd->setCursor(12, 0);
   Hardware::lcd->print(Globals::DrumtypeToHumanreadable(drumtype));
 
@@ -348,7 +346,7 @@ void Instrument::trigger(midi::MidiInterface<HardwareSerial> MIDI)
     random_change_cc_in(MIDI);
     break;
   case MainNoteIteration:
-    mainNoteIteration(midi_settings.synth, MIDI);
+    mainNoteIteration(midi.synth, MIDI);
     break;
 
   case Reflex_and_PlayMidi: // combines PlayMidi and Change_CC
@@ -397,7 +395,7 @@ void Instrument::perform(std::vector<Instrument *> instruments, midi::MidiInterf
 
 void Instrument::tidyUp(midi::MidiInterface<HardwareSerial> MIDI)
 {
-  // Globals::println_to_console("tidying up");
+  // Devtools::println_to_console("tidying up");
   switch (effect)
   {
   case PlayMidi:
@@ -433,12 +431,13 @@ Instrument *Drumset::standtom = new Instrument(INPUT_PIN_STANDTOM, Standtom1);
 Instrument *Drumset::crash1 = new Instrument(INPUT_PIN_CRASH1, Crash1);
 Instrument *Drumset::ride = new Instrument(INPUT_PIN_RIDE, Ride);
 
-std::vector<Instrument *> Drumset::instruments = {Drumset::hihat, Drumset::snare, Drumset::kick, Drumset::standtom};
+std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom1, Drumset::standtom};
 
 // instantiate external MIDI devices:
 Synthesizer *Synthesizers::mKorg = new Synthesizer(MIDI_CHANNEL_MICROKORG, "mKRG");
 Synthesizer *Synthesizers::volca = new Synthesizer(MIDI_CHANNEL_VOLCA, "vlca");
 Synthesizer *Synthesizers::dd200 = new Synthesizer(MIDI_CHANNEL_DD200, "d200");
 Synthesizer *Synthesizers::whammy = new Synthesizer(MIDI_CHANNEL_WHAMMY, "whmy");
+Synthesizer *Synthesizers::kaossPad3 = new Synthesizer(MIDI_CHANNEL_KP3, "KP3");
 
 std::vector<Synthesizer *> Synthesizers::synths = {Synthesizers::mKorg, Synthesizers::volca, Synthesizers::whammy, Synthesizers::dd200};

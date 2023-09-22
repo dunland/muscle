@@ -15,7 +15,7 @@ void Synthesizer::sendControlChange(CC_Type cc_type, int val, midi::MidiInterfac
 
   if (cc_type < 0)
   {
-    Globals::println_to_console("could not send MIDI CC Command: CC_Type not defined.");
+    Devtools::println_to_console("could not send MIDI CC Command: CC_Type not defined.");
   }
   else if (val != previous_val)
   {
@@ -30,7 +30,7 @@ midi_values[cc_type] = val;
 
   if (cc_type < 0)
   {
-    Globals::println_to_console("could not send MIDI CC Command: CC_Type not defined.");
+    Devtools::println_to_console("could not send MIDI CC Command: CC_Type not defined.");
   }
   else
   {

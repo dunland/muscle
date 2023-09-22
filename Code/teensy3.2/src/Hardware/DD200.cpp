@@ -1,7 +1,7 @@
 #include <Hardware.h>
 ///////////////////////// DD-200 MIDI-to-BPM map //////////////////////
 
-int Hardware::dd_200_midi_interval_map[128] =
+int dd_200_midi_interval_map[128] =
     // ATTENTION: not so sure which of these tables is BPM and which is interval, but like this it seems to be working nicely:
     // {
     //     60000, 30000, 1000, 741, 496, 373, 300, 250,

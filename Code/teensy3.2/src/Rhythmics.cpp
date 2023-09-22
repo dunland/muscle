@@ -16,28 +16,27 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         // apply topography derivations from previous beats
         // → problem: if there was any stroke at all, it was probably not on the very first run BEFORE derivation was executed
 
-        if (Globals::do_print_JSON)
+        if (Devtools::do_print_JSON)
             JSON::compose_and_send_json(instruments);
 
         // -------------------------- 32nd-notes --------------------------
-        if (Globals::do_send_to_processing)
-        Globals::println_to_console("");
+        if (Devtools::do_send_to_processing)
+        Devtools::println_to_console("");
 
         // print millis and current beat:
-        if (Globals::do_send_to_processing)
-            Globals::print_to_console("m");
-        Globals::print_to_console(String(millis()));
-        Globals::print_to_console("\t");
-        // Globals::print_to_console(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
-        if (Globals::do_send_to_processing)
-            Globals::print_to_console("b");
-        Globals::print_to_console(Globals::current_beat_pos);
-        Globals::print_to_console("\t");
+        if (Devtools::do_send_to_processing)
+            Devtools::print_to_console("m");
+        Devtools::print_to_console(String(millis()));
+        Devtools::print_to_console("\t");
+        // Devtools::print_to_console(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
+        if (Devtools::do_send_to_processing)
+            Devtools::print_to_console("b");
+        Devtools::print_to_console(Globals::current_beat_pos);
+        Devtools::print_to_console("\t");
 
         // -------------------------- full notes: -------------------------
         if (Globals::current_beat_pos == 0)
         {
-
         }
 
         // ------------------------- quarter notes: -----------------------
@@ -67,9 +66,10 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
 
         for (auto &instrument : instruments)
         {
-            Globals::print_to_console(instrument->output_string);
+            Devtools::print_to_console(instrument->output_string);
             instrument->output_string = "\t";
         }
+            Devtools::println_to_console("");
 
         // sum up all topographies of all instruments:
         // Globals::active_song->beat_sum.reset();
@@ -80,14 +80,14 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         // }
         // Globals::active_song->beat_sum.smoothen_dataArray();
 
-        // Globals::print_to_console("avg: ");
-        // Globals::print_to_console(Globals::active_song->beat_sum.average_smooth);
-        // Globals::print_to_console("/");
-        // Globals::print_to_console(Globals::active_song->beat_sum.activation_thresh);
-        // Globals::print_to_console("\t");
-        // Globals::print_to_console(Globals::active_song->name);
-        // Globals::print_to_console(".");
-        // Globals::println_to_console(Globals::active_song->step);
+        // Devtools::print_to_console("avg: ");
+        // Devtools::print_to_console(Globals::active_score->beat_sum.average_smooth);
+        // Devtools::print_to_console("/");
+        // Devtools::print_to_console(Globals::active_score->beat_sum.activation_thresh);
+        // Devtools::print_to_console("\t");
+        // Devtools::print_to_console(Globals::active_score->name);
+        // Devtools::print_to_console(".");
+        // Devtools::println_to_console(Globals::active_score->step);
 
         // Globals::active_song->beat_regularity.derive_from(&Globals::active_song->beat_sum); // TODO: also do this for all instruments
 
@@ -95,10 +95,10 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         // if (Globals::do_print_beat_sum)
         // {
         //     // for (auto &instrument : instruments)
-        //     // Globals::printTopoArray(&instrument->topography);
-        //     Globals::printTopoArray(&Globals::active_song->beat_sum); // print volume layer
+        //     // Devtools::printTopoArray(&instrument->topography);
+        //     Devtools::printTopoArray(&Globals::active_score->beat_sum); // print volume layer
         // }
-        // Globals::printTopoArray(&active_song->beat_regularity);
+        // Devtools::printTopoArray(&active_score->beat_regularity);
 
         // perform timed pin actions according to current beat:
         for (auto &instrument : instruments)

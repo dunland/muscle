@@ -62,9 +62,9 @@ void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 
         // instrument values:
         instr["wasHit"] = instrument->timing.wasHit;
-        instr["cc_val"] = instrument->midi_settings.cc_val;
-        instr["cc_increase"] = instrument->midi_settings.cc_increase_factor;
-        instr["cc_decay"] = instrument->midi_settings.cc_tidyUp_factor;
+        instr["cc_val"] = instrument->midi.cc_val;
+        instr["cc_increase"] = instrument->midi.cc_increase_factor;
+        instr["cc_decay"] = instrument->midi.cc_tidyUp_factor;
         instr["effect"] = Globals::EffectstypeToHumanReadable(instrument->effect);
     }
 
@@ -106,11 +106,11 @@ void JSON::save_settings_to_SD(std::vector<Instrument *> instruments)
     {
         serializeJson(doc, file);
         file.close();
-        Globals::println_to_console("sensitivity data was saved to SD card.");
+        Devtools::println_to_console("sensitivity data was saved to SD card.");
     }
     else
     {
-        Globals::println_to_console("error writing sensitivity data to SD card.");
+        Devtools::println_to_console("error writing sensitivity data to SD card.");
     }
 }
 
@@ -145,10 +145,10 @@ void JSON::read_sensitivity_data_from_SD(std::vector<Instrument *> instruments)
             instrument->timing.countAfterFirstStroke = doc[Globals::DrumtypeToHumanreadable(instrument->drumtype)]["countAfterFirstStroke"];
         }
 
-        Globals::println_to_console("reading sensitivity data from SD card complete.");
+        Devtools::println_to_console("reading sensitivity data from SD card complete.");
     }
     else
     {
-        Globals::println_to_console("error opening sense.txt from SD card to read sensitivity data.");
+        Devtools::println_to_console("error opening sense.txt from SD card to read sensitivity data.");
     }
 }

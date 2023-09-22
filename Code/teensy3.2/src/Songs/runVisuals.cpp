@@ -4,30 +4,30 @@
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
+void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
 {
     // skips thorugh visual levels by pressing footswitch
 
     static float delay_time = 0;
 
-    switch (step)
+    switch (Globals::active_song->step)
     {
     case 0: // nix
-        if (setup)
+        if (Globals::active_song->get_setup_state())
         {
-            resetInstruments();
-            notes.clear();
+            Globals::active_song->resetInstruments();
+            Globals::active_song->notes.clear();
 
             Hardware::footswitch_mode = Increment_Score;
 
-            step = 1;
+            Globals::active_song->increase_step();
         }
         break;
 
     case 1: // Theodolit
-        if (setup)
+        if (Globals::active_song->get_setup_state())
         {
-            setup = false;
+
             Serial.println("Theodolit");
         }
         Hardware::lcd->setCursor(0, 0);
@@ -37,12 +37,12 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 2: // Improvisation
             /* crash and ride increase delay_time, automatic decrease */
-        if (setup)
+        if (Globals::active_song->get_setup_state())
         {
-            setup = false;
+
             Serial.println("Improvisation");
 
-            notes.push_back(31);                              // G
+            Globals::active_song->notes.push_back(31);                              // G
             Synthesizers::mKorg->sendProgramChange(91, MIDI); // switches to Voice B.44
 
             Drumset::hihat->set_effect(TapTempo);
@@ -81,11 +81,11 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 3: // Sattelstein 1
             /* keine Noten */
-        if (setup)
+        if (Globals::active_song->get_setup_state())
         {
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3, MIDI);
-            setup = false;
+
         }
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print("Sattelstein");
@@ -94,9 +94,9 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
 
     case 4: // Sattelstein 2
         /* play notes G2 and G3 */
-        if (setup)
+        if (Globals::active_song->get_setup_state())
         {
-            setup = false;
+
             Serial.println("Sattelstein");
             Globals::current_BPM = 139;
         }
@@ -110,17 +110,17 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     case 5: // KupferUndGold
-        if (setup)
+        if (Globals::active_song->get_setup_state())
         {
-            resetInstruments();
-            notes.clear();
+            Globals::active_song->resetInstruments();
+            Globals::active_song->notes.clear();
             Synthesizers::mKorg->sendNoteOff(55, MIDI); // play note 55 (G) if it is not playing at the moment
             Synthesizers::mKorg->sendNoteOff(43, MIDI); // play note 43 (G) if it is not playing at the moment
 
             Serial.println("KupferUndGold");
             Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57 to stop notes
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3, MIDI); // delay_time = 82!
-            setup = false;
+
         }
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print("KupferUndGold");
@@ -128,8 +128,8 @@ void Song::runVisuals(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-        step = 1;
-        setup = true;
+        Globals::active_song->step = 1;
+        Globals::active_song->setup_state = true;
         break;
     }
 }

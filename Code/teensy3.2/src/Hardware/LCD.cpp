@@ -215,7 +215,7 @@ void Hardware::display_Midi_values()
             Hardware::lcd->setCursor(((i % 4) * 4), int(i >= 4));
             Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[i]->drumtype)[0]);
             Hardware::lcd->setCursor(((i % 4) * 4) + 1, int(i >= 4));
-            Hardware::lcd->print(int(Drumset::instruments[i]->midi_settings.cc_val));
+            Hardware::lcd->print(int(Drumset::instruments[i]->midi.cc_val));
         }
     }
 }

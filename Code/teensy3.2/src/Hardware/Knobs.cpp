@@ -1,4 +1,5 @@
 #include <Hardware.h>
+#include <Devtools.h>
 
 // ------------------------------------------------------------------------------
 void Knob::poll()
@@ -13,11 +14,11 @@ void Knob::poll()
   {
     if (switch_state == LOW)
     {
-      Globals::println_to_console("Knob pressed.");
+      Devtools::println_to_console("Knob pressed.");
     }
     else
     {
-      Globals::println_to_console("Knob released.");
+      Devtools::println_to_console("Knob released.");
     }
     last_switch_state = switch_state;
     last_switch_toggle = millis();

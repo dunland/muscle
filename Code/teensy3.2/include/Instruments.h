@@ -6,6 +6,7 @@
 // #include <Tsunami.h>
 #include <MIDI.h>
 #include <Song.h>
+#include <Topography.h>
 
 class Synthesizer;
 
@@ -13,10 +14,11 @@ class Instrument
 {
 
 public:
-    Instrument(int pin_, DrumType drumtype_)
+    Instrument(int pin_, DrumType drumtype_, std::vector<int> note_input = {int(random(21, 128))})
     {
         pin = pin_;
         drumtype = drumtype_;
+        set_notes(note_input); // assigns one random note so the array is not empty if not provided otherwise in input parameters
     }
 
     int pin;
@@ -46,10 +48,11 @@ public:
         boolean stroke_flag = false;
         int countsCopy;
         boolean wasHit = false;
+        unsigned long lastHit = 0;
 
     } timing;
 
-    struct MIDI
+    struct MIDI_SETTINGS
     {
         std::vector<int> notes;
         int active_note;
@@ -63,7 +66,7 @@ public:
         float cc_tidyUp_factor = -0.1; // factor by which MIDI vals decay/increase each loop
         Synthesizer *synth;            // associated midi-instrument to address
 
-    } midi_settings;
+    } midi;
 
     struct SCORE
     {
@@ -85,7 +88,7 @@ public:
         int tsunami_track; // tracks will be allocated in tsunami_beat_playback
         int tsunami_channel = 0;
 
-        boolean ready_to_shuffle = false; // a flag for Random_CC_Effect: resets midi_settings.cc_chan to random (once) when true
+        boolean ready_to_shuffle = false; // a flag for Random_CC_Effect: resets midi.cc_chan to random (once) when true
 
     } score;
 
@@ -193,6 +196,7 @@ class Synthesizers
     static Synthesizer *volca; // create a KORG Volca Keys instrument called volca
     static Synthesizer *dd200;
     static Synthesizer *whammy;
+    static Synthesizer *kaossPad3;
 
     static std::vector<Synthesizer*> synths;
 };

@@ -106,7 +106,7 @@ void NanoKontrol::parseData()
 
     std::string str = strtokIndx;
 
-    if (strcmp("channel", address2) == 0)
+    if (strcmp("channel", address2) == 0) // comparing Strings
         incomingChannel = incomingInt;
     else if (strcmp("value", address2) == 0)
         incomingValue = incomingInt;
@@ -149,14 +149,14 @@ void NanoKontrol::allocateData()
         switch (paramsToChange[1])
         {
         case SET_CC_TYPE:
-            if (instrument->midi_settings.synth == Synthesizers::dd200)
-                instrument->midi_settings.cc_chan = dd200_controlValues[int(float(incomingValue) / 127.0 * sizeof(dd200_controlValues) / sizeof(dd200_controlValues[0]))];
-            else if (instrument->midi_settings.synth == Synthesizers::mKorg)
-                instrument->midi_settings.cc_chan = mKorg_controlValues[int(float(incomingValue) / 127.0 * sizeof(mKorg_controlValues) / sizeof(mKorg_controlValues[0]))];
+            if (instrument->midi.synth == Synthesizers::dd200)
+                instrument->midi.cc_chan = dd200_controlValues[int(float(incomingValue) / 127.0 * sizeof(dd200_controlValues) / sizeof(dd200_controlValues[0]))];
+            else if (instrument->midi.synth == Synthesizers::mKorg)
+                instrument->midi.cc_chan = mKorg_controlValues[int(float(incomingValue) / 127.0 * sizeof(mKorg_controlValues) / sizeof(mKorg_controlValues[0]))];
             break;
 
         case SET_DEST:
-            instrument->midi_settings.synth = (incomingValue >= 64) ? Synthesizers::mKorg : Synthesizers::dd200;
+            instrument->midi.synth = (incomingValue >= 64) ? Synthesizers::mKorg : Synthesizers::dd200;
             break;
 
         default:
@@ -173,10 +173,10 @@ void NanoKontrol::allocateData()
         switch (paramsToChange[2])
         {
         case SET_CC_MIN:
-            instrument->midi_settings.cc_min = incomingValue;
+            instrument->midi.cc_min = incomingValue;
             break;
         case SET_INCREASE:
-            instrument->midi_settings.cc_increase_factor = map(float(incomingValue), 0.0, 127.0, -10.0, 10.0);
+            instrument->midi.cc_increase_factor = map(float(incomingValue), 0.0, 127.0, -10.0, 10.0);
             break;
         default:
             break;
@@ -192,10 +192,10 @@ void NanoKontrol::allocateData()
         switch (paramsToChange[3])
         {
         case SET_CC_MAX:
-            instrument->midi_settings.cc_max = incomingValue;
+            instrument->midi.cc_max = incomingValue;
             break;
         case SET_DECREASE:
-            instrument->midi_settings.cc_tidyUp_factor = map(float(incomingValue), 0.0, 127.0, -2.0, 2.0);
+            instrument->midi.cc_tidyUp_factor = map(float(incomingValue), 0.0, 127.0, -2.0, 2.0);
             break;
 
         default:
@@ -217,9 +217,9 @@ void NanoKontrol::allocateData()
     // menu[3][1] = decrease;
 
     // // instrument                          param    value
-    // instruments(menu[0][0])->midi_settings.cc_chan = menu[0][1];
-    // instruments(menu[0][0])->midi_settings.cc_min = menu[2][0];
-    // instruments(menu[0][0])->midi_settings.cc_min = menu[2][0];
+    // instruments(menu[0][0])->midi.cc_chan = menu[0][1];
+    // instruments(menu[0][0])->midi.cc_min = menu[2][0];
+    // instruments(menu[0][0])->midi.cc_min = menu[2][0];
 }
 
 // --------------------------------------------------------------------
@@ -270,21 +270,21 @@ void NanoKontrol::printToLCD()
 
     Hardware::lcd->setCursor(4, 1);
     if (paramsToChange[1] == SET_CC_TYPE)
-        Hardware::lcd->print(Globals::CCTypeToHumanReadable(instrument->midi_settings.cc_chan));
+        Hardware::lcd->print(Globals::CCTypeToHumanReadable(instrument->midi.cc_chan));
     else if (paramsToChange[1] == SET_DEST)
         Hardware::lcd->print("DST?");
 
     Hardware::lcd->setCursor(8, 1);
     if (paramsToChange[2] == SET_CC_MIN)
-        Hardware::lcd->print(instrument->midi_settings.cc_min);
+        Hardware::lcd->print(instrument->midi.cc_min);
     else if (paramsToChange[2] == SET_INCREASE)
-        Hardware::lcd->print(instrument->midi_settings.cc_increase_factor);
+        Hardware::lcd->print(instrument->midi.cc_increase_factor);
 
     Hardware::lcd->setCursor(12, 1);
     if (paramsToChange[3] == SET_CC_MAX)
-        Hardware::lcd->print(Hardware::lcd->print(instrument->midi_settings.cc_max));
+        Hardware::lcd->print(Hardware::lcd->print(instrument->midi.cc_max));
     else if (paramsToChange[3] == SET_DECREASE)
-        Hardware::lcd->print(Hardware::lcd->print(instrument->midi_settings.cc_tidyUp_factor));
+        Hardware::lcd->print(Hardware::lcd->print(instrument->midi.cc_tidyUp_factor));
 }
     // ----------------------- print to Serial ------------------------
 void NanoKontrol::printToSerial()
@@ -309,21 +309,21 @@ void NanoKontrol::printToSerial()
     Serial.print("\t");
 
     if (paramsToChange[1] == SET_CC_TYPE)
-        Serial.print(Globals::CCTypeToHumanReadable(instrument->midi_settings.cc_chan));
+        Serial.print(Globals::CCTypeToHumanReadable(instrument->midi.cc_chan));
     else if (paramsToChange[1] == SET_DEST)
-        Serial.print(instrument->midi_settings.synth->name);
+        Serial.print(instrument->midi.synth->name);
     Serial.print("\t");
 
     if (paramsToChange[2] == SET_CC_MIN)
-        Serial.print(instrument->midi_settings.cc_min);
+        Serial.print(instrument->midi.cc_min);
     else if (paramsToChange[2] == SET_INCREASE)
-        Serial.print(instrument->midi_settings.cc_increase_factor);
+        Serial.print(instrument->midi.cc_increase_factor);
     Serial.print("\t");
 
     if (paramsToChange[3] == SET_CC_MAX)
-        Serial.print(instrument->midi_settings.cc_max);
+        Serial.print(instrument->midi.cc_max);
     else if (paramsToChange[3] == SET_DECREASE)
-        Serial.print(instrument->midi_settings.cc_tidyUp_factor);
+        Serial.print(instrument->midi.cc_tidyUp_factor);
     Serial.print("\t");
 
     Serial.println();

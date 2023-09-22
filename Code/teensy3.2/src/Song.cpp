@@ -6,6 +6,14 @@
 ///////////////////////// SETUP FUNCTIONS /////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
+bool Song::get_setup_state()
+{
+
+    bool currentState = setup_state;
+    setup_state = false;
+    return currentState;
+}
+
 void Song::set_notes(std::vector<int> list)
 {
     // clear notes list:
@@ -18,41 +26,41 @@ void Song::set_notes(std::vector<int> list)
     }
 
     // print list:
-    Globals::print_to_console("Score::notes:");
+    Devtools::print_to_console("Score::notes:");
     for (uint8_t i = 0; i < notes.size(); i++)
     {
-        Globals::print_to_console(" ");
-        Globals::print_to_console(notes[i]);
+        Devtools::print_to_console(" ");
+        Devtools::print_to_console(notes[i]);
     }
-    Globals::println_to_console("");
-}
-
-void Song::set_step_function(int trigger_step, Instrument *instrument, EffectsType effect_)
-{
+    Devtools::println_to_console("");
 }
 
 void Song::increase_step()
 {
     step++;
-    setup = true;
+    setup_state = true;
     Serial.println("step");
     Serial.println(step);
     Hardware::lcd->clear();
 }
 
-// proceed to step 0 of next score and set all instruments effects to "Monitor":
-void Song::proceed_to_next_score()
+// proceed to step 0 of next song and set all instruments effects to "Monitor":
+void Song::proceed_to_next_score() // TODO: make this a callback function/the songs' individual "tidyUp function", so they can be programmed individually.
 {
-    // proceed to next score in list:
+    // proceed to next song in list:
     Globals::active_song_pointer = (Globals::active_song_pointer + 1) % Globals::songlist.size();
-    Globals::active_song = Globals::songlist[Globals::active_song_pointer];
+    Globals::active_song = Globals::songlist.at(Globals::active_song_pointer);
+    Devtools::print_to_console("switching to song ");
+    Devtools::println_to_console(Globals::active_song->name);
     // ...and begin at step 0:
     Globals::active_song->step = 0;
-    Globals::active_song->setup = true;
+    Globals::active_song->setup_state = true;
 
+    // reset effects:
     for (auto &instrument : Drumset::instruments)
         instrument->effect = Monitor;
 
+    // turn off all notes:
     for (auto &synth : Synthesizers::synths)
     {
         for (int note = 0; note < 127; note++)
@@ -64,11 +72,11 @@ void Song::proceed_to_next_score()
     Hardware::lcd->clear();
 }
 
-// set tempo of the score:
+// set tempo of the song:
 void Song::setTempoRange(int min_tempo_, int max_tempo_)
 {
-    tempo.min_tempo = min_tempo_;
-    tempo.max_tempo = max_tempo_;
+    Globals::active_song->tempo.min_tempo = min_tempo_;
+    Globals::active_song->tempo.max_tempo = max_tempo_;
 }
 
 // reset all instruments to "Monitor" mode
@@ -81,118 +89,19 @@ void Song::resetInstruments()
     //TODO: also reset synthesizers' CC values and turn notes off!
 }
 
-///////////////////////////////////////////////////////////////////////
-/////////////////////////// STANDARD RUN //////////////////////////////
-///////////////////////////////////////////////////////////////////////
-void Song::run(midi::MidiInterface<HardwareSerial> MIDI) // TODO: use callback function and set upon Song creation!
-{
-    if (name == "elektrosmoff")
-    {
-        run_elektrosmoff(MIDI);
-    }
-    else if (name == "doubleSquirrel")
-    {
-        run_doubleSquirrel(MIDI);
-    }
-    else if (name == "randomVoice")
-    {
-        run_randomVoice(MIDI);
-    }
-    else if (name == "monitoring")
-    {
-        run_monitoring(MIDI);
-    }
-    else if (name == "sattelstein")
-    {
-        run_sattelstein(MIDI);
-    }
-    else if (name == "dd200")
-    {
-        run_control_dd200(MIDI);
-    }
-    else if (name == "dd200_timeControl")
-    {
-        run_dd200_timeControl(MIDI);
-    }
-    else if (name == "A.72")
-    {
-        run_a72(MIDI);
-    }
-    else if (name == "whammyMountains")
-    {
-        run_whammyMountains(MIDI);
-    }
-    else if (name == "hutschnur")
-    {
-        run_hutschnur(MIDI);
-    }
-    else if (name == "control_volca")
-    {
-        run_control_volca(MIDI);
-    }
-    else if (name == "runVisuals")
-    {
-        runVisuals(MIDI);
-    }
-    else if (name == "zitteraal")
-    {
-        run_zitteraal(MIDI);
-    }
-    else if (name == "nanokontrol")
-    {
-        run_nanokontrol(MIDI);
-    }
-    else if (name == "pogoNumberOne")
-    {
-        run_PogoNumberOne(MIDI);
-    }
-    else if (name == "roeskur")
-    {
-        run_roeskur(MIDI);
-    }
-    else if (name == "b_27")
-    {
-        run_b_27(MIDI);
-    }
-    else if (name == "b_36")
-    {
-        run_b_36(MIDI);
-    }
-    else if (name == "alhambra")
-    {
-        run_alhambra(MIDI);
-    }
-    else if (name == "theodolit")
-    {
-        run_theodolit(MIDI);
-    }
-    else if (name == "kupferUndGold")
-    {
-        run_kupferUndGold(MIDI);
-    }
-    else if (name == "wueste")
-    {
-        run_monitoring(MIDI);
-    }
-    else if (name == "mrWimbledon")
-    {
-        run_monitoring(MIDI);
-    }
-}
-
-/////////////////////////// MUSICAL FUNCTIONS /////////////////////////
+//////////////////////////// MUSICAL FUNCTIONS ////////////////////////
 void Song::add_bassNote(int note)
 {
     notes.push_back(note);
-    Globals::print_to_console("note ");
-    Globals::print_to_console(note);
-    Globals::print_to_console(" has been added to Score::notes [ ");
+    Devtools::print_to_console("note ");
+    Devtools::print_to_console(note);
+    Devtools::print_to_console(" has been added to Score::notes [ ");
     for (uint8_t i = 0; i < notes.size(); i++)
     {
-        Globals::print_to_console(notes[i]);
-        Globals::print_to_console(" ");
+        Devtools::print_to_console(notes[i]);
+        Devtools::print_to_console(" ");
     }
-    Globals::println_to_console("]");
+    Devtools::println_to_console("]");
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -200,7 +109,7 @@ void Song::add_bassNote(int note)
 ///////////////////////////////////////////////////////////////////////
 
 // play note, repeatedly:
-void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int rhythmic_iterator) // initiates a continuous bass note from score
+void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int rhythmic_iterator) // initiates a continuous bass note from song
 {
     if (rhythmic_iterator != 0)
         note_change_pos = rhythmic_iterator;
@@ -210,8 +119,8 @@ void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSer
         // play note
         synth->sendNoteOff(notes[note_idx], MIDI);
         synth->sendNoteOn(notes[note_idx], MIDI);
-        Globals::print_to_console("\tplaying Score::note:");
-        Globals::println_to_console(notes[note_idx]);
+        Devtools::print_to_console("\tplaying Score::note:");
+        Devtools::println_to_console(notes[note_idx]);
 
         // change note
         if (notes.size() > 1)
@@ -220,31 +129,31 @@ void Song::playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSer
             if (note_idx > int(notes.size()) - 1)
                 note_idx = 0;
             //  = (note_idx + 1) % notes.size(); // iterate through the bass notes
-            Globals::print_to_console("\tnote_idx = ");
-            Globals::println_to_console(note_idx);
+            Devtools::print_to_console("\tnote_idx = ");
+            Devtools::println_to_console(note_idx);
         }
     }
     // else
 
     // if (Globals::current_beat_pos == 0) // at beginninng of each bar
     // {
-    //     Globals::print_to_console("\tnotes.size() = ");
-    //     Globals::println_to_console(int(notes.size()));
+    //     Devtools::print_to_console("\tnotes.size() = ");
+    //     Devtools::println_to_console(int(notes.size()));
     // }
 }
 
 // ----------------- play note only once (turn on never off):
-// TODO: if this is running, re-play note whenever it is turned off (due to too many notes..)
-void Song::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from score
-{
-    if (notes.size() > 0)
-    {
-        if (synth->notes[note_idx] == false)
-            synth->sendNoteOn(notes[note_idx], MIDI);
-    }
-    else
-        Globals::println_to_console("cannot play MIDI note, because Score::notes is empty.");
-}
+// TODO: FIX THIS! if this is running, re-play note whenever it is turned off (due to too many notes..)
+// void Song::playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI) // initiates a continuous bass note from song
+// {
+//     if (notes.size() > 0)
+//     {
+//         if (synth->notes[note_idx] == false)
+//             synth->sendNoteOn(notes[note_idx], MIDI);
+//     }
+//     else
+//         Devtools::println_to_console("cannot play MIDI note, because Score::notes is empty.");
+// }
 
 // play last 3 notes in list:
 void Song::playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI)
@@ -321,3 +230,20 @@ void Song::crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSeria
 
 //     }
 // }
+
+Song *Globals::get_song(String songName)
+{
+    Devtools::println_to_console(songName);
+	for (auto &thisSong : songlist)
+	{
+        Devtools::println_to_console(thisSong->name == songName);
+		if (strcmp(thisSong->name.c_str(), songName.c_str()) == 0){ //string to const char conversion
+            Devtools::print_to_console("randomly selected song ");
+            Devtools::println_to_console(thisSong->name);
+			return thisSong;
+		}
+	}
+    return Globals::active_song;
+    Devtools::print_to_console("could not get_song ");
+    Devtools::println_to_console(songName);
+}

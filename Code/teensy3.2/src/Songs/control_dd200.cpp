@@ -7,28 +7,28 @@
 */
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void Song::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
+void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 {
     // static float delay_time = 0;
     // static float delay_depth = 0;
     // static float delay_level = 0;
 
-    switch (step)
+    switch (Globals::active_song->step)
     {
 
     case 0: // some ramp effect on snare. Used as intro for Concert at Stasi's. Works fine with DD200-DUAL mode @ ~150 BPM quarter notes
 
-        if (setup)
+        if (Globals::active_song->get_setup_state())
         {
             Hardware::footswitch_mode = Increment_Score;
-            resetInstruments();
-            notes.clear();
+            Globals::active_song->resetInstruments();
+            Globals::active_song->notes.clear();
 
-            Drumset::hihat->set_effect(Monitor);
+            Drumset::hihat->set_effect(TapTempo);
             Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
 
-            setup = false;
+            
         }
 
         /* CC-values are printed automatically */
@@ -40,12 +40,12 @@ void Song::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
         /* old code:
         case 1: // just using midi clock
-            if (setup)
+            if (Globals::active_song->setup)
             {
                 Drumset::hihat->set_effect(TapTempo);
                 Drumset::snare->set_effect(Monitor);
 
-                setup = false;
+                Globals::active_song->setup = false;
 
             }
             Hardware::lcd->setCursor(0, 0);
@@ -58,10 +58,10 @@ void Song::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             break;
 
         case 10: // crash triggers dd200-time-reallocation
-            if (setup)
+            if (Globals::active_song->setup)
             {
                 delay_time = 0;
-                setup = false;
+                Globals::active_song->setup = false;
                 Drumset::hihat->set_effect(Monitor); // tap tempo would conflict with delay_time!
             }
 
@@ -110,13 +110,13 @@ void Song::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             break;
 
         case 3: // snare and kick increase delay_time, automatic decrease
-            if (setup)
+            if (Globals::active_song->setup)
             {
                 // notes.push_back(31);                              // G
                 Synthesizers::mKorg->sendProgramChange(91, MIDI); // switches to Voice B.44
                 Globals::bSendMidiClock = false;
                 // Drumset::hihat->set_effect(TapTempo);
-                setup = false;
+                Globals::active_song->setup = false;
             }
 
             // standard run: fall back to 0 quickly
@@ -157,10 +157,10 @@ void Song::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             // kick:   delay_depth--; delay_level++;
 
 
-            if (setup)
+            if (Globals::active_song->setup)
             {
                 Synthesizers::dd200->sendControlChange(dd200_DelayTime, 50, MIDI);
-                setup = false;
+                Globals::active_song->setup = false;
             }
 
             if (Drumset::snare->timing.wasHit)
@@ -203,12 +203,12 @@ void Song::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
              // feedback is at about 80
 
 
-            if (setup)
+            if (Globals::active_song->setup)
             {
                 Hardware::footswitch_mode = No_Footswitch_Mode;
                 Drumset::hihat->set_effect(TapTempo);
                 Synthesizers::dd200->sendControlChange(dd200_DelayLevel, 80, MIDI); // I think 80 was a good value
-                setup = false;
+                Globals::active_song->setup = false;
             }
 
             static bool bUseEffects = true;
@@ -287,10 +287,10 @@ void Song::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
                 break;
 
             // case 5: // test code! increases the delay time when snare is hit, decrease via kick
-            //     if (setup)
+            //     if (Globals::active_song->setup)
             //     {
             //         delay_time = 0;
-            //         setup = false;
+            //         Globals::active_song->setup = false;
             //     }
             //     if (Drumset::kick->timing.wasHit)
             //     {
@@ -317,8 +317,8 @@ void Song::run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
     default:
         Synthesizers::mKorg->sendNoteOff(31, MIDI);
-        proceed_to_next_score();
-        step = 0;
+        Globals::active_song->proceed_to_next_score();
+        Globals::active_song->step = 0;
         break;
     }
 }

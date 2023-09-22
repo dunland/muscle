@@ -7,6 +7,7 @@
 #define MIDI_CHANNEL_MICROKORG 2
 #define MIDI_CHANNEL_DD200 3
 #define MIDI_CHANNEL_WHAMMY 4
+#define MIDI_CHANNEL_KP3 5
 
 /////////////////////////// AUXILIARY HARDWARE ////////////////////////
 #define VIBR 0
@@ -15,7 +16,7 @@
 /* LCD AV1623 pinout:
 1   Vss       GND
 2   Vdd       +5V
-3   LCD Drive poti power / GND
+3   V0 (LCD Drive poti power) / GND
 4   RS        11
 5   R/W       GND
 6   EN        12
