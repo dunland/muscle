@@ -14,8 +14,8 @@
 
 /* LCD pinout:
 1   Vss       GND
-2   Vss       +5V
-3   LCD Drive poti power / GND
+2   Vdd       +5V
+3   V0 (LCD Drive poti power) / GND
 4   RS        11
 5   R/W       GND
 6   EN        12
@@ -43,9 +43,9 @@
 // right - encoder1
 // middle - ground
 // left - encoder2
-#define ENCODER1 3
-#define ENCODER2 6
-#define PUSHBUTTON 7
+#define ENCODER1 3 // A
+#define ENCODER2 6 // B
+#define PUSHBUTTON
 
 //////////////////////////////// PIEZO INPUTS /////////////////////////
 #define INPUT_PIN_CRASH1 A7
