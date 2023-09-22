@@ -3,12 +3,30 @@
 #include <Instruments.h>
 #include <Calibration.h>
 #include <settings.h>
+#include <MIDI_Instance.h>
+
+void Hardware::begin_MIDI()
+{
+  MIDI.begin(MIDI_CHANNEL_OMNI);
+  // turn off all currently playing MIDI notes:
+  for (int channel = 1; channel < 3; channel++)
+  {
+    for (int note_number = 0; note_number < 127; note_number++)
+    {
+      MIDI.sendNoteOff(note_number, 127, channel);
+    }
+  }
+}
+
+void Hardware::sendMidiClock(){
+  MIDI.sendRealTime(midi::Clock);
+}
 
 //////////////////////// SYNTHESIZER CLASS ////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
 // sets cc_value (for JSON communication) and sends MIDI-ControlChange:
-void Synthesizer::sendControlChange(CC_Type cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI)
+void Synthesizer::sendControlChange(CC_Type cc_type, int val)
 {
   static int previous_val = -1;
   midi_values[cc_type] = val; // store value
@@ -24,7 +42,7 @@ void Synthesizer::sendControlChange(CC_Type cc_type, int val, midi::MidiInterfac
   }
 }
 
-void Synthesizer::sendControlChange(int cc_type, int val, midi::MidiInterface<HardwareSerial> MIDI)
+void Synthesizer::sendControlChange(int cc_type, int val)
 {
 midi_values[cc_type] = val;
 
@@ -38,19 +56,19 @@ midi_values[cc_type] = val;
   }
 }
 
-void Synthesizer::sendNoteOn(int note, midi::MidiInterface<HardwareSerial> MIDI)
+void Synthesizer::sendNoteOn(int note)
 {
   notes[note] = true; // remember that note is turned on
   MIDI.sendNoteOn(note, 127, midi_channel);
 }
 
-void Synthesizer::sendNoteOff(int note, midi::MidiInterface<HardwareSerial> MIDI)
+void Synthesizer::sendNoteOff(int note)
 {
   notes[note] = false; // remember that note is turned off
   MIDI.sendNoteOff(note, 127, midi_channel);
 }
 
-void Synthesizer::sendProgramChange(int number, midi::MidiInterface<HardwareSerial> MIDI)
+void Synthesizer::sendProgramChange(int number)
 {
   MIDI.sendProgramChange(number, midi_channel);
 }
