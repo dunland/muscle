@@ -5,7 +5,7 @@
 #include <Globals.h>
 #include <vector>
 // #include <Instruments.h>
-#include <MIDI.h>
+
 
 class Instrument;
 class Synthesizer;
@@ -13,7 +13,7 @@ class Synthesizer;
 class Song
 {
 public:
-    typedef std::function<void(midi::MidiInterface<HardwareSerial>)> Callback;
+    typedef std::function<void()> Callback;
     Callback trigger_function;
 
     Song(Callback f, String songName) : trigger_function(f)
@@ -63,96 +63,96 @@ public:
     void resetInstruments();
 
     // ------------------------------- MODES: (deprecated) ------------
-    void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
+    void playRhythmicNotes(Synthesizer *synth,int note_change_pos_ = 0); // initiates a continuous bass note from score
 
-    // void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on, never off)
+    // void playSingleNote(Synthesizer *synth, ); // play note only once (turn on, never off)
 
-    void playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);
+    void playLastThreeNotes(Synthesizer *synth);
 
-    void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
+    void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography); // creates an envelope for cutoff filter via topography
 
-    void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // creates an envelope for volume filter via topography
+    void envelope_volume(TOPOGRAPHY *topography, Synthesizer *synth); // creates an envelope for volume filter via topography
 
-    void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // changes the delay times on each 16th-step
+    void crazyDelays(Instrument *instrument, Synthesizer *synth); // changes the delay times on each 16th-step
 
-    // void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
+    // void set_ramp(CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
 };
 
-void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI);
+void run_monitoring();
 
-void run_sattelstein(midi::MidiInterface<HardwareSerial> MIDI);
+void run_sattelstein();
 
-void run_doubleSquirrel(midi::MidiInterface<HardwareSerial> MIDI); // TODO: tentative, as this should be dynamic later..
+void run_doubleSquirrel(); // TODO: tentative, as this should be dynamic later..
 
-void run_host(midi::MidiInterface<HardwareSerial> MIDI);
+void run_host();
 
-void run_randomVoice(midi::MidiInterface<HardwareSerial> MIDI);
+void run_randomVoice();
 
-void run_A_72(midi::MidiInterface<HardwareSerial> MIDI);
+void run_A_72();
 
-void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI);
+void run_control_dd200();
 
-void run_dd200_timeControl(midi::MidiInterface<HardwareSerial> MIDI);
+void run_dd200_timeControl();
 
-void run_whammyMountains(midi::MidiInterface<HardwareSerial> MIDI);
+void run_whammyMountains();
 
-void run_hutschnur(midi::MidiInterface<HardwareSerial> MIDI);
+void run_hutschnur();
 
-void run_control_volca(midi::MidiInterface<HardwareSerial> MIDI);
+void run_control_volca();
 
-void run_visuals(midi::MidiInterface<HardwareSerial> MIDI);
+void run_visuals();
 
-void run_besen(midi::MidiInterface<HardwareSerial> MIDI);
+void run_besen();
 
-void run_nanokontrol(midi::MidiInterface<HardwareSerial> MIDI);
+void run_nanokontrol();
 
-void run_PogoNumberOne(midi::MidiInterface<HardwareSerial> MIDI);
+void run_PogoNumberOne();
 
-void run_roeskur(midi::MidiInterface<HardwareSerial> MIDI);
+void run_roeskur();
 
-void run_b_27(midi::MidiInterface<HardwareSerial> MIDI);
+void run_b_27();
 
-void run_b_36(midi::MidiInterface<HardwareSerial> MIDI);
+void run_b_36();
 
-void run_alhambra(midi::MidiInterface<HardwareSerial> MIDI);
+void run_alhambra();
 
-void run_theodolit(midi::MidiInterface<HardwareSerial> MIDI);
+void run_theodolit();
 
-void run_kupferUndGold(midi::MidiInterface<HardwareSerial> MIDI);
+void run_kupferUndGold();
 
-void run_ferdinandPiech(midi::MidiInterface<HardwareSerial> MIDI);
+void run_ferdinandPiech();
 
-void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI);
+void run_donnerwetter();
 
-void run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI);
+void run_randomSelect();
 
-void run_wueste(midi::MidiInterface<HardwareSerial> MIDI);
+void run_wueste();
 
-void run_intro(midi::MidiInterface<HardwareSerial> MIDI);
+void run_intro();
 
 // ------------------------------- MODES: (deprecated) ------------
-void playRhythmicNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI, int note_change_pos_ = 0); // initiates a continuous bass note from score
+void playRhythmicNotes(Synthesizer *synth, int note_change_pos_ = 0); // initiates a continuous bass note from score
 
-// void playSingleNote(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI); // play note only once (turn on, never off)
+// void playSingleNote(Synthesizer *synth, ); // play note only once (turn on, never off)
 
-void playLastThreeNotes(Synthesizer *synth, midi::MidiInterface<HardwareSerial> MIDI);
+void playLastThreeNotes(Synthesizer *synths);
 
-void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI); // creates an envelope for cutoff filter via topography
+void envelope_cutoff(Synthesizer *synth, TOPOGRAPHY *topography); // creates an envelope for cutoff filter via topography
 
-void envelope_volume(TOPOGRAPHY *topography, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // creates an envelope for volume filter via topography
+void envelope_volume(TOPOGRAPHY *topography, Synthesizer *synth); // creates an envelope for volume filter via topography
 
-void crazyDelays(Instrument *instrument, midi::MidiInterface<HardwareSerial> MIDI, Synthesizer *synth); // changes the delay times on each 16th-step
+void crazyDelays(Instrument *instrument, Synthesizer *synth); // changes the delay times on each 16th-step
 
-// void set_ramp( midi::MidiInterface<HardwareSerial> MIDI, CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
+// void set_ramp( , CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
 
-void run_A_15(midi::MidiInterface<HardwareSerial> MIDI);
+void run_A_15();
 
-void run_A_25(midi::MidiInterface<HardwareSerial> MIDI);
+void run_A_25();
 
-void run_b_11(midi::MidiInterface<HardwareSerial> MIDI);
+void run_b_11();
 
-void run_b_36(midi::MidiInterface<HardwareSerial> MIDI);
+void run_b_36();
 
-void run_b_63(midi::MidiInterface<HardwareSerial> MIDI);
+void run_b_63();
 
-void run_b_73(midi::MidiInterface<HardwareSerial> MIDI);
+void run_b_73();

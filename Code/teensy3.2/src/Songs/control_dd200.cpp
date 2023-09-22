@@ -1,5 +1,5 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 /*
@@ -7,7 +7,7 @@
 */
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
+void run_control_dd200()
 {
     // static float delay_time = 0;
     // static float delay_depth = 0;
@@ -28,7 +28,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
 
-            
+
         }
 
         /* CC-values are printed automatically */
@@ -94,7 +94,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
                         // }
                     }
                     delay_time = Hardware::dd_200_midi_interval_map[idx];
-                    Synthesizers::dd200->sendControlChange(dd200_DelayTime, delay_time, MIDI);
+                    Synthesizers::dd200->sendControlChange(dd200_DelayTime, delay_time;
                     previous_tapInterval = Globals::tapInterval;
                 }
             }
@@ -113,7 +113,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             if (Globals::active_song->setup)
             {
                 // notes.push_back(31);                              // G
-                Synthesizers::mKorg->sendProgramChange(91, MIDI); // switches to Voice B.44
+                Synthesizers::mKorg->sendProgramChange(91; // switches to Voice B.44
                 Globals::bSendMidiClock = false;
                 // Drumset::hihat->set_effect(TapTempo);
                 Globals::active_song->setup = false;
@@ -137,7 +137,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             // send the value to dd200:
             if (previous_delay_time != delay_time) // prevent hangup at 0
             {
-                Synthesizers::dd200->sendControlChange(dd200_DelayTime, int(delay_time), MIDI);
+                Synthesizers::dd200->sendControlChange(dd200_DelayTime, int(delay_time);
             }
             Hardware::lcd->setCursor(0, 0);
             Hardware::lcd->print(delay_time);
@@ -159,7 +159,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
 
             if (Globals::active_song->setup)
             {
-                Synthesizers::dd200->sendControlChange(dd200_DelayTime, 50, MIDI);
+                Synthesizers::dd200->sendControlChange(dd200_DelayTime, 50;
                 Globals::active_song->setup = false;
             }
 
@@ -182,8 +182,8 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
                     delay_depth = 0;
             }
 
-            Synthesizers::dd200->sendControlChange(dd200_DelayDepth, int(delay_depth), MIDI);
-            Synthesizers::dd200->sendControlChange(dd200_DelayLevel, int(delay_level), MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_DelayDepth, int(delay_depth);
+            Synthesizers::dd200->sendControlChange(dd200_DelayLevel, int(delay_level);
 
             Hardware::lcd->setCursor(0, 0);
             Hardware::lcd->print(Globals::current_BPM);
@@ -207,7 +207,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             {
                 Hardware::footswitch_mode = No_Footswitch_Mode;
                 Drumset::hihat->set_effect(TapTempo);
-                Synthesizers::dd200->sendControlChange(dd200_DelayLevel, 80, MIDI); // I think 80 was a good value
+                Synthesizers::dd200->sendControlChange(dd200_DelayLevel, 80; // I think 80 was a good value
                 Globals::active_song->setup = false;
             }
 
@@ -229,8 +229,8 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
                 delay_level = max(0, delay_level - 0.3);
             }
 
-            Synthesizers::dd200->sendControlChange(dd200_DelayDepth, int(delay_time), MIDI);
-            Synthesizers::dd200->sendControlChange(dd200_DelayLevel, int(delay_level), MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_DelayDepth, int(delay_time);
+            Synthesizers::dd200->sendControlChange(dd200_DelayLevel, int(delay_level);
 
             Hardware::lcd->setCursor(0, 0);
             Hardware::lcd->print(Globals::current_BPM);
@@ -275,7 +275,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
                 {
                     static int val = 0;
                     val = (val + 1) % 127;
-                    Synthesizers::dd200->sendControlChange(dd200_DelayTime, val, MIDI);
+                    Synthesizers::dd200->sendControlChange(dd200_DelayTime, val;
                     lastUpCount = millis();
 
                     // print val
@@ -306,7 +306,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             //             delay_time = 127;
             //     }
 
-            //     Synthesizers::dd200->sendControlChange(dd200_DelayTime, delay_time, MIDI);
+            //     Synthesizers::dd200->sendControlChange(dd200_DelayTime, delay_time;
 
             //     // print val
             //     Hardware::lcd->setCursor(0, 0);
@@ -316,7 +316,7 @@ void run_control_dd200(midi::MidiInterface<HardwareSerial> MIDI)
             */
 
     default:
-        Synthesizers::mKorg->sendNoteOff(31, MIDI);
+        Synthesizers::mKorg->sendNoteOff(31);
         Globals::active_song->proceed_to_next_score();
         Globals::active_song->step = 0;
         break;

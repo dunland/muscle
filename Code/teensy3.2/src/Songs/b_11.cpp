@@ -1,9 +1,9 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
-void run_b_11(midi::MidiInterface<HardwareSerial> MIDI)
+void run_b_11()
 {
     static int current_val = 0;
     static int gravitate = map(0, -24, 24, 0, 127);
@@ -13,17 +13,17 @@ void run_b_11(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::mKorg->sendProgramChange(64, MIDI); // b.11
-            // Globals::active_song->playSingleNote(Synthesizers::mKorg, MIDI);
+            Synthesizers::mKorg->sendProgramChange(64); // b.11
+            // Globals::active_song->playSingleNote(Synthesizers::mKorg;
             Globals::bSendMidiClock = true;
-            Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127, MIDI); // Apreggiator on
+            Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127); // Apreggiator on
             Drumset::hihat->set_effect(TapTempo);
 
         }
 
         static int randomNote = int(random(16,72));
         if (Globals::current_beat_pos == 0)
-            Synthesizers::mKorg->sendNoteOn(randomNote, MIDI);
+            Synthesizers::mKorg->sendNoteOn(randomNote);
 
         if (Drumset::snare->timing.wasHit)
             current_val -= 17;
@@ -34,7 +34,7 @@ void run_b_11(midi::MidiInterface<HardwareSerial> MIDI)
         // gravitate towards val:
         current_val = (current_val < gravitate) ? current_val + (gravitate - current_val) / 1.5 : current_val - (current_val - gravitate) / 0.25;
 
-        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, current_val, MIDI);
+        Synthesizers::mKorg->sendControlChange(mKORG_Osc2_semitone, current_val);
 
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print("gravitateOSC2");

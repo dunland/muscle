@@ -1,10 +1,10 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
 ///////////////////////////// MONITORING //////////////////////////////
-void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
+void run_monitoring()
 {
     switch (Globals::active_song->step)
     {
@@ -12,7 +12,7 @@ void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
 
-        Synthesizers::kaossPad3->sendControlChange(92, 0, MIDI); // Touch Pad off - JUST BECAUSE ALHAMBRA IS BEFORE!// TODO: execute this when leaving the song with push button! at best, by using callback functions for song.proceed_to_next_score
+            Synthesizers::kaossPad3->sendControlChange(92, 0); // Touch Pad off - JUST BECAUSE ALHAMBRA IS BEFORE!// TODO: execute this when leaving the song with push button! at best, by using callback functions for song.proceed_to_next_score
 
             Hardware::footswitch_mode = Increment_Score;
             Globals::active_song->resetInstruments();
@@ -21,10 +21,11 @@ void run_monitoring(midi::MidiInterface<HardwareSerial> MIDI)
             // turn off all currently playing MIDI notes:
             for (int channel = 1; channel < 3; channel++)
             {
-                for (int note_number = 0; note_number < 127; note_number++)
-                {
-                    MIDI.sendNoteOff(note_number, 127, channel);
-                }
+                for (auto &synth : Synthesizers::synths)
+                    for (int note_number = 0; note_number < 127; note_number++)
+                    {
+                        synth->sendNoteOff(note_number);
+                    }
             }
         }
 

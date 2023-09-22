@@ -4,7 +4,7 @@
 #include <vector>
 #include <Globals.h>
 // #include <Tsunami.h>
-#include <MIDI.h>
+
 #include <Song.h>
 #include <Topography.h>
 
@@ -97,11 +97,11 @@ public:
     TOPOGRAPHY topography;
     TOPOGRAPHY regularity;
 
-    void trigger(midi::MidiInterface<HardwareSerial>);
+    void trigger();
 
-    void perform(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>);
+    void perform(std::vector<Instrument *> instruments);
 
-    void tidyUp(midi::MidiInterface<HardwareSerial>); // turn of MIDI notes etc
+    void tidyUp(); // turn of MIDI notes etc
 
     bool stroke_detected();
 
@@ -128,7 +128,7 @@ public:
 
     // trigger effects: -----------------------------------------------
 
-    void playMidi(midi::MidiInterface<HardwareSerial>);
+    void playMidi();
 
     void monitor(); // just prints what is being played.
 
@@ -138,35 +138,35 @@ public:
 
     void getTapTempo();
 
-    void change_cc_in(midi::MidiInterface<HardwareSerial> MIDI); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
+    void change_cc_in(); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 
-    void reflex_and_playMidi(midi::MidiInterface<HardwareSerial> MIDI); // plays note when hit and changes CC
+    void reflex_and_playMidi(); // plays note when hit and changes CC
 
-    void random_change_cc_in(midi::MidiInterface<HardwareSerial> MIDI); // changes CC using integer, not CC_Type.
+    void random_change_cc_in(); // changes CC using integer, not CC_Type.
 
-    void swell_rec(midi::MidiInterface<HardwareSerial>);
+    void swell_rec();
 
     void countup_topography();
 
-    void mainNoteIteration(Synthesizer *, midi::MidiInterface<HardwareSerial>); // increase note_index of Score and play it
+    void mainNoteIteration(Synthesizer *); // increase note_index of Score and play it
 
     // timed events: --------------------------------------------------
 
-    void swell_perform(midi::MidiInterface<HardwareSerial> MIDI);
+    void swell_perform();
 
-    void sendMidiNotes_timed(midi::MidiInterface<HardwareSerial> MIDI);
+    void sendMidiNotes_timed();
 
     void setInstrumentSlots(); // for Footswitchlooper
 
-    void topography_midi_effects(std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial>); // MIDI playback according to beat_topography
+    void topography_midi_effects(std::vector<Instrument *> instruments); // MIDI playback according to beat_topography
 
     void tsunamiLink(); // Tsunami beat-linked pattern
 
     // final tidy up functions: ---------------------------------------
 
-    void turnMidiNoteOff(midi::MidiInterface<HardwareSerial>);
+    void turnMidiNoteOff();
 
-    void change_cc_out(midi::MidiInterface<HardwareSerial>);
+    void change_cc_out();
 
     void shuffle_cc(boolean force_);
 };

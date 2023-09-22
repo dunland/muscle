@@ -1,10 +1,10 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
 //////////////////////////// ELEKTROSMOFF /////////////////////////////
-void run_host(midi::MidiInterface<HardwareSerial> MIDI)
+void run_host()
 {
     // THIS SONG IS COMPOSED FOR microKORG A.81
     switch (Globals::active_song->step)
@@ -12,7 +12,7 @@ void run_host(midi::MidiInterface<HardwareSerial> MIDI)
     case 0: // Vocoder not activated
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::mKorg->sendProgramChange(56, MIDI); // selects mKORG Voice A.57
+            Synthesizers::mKorg->sendProgramChange(56); // selects mKORG Voice A.57
             Globals::active_song->resetInstruments();         // reset all instruments to "Monitor" mode
             Drumset::snare->set_effect(Monitor);
             Hardware::footswitch_mode = Increment_Score;
@@ -22,15 +22,15 @@ void run_host(midi::MidiInterface<HardwareSerial> MIDI)
 
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::mKorg->sendControlChange(mKORG_DelayDepth, 0, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_DelayDepth, 0);
             Drumset::snare->midi.active_note = 55;                                     // G = 55
             Drumset::snare->setup_midi(mKORG_Amplevel, Synthesizers::mKorg, 127, 0, 3, -0.002); // changes Gate in Vocoder-Mode
             Drumset::snare->set_effect(Change_CC);
-            Drumset::snare->midi.synth->sendNoteOn(55, MIDI); // play note 55 (G) if it is not playing at the moment
+            Drumset::snare->midi.synth->sendNoteOn(55); // play note 55 (G) if it is not playing at the moment
         }
 
         if (Drumset::snare->midi.synth->notes[55] == false)
-            Drumset::snare->midi.synth->sendNoteOn(55, MIDI); // play note 55 (G) if it is not playing at the moment
+            Drumset::snare->midi.synth->sendNoteOn(55); // play note 55 (G) if it is not playing at the moment
 
         // proceed:
         if (Drumset::crash1->timing.wasHit)
@@ -42,7 +42,7 @@ void run_host(midi::MidiInterface<HardwareSerial> MIDI)
     case 2: // Snare → increase delay depth
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 127, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 127);
             Drumset::snare->midi.cc_val = 0;
             Drumset::snare->setup_midi(mKORG_DelayDepth, Synthesizers::mKorg, 90, 0, 3, -0.002);
         }
@@ -52,9 +52,9 @@ void run_host(midi::MidiInterface<HardwareSerial> MIDI)
         if (Globals::active_song->get_setup_state())
         {
             Drumset::snare->set_effect(Monitor);
-            Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 0, MIDI);
-            Synthesizers::mKorg->sendControlChange(mKORG_DelayDepth, 0, MIDI);
-            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
+            Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 0);
+            Synthesizers::mKorg->sendControlChange(mKORG_DelayDepth, 0);
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0);
         }
         break;
 

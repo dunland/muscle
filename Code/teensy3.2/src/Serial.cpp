@@ -1,7 +1,7 @@
 #include <Serial.h>
 #include <Arduino.h>
 #include <vector>
-#include <MIDI.h>
+
 // #include <Tsunami.h>
 #include <ArduinoJson.h>
 #include <Globals.h>

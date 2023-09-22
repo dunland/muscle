@@ -1,5 +1,5 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
@@ -13,7 +13,7 @@ static std::vector<int> list_of_songs = {
     12   // A.25
 };
 
-void run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
+void run_randomSelect()
 {
     static int sel_song_int = 0;
     static Song *randomSong;
@@ -31,37 +31,37 @@ void run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
     switch (sel_song_int)
     {
     case 85:
-        randomSong = new Song(std::bind(run_b_36, MIDI), "b_36");
+        randomSong = new Song(run_b_36, "b_36");
         Globals::active_song = randomSong;
         break;
 
     case 64:
-        randomSong = new Song(std::bind(run_b_11, MIDI), "b_11");
+        randomSong = new Song(run_b_11, "b_11");
         Globals::active_song = randomSong;
         break;
 
     case 114:
-        randomSong = new Song(std::bind(run_b_73, MIDI), "b_73");
+        randomSong = new Song(run_b_73, "b_73");
         Globals::active_song = randomSong;
         break;
 
     case 27:
-        randomSong = new Song(std::bind(run_b_27, MIDI), "b_27");
+        randomSong = new Song(run_b_27, "b_27");
         Globals::active_song = randomSong;
         break;
 
     case 106:
-        randomSong = new Song(std::bind(run_b_63, MIDI), "b_63");
+        randomSong = new Song(run_b_63, "b_63");
         Globals::active_song = randomSong;
         break;
 
     case 4:
-        randomSong = new Song(std::bind(run_A_15, MIDI), "A_15");
+        randomSong = new Song(run_A_15, "A_15");
         Globals::active_song = randomSong;
         break;
 
     case 12:
-        randomSong = new Song(std::bind(run_A_25, MIDI), "A_25");
+        randomSong = new Song(run_A_25, "A_25");
         Globals::active_song = randomSong;
         break;
 
@@ -84,38 +84,38 @@ void run_randomSelect(midi::MidiInterface<HardwareSerial> MIDI)
     //     switch (sel_song_int)
     //     {
     //     case 85:
-    //         // run_b_36(MIDI);
+    //         // run_b_36();
     //         // Globals::active_song->name = "b_36";
     //         // TODO: Globals::active_song = *song; // SONST WIRD SONG::SETUP NICHT AUSGEFÜHRT!
     //         break;
 
     //     case 64:
-    //         run_b_11(MIDI);
+    //         run_b_11();
     //         Globals::active_song->name = "b_11";
     //         break;
 
     //     case 114:
-    //         run_b_73(MIDI);
+    //         run_b_73();
     //         Globals::active_song->name = "b_73";
     //         break;
 
     //     case 27:
-    //         run_b_27(MIDI);
+    //         run_b_27();
     //         Globals::active_song->name = "b_27";
     //         break;
 
     //     case 106:
-    //         run_b_63(MIDI);
+    //         run_b_63();
     //         Globals::active_song->name = "b_63";
     //         break;
 
     //     case 4:
-    //         run_A_15(MIDI);
+    //         run_A_15();
     //         Globals::active_song->name = "A_15";
     //         break;
 
     //     case 12:
-    //         run_A_25(MIDI);
+    //         run_A_25();
     //         Globals::active_song->name = "A_25";
     //         break;
 

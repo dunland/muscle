@@ -13,7 +13,6 @@
 
 #include <Arduino.h>
 #include <vector>
-#include <MIDI.h>
 // #include <Tsunami.h>
 #include <ArduinoJson.h>
 #include <settings.h>
@@ -37,7 +36,6 @@ const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
 const boolean USING_TSUNAMI = false;
 
 // ----------------------------- variables ----------------------------
-midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial &)Serial2); // same as MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
 Rhythmics *rhythmics;
 
@@ -175,15 +173,7 @@ void setup()
   // delay(1000); // alternative to line above, if run with external power (no computer)
 
   // -------------------------------- MIDI ----------------------------
-  MIDI.begin(MIDI_CHANNEL_OMNI);
-  // turn off all currently playing MIDI notes:
-  for (int channel = 1; channel < 3; channel++)
-  {
-    for (int note_number = 0; note_number < 127; note_number++)
-    {
-      MIDI.sendNoteOff(note_number, 127, channel);
-    }
-  }
+  Hardware::begin_MIDI();
 
   // -------------------- Hardware initialization ---------------------
 
@@ -260,43 +250,43 @@ void setup()
   Devtools::println_to_console("-----------------------------------------------");
 
   // -------------------------------- songlist ------------------------
-  //   Globals::songlist.push_back(new Song(std::bind(run_b_11, MIDI), "b_11"));
-  // Globals::songlist.push_back(new Song(std::bind(run_b_73, MIDI), "b_73"));
-  // Globals::songlist.push_back(new Song(std::bind(run_b_63, MIDI), "b_63"));
-  // Globals::songlist.push_back(new Song(std::bind(run_A_15, MIDI), "A_15"));
-  // Globals::songlist.push_back(new Song(std::bind(run_A_25, MIDI), "A_25"));
-  // Globals::songlist.push_back(new Song(std::bind(run_A_72, MIDI), "A_72"));
-  // Globals::songlist.push_back(new Song(std::bind(run_b_27, MIDI), "b_27"));
-  // Globals::songlist.push_back(new Song(std::bind(run_b_36, MIDI), "b_36"));
+  //   Globals::songlist.push_back(new Song(run_b_11, "b_11"));
+  // Globals::songlist.push_back(new Song(run_b_73, "b_73"));
+  // Globals::songlist.push_back(new Song(run_b_63, "b_63"));
+  // Globals::songlist.push_back(new Song(run_A_15, "A_15"));
+  // Globals::songlist.push_back(new Song(run_A_25, "A_25"));
+  // Globals::songlist.push_back(new Song(run_A_72, "A_72"));
+  // Globals::songlist.push_back(new Song(run_b_27, "b_27"));
+  // Globals::songlist.push_back(new Song(run_b_36, "b_36"));
 
-  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI), "monitoring"));
-  Globals::songlist.push_back(new Song(std::bind(run_A_72, MIDI), "intro"));
-  Globals::songlist.push_back(new Song(std::bind(run_PogoNumberOne, MIDI), "pogoNumberOne"));
-  Globals::songlist.push_back(new Song(std::bind(run_hutschnur, MIDI), "hutschnur"));
-  Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI), "randomSelect"));
-  Globals::songlist.push_back(new Song(std::bind(run_wueste, MIDI), "wueste"));
-  Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI), "randomSelect"));
-  Globals::songlist.push_back(new Song(std::bind(run_besen, MIDI), "besen"));
-  Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI), "randomSelect"));
-  Globals::songlist.push_back(new Song(std::bind(run_alhambra, MIDI), "alhambra"));
-  Globals::songlist.push_back(new Song(std::bind(run_randomSelect, MIDI), "randomSelect"));
-  Globals::songlist.push_back(new Song(std::bind(run_monitoring, MIDI), "mrWimbledon")); // mrWimbledon
-  Globals::songlist.push_back(new Song(std::bind(run_roeskur, MIDI), "roeskur"));
-  Globals::songlist.push_back(new Song(std::bind(run_sattelstein, MIDI), "sattelstein"));
-  Globals::songlist.push_back(new Song(std::bind(run_theodolit, MIDI), "theodolit"));
-  Globals::songlist.push_back(new Song(std::bind(run_kupferUndGold, MIDI), "kupferUndGold"));
-  Globals::songlist.push_back(new Song(std::bind(run_donnerwetter, MIDI), "donnerwetter"));
-  Globals::songlist.push_back(new Song(std::bind(run_randomVoice, MIDI), "randomSelect"));
+  Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
+  Globals::songlist.push_back(new Song(run_A_72, "intro"));
+  Globals::songlist.push_back(new Song(run_PogoNumberOne, "pogoNumberOne"));
+  Globals::songlist.push_back(new Song(run_hutschnur, "hutschnur"));
+  Globals::songlist.push_back(new Song(run_randomSelect, "randomSelect"));
+  Globals::songlist.push_back(new Song(run_wueste, "wueste"));
+  Globals::songlist.push_back(new Song(run_randomSelect, "randomSelect"));
+  Globals::songlist.push_back(new Song(run_besen, "besen"));
+  Globals::songlist.push_back(new Song(run_randomSelect, "randomSelect"));
+  Globals::songlist.push_back(new Song(run_alhambra, "alhambra"));
+  Globals::songlist.push_back(new Song(run_randomSelect, "randomSelect"));
+  Globals::songlist.push_back(new Song(run_monitoring, "mrWimbledon")); // mrWimbledon
+  Globals::songlist.push_back(new Song(run_roeskur, "roeskur"));
+  Globals::songlist.push_back(new Song(run_sattelstein, "sattelstein"));
+  Globals::songlist.push_back(new Song(run_theodolit, "theodolit"));
+  Globals::songlist.push_back(new Song(run_kupferUndGold, "kupferUndGold"));
+  Globals::songlist.push_back(new Song(run_donnerwetter, "donnerwetter"));
+  Globals::songlist.push_back(new Song(run_randomVoice, "randomSelect"));
 
   // Globals::songlist.at(sizeof(Globals::songlist))->setTempoRange(150, 170); // TODO: make this work!
-  // Globals::songlist.push_back(new Song(std::bind(run_host, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_randomVoice, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_control_dd200, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_dd200_timeControl, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_whammyMountains, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_control_volca, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_visuals, MIDI)));
-  // Globals::songlist.push_back(new Song(std::bind(run_nanokontrol, MIDI)));
+  // Globals::songlist.push_back(new Song(run_host));
+  // Globals::songlist.push_back(new Song(run_randomVoice));
+  // Globals::songlist.push_back(new Song(run_control_dd200));
+  // Globals::songlist.push_back(new Song(run_dd200_timeControl));
+  // Globals::songlist.push_back(new Song(run_whammyMountains));
+  // Globals::songlist.push_back(new Song(run_control_volca));
+  // Globals::songlist.push_back(new Song(run_visuals));
+  // Globals::songlist.push_back(new Song(run_nanokontrol));
 
   Globals::active_song = Globals::songlist.at(0);
 
@@ -378,15 +368,15 @@ void loop()
   for (auto &instrument : Drumset::instruments)
   {
     // if (instrument->effect == PlayMidi_rawPin || instrument->effect == CC_Effect_rawPin)
-    //  instrument->trigger(instrument, MIDI);
+    //  instrument->trigger(instrument;
 
     if (instrument->stroke_detected()) // evaluates pins for activity repeatedly
     {
       // ----------------------- perform pin action -------------------
-      instrument->trigger(MIDI);        // runs trigger function according to instrument's EffectType
+      instrument->trigger();        // runs trigger function according to instrument's EffectType
       instrument->timing.wasHit = true; // a flag to show that the instrument was hit (for transmission via JSON)
 
-      Synthesizers::volca->sendNoteOn(instrument->midi.notes[0], MIDI);
+      Synthesizers::volca->sendNoteOn(instrument->midi.notes[0]);
 
       instrument->timing.lastHit = millis();
     }
@@ -411,21 +401,21 @@ void loop()
   if (sendMidiCopy) // MIDI-clock has to be sent 24 times per quarter note
   {
     if (Globals::bSendMidiClock)
-      MIDI.sendRealTime(midi::Clock);
+      Hardware::sendMidiClock();
     noInterrupts();
     Globals::sendMidiClock = false;
     interrupts();
   }
 
   //----------------------- DO THINGS ONCE PER 32nd-step:--------------
-  rhythmics->run_beat(last_beat_pos, Drumset::instruments, MIDI);
+  rhythmics->run_beat(last_beat_pos, Drumset::instruments);
 
   //////////////////////////////// RHYTHMICS //////////////////////////
   /////////////////////////////////////////////////////////////////////
 
   if (Globals::current_beat_pos != last_beat_pos) // run once per 32nd-step
   {
-    Globals::active_song->trigger_function(MIDI);
+    Globals::active_song->trigger_function();
 
     //----------------------- RHYTHMICS END ---------------------------
 
@@ -461,11 +451,11 @@ void loop()
   for (auto &instrument : Drumset::instruments)
   {
     // tidying up what's left from performing functions..
-    instrument->tidyUp(MIDI);
+    instrument->tidyUp();
 
     // tentative: turn volca note off after instruments' specific stroke threshold
     if (millis() > instrument->timing.lastHit + instrument->sensitivity.delayAfterStroke * 30)
-      Synthesizers::volca->sendNoteOff(instrument->midi.notes[0], MIDI);
+      Synthesizers::volca->sendNoteOff(instrument->midi.notes[0]);
   }
 
   NanoKontrol::loop();

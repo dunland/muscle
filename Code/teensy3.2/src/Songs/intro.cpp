@@ -1,5 +1,5 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 /*
@@ -7,7 +7,7 @@
 */
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void run_intro(midi::MidiInterface<HardwareSerial> MIDI)
+void run_intro()
 {
 
     static int valueXgoal = 64, valueYgoal = 64, valueX, valueY;
@@ -27,10 +27,10 @@ void run_intro(midi::MidiInterface<HardwareSerial> MIDI)
             Drumset::snare->setup_midi(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
             Drumset::snare->set_effect(Change_CC);
 
-            Synthesizers::mKorg->sendProgramChange(78, MIDI); // b.27
-            Synthesizers::kaossPad3->sendProgramChange(58, MIDI);
+            Synthesizers::mKorg->sendProgramChange(78); // b.27
+            Synthesizers::kaossPad3->sendProgramChange(58);
 
-            Synthesizers::kaossPad3->sendControlChange(92, 127, MIDI); // Touch Pad on
+            Synthesizers::kaossPad3->sendControlChange(92, 127); // Touch Pad on
 
         }
 
@@ -48,16 +48,16 @@ void run_intro(midi::MidiInterface<HardwareSerial> MIDI)
 
         // successive approximation:
         valueX = (valueX < valueXgoal) ? valueX + (valueXgoal - valueX) / 5 : valueX - (valueX - valueXgoal) / 5;
-        Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_x, valueX, MIDI);
+        Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_x, valueX);
         valueY = (valueY < valueYgoal) ? valueY + (valueYgoal - valueY) / 5 : valueY - (valueY - valueYgoal) / 5;
-        Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_y, valueY, MIDI);
+        Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_y, valueY);
 
         /* CC-values are printed automatically */
 
         break;
 
     default:
-        Synthesizers::kaossPad3->sendControlChange(92, 0, MIDI); // Touch Pad off
+        Synthesizers::kaossPad3->sendControlChange(92, 0); // Touch Pad off
         Globals::active_song->proceed_to_next_score();
         Globals::active_song->step = 0;
         break;

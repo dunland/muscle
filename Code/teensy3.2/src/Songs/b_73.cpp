@@ -1,17 +1,17 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
 // b.73: heavy tonal noise Trigger
-void run_b_73(midi::MidiInterface<HardwareSerial> MIDI)
+void run_b_73()
 {
 
     switch (Globals::active_song->step)
     {
     case 0:
         Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
-        Synthesizers::mKorg->sendProgramChange(114, MIDI);
+        Synthesizers::mKorg->sendProgramChange(114);
         // notes.push_back(int(random(24, 48)));
         Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
 

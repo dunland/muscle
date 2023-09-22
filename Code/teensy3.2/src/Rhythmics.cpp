@@ -4,9 +4,9 @@
 #include <JSON.h>
 #include <Instruments.h>
 #include <Song.h>
-#include <MIDI.h>
 
-void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instruments, midi::MidiInterface<HardwareSerial> MIDI)
+
+void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instruments)
 {
     static boolean toggleLED = true;
 
@@ -103,7 +103,7 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         // perform timed pin actions according to current beat:
         for (auto &instrument : instruments)
         {
-            instrument->perform(instruments, MIDI);
+            instrument->perform(instruments);
         }
     }
 }

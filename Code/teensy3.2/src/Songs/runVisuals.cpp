@@ -1,10 +1,10 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 
 //////////////////////////// A.72 /////////////////////////////
-void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
+void run_visuals()
 {
     // skips thorugh visual levels by pressing footswitch
 
@@ -43,7 +43,7 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
             Serial.println("Improvisation");
 
             Globals::active_song->notes.push_back(31);                              // G
-            Synthesizers::mKorg->sendProgramChange(91, MIDI); // switches to Voice B.44
+            Synthesizers::mKorg->sendProgramChange(91); // switches to Voice B.44
 
             Drumset::hihat->set_effect(TapTempo);
         }
@@ -68,7 +68,7 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
         // send the value to dd200:
         if (previous_delay_time != delay_time) // prevent hangup at 0
         {
-            Synthesizers::dd200->sendControlChange(dd200_DelayTime, int(delay_time), MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_DelayTime, int(delay_time));
         }
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print(delay_time);
@@ -83,8 +83,8 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
             /* keine Noten */
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57
-            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3, MIDI);
+            Synthesizers::mKorg->sendProgramChange(38); // selects mKORG Voice A.57
+            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3);
 
         }
         Hardware::lcd->setCursor(0, 0);
@@ -104,9 +104,9 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
         Hardware::lcd->print("Sattelstein");
 
         if (Synthesizers::mKorg->notes[55] == false)
-            Synthesizers::mKorg->sendNoteOn(55, MIDI); // play note 55 (G) if it is not playing at the moment
+            Synthesizers::mKorg->sendNoteOn(55); // play note 55 (G) if it is not playing at the moment
         if (Synthesizers::mKorg->notes[43] == false)
-            Synthesizers::mKorg->sendNoteOn(43, MIDI); // play note 43 (G) if it is not playing at the moment
+            Synthesizers::mKorg->sendNoteOn(43); // play note 43 (G) if it is not playing at the moment
         break;
 
     case 5: // KupferUndGold
@@ -114,12 +114,12 @@ void run_visuals(midi::MidiInterface<HardwareSerial> MIDI)
         {
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
-            Synthesizers::mKorg->sendNoteOff(55, MIDI); // play note 55 (G) if it is not playing at the moment
-            Synthesizers::mKorg->sendNoteOff(43, MIDI); // play note 43 (G) if it is not playing at the moment
+            Synthesizers::mKorg->sendNoteOff(55); // play note 55 (G) if it is not playing at the moment
+            Synthesizers::mKorg->sendNoteOff(43); // play note 43 (G) if it is not playing at the moment
 
             Serial.println("KupferUndGold");
-            Synthesizers::mKorg->sendProgramChange(38, MIDI); // selects mKORG Voice A.57 to stop notes
-            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3, MIDI); // delay_time = 82!
+            Synthesizers::mKorg->sendProgramChange(38); // selects mKORG Voice A.57 to stop notes
+            Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3); // delay_time = 82!
 
         }
         Hardware::lcd->setCursor(0, 0);

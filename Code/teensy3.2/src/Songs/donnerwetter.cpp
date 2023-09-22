@@ -1,5 +1,5 @@
 #include <Song.h>
-#include <MIDI.h>
+
 #include <Instruments.h>
 #include <Hardware.h>
 /*
@@ -7,7 +7,7 @@
 */
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
+void run_donnerwetter()
 {
     switch (Globals::active_song->step)
     {
@@ -15,7 +15,7 @@ void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
     case 0:
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, MIDI);
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0);
         }
         break;
 
@@ -40,7 +40,7 @@ void run_donnerwetter(midi::MidiInterface<HardwareSerial> MIDI)
         break;
 
     default:
-        Synthesizers::mKorg->sendNoteOff(31, MIDI);
+        Synthesizers::mKorg->sendNoteOff(31);
         Globals::active_song->proceed_to_next_score();
         Globals::active_song->step = 0;
         break;
