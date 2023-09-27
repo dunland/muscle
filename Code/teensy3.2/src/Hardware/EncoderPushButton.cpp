@@ -52,46 +52,52 @@ void Hardware::checkPushButton()
 {
   static bool last_button_state = false;
   static unsigned long last_button_toggle = 1000; // some pre-delay to prevent initial misdetection
-  static unsigned long last_level_ascend = 0;
+  static unsigned long last_hold_trigger = 0;
+  static bool readyToPush = false;
 
   bool button_state = !digitalRead(PUSHBUTTON);
 
-  // BUTTON TOGGLE:
+  // ---------------------- BUTTON TOGGLE: ------------------
   if (button_state != last_button_state && millis() > last_button_toggle + 20) // button status changed
   {
-    switch (Globals::machine_state)
+    if (readyToPush)
     {
-    case Running:
-      if (button_state == false) // button released
+
+      switch (Globals::machine_state)
       {
-        Globals::active_song->proceed_to_next_score();
+      case Running:
+        if (button_state == false) // button released
+        {
+          Globals::active_song->proceed_to_next_score();
+        }
+        break;
+
+      case Calibrating:
+
+        if (button_state == false && millis() > last_button_toggle + 200) // button released
+        {
+          // save current encoder value:
+          encoder_value = encoder_count;
+
+          // go one level down and setup new mode:
+          Calibration::set(encoder_value);
+        }
+
+        break;
+
+      default:
+        Serial.println("no machine state for push button!");
+
+        break;
       }
-      break;
-
-    case Calibrating:
-
-      if (button_state == false && millis() > last_button_toggle + 200) // button released
-      {
-        // save current encoder value:
-        encoder_value = encoder_count;
-
-        // go one level down and setup new mode:
-        Calibration::set(encoder_value);
-      }
-
-      break;
-
-    default:
-      Serial.println("no machine state for push button!");
-
-      break;
     }
     last_button_state = button_state;
     last_button_toggle = millis();
+    readyToPush = true;
   }
 
-  // BUTTON HOLD:
-  else if (button_state == true && millis() > last_button_toggle + 3000 && millis() > 5000 && millis() > last_level_ascend + 3000) // pressed for 3s
+  // -------------------- BUTTON HOLD: ----------------------
+  else if (button_state == true && millis() > last_button_toggle + 1000 && millis() > 5000 && millis() > last_hold_trigger + 1000) // button pushed + held for 1000ms
   {
     switch (Globals::machine_state)
     {
@@ -135,12 +141,13 @@ void Hardware::checkPushButton()
       default:
         break;
       }
-      last_level_ascend = millis();
       break;
-      
+
     default:
       break;
     }
+    last_hold_trigger = millis();
+    readyToPush = false; // button needs to be pushed first before next action upon release
   }
 }
 

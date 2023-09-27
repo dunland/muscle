@@ -7,9 +7,10 @@
    ------------------------------------
    ------------------------------------
 */
-/* --------------------------------------------------------------------- */
-/* ------------------------------- GLOBAL ------------------------------ */
-/* --------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------
+ --------------------------------- GLOBAL -----------------------------
+ ------------------------------------------------------------------- */
 
 #include <Arduino.h>
 #include <vector>
@@ -27,13 +28,17 @@
 #include <Calibration.h>
 #include <SD.h>
 
-// ----------------------------- settings -----------------------------
 const String VERSION_NUMBER = "1.0.0";
-const boolean DO_PRINT_JSON = false;
-const boolean DO_PRINT_TO_CONSOLE = true;
-const boolean DO_PRINT_BEAT_SUM = false;
-const boolean DO_USE_RESPONSIVE_CALIBRATION = false;
+
+//---------------------- Global / Debug values ----------------------
+
 const boolean USING_TSUNAMI = false;
+boolean Devtools::use_responsiveCalibration = false;
+boolean Devtools::do_print_beat_sum = false; // prints active_score->beat_sum topography array
+boolean Devtools::do_print_to_console = true;
+boolean Devtools::do_print_JSON = false;
+boolean Devtools::do_send_to_processing = false;
+boolean Devtools::printStrokes = true;
 
 // ----------------------------- variables ----------------------------
 
@@ -135,13 +140,6 @@ void test_SD()
 
 void setup()
 {
-  //---------------------- Global / Debug values ----------------------
-
-  Devtools::use_responsiveCalibration = DO_USE_RESPONSIVE_CALIBRATION;
-  Devtools::do_print_beat_sum = DO_PRINT_BEAT_SUM; // prints active_score->beat_sum topography array
-  Devtools::do_print_to_console = DO_PRINT_TO_CONSOLE;
-  Devtools::do_print_JSON = DO_PRINT_JSON;
-
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
   pinMode(FOOTSWITCH, INPUT_PULLUP);
@@ -225,8 +223,12 @@ void setup()
   Drumset::tom1->setup_sensitivity(TOM1_THRESHOLD, TOM1_CROSSINGS, TOM1_DELAY_AFTER_STROKE, TOM1_FIRST_STROKE);
 
   // try to override sensitivity with data from SD:
-  if (SD.exists("sense.txt"))
-    JSON::read_sensitivity_data_from_SD(Drumset::instruments);
+  // if (SD.exists("sense.txt"))
+  if (!JSON::read_sensitivity_data_from_SD(Drumset::instruments))
+    Globals::bUsingSDCard = true;
+
+  // else
+  //   Devtools::println_to_console("No SD card found. Using hard-coded sensitivity data from settings.h");
 
   // ------------------ calculate noise floor -------------------------
   for (auto &instrument : Drumset::instruments)
@@ -373,7 +375,7 @@ void loop()
     if (instrument->stroke_detected()) // evaluates pins for activity repeatedly
     {
       // ----------------------- perform pin action -------------------
-      instrument->trigger();        // runs trigger function according to instrument's EffectType
+      instrument->trigger();            // runs trigger function according to instrument's EffectType
       instrument->timing.wasHit = true; // a flag to show that the instrument was hit (for transmission via JSON)
 
       Synthesizers::volca->sendNoteOn(instrument->midi.notes[0]);
@@ -458,6 +460,7 @@ void loop()
       Synthesizers::volca->sendNoteOff(instrument->midi.notes[0]);
   }
 
-  NanoKontrol::loop();
+  if (Devtools::do_print_to_console)
+    NanoKontrol::loop();
 }
 // --------------------------------------------------------------------

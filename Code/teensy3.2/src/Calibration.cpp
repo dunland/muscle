@@ -13,7 +13,7 @@ void Calibration::setup()
     selected_instrument = Drumset::instruments[0];
 }
 
-// invoked by pushButton:
+// set LCD menu using pushButton:
 void Calibration::set(int val)
 {
     Hardware::lcd->clear();

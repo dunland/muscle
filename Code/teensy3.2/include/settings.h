@@ -111,4 +111,4 @@
 //////////////////////////////// CORE /////////////////////////////////
 
 #define STARTUP_TIME_WAIT_FOR_USB 5000
-#define ENCODER_TIMEOUT 100
+#define ENCODER_TIMEOUT 200

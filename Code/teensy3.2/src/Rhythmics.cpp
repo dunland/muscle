@@ -5,7 +5,7 @@
 #include <Instruments.h>
 #include <Song.h>
 
-
+// do things once per 32nd-step:
 void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instruments)
 {
     static boolean toggleLED = true;
@@ -21,7 +21,7 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
 
         // -------------------------- 32nd-notes --------------------------
         if (Devtools::do_send_to_processing)
-        Devtools::println_to_console("");
+            Devtools::println_to_console("");
 
         // print millis and current beat:
         if (Devtools::do_send_to_processing)
@@ -69,7 +69,7 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
             Devtools::print_to_console(instrument->output_string);
             instrument->output_string = "\t";
         }
-            Devtools::println_to_console("");
+        Devtools::println_to_console("");
 
         // sum up all topographies of all instruments:
         // Globals::active_song->beat_sum.reset();

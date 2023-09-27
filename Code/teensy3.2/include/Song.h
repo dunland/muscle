@@ -24,8 +24,8 @@ public:
 
         // add a bass note to Score
         notes.push_back(int(random(36, 48)));
-        Devtools::print_to_console("active_score->note[0] = ");
-        Devtools::println_to_console(notes[0]);
+        // Devtools::print_to_console("active_score->note[0] = ");
+        // Devtools::println_to_console(notes[0]);
         name = songName;
         setup_state = true;
     }

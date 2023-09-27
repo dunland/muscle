@@ -116,17 +116,24 @@ void JSON::save_settings_to_SD(std::vector<Instrument *> instruments)
 
 // ----------- read instrument sentivity data from SD card: -----------
 String inString;
-void JSON::read_sensitivity_data_from_SD(std::vector<Instrument *> instruments)
+bool JSON::read_sensitivity_data_from_SD(std::vector<Instrument *> instruments)
 {
 
     Serial.print("Initializing SD card...");
     if (!SD.begin(BUILTIN_SDCARD))
     {
         Serial.println("initialization failed!");
-        return;
+        return 1;
     }
     Serial.println("initialization done.");
     File file = SD.open("sense.txt", FILE_READ);
+
+    if (!file)
+    {
+        Devtools::println_to_console("error opening sense.txt from SD card to read sensitivity data. Overwriting with data from settings.h...");
+        save_settings_to_SD(Drumset::instruments);
+        return 1;
+    }
     if (file)
     {
         while (file.available())
@@ -147,8 +154,6 @@ void JSON::read_sensitivity_data_from_SD(std::vector<Instrument *> instruments)
 
         Devtools::println_to_console("reading sensitivity data from SD card complete.");
     }
-    else
-    {
-        Devtools::println_to_console("error opening sense.txt from SD card to read sensitivity data.");
-    }
+
+    return 0;
 }
