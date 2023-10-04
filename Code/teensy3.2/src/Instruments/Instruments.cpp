@@ -234,8 +234,8 @@ void Instrument::setInstrumentPrintString()
       output_string = "!■\t"; // Kickdrum
     else if (drumtype == Cowbell)
       output_string = "!▲\t"; // Cowbell
-    else if (drumtype == Standtom1)
-      output_string = "!□\t"; // Standtom1
+    else if (drumtype == Standtom)
+      output_string = "!□\t"; // Standtom
     else if (drumtype == Standtom2)
       output_string = "!O\t"; // Standtom2
     else if (drumtype == Hihat)
@@ -259,8 +259,8 @@ void Instrument::setInstrumentPrintString()
       output_string = "■\t"; // Kickdrum
     else if (drumtype == Cowbell)
       output_string = "▲\t"; // Cowbell
-    else if (drumtype == Standtom1)
-      output_string = "□\t"; // Standtom1
+    else if (drumtype == Standtom)
+      output_string = "□\t"; // Standtom
     else if (drumtype == Standtom2)
       output_string = "O\t"; // Standtom2
     else if (drumtype == Hihat)
@@ -427,11 +427,11 @@ Instrument *Drumset::hihat = new Instrument(INPUT_PIN_HIHAT, Hihat);
 Instrument *Drumset::kick = new Instrument(INPUT_PIN_KICK, Kick);
 Instrument *Drumset::tom1 = new Instrument(INPUT_PIN_TOM1, Tom1);
 Instrument *Drumset::tom2 = new Instrument(INPUT_PIN_TOM2, Tom2);
-Instrument *Drumset::standtom = new Instrument(INPUT_PIN_STANDTOM, Standtom1);
+Instrument *Drumset::standtom = new Instrument(INPUT_PIN_STANDTOM, Standtom);
 Instrument *Drumset::crash1 = new Instrument(INPUT_PIN_CRASH1, Crash1);
 Instrument *Drumset::ride = new Instrument(INPUT_PIN_RIDE, Ride);
 
-std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom1, Drumset::standtom};
+std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom1, Drumset::standtom, Drumset::crash1};
 
 // instantiate external MIDI devices:
 Synthesizer *Synthesizers::mKorg = new Synthesizer(MIDI_CHANNEL_MICROKORG, "mKRG");

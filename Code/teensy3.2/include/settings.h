@@ -44,8 +44,8 @@
 // right - encoder1 (3)
 // middle - ground (GND)
 // left - encoder2 (6)
-#define ENCODER1 3
-#define ENCODER2 6
+#define ENCODER1 6
+#define ENCODER2 3
 #define PUSHBUTTON 28 // 7 on teensy3.2
 
 //////////////////////////////// PIEZO INPUTS /////////////////////////
@@ -111,4 +111,4 @@
 //////////////////////////////// CORE /////////////////////////////////
 
 #define STARTUP_TIME_WAIT_FOR_USB 5000
-#define ENCODER_TIMEOUT 200
+#define ENCODER_TIMEOUT 100

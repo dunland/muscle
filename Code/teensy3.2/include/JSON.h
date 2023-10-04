@@ -14,4 +14,6 @@ class JSON
 
     static bool read_sensitivity_data_from_SD(std::vector<Instrument *> instruments);
 
+    static String inString;
+
 };

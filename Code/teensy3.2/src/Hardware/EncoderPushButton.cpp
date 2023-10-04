@@ -29,7 +29,7 @@ void Hardware::checkEncoder()
         encoder_count--;
       encoder_oldPosition = encoder_newPosition;
       if (encoder_count < 100 && encoder_previous_count >= 100)
-        lcd->clear();
+        lcd->clear(); // clear when crossing 3-digit-number
       encoder_previous_count = encoder_count;
     }
 
@@ -112,6 +112,7 @@ void Hardware::checkPushButton()
     case Calibrating:
       switch (Calibration::calibration_mode)
       {
+        // root menu level:
       case Select_Instrument:
 
         // leave calibration mode:
@@ -128,11 +129,13 @@ void Hardware::checkPushButton()
         Hardware::lcd->clear();
         break;
 
+      // 1st menu level
       case Select_Sensitivity_Param: // ascend back to Instrument Selection
         Calibration::calibration_mode = Select_Instrument;
         Hardware::lcd->clear();
         break;
 
+      // 2nd menu level
       case Set_Value:
         Calibration::calibration_mode = Select_Sensitivity_Param;
         Hardware::lcd->clear();

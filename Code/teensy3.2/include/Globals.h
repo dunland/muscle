@@ -23,7 +23,7 @@ enum DrumType
   Kick,
   Tom1,
   Tom2,
-  Standtom1,
+  Standtom,
   Cowbell,
   Standtom2,
   Ride,

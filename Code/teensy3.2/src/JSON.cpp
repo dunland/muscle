@@ -10,6 +10,51 @@
 #include <Song.h>
 #include <SD.h>
 
+void test_SD()
+{
+    File myFile;
+    const int chipSelect = BUILTIN_SDCARD;
+
+    Serial.print("Initializing SD card...");
+    if (!SD.begin(chipSelect))
+    {
+        Serial.println("initialization failed!");
+        return;
+    }
+    Serial.println("initialization done.");
+    myFile = SD.open("/test.txt", FILE_WRITE); //append to file
+    if (myFile)
+    {
+        Serial.print("Writing to test.txt...");
+        myFile.println("testing 1, 2, 3.");
+        myFile.close();
+        Serial.println("done.");
+    }
+    else
+    {
+        Serial.println("error opening test.txt to write");
+    }
+    myFile = SD.open("/test.txt", FILE_READ); //read from file
+    if (myFile)
+    {
+        Serial.println("test.txt:");
+        String inString; //need to use Strings because of the ESP32 webserver
+        while (myFile.available())
+        {
+            inString += myFile.readString();
+        }
+        myFile.close();
+        Serial.print(inString);
+    }
+    else
+    {
+        Serial.println("error opening test.txt to read");
+    }
+    Globals::bUsingSDCard = true;
+}
+
+String JSON::inString;
+
 // sends JSON as Serial information over port "Serial" (via USB)
 void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 {
@@ -76,7 +121,7 @@ void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 // --------- write instrument sensitivity data to file on SD: --------
 void JSON::save_settings_to_SD(std::vector<Instrument *> instruments)
 {
-    StaticJsonDocument<512> doc;
+    StaticJsonDocument<1024> doc;
 
     for (auto &instrument : instruments)
     {
@@ -92,30 +137,38 @@ void JSON::save_settings_to_SD(std::vector<Instrument *> instruments)
     if (!SD.begin(BUILTIN_SDCARD))
     {
         Serial.println("initialization failed!");
+        Hardware::lcd->setCursor(0, 1);
+        Hardware::lcd->print("SD init error");
         return;
     }
     Serial.println("initialization done.");
 
     // (WORKAROUND) remove existing file, otherwise data will be appended and cannot be read
-    if (SD.exists("sense.txt"))
-        SD.remove("sense.txt");
+    if (SD.exists("muscle.txt"))
+        SD.remove("muscle.txt");
 
-    File file = SD.open("sense.txt", FILE_WRITE); // seems to only work whith short file names
+    File file = SD.open("muscle.txt", FILE_WRITE); // seems to only work whith short file names
     // TODO: overwrite instead of append data
     if (file)
     {
         serializeJson(doc, file);
         file.close();
         Devtools::println_to_console("sensitivity data was saved to SD card.");
+        Hardware::lcd->setCursor(0, 1);
+        Hardware::lcd->print("settings saved to SD");
+
+        Serial.println("data contained on SD/muscle.txt:");
+        Serial.println(JSON::inString);
     }
     else
     {
         Devtools::println_to_console("error writing sensitivity data to SD card.");
+        Hardware::lcd->setCursor(0, 1);
+        Hardware::lcd->print("SD error");
     }
 }
 
 // ----------- read instrument sentivity data from SD card: -----------
-String inString;
 bool JSON::read_sensitivity_data_from_SD(std::vector<Instrument *> instruments)
 {
 
@@ -123,14 +176,16 @@ bool JSON::read_sensitivity_data_from_SD(std::vector<Instrument *> instruments)
     if (!SD.begin(BUILTIN_SDCARD))
     {
         Serial.println("initialization failed!");
+        Hardware::lcd->setCursor(0, 1);
+        Hardware::lcd->print("SD init error");
         return 1;
     }
     Serial.println("initialization done.");
-    File file = SD.open("sense.txt", FILE_READ);
+    File file = SD.open("muscle.txt", FILE_READ);
 
     if (!file)
     {
-        Devtools::println_to_console("error opening sense.txt from SD card to read sensitivity data. Overwriting with data from settings.h...");
+        Devtools::println_to_console("error opening muscle.txt from SD card to read sensitivity data. Overwriting with data from settings.h...");
         save_settings_to_SD(Drumset::instruments);
         return 1;
     }
@@ -141,7 +196,7 @@ bool JSON::read_sensitivity_data_from_SD(std::vector<Instrument *> instruments)
             inString += file.readString();
         }
         file.close();
-        StaticJsonDocument<512> doc;
+        StaticJsonDocument<1024> doc;
         deserializeJson(doc, inString);
 
         for (auto &instrument : instruments)
@@ -152,7 +207,11 @@ bool JSON::read_sensitivity_data_from_SD(std::vector<Instrument *> instruments)
             instrument->timing.countAfterFirstStroke = doc[Globals::DrumtypeToHumanreadable(instrument->drumtype)]["countAfterFirstStroke"];
         }
 
-        Devtools::println_to_console("reading sensitivity data from SD card complete.");
+        Devtools::println_to_console("reading sensitivity data from SD card complete. Data contained on SD/muscle.txt:");
+        Devtools::println_to_console(inString);
+
+        Hardware::lcd->setCursor(0, 1);
+        Hardware::lcd->print("loaded from SD");
     }
 
     return 0;

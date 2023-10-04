@@ -123,10 +123,10 @@ String Globals::DrumtypeToHumanreadable(DrumType type)
 		return "Tom1";
 	case Tom2:
 		return "Tom2";
-	case Standtom1:
-		return "S_Tom1";
+	case Standtom:
+		return "STom1";
 	case Standtom2:
-		return "S_Tom2";
+		return "STom2";
 	case Ride:
 		return "Ride";
 	case Crash1:

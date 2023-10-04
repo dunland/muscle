@@ -91,49 +91,6 @@ void samplePins()
   }
 }
 
-void test_SD()
-{
-  File myFile;
-  const int chipSelect = BUILTIN_SDCARD;
-
-  Serial.print("Initializing SD card...");
-  if (!SD.begin(chipSelect))
-  {
-    Serial.println("initialization failed!");
-    return;
-  }
-  Serial.println("initialization done.");
-  myFile = SD.open("/test.txt", FILE_WRITE); //append to file
-  if (myFile)
-  {
-    Serial.print("Writing to test.txt...");
-    myFile.println("testing 1, 2, 3.");
-    myFile.close();
-    Serial.println("done.");
-  }
-  else
-  {
-    Serial.println("error opening test.txt to write");
-  }
-  myFile = SD.open("/test.txt", FILE_READ); //read from file
-  if (myFile)
-  {
-    Serial.println("test.txt:");
-    String inString; //need to use Strings because of the ESP32 webserver
-    while (myFile.available())
-    {
-      inString += myFile.readString();
-    }
-    myFile.close();
-    Serial.print(inString);
-  }
-  else
-  {
-    Serial.println("error opening test.txt to read");
-  }
-  Globals::bUsingSDCard = true;
-}
-
 ///////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// SETUP //////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -165,10 +122,7 @@ void setup()
     }
   }
 
-  // test_SD();
   SD.begin(BUILTIN_SDCARD);
-
-  // delay(1000); // alternative to line above, if run with external power (no computer)
 
   // -------------------------------- MIDI ----------------------------
   Hardware::begin_MIDI();
@@ -222,13 +176,10 @@ void setup()
   Drumset::ride->setup_sensitivity(RIDE_THRESHOLD, RIDE_CROSSINGS, RIDE_DELAY_AFTER_STROKE, RIDE_FIRST_STROKE);
   Drumset::tom1->setup_sensitivity(TOM1_THRESHOLD, TOM1_CROSSINGS, TOM1_DELAY_AFTER_STROKE, TOM1_FIRST_STROKE);
 
-  // try to override sensitivity with data from SD:
-  // if (SD.exists("sense.txt"))
   if (!JSON::read_sensitivity_data_from_SD(Drumset::instruments))
+  {
     Globals::bUsingSDCard = true;
-
-  // else
-  //   Devtools::println_to_console("No SD card found. Using hard-coded sensitivity data from settings.h");
+  }
 
   // ------------------ calculate noise floor -------------------------
   for (auto &instrument : Drumset::instruments)
