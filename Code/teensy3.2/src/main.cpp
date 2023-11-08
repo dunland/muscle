@@ -1,7 +1,7 @@
 /*
    SUPER MUSCLE
    ------------------------------------
-   October 2020-September 2023
+   October 2020-November 2023
    by David Unland email[at]davidunland[dot]de
    github.com/dunland/muscle
    ------------------------------------
@@ -14,7 +14,6 @@
 
 #include <Arduino.h>
 #include <vector>
-// #include <Tsunami.h>
 #include <ArduinoJson.h>
 #include <settings.h>
 #include <Globals.h>
@@ -129,17 +128,6 @@ void setup()
 
   // -------------------- Hardware initialization ---------------------
 
-  // if (USING_TSUNAMI)
-  // {
-  //   delay(1000);              // wait for Tsunami to finish reset // redundant?
-  //   Globals::tsunami.start(); // Tsunami startup at 57600. ATTENTION: Serial Channel is selected in Tsunami.h !!!
-  //   delay(100);
-  //   Globals::tsunami.stopAllTracks(); // in case Tsunami was already playing.
-  //   Globals::tsunami.samplerateOffset(0, 0);
-  //   Globals::tsunami.setReporting(true); // Enable track reporting from the Tsunami
-  //   delay(100);                          // some time for Tsunami to respond with version string
-  // }
-
   // LCD
   Hardware::lcd->begin(16, 2);
   Hardware::lcd->setCursor(0, 0);
@@ -216,13 +204,13 @@ void setup()
   Globals::songlist.push_back(new Song(run_A_72, "intro"));
   Globals::songlist.push_back(new Song(run_PogoNumberOne, "pogoNumberOne"));
   Globals::songlist.push_back(new Song(run_hutschnur, "hutschnur"));
-  Globals::songlist.push_back(new Song(run_randomSelect, "randomSelect"));
+  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
   Globals::songlist.push_back(new Song(run_wueste, "wueste"));
-  Globals::songlist.push_back(new Song(run_randomSelect, "randomSelect"));
+  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
   Globals::songlist.push_back(new Song(run_besen, "besen"));
-  Globals::songlist.push_back(new Song(run_randomSelect, "randomSelect"));
+  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
   Globals::songlist.push_back(new Song(run_alhambra, "alhambra"));
-  Globals::songlist.push_back(new Song(run_randomSelect, "randomSelect"));
+  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
   Globals::songlist.push_back(new Song(run_monitoring, "mrWimbledon")); // mrWimbledon
   Globals::songlist.push_back(new Song(run_roeskur, "roeskur"));
   Globals::songlist.push_back(new Song(run_sattelstein, "sattelstein"));
