@@ -13,12 +13,12 @@ void run_randomVoice()
         Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
         Synthesizers::mKorg->sendProgramChange(int(random(0, 128)));
         // notes.push_back(int(random(24, 48)));
-        Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+        Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
 
-        Drumset::kick->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-        Drumset::tom1->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-        Drumset::tom2->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 50, -0.1);
-        Drumset::standtom->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+        Drumset::kick->setup_midi(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
+        Drumset::tom1->setup_midi(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
+        Drumset::tom2->setup_midi(CC_None, Synthesizers::mKorg, 115, 15, 50, -0.1);
+        Drumset::standtom->setup_midi(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
         Drumset::tom2->setup_midi(CC_None, Synthesizers::mKorg, 115, 15, 20, -0.06);
 
         Globals::active_song->step = 1;

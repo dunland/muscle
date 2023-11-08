@@ -49,14 +49,18 @@
 #define PUSHBUTTON 28 // 7 on teensy3.2
 
 //////////////////////////////// PIEZO INPUTS /////////////////////////
+
+// ATTENTION: PCB-Layout ist falsch!!
+// PCB-pin 38 == teensy-pin 16 == A2 statt A0!!
+
 #define INPUT_PIN_CRASH1 A9
-#define INPUT_PIN_KICK A4
-#define INPUT_PIN_STANDTOM A5
+#define INPUT_PIN_KICK A3
+#define INPUT_PIN_STANDTOM A4
 #define INPUT_PIN_RIDE A8
-#define INPUT_PIN_SNARE A3
-#define INPUT_PIN_HIHAT A2
-#define INPUT_PIN_TOM1 A6
-#define INPUT_PIN_TOM2 A7
+#define INPUT_PIN_SNARE A2
+#define INPUT_PIN_HIHAT A6
+#define INPUT_PIN_TOM1 A7
+#define INPUT_PIN_TOM2 A5
 
 #define SNARE_THRESHOLD 40
 #define SNARE_CROSSINGS 3
