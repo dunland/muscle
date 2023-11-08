@@ -16,6 +16,7 @@ void run_donnerwetter()
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0);
+            Synthesizers::whammy->sendProgramChange(83); // Whammy off!!
         }
         break;
 

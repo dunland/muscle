@@ -22,7 +22,7 @@ void run_besen()
 
             Synthesizers::mKorg->sendProgramChange(62); // corresponds A.87
             Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 80); // set loudness to 80
-            Synthesizers::whammy->sendProgramChange(58); // HARMONY UP 5TH / UP 6TH
+            Synthesizers::whammy->sendProgramChange(83); // whammy aus
 
             delay(50);
             Synthesizers::mKorg->sendNoteOn(Note_D6);
@@ -37,17 +37,12 @@ void run_besen()
 
         break;
 
-    case 1: // turn notes off
+    case 1: // Teil B: MIDI-Clock aus
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::mKorg->sendNoteOff(Note_D6);
-            Synthesizers::mKorg->sendNoteOff(Note_F6);
-            Synthesizers::mKorg->sendProgramChange(62); // restart to stop Arp)
-
+            Drumset::hihat->set_effect(Monitor); // no more tempo trigger
         }
 
-        Hardware::lcd->setCursor(0, 0);
-        Hardware::lcd->print(Globals::current_BPM);
         Hardware::lcd->setCursor(10, 1);
         Hardware::lcd->print("stop");
 

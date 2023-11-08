@@ -14,6 +14,8 @@ void run_monitoring()
 
             Synthesizers::kaossPad3->sendControlChange(92, 0); // Touch Pad off - JUST BECAUSE ALHAMBRA IS BEFORE!// TODO: execute this when leaving the song with push button! at best, by using callback functions for song.proceed_to_next_score
 
+            Synthesizers::whammy->sendProgramChange(83); // Whammy off!!
+
             Hardware::footswitch_mode = Increment_Score;
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
