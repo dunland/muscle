@@ -17,6 +17,8 @@ void run_wueste()
             Synthesizers::dd200->sendProgramChange(1);  // Program #1
             Globals::tapInterval = 500;
             Globals::current_BPM = 120;
+            Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
+
             Hardware::footswitch_mode = Increment_Score;
         }
         break;

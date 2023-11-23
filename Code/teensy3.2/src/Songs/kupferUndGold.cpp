@@ -15,6 +15,9 @@ void run_kupferUndGold()
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 127);
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3);
             Synthesizers::whammy->sendProgramChange(62); // HARMONY UP OCT → UP 2 OCT
+            Globals::current_BPM = 81;
+            Globals::tapInterval = 740;
+            Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM
 
         }
         break;
@@ -23,7 +26,6 @@ void run_kupferUndGold()
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::whammy->sendProgramChange(58); // HARMONY UP 5TH → UP  OCT
-
         }
         break;
 
