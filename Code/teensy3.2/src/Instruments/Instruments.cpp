@@ -194,7 +194,7 @@ void Instrument::calculateNoiseFloor()
           totalSamples += analogRead(pin);
         }
         break;
-      };       // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
+      }; // calculate noiseFloor only after first stroke! noiseFloor seems to change with first stroke sometimes!
     Devtools::print_to_console(" >!<");
     delay(1000); // should be long enough for drum not to oscillate anymore
   }
@@ -292,7 +292,8 @@ void Instrument::setInstrumentPrintString()
 void Instrument::trigger()
 {
   // print instrument name to receive using external programs via Serial connection:
-  Serial.println(Globals::DrumtypeToHumanreadable(drumtype));
+  if (Devtools::use_serial_comm)
+    Serial.println(Globals::DrumtypeToHumanreadable(drumtype));
   Hardware::lcd->setCursor(12, 0);
   Hardware::lcd->print(Globals::DrumtypeToHumanreadable(drumtype));
 
@@ -431,7 +432,7 @@ Instrument *Drumset::standtom = new Instrument(INPUT_PIN_STANDTOM, Standtom);
 Instrument *Drumset::crash1 = new Instrument(INPUT_PIN_CRASH1, Crash1);
 Instrument *Drumset::ride = new Instrument(INPUT_PIN_RIDE, Ride);
 
-std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom1, Drumset::standtom};
+std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom1, Drumset::tom2, Drumset::standtom}; // TODO: add this to calibration mode
 
 // instantiate external MIDI devices:
 Synthesizer *Synthesizers::mKorg = new Synthesizer(MIDI_CHANNEL_MICROKORG, "mKRG");

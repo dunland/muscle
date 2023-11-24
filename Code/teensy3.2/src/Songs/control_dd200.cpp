@@ -182,7 +182,7 @@ void run_control_dd200()
                     delay_depth = 0;
             }
 
-            Synthesizers::dd200->sendControlChange(dd200_DelayDepth, int(delay_depth);
+            Synthesizers::dd200->sendControlChange(dd200_DelayFeedback, int(delay_depth);
             Synthesizers::dd200->sendControlChange(dd200_DelayLevel, int(delay_level);
 
             Hardware::lcd->setCursor(0, 0);
@@ -229,7 +229,7 @@ void run_control_dd200()
                 delay_level = max(0, delay_level - 0.3);
             }
 
-            Synthesizers::dd200->sendControlChange(dd200_DelayDepth, int(delay_time);
+            Synthesizers::dd200->sendControlChange(dd200_DelayFeedback, int(delay_time);
             Synthesizers::dd200->sendControlChange(dd200_DelayLevel, int(delay_level);
 
             Hardware::lcd->setCursor(0, 0);

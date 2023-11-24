@@ -35,9 +35,11 @@ const boolean USING_TSUNAMI = false;
 boolean Devtools::use_responsiveCalibration = false;
 boolean Devtools::do_print_beat_sum = false; // prints active_score->beat_sum topography array
 boolean Devtools::do_print_to_console = true;
+boolean Devtools::use_serial_comm = false; // sends instrument names upon stroke and song names, if true
 boolean Devtools::do_print_JSON = false;
 boolean Devtools::do_send_to_processing = false;
 boolean Devtools::printStrokes = true;
+boolean Devtools::overwrite_SD_data = true; // overwrites sensitivity data on SD card with settings.h
 
 // ----------------------------- variables ----------------------------
 
@@ -201,23 +203,25 @@ void setup()
   // Globals::songlist.push_back(new Song(run_b_36, "b_36"));
 
   Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
-  Globals::songlist.push_back(new Song(run_A_72, "intro"));
-  Globals::songlist.push_back(new Song(run_PogoNumberOne, "pogoNumberOne"));
-  Globals::songlist.push_back(new Song(run_hutschnur, "hutschnur"));
-  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
-  Globals::songlist.push_back(new Song(run_wueste, "wueste"));
-  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
-  Globals::songlist.push_back(new Song(run_besen, "besen"));
-  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
-  Globals::songlist.push_back(new Song(run_alhambra, "alhambra"));
-  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
-  Globals::songlist.push_back(new Song(run_monitoring, "mrWimbledon")); // mrWimbledon
-  Globals::songlist.push_back(new Song(run_roeskur, "roeskur"));
-  Globals::songlist.push_back(new Song(run_sattelstein, "sattelstein"));
-  Globals::songlist.push_back(new Song(run_theodolit, "theodolit"));
-  Globals::songlist.push_back(new Song(run_kupferUndGold, "kupferUndGold"));
-  Globals::songlist.push_back(new Song(run_donnerwetter, "donnerwetter"));
-  Globals::songlist.push_back(new Song(run_randomVoice, "randomSelect"));
+  Globals::songlist.push_back(new Song(run_sturmUndDrang, "sturmUndDrang"));
+  // Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
+  // Globals::songlist.push_back(new Song(run_A_72, "intro"));
+  // Globals::songlist.push_back(new Song(run_PogoNumberOne, "pogoNumberOne"));
+  // Globals::songlist.push_back(new Song(run_hutschnur, "hutschnur"));
+  // Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
+  // Globals::songlist.push_back(new Song(run_wueste, "wueste"));
+  // Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
+  // Globals::songlist.push_back(new Song(run_besen, "besen"));
+  // Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
+  // Globals::songlist.push_back(new Song(run_alhambra, "alhambra"));
+  // Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
+  // Globals::songlist.push_back(new Song(run_monitoring, "mrWimbledon")); // mrWimbledon
+  // Globals::songlist.push_back(new Song(run_roeskur, "roeskur"));
+  // Globals::songlist.push_back(new Song(run_sattelstein, "sattelstein"));
+  // Globals::songlist.push_back(new Song(run_theodolit, "theodolit"));
+  // Globals::songlist.push_back(new Song(run_kupferUndGold, "kupferUndGold"));
+  // Globals::songlist.push_back(new Song(run_donnerwetter, "donnerwetter"));
+  // Globals::songlist.push_back(new Song(run_randomVoice, "randomSelect"));
 
   // Globals::songlist.at(sizeof(Globals::songlist))->setTempoRange(150, 170); // TODO: make this work!
   // Globals::songlist.push_back(new Song(run_host));

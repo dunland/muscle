@@ -201,7 +201,7 @@ String Globals::CCTypeToHumanReadable(CC_Type type)
 		case mKORG_Release: 		return "Rls"; 				break;
 		case mKORG_DelayTime: 		return "dTim"; 				break;
 		// case DelayDepth: 		return "DelayDepth"; 		break;
-		case dd200_DelayDepth: 		return "dDpt";			 	break;
+		case dd200_DelayFeedback: 		return "dDpt";			 	break;
 		case mKORG_TimbreSelect: 	return "Tmbr"; 				break;
 		default: 					return "n.d.";		 		break;
 	}

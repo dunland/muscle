@@ -72,7 +72,7 @@ void Instrument::getTapTempo()
     //      tapState = 1;
     //      break;
 
-  case 1:                                                                              // first hit
+  case 1: // first hit
 
     if (millis() > timeSinceFirstTap + Globals::active_song->tempo.tapTempoResetTime) // reinitiate tap if not used for ten seconds
     {
@@ -97,8 +97,8 @@ void Instrument::getTapTempo()
       // check if score tempo was set, else define quarters are > 300 ms (< 200 BPM)
       // int quarter_timing = (Globals::active_song->tempo.min_tempo > 0) ? Globals::active_song->tempo.min_tempo : 300;
 
-      //TODO: re-apply tap-tempo quarter vs eighth notes differentiation
-      // if (Globals::tapInterval >= quarter_timing && Globals::tapInterval <= 60000 / Globals::active_song->tempo.max_tempo) // quarter notes when slow tapping; tapInterval must be within score tempo range
+      // TODO: re-apply tap-tempo quarter vs eighth notes differentiation
+      //  if (Globals::tapInterval >= quarter_timing && Globals::tapInterval <= 60000 / Globals::active_song->tempo.max_tempo) // quarter notes when slow tapping; tapInterval must be within score tempo range
       if (Globals::tapInterval >= 300)
       {
         Globals::current_BPM = 60000 / Globals::tapInterval;
@@ -230,9 +230,9 @@ void Instrument::mainNoteIteration(Synthesizer *synth_)
 
   if (millis() > lastNoteChange + 4000) // only do this once in an interval of 4 seconds, because there are always many hits on a cymbal..
   {
-    synth_->sendNoteOff(Globals::active_song->notes[Globals::active_song->note_idx]);                      // turn previous note off
+    synth_->sendNoteOff(Globals::active_song->notes[Globals::active_song->note_idx]);  // turn previous note off
     Globals::active_song->note_idx = (Globals::active_song->note_idx + 1) % Globals::active_song->notes.size(); // iterate note pointer
-    synth_->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx]);                       // turn next note on
+    synth_->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx]);  // turn next note on
 
     lastNoteChange = millis();
   }
@@ -276,7 +276,7 @@ void Instrument::swell_perform() // updates once a 32nd-beat-step
     {
 
       // Debug print:
-      //output_string[instr] = String(swell_val[instr]);
+      // output_string[instr] = String(swell_val[instr]);
       //      output_string[instr] = "[";
       //      output_string[instr] += String(swell_stroke_interval[instr]);
       //      output_string[instr] += "] ";
@@ -387,7 +387,7 @@ void Instrument::tsunamiLink()
   {
 
     // find right track from database:
-    //int tracknum = 0;
+    // int tracknum = 0;
     for (int j = 0; j < 8; j++)
     {
       if (topography.a_8[j] > 0)
@@ -413,7 +413,7 @@ void Instrument::tsunamiLink()
     score.tsunami_track = tracknum; // save for use in other functions
 
     // set loudness and fade:
-    //int trackLevel = min(-40 + (topography.average_smooth * 5), 0);
+    // int trackLevel = min(-40 + (topography.average_smooth * 5), 0);
     // int trackLevel = 0;                                                            // Debug
     // Globals::tsunami.trackFade(tracknum, trackLevel, Globals::tapInterval, false); // fade smoothly within length of a quarter note
 
@@ -451,7 +451,7 @@ void Instrument::tsunamiLink()
     //   Devtools::print_to_console("starting to play track ");
     //   Devtools::println_to_console(tracknum);
     // } // track playing end
-  }   // threshold end
+  } // threshold end
 
   // Debug:
   Devtools::print_to_console("[");
