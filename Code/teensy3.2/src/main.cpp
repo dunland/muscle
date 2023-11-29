@@ -312,10 +312,8 @@ void loop()
   // (define what should happen when instruments are hit)
   for (auto &instrument : Drumset::instruments)
   {
-    // if (instrument->effect == PlayMidi_rawPin || instrument->effect == CC_Effect_rawPin)
-    //  instrument->trigger(instrument;
-
-    if (instrument->stroke_detected()) // evaluates pins for activity repeatedly
+    // TODO: TEST THIS! (geändert am 23.11.23) instrument->trigger should only be called once per 32nd-step!?
+    if (instrument->stroke_detected() && !instrument->timing.wasHit) // evaluates pins for activity repeatedly
     {
       // ----------------------- perform pin action -------------------
       instrument->trigger();            // runs trigger function according to instrument's EffectType
