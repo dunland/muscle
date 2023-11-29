@@ -21,7 +21,7 @@ int NanoKontrol::incomingChannel = 0;
 int NanoKontrol::incomingValue = 0;
 
 const CC_Type dd200_controlValues[6] = {
-    dd200_DelayDepth,
+    dd200_DelayFeedback,
     dd200_DelayLevel,
     dd200_DelayTime,
     dd200_mod,
