@@ -1,12 +1,15 @@
 """
 receives Serial messages from SUPERMUSCLE (teensy) and opens hydra-synth in a webbrowser with a url corresponding to the received song name.
 
+MAKE SURE YOU HAVE A STABLE INTERNET CONNECTION WHILE STARTING THE APPLICATION!
 First hydra has to be started:
 
 ```
 cd path/to/github/hydra
 yarn dev
 ```
+
+then plug in SUPERMUSCLE & within its short startup time, do `python3 serial_to_hydra_url.py`
 
 dunland, 2023-09
 """
@@ -16,8 +19,10 @@ import time
 from selenium import webdriver
 
 driver = webdriver.Chrome()
+driver.get("http://localhost:8080/?sketch_id=intro")  # opens website
 
-accepted_messages = ['monitoring', 'intro', 'pogoNumberOne', 'hutschnur', 'randomSelect', 'wueste', 'besen', 'alhambra', 'mrWimbledon', 'roeskur', 'sattelstein', 'theodolit', 'kupferUndGold', 'donnerwetter']
+
+accepted_messages = ['intro', 'pogoNumberOne', 'hutschnur', 'randomVoice', 'wueste', 'besen', 'alhambra', 'mrWimbledon', 'roeskur', 'sattelstein', 'theodolit', 'kupferUndGold', 'donnerwetter']
 
 ser = serial.Serial('/dev/ttyACM0', 9600)
 # ser = serial.Serial('/dev/ttyACM0',
