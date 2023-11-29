@@ -166,10 +166,18 @@ void setup()
   Drumset::ride->setup_sensitivity(RIDE_THRESHOLD, RIDE_CROSSINGS, RIDE_DELAY_AFTER_STROKE, RIDE_FIRST_STROKE);
   Drumset::tom1->setup_sensitivity(TOM1_THRESHOLD, TOM1_CROSSINGS, TOM1_DELAY_AFTER_STROKE, TOM1_FIRST_STROKE);
 
-  if (!JSON::read_sensitivity_data_from_SD(Drumset::instruments))
+  // load data from SD:
+  if (!Devtools::overwrite_SD_data)
   {
-    Globals::bUsingSDCard = true;
+    if (!JSON::read_sensitivity_data_from_SD(Drumset::instruments))
+    {
+      Globals::bUsingSDCard = true;
+    }
   }
+
+  // or overwrite:
+  else
+    JSON::save_settings_to_SD(Drumset::instruments);
 
   // ------------------ calculate noise floor -------------------------
   for (auto &instrument : Drumset::instruments)
@@ -244,16 +252,6 @@ void setup()
   Drumset::tom1->midi.synth = Synthesizers::mKorg;
   Drumset::tom2->midi.synth = Synthesizers::mKorg;
   Drumset::standtom->midi.synth = Synthesizers::mKorg;
-
-  // an initial midi note must be defined, otherwise there is a problem with the tidyUp function
-  // Drumset::snare->midi.active_note = 50;
-  // Drumset::kick->midi.active_note = 50;
-  // Drumset::hihat->midi.active_note = 50;
-  // Drumset::crash1->midi.active_note = 50;
-  // Drumset::ride->midi.active_note = 50;
-  // Drumset::tom2->midi.active_note = 50;
-  // Drumset::standtom->midi.active_note = 50;
-  // Drumset::cowbell->midi.active_note = 50;
 
   // assign startup instrument effects:
   Drumset::hihat->effect = Monitor;

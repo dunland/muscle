@@ -13,6 +13,7 @@ void run_sturmUndDrang()
         if (Globals::active_song->get_setup_state())
         {
             Drumset::hihat->set_effect(TapTempo);
+            Synthesizers::mKorg->mKorg_arpOnOff(0); // Arp off
         }
 
         Hardware::lcd->setCursor(0, 0);
@@ -30,6 +31,7 @@ void run_sturmUndDrang()
             // Synthesizers::dd200->sendControlChange(dd200_OnOff, 0);
 
             Synthesizers::mKorg->sendProgramChange(57); // corresponds A.82 // TODO: create enum with all programs...
+            Synthesizers::mKorg->mKorg_arpOnOff(127); // Arp on
             // Synthesizers::whammy->sendProgramChange(83); // whammy aus
             Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 80);
 

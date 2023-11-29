@@ -12,7 +12,8 @@ void run_A_25()
 
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127); // Apreggiator on
+            // Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 127); // Apreggiator on
+            Synthesizers::mKorg->mKorg_arpOnOff(127); // Arp on
 
             Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
             Synthesizers::mKorg->sendProgramChange(12);
