@@ -129,4 +129,6 @@ public:
   void sendNoteOff(int note);
 
   void sendProgramChange(int number);
+
+  void whammyPedal(int value);
 };

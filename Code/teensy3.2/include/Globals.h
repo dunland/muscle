@@ -92,7 +92,10 @@ enum CC_Type
   KP3_Sample_A = 36,
   KP3_Sample_B = 37,
   KP3_Sample_C = 38,
-  KP3_Sample_D = 39
+  KP3_Sample_D = 39,
+
+  // whammy CC Channels:
+  whammyPedal = 11
 
 };
 

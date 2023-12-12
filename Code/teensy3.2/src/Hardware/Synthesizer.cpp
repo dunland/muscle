@@ -72,3 +72,9 @@ void Synthesizer::sendProgramChange(int number)
 {
   MIDI.sendProgramChange(number, midi_channel);
 }
+
+void Synthesizer::whammyPedal(int value){
+  Serial2.write(midi_channel);
+  Serial2.write(11);
+  Serial2.write(value);
+}
