@@ -13,6 +13,7 @@ public:
     static boolean use_serial_comm;
     static boolean do_print_beat_sum; // prints Score::beat_sum topography array
     static boolean do_print_JSON;     // determines whether to use USB Serial communication for monitoring via processing/console or not
+    static bool overwrite_SD_data;
 
     // DEBUG FUNCTIONS: ---------------------------------------------------
     // print the play log to Serial monitor:

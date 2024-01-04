@@ -180,12 +180,13 @@ String Globals::CCTypeToHumanReadable(CC_Type type)
 {
 	switch (type)
 	{
-		case CC_None: 					return "None"; 				break;
+		case CC_None: 				return "None"; 				break;
 		case dd200_DelayTime: 		return "dTim"; 				break;
-		case mKORG_Osc2_semitone: 	return "O2smi"; 			break;
+		case dd200_DelayFeedback: 	return "dFbk";			 	break;
 		case dd200_param:			return "dprm";				break;
+		case dd200_DelayLevel: 		return "dLvl";		 		break;
+		case mKORG_Osc2_semitone: 	return "O2smi"; 			break;
 		// case Osc2_tune: 			return "Osc2_tune"; 		break;
-		case dd200_DelayLevel: 		return "dLvl";			 	break;
 		case mKORG_Mix_Level_1: 	return "Mix1"; 				break;
 		case mKORG_Mix_Level_2: 	return "Mix2";		 		break;
 		case dd200_OnOff: 			return "OnOf";		 		break;
@@ -200,8 +201,6 @@ String Globals::CCTypeToHumanReadable(CC_Type type)
 		case mKORG_Sustain: 		return "sus"; 				break;
 		case mKORG_Release: 		return "Rls"; 				break;
 		case mKORG_DelayTime: 		return "dTim"; 				break;
-		// case DelayDepth: 		return "DelayDepth"; 		break;
-		case dd200_DelayFeedback: 		return "dDpt";			 	break;
 		case mKORG_TimbreSelect: 	return "Tmbr"; 				break;
 		default: 					return "n.d.";		 		break;
 	}

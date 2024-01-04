@@ -80,7 +80,7 @@ enum CC_Type
   dd200_mod = 21,
   dd200_param = 22,
   dd200_OnOff = 27,
-  dd200_DelayDepth = 94,
+  dd200_DelayFeedback = 94,
 
   // KP3 CC Channels:
   KP3_touch_pad_x = 12,
