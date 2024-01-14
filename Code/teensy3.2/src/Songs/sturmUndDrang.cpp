@@ -7,6 +7,9 @@
 //////////////////////////// ZITTERAAL /////////////////////////////
 void run_sturmUndDrang()
 {
+
+    static float mKorgAmpLvl;
+
     switch (Globals::active_song->step)
     {
     case 0: // nichts
@@ -35,12 +38,26 @@ void run_sturmUndDrang()
 
             delay(50);
             Synthesizers::mKorg->sendNoteOn(Note_D5);
+            mKorgAmpLvl = 0;
+
+            // Synthesizers::dd200->sendControlChange(dd200_DelayTime, ) // Timing für DD200 einstellen? 145BPM bzw 415ms.. kann man leider nicht mit MIDI so genau einstellen.
+        }
+
+        // TODO: anschwellende synt-latustaerke
+        if (mKorgAmpLvl < 102)
+        {
+            mKorgAmpLvl += 0.5;
+            Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, int(mKorgAmpLvl));
         }
 
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print(Globals::current_BPM);
         Hardware::lcd->setCursor(3, 0);
         Hardware::lcd->print("D");
+        Hardware::lcd->setCursor(5, 0);
+        Hardware::lcd->print("V");
+        Hardware::lcd->setCursor(6, 0);
+        Hardware::lcd->print(int(mKorgAmpLvl));
 
         break;
 
@@ -54,7 +71,6 @@ void run_sturmUndDrang()
             // Synthesizers::dd200->sendControlChange(dd200_OnOff, 0);
 
             Synthesizers::mKorg->sendProgramChange(57); // corresponds A.82 // TODO: create enum with all programs...
-            Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 102);
 
             delay(50);
             Synthesizers::mKorg->sendNoteOff(Note_D5);
@@ -69,7 +85,6 @@ void run_sturmUndDrang()
         Hardware::lcd->print("D+D+F");
 
         break;
-
 
     case 3: // alles zerhechseln
         if (Globals::active_song->get_setup_state())
