@@ -32,17 +32,17 @@ void run_A_72()
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, 1); // Select Timbre 2
 
             Drumset::tom1->set_effect(Change_CC);
-            Drumset::tom1->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 127, 29, 3, -0.035);
+            Drumset::tom1->addMidiTarget(mKORG_Cutoff, Synthesizers::mKorg, 127, 29, 3, -0.035);
 
             Drumset::standtom->set_effect(Change_CC);
-            Drumset::standtom->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 127, 29, 5, -0.05);
+            Drumset::standtom->addMidiTarget(mKORG_Resonance, Synthesizers::mKorg, 127, 29, 5, -0.05);
 
-            Drumset::kick->midi.notes.push_back(Globals::active_song->notes[0] + 44);
-            Drumset::kick->midi.active_note = Drumset::kick->midi.notes[0];
+            Drumset::kick->midiTargets.back()->notes.push_back(Globals::active_song->notes[0] + 44);
+            Drumset::kick->midiTargets.back()->active_note = Drumset::kick->midiTargets.back()->notes[0];
             Drumset::kick->set_effect(PlayMidi);
 
-            Drumset::snare->midi.notes.push_back(Globals::active_song->notes[0] + 49);
-            Drumset::snare->midi.active_note = Drumset::snare->midi.notes[0];
+            Drumset::snare->midiTargets.back()->notes.push_back(Globals::active_song->notes[0] + 49);
+            Drumset::snare->midiTargets.back()->active_note = Drumset::snare->midiTargets.back()->notes[0];
             Drumset::snare->set_effect(PlayMidi);
 
         }

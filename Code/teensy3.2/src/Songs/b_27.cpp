@@ -22,29 +22,29 @@ void run_b_27()
                         // Drumset::tom1->midi.notes = {Note_D6, Note_F7, Note_G7};
 
                         int idx = random(sizeof(notes));
-                        Drumset::kick->midi.notes.push_back(notes[idx]);
-                        Drumset::kick->midi.active_note = notes[idx];
-                        idx = random(sizeof(notes));
-                        Drumset::snare->midi.notes.push_back(notes[idx]);
-                        Drumset::snare->midi.active_note = notes[idx];
-                        idx = random(sizeof(notes));
-                        Drumset::standtom->midi.notes.push_back(notes[idx]);
-                        Drumset::standtom->midi.active_note = notes[idx];
-                        idx = random(sizeof(notes));
-                        Drumset::tom1->midi.notes.push_back(notes[idx]);
-                        Drumset::tom1->midi.active_note = notes[idx];
+                        Drumset::snare->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+                        Drumset::standtom->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+                        Drumset::tom1->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
 
-                        Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-                        Drumset::standtom->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-                        Drumset::tom1->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+                        Drumset::kick->midiTargets.back()->notes.push_back(notes[idx]);
+                        Drumset::kick->midiTargets.back()->active_note = notes[idx];
+                        idx = random(sizeof(notes));
+                        Drumset::snare->midiTargets.back()->notes.push_back(notes[idx]);
+                        Drumset::snare->midiTargets.back()->active_note = notes[idx];
+                        idx = random(sizeof(notes));
+                        Drumset::standtom->midiTargets.back()->notes.push_back(notes[idx]);
+                        Drumset::standtom->midiTargets.back()->active_note = notes[idx];
+                        idx = random(sizeof(notes));
+                        Drumset::tom1->midiTargets.back()->notes.push_back(notes[idx]);
+                        Drumset::tom1->midiTargets.back()->active_note = notes[idx];
 
                         Drumset::snare->set_effect(PlayMidi);
                         Drumset::standtom->set_effect(PlayMidi);
                         Drumset::tom1->set_effect(PlayMidi);
                 }
 
-                if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[Drumset::snare->midi.active_note - 12] == false)
-                        Synthesizers::mKorg->sendNoteOn(Drumset::snare->midi.active_note - 12);
+                if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[Drumset::snare->midiTargets.back()->active_note - 12] == false)
+                        Synthesizers::mKorg->sendNoteOn(Drumset::snare->midiTargets.back()->active_note - 12);
 
                 if (Drumset::kick->timing.wasHit)
                 {
@@ -61,14 +61,14 @@ void run_b_27()
                 if (Globals::active_song->get_setup_state())
                 {
                         int idx = random(sizeof(notes));
-                        Drumset::kick->midi.active_note = notes[idx];
+                        Drumset::kick->midiTargets.back()->active_note = notes[idx];
                         idx = random(sizeof(notes));
-                        Drumset::snare->midi.active_note = notes[idx];
+                        Drumset::snare->midiTargets.back()->active_note = notes[idx];
 
                         idx = random(sizeof(notes));
-                        Drumset::standtom->midi.active_note = notes[idx];
+                        Drumset::standtom->midiTargets.back()->active_note = notes[idx];
                         idx = random(sizeof(notes));
-                        Drumset::tom1->midi.active_note = notes[idx];
+                        Drumset::tom1->midiTargets.back()->active_note = notes[idx];
                 }
 
                 if (Drumset::kick->timing.wasHit)

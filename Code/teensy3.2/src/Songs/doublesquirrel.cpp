@@ -34,22 +34,22 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
         //     // drums → playMidi (Volca)
 
         //     // assign random-cc-effect to cymbals:
-        //     crash1->setup_midi(None,Synthesizers::mKorg);
+        //     crash1->addMidiTarget(None,Synthesizers::mKorg);
         //     crash1->set_effect(Random_CC_Effect);
-        //     ride->setup_midi(None,Synthesizers::mKorg);
+        //     ride->addMidiTarget(None,Synthesizers::mKorg);
         //     ride->set_effect(Random_CC_Effect);
 
         //     // set list of notes for kick, snare, tom, standtom
-        //     kick->set_notes(locrian_mode);
-        //     snare->set_notes(locrian_mode);
-        //     tom2->set_notes(locrian_mode);
-        //     standtom->set_notes(locrian_mode);
+        //     kick->allocateNotesToTarget(locrian_mode);
+        //     snare->allocateNotesToTarget(locrian_mode);
+        //     tom2->allocateNotesToTarget(locrian_mode);
+        //     standtom->allocateNotesToTarget(locrian_mode);
 
         //     // drums play on Volca:
-        //     kick->setup_midi(None, volca);
-        //     snare->setup_midi(None, volca);
-        //     tom2->setup_midi(None, volca);
-        //     standtom->setup_midi(None, volca);
+        //     kick->addMidiTarget(None, volca);
+        //     snare->addMidiTarget(None, volca);
+        //     tom2->addMidiTarget(None, volca);
+        //     standtom->addMidiTarget(None, volca);
 
         //     // proceed in note lists:
         //     note_idx = (note_idx + 1) % locrian_mode.size();
@@ -68,7 +68,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
         //     standtom->set_effect(PlayMidi);
 
         //     // add locrian mode
-        //     active_song->set_notes({locrian_mode[0], locrian_mode[1], locrian_mode[2]});
+        //     active_song->allocateNotesToTarget({locrian_mode[0], locrian_mode[1], locrian_mode[2]});
 
         //     // start bass note:
         //     active_song->playSingleNote(Synthesizers::mKorg;
@@ -94,10 +94,10 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
         //   if (active_song->setup)
         //   {
         //     // add locrian mode
-        //     active_song->set_notes({locrian_mode[7], locrian_mode[4], locrian_mode[3], locrian_mode[0]});
+        //     active_song->allocateNotesToTarget({locrian_mode[7], locrian_mode[4], locrian_mode[3], locrian_mode[0]});
 
         //     // set crash1 to change main note:
-        //     crash1->setup_midi(None,Synthesizers::mKorg);
+        //     crash1->addMidiTarget(None,Synthesizers::mKorg);
         //     crash1->set_effect(MainNoteIteration);
 
         //     // define interval when to change notes:
@@ -146,7 +146,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
             // assign effects to instruments:
             // the hihat will change the allocated (AmpLevel) value on the synth, whenever hit:
             hihat->effect = Change_CC;
-            hihat->setup_midi(mKORG_Amplevel, Synthesizers::mKorg, 127, 0, 0.65, 0);
+            hihat->addMidiTarget(mKORG_Amplevel, Synthesizers::mKorg, 127, 0, 0.65, 0);
 
             // these instruments do not play a role here. just print out what they do:
             snare->effect = Monitor;
@@ -164,9 +164,9 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
             Synthesizers::mKorg->sendNoteOn(randomNote);
 
         Devtools::print_to_console("amplevel_val = ");
-        Devtools::println_to_console(hihat->midi.cc_val);
+        Devtools::println_to_console(hihat->midiTargets.back()->cc_val);
 
-        if (hihat->midi.cc_val >= 127)
+        if (hihat->midiTargets.back()->cc_val >= 127)
         {
             active_song->beat_sum.activation_thresh = 0; // score step is ready
         }
@@ -181,24 +181,24 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
         {
             // assign effects to instruments:
             kick->set_effect(PlayMidi);
-            // kick->setup_midi(None, Synthesizers::volca, 127, 0, 1, 0.1);
-            kick->midi.notes.push_back(active_song->notes[0] + 12 + 7);
-            kick->midi.active_note = kick->midi.notes[0];
+            // kick->addMidiTarget(None, Synthesizers::volca, 127, 0, 1, 0.1);
+            kick->midiTargets.back()->notes.push_back(active_song->notes[0] + 12 + 7);
+            kick->midiTargets.back()->active_note = kick->midiTargets.back()->notes[0];
 
             Devtools::print_to_console("note for kick is: ");
-            Devtools::print_to_console(kick->midi.notes[0]);
+            Devtools::print_to_console(kick->midiTargets.back()->notes[0]);
             Devtools::print_to_console(" active note:");
-            Devtools::println_to_console(kick->midi.active_note);
+            Devtools::println_to_console(kick->midiTargets.back()->active_note);
 
             snare->set_effect(PlayMidi);
-            snare->setup_midi(CC_None, Synthesizers::volca, 127, 0, 1, 0.1);
-            snare->midi.notes.push_back(active_song->notes[0] + 24);
-            snare->midi.active_note = snare->midi.notes[0];
+            snare->addMidiTarget(CC_None, Synthesizers::volca, 127, 0, 1, 0.1);
+            snare->midiTargets.back()->notes.push_back(active_song->notes[0] + 24);
+            snare->midiTargets.back()->active_note = snare->midiTargets.back()->notes[0];
 
             Devtools::print_to_console("note for snare is: ");
-            Devtools::print_to_console(snare->midi.notes[0]);
+            Devtools::print_to_console(snare->midiTargets.back()->notes[0]);
             Devtools::print_to_console(" active note:");
-            Devtools::println_to_console(snare->midi.active_note);
+            Devtools::println_to_console(snare->midiTargets.back()->active_note);
         }
         break;
 
@@ -232,10 +232,10 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
             crash1->effect = Change_CC;
 
             // midi channels (do not use any Type twice → smaller/bigger will be ignored..)
-            snare->setup_midi(mKORG_Osc2_tune, Synthesizers::mKorg, 127, 13, 15, -0.1);
-            kick->setup_midi(mKORG_Amplevel, Synthesizers::mKorg, 127, 80, -35, 0.1);
-            ride->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
-            crash1->setup_midi(mKORG_Patch_3_Depth, Synthesizers::mKorg, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
+            snare->addMidiTarget(mKORG_Osc2_tune, Synthesizers::mKorg, 127, 13, 15, -0.1);
+            kick->addMidiTarget(mKORG_Amplevel, Synthesizers::mKorg, 127, 80, -35, 0.1);
+            ride->addMidiTarget(mKORG_Resonance, Synthesizers::mKorg, 127, 0, 0.4, -0.1);      // TODO: implement oscillation possibility
+            crash1->addMidiTarget(mKORG_Patch_3_Depth, Synthesizers::mKorg, 127, 64, 2, -0.1); // Patch 3 is Pitch on A.63; extends -63-0-63 → 0-64-127
         }
 
         // change cutoff with overall beat_sum until at max
@@ -260,9 +260,9 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
         {
             active_song->beat_sum.activation_thresh = 15;
             snare->effect = Change_CC;
-            snare->setup_midi(mKORG_Osc2_tune, Synthesizers::mKorg, 64, 0, 1, 0);      // does not decrease
-            kick->setup_midi(mKORG_DelayDepth, Synthesizers::mKorg, 127, 0, 50, -0.1); // TODO: implement oscillation possibility
-            ride->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 127, 13, -0.7, 0.1);   // TODO: implement oscillation possibility
+            snare->addMidiTarget(mKORG_Osc2_tune, Synthesizers::mKorg, 64, 0, 1, 0);      // does not decrease
+            kick->addMidiTarget(mKORG_DelayDepth, Synthesizers::mKorg, 127, 0, 50, -0.1); // TODO: implement oscillation possibility
+            ride->addMidiTarget(mKORG_Cutoff, Synthesizers::mKorg, 127, 13, -0.7, 0.1);   // TODO: implement oscillation possibility
         }
 
         // increase osc2_semitone with beat_sum until at 0
@@ -270,7 +270,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
         osc2_semitone_val = max(0, min(127, osc2_semitone_val));
 
         Devtools::print_to_console("\n -- Osc2-tune = ");
-        Devtools::print_to_console(snare->midi.cc_val);
+        Devtools::print_to_console(snare->midiTargets.back()->cc_val);
         Devtools::println_to_console(" --");
 
         break;
@@ -286,7 +286,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
 
             // cutoff on tom2:
             tom2->effect = Change_CC;
-            tom2->setup_midi(mKORG_Cutoff, Synthesizers::mKorg, 127, 20, 30, -0.1);
+            tom2->addMidiTarget(mKORG_Cutoff, Synthesizers::mKorg, 127, 20, 30, -0.1);
             ride->effect = Monitor;
             snare->effect = Monitor;
 
@@ -310,11 +310,11 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
             // active_song->add_bassNote(active_song->notes[0] + int(random(6)));
 
             snare->effect = PlayMidi;
-            snare->midi.active_note = active_song->notes[0] + 24 + 7;
+            snare->midiTargets.back()->active_note = active_song->notes[0] + 24 + 7;
             tom2->effect = PlayMidi;
-            tom2->midi.active_note = active_song->notes[0] + 24 + 3;
+            tom2->midiTargets.back()->active_note = active_song->notes[0] + 24 + 3;
             standtom->effect = PlayMidi;
-            standtom->midi.active_note = active_song->notes[0] + 12 + 4;
+            standtom->midiTargets.back()->active_note = active_song->notes[0] + 12 + 4;
 
             kick->effect = Monitor;
         }

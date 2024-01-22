@@ -78,12 +78,12 @@ void run_sturmUndDrang()
             Synthesizers::mKorg->sendProgramChange(0); // workaround: disable arp...
 
             Drumset::standtom->set_effect(Change_CC);
-            Drumset::standtom->setup_midi(dd200_mod, Synthesizers::dd200, 127, 0, 4, -0.02);
+            Drumset::standtom->addMidiTarget(dd200_mod, Synthesizers::dd200, 127, 0, 4, -0.02);
 
             Drumset::kick->set_effect(Change_CC);
-            Drumset::kick->setup_midi(dd200_DelayTime, Synthesizers::dd200, 107, 20, 10, -0.2);
+            Drumset::kick->addMidiTarget(dd200_DelayTime, Synthesizers::dd200, 107, 20, 10, -0.2);
 
-            Drumset::snare->setup_midi(whammyPedal, Synthesizers::whammy, 127, 0, 20, -1);
+            Drumset::snare->addMidiTarget(whammyPedal, Synthesizers::whammy, 127, 0, 20, -1);
             Drumset::snare->set_effect(Change_CC);
         }
 

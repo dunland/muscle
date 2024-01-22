@@ -107,9 +107,9 @@ void JSON::compose_and_send_json(std::vector<Instrument *> instruments)
 
         // instrument values:
         instr["wasHit"] = instrument->timing.wasHit;
-        instr["cc_val"] = instrument->midi.cc_val;
-        instr["cc_increase"] = instrument->midi.cc_increase_factor;
-        instr["cc_decay"] = instrument->midi.cc_tidyUp_factor;
+        instr["cc_val"] = -1; // TODO: instrument->midiTarget.cc_val;
+        instr["cc_increase"] = -1; // TODO: instrument->midiTarget.cc_increase_factor;
+        instr["cc_decay"] = -1; // TODO: instrument->midiTarget.cc_tidyUp_factor;
         instr["effect"] = Globals::EffectstypeToHumanReadable(instrument->effect);
     }
 

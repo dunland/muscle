@@ -236,14 +236,14 @@ void setup()
   Globals::active_song = Globals::songlist.at(0);
 
   // link midi synth to instruments:
-  Drumset::snare->midi.synth = Synthesizers::mKorg;
-  Drumset::kick->midi.synth = Synthesizers::mKorg;
-  Drumset::hihat->midi.synth = Synthesizers::mKorg;
-  Drumset::crash1->midi.synth = Synthesizers::mKorg;
-  Drumset::ride->midi.synth = Synthesizers::mKorg;
-  Drumset::tom1->midi.synth = Synthesizers::mKorg;
-  Drumset::tom2->midi.synth = Synthesizers::mKorg;
-  Drumset::standtom->midi.synth = Synthesizers::mKorg;
+//   Drumset::snare->midiTarget.synth = Synthesizers::mKorg;
+//   Drumset::kick->midiTarget.synth = Synthesizers::mKorg;
+//   Drumset::hihat->midiTarget.synth = Synthesizers::mKorg;
+//   Drumset::crash1->midiTarget.synth = Synthesizers::mKorg;
+//   Drumset::ride->midiTarget.synth = Synthesizers::mKorg;
+//   Drumset::tom1->midiTarget.synth = Synthesizers::mKorg;
+//   Drumset::tom2->midiTarget.synth = Synthesizers::mKorg;
+//   Drumset::standtom->midiTarget.synth = Synthesizers::mKorg;
 
   // an initial midi note must be defined, otherwise there is a problem with the tidyUp function
   // Drumset::snare->midi.active_note = 50;
@@ -321,7 +321,7 @@ void loop()
       instrument->trigger();            // runs trigger function according to instrument's EffectType
       instrument->timing.wasHit = true; // a flag to show that the instrument was hit (for transmission via JSON)
 
-      Synthesizers::volca->sendNoteOn(instrument->midi.notes[0]);
+    //   TODO: send song notes! //Synthesizers::volca->sendNoteOn(instrument->midiTarget.notes[0]);
 
       instrument->timing.lastHit = millis();
     }
@@ -399,8 +399,8 @@ void loop()
     instrument->tidyUp();
 
     // tentative: turn volca note off after instruments' specific stroke threshold
-    if (millis() > instrument->timing.lastHit + instrument->sensitivity.delayAfterStroke * 30)
-      Synthesizers::volca->sendNoteOff(instrument->midi.notes[0]);
+    // TODO: volca: send song notes! // if (millis() > instrument->timing.lastHit + instrument->sensitivity.delayAfterStroke * 30)
+    //   Synthesizers::volca->sendNoteOff(instrument->midiTarget.notes[0]);
   }
 
   if (Devtools::do_print_to_console)

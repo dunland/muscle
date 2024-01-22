@@ -208,6 +208,17 @@ void Hardware::display_scores()
 // display midi values of instruments with FX-Type CC_Change
 void Hardware::display_Midi_values()
 {
+
+  const int toggleTime = 1000; // ms timeout to iterate midiTargets
+  static unsigned long lastToggle;
+  static int toggleIndex = 0;
+
+  if (millis() > (lastToggle + toggleTime))
+  {
+    toggleIndex++;
+    lastToggle = millis();
+  }
+
     for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
     {
         if (Drumset::instruments[i]->effect == Change_CC)
@@ -215,7 +226,7 @@ void Hardware::display_Midi_values()
             Hardware::lcd->setCursor(((i % 4) * 4), int(i >= 4));
             Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[i]->drumtype)[0]);
             Hardware::lcd->setCursor(((i % 4) * 4) + 1, int(i >= 4));
-            Hardware::lcd->print(int(Drumset::instruments[i]->midi.cc_val));
+            Hardware::lcd->print(int(Drumset::instruments[i]->midiTargets.at(toggleIndex % Drumset::instruments[i]->midiTargets.size())->cc_val));
         }
     }
 }

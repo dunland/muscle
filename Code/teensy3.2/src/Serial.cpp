@@ -9,6 +9,20 @@
 #include <Hardware.h>
 #include <Song.h>
 
+#define NANOKONTROL_FADER_1 0
+#define NANOKONTROL_FADER_2 1
+#define NANOKONTROL_FADER_3 2
+#define NANOKONTROL_FADER_4 3
+#define NANOKONTROL_KNOB_2 17
+#define NANOKONTROL_KNOB_3 18
+#define NANOKONTROL_KNOB_4 19
+#define NANOKONTROL_KNOB_5 20
+
+#define NANOKONTROL_INSTRUMENT 0
+#define NANOKONTROL_CC_TYPE 1
+#define NANOKONTROL_CC_MIN 2
+#define NANOKONTROL_CC_MAX 3
+
 char NanoKontrol::address1[NanoKontrol::numChars] = {0};
 char NanoKontrol::address2[NanoKontrol::numChars] = {0};
 int NanoKontrol::incomingInt = 0;
@@ -16,7 +30,15 @@ bool NanoKontrol::newData = false;
 char NanoKontrol::receivedChars[numChars];
 char NanoKontrol::tempChars[numChars]; // temporary array for use when parsing
 Instrument *NanoKontrol::instrument = Drumset::instruments[0];
-int NanoKontrol::paramsToChange[4] = {NanoKontrol::SET_INSTRUMENT, NanoKontrol::SET_CC_TYPE, NanoKontrol::SET_CC_MIN, NanoKontrol::SET_CC_MAX};
+Instrument::MIDI_TARGET *NanoKontrol::midiTarget = Drumset::instruments[0]->midiTargets.at(0);
+
+// {0:instrument, 1:CCtype, 2:CCmin, 3:CCmax}
+int NanoKontrol::paramsToChange[4] = {
+    NanoKontrol::SET_INSTRUMENT,
+    NanoKontrol::SET_CC_TYPE,
+    NanoKontrol::SET_CC_MIN,
+    NanoKontrol::SET_CC_MAX};
+
 int NanoKontrol::incomingChannel = 0;
 int NanoKontrol::incomingValue = 0;
 
@@ -90,8 +112,9 @@ void NanoKontrol::recvWithStartEndMarkers()
 
 // --------------------------------------------------------------------
 
+// split the data into its parts
 void NanoKontrol::parseData()
-{ // split the data into its parts
+{
 
     char *strtokIndx; // this is used by strtok() as an index
 
@@ -116,6 +139,7 @@ void NanoKontrol::parseData()
 
 // --------------------------------------------------------------------
 
+// translate incoming NanoKontrol-Fader and -Knobs Values to internal variables
 void NanoKontrol::allocateData()
 {
     // Serial.print("address 1: ");
@@ -132,31 +156,35 @@ void NanoKontrol::allocateData()
 
     switch (incomingChannel)
     {
-    case 0: // Fader 1: select instrument
+    case NANOKONTROL_FADER_1: // Fader 1: select instrument
     {
         instrument = instruments[int(float(incomingInt) / 127.0 * (instruments.size() - 1))];
     }
     break;
 
-    case 17: // Knob 2: CC_Type or MIDI destination
+    case NANOKONTROL_KNOB_2: // Knob 2: select midi target
+        midiTarget = instrument->midiTargets.at(incomingValue % instrument->midiTargets.size());
+        break;
+
+    case NANOKONTROL_KNOB_3: // Knob 3: CC_Type or MIDI destination
     {
         paramsToChange[1] = (incomingValue >= 64) ? SET_CC_TYPE : SET_DEST; // always set cc_type.. TODO: implement destination setting and allow all according CC_Types (below)!
     }
     break;
 
-    case 1: // Fader 2: set CC_Type
+    case NANOKONTROL_FADER_2: // Fader 2: set CC_Type
     {
         switch (paramsToChange[1])
         {
         case SET_CC_TYPE:
-            if (instrument->midi.synth == Synthesizers::dd200)
-                instrument->midi.cc_chan = dd200_controlValues[int(float(incomingValue) / 127.0 * sizeof(dd200_controlValues) / sizeof(dd200_controlValues[0]))];
-            else if (instrument->midi.synth == Synthesizers::mKorg)
-                instrument->midi.cc_chan = mKorg_controlValues[int(float(incomingValue) / 127.0 * sizeof(mKorg_controlValues) / sizeof(mKorg_controlValues[0]))];
+            if (midiTarget->synth == Synthesizers::dd200)
+                midiTarget->cc_type = dd200_controlValues[int(float(incomingValue) / 127.0 * sizeof(dd200_controlValues) / sizeof(dd200_controlValues[0]))];
+            else if (instrument->midiTargets.at(paramsToChange[1])->synth == Synthesizers::mKorg)
+                midiTarget->cc_type = mKorg_controlValues[int(float(incomingValue) / 127.0 * sizeof(mKorg_controlValues) / sizeof(mKorg_controlValues[0]))];
             break;
 
         case SET_DEST:
-            instrument->midi.synth = (incomingValue >= 64) ? Synthesizers::mKorg : Synthesizers::dd200;
+            midiTarget->synth = (incomingValue >= 64) ? Synthesizers::mKorg : Synthesizers::dd200;
             break;
 
         default:
@@ -165,18 +193,18 @@ void NanoKontrol::allocateData()
     }
     break;
 
-    case 18: // Knob 3: set type
+    case NANOKONTROL_KNOB_4: // Knob 3: set type
         paramsToChange[2] = (incomingValue < 64) ? SET_CC_MIN : SET_INCREASE;
         break;
 
-    case 2: // Fader 3: set value
+    case NANOKONTROL_FADER_3: // Fader 3: set value
         switch (paramsToChange[2])
         {
         case SET_CC_MIN:
-            instrument->midi.cc_min = incomingValue;
+            midiTarget->cc_min = incomingValue;
             break;
         case SET_INCREASE:
-            instrument->midi.cc_increase_factor = map(float(incomingValue), 0.0, 127.0, -10.0, 10.0);
+            midiTarget->cc_increase_factor = map(float(incomingValue), 0.0, 127.0, -10.0, 10.0);
             break;
         default:
             break;
@@ -184,18 +212,18 @@ void NanoKontrol::allocateData()
 
         break;
 
-    case 19: // Knob 4: set type
+    case NANOKONTROL_KNOB_5: // Knob 5: set type
         paramsToChange[3] = (incomingValue < 64) ? SET_CC_MAX : SET_DECREASE;
         break;
 
-    case 3: // Fader 4 : set value
+    case NANOKONTROL_FADER_4: // Fader 4 : set value
         switch (paramsToChange[3])
         {
         case SET_CC_MAX:
-            instrument->midi.cc_max = incomingValue;
+            midiTarget->cc_max = incomingValue;
             break;
         case SET_DECREASE:
-            instrument->midi.cc_tidyUp_factor = map(float(incomingValue), 0.0, 127.0, -2.0, 2.0);
+            midiTarget->cc_tidyUp_factor = map(float(incomingValue), 0.0, 127.0, -2.0, 2.0);
             break;
 
         default:
@@ -217,7 +245,7 @@ void NanoKontrol::allocateData()
     // menu[3][1] = decrease;
 
     // // instrument                          param    value
-    // instruments(menu[0][0])->midi.cc_chan = menu[0][1];
+    // instruments(menu[0][0])->midi.cc_type = menu[0][1];
     // instruments(menu[0][0])->midi.cc_min = menu[2][0];
     // instruments(menu[0][0])->midi.cc_min = menu[2][0];
 }
@@ -237,7 +265,8 @@ void NanoKontrol::loop()
         printToSerial();
         newData = false;
     }
-       if (Globals::machine_state == NanoKontrol_Test) printToLCD();
+    if (Globals::machine_state == NanoKontrol_Test)
+        printToLCD();
 }
 
 // --------------------------------------------------------------------
@@ -270,23 +299,23 @@ void NanoKontrol::printToLCD()
 
     Hardware::lcd->setCursor(4, 1);
     if (paramsToChange[1] == SET_CC_TYPE)
-        Hardware::lcd->print(Globals::CCTypeToHumanReadable(instrument->midi.cc_chan));
+        Hardware::lcd->print(Globals::CCTypeToHumanReadable(midiTarget->cc_type));
     else if (paramsToChange[1] == SET_DEST)
         Hardware::lcd->print("DST?");
 
     Hardware::lcd->setCursor(8, 1);
     if (paramsToChange[2] == SET_CC_MIN)
-        Hardware::lcd->print(instrument->midi.cc_min);
+        Hardware::lcd->print(midiTarget->cc_min);
     else if (paramsToChange[2] == SET_INCREASE)
-        Hardware::lcd->print(instrument->midi.cc_increase_factor);
+        Hardware::lcd->print(midiTarget->cc_increase_factor);
 
     Hardware::lcd->setCursor(12, 1);
     if (paramsToChange[3] == SET_CC_MAX)
-        Hardware::lcd->print(Hardware::lcd->print(instrument->midi.cc_max));
+        Hardware::lcd->print(Hardware::lcd->print(midiTarget->cc_max));
     else if (paramsToChange[3] == SET_DECREASE)
-        Hardware::lcd->print(Hardware::lcd->print(instrument->midi.cc_tidyUp_factor));
+        Hardware::lcd->print(Hardware::lcd->print(midiTarget->cc_tidyUp_factor));
 }
-    // ----------------------- print to Serial ------------------------
+// ----------------------- print to Serial ------------------------
 void NanoKontrol::printToSerial()
 {
     Serial.print("INT\t");
@@ -309,21 +338,21 @@ void NanoKontrol::printToSerial()
     Serial.print("\t");
 
     if (paramsToChange[1] == SET_CC_TYPE)
-        Serial.print(Globals::CCTypeToHumanReadable(instrument->midi.cc_chan));
+        Serial.print(Globals::CCTypeToHumanReadable(midiTarget->cc_type));
     else if (paramsToChange[1] == SET_DEST)
-        Serial.print(instrument->midi.synth->name);
+        Serial.print(midiTarget->synth->name);
     Serial.print("\t");
 
     if (paramsToChange[2] == SET_CC_MIN)
-        Serial.print(instrument->midi.cc_min);
+        Serial.print(midiTarget->cc_min);
     else if (paramsToChange[2] == SET_INCREASE)
-        Serial.print(instrument->midi.cc_increase_factor);
+        Serial.print(midiTarget->cc_increase_factor);
     Serial.print("\t");
 
     if (paramsToChange[3] == SET_CC_MAX)
-        Serial.print(instrument->midi.cc_max);
+        Serial.print(midiTarget->cc_max);
     else if (paramsToChange[3] == SET_DECREASE)
-        Serial.print(instrument->midi.cc_tidyUp_factor);
+        Serial.print(midiTarget->cc_tidyUp_factor);
     Serial.print("\t");
 
     Serial.println();
