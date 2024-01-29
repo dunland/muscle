@@ -18,7 +18,6 @@
 #include <settings.h>
 #include <Globals.h>
 #include <Devtools.h>
-#include <Instruments.h>
 #include <Hardware.h>
 #include <Song.h>
 #include <Serial.h>
@@ -55,12 +54,11 @@ int pinValue(Instrument *instrument)
 }
 // --------------------------------------------------------------------
 
-//////////////////////////// PRINT NORMALIZED VALUES //////////////////
-void printNormalizedValues(boolean printNorm_criterion)
+// useful debugger for column-wise output of raw/normalised values
+void printNormalizedValues(boolean letsDoThis)
 {
-  // useful debugger for column-wise output of raw/normalised values:
 
-  if (printNorm_criterion == true)
+  if (letsDoThis == true)
   {
     static unsigned long lastMillis;
     if (millis() != lastMillis)
@@ -295,6 +293,8 @@ void setup()
   delay(1000);
   Hardware::lcd->clear();
   // delay(500);
+
+  Serial.println("hello");
 }
 
 /* --------------------------------------------------------------------- */
@@ -403,7 +403,9 @@ void loop()
     //   Synthesizers::volca->sendNoteOff(instrument->midiTarget.notes[0]);
   }
 
-  if (Devtools::do_print_to_console)
+  if (Devtools::do_print_to_console){
     NanoKontrol::loop();
+  }
+
 }
 // --------------------------------------------------------------------

@@ -8,18 +8,21 @@ void run_A_15() // wie randomVoices
     switch (Globals::active_song->step)
     {
     case 0:
-        Globals::active_song->resetInstruments();  // reset all instruments to "Monitor" mode
-        Synthesizers::mKorg->sendProgramChange(4); // A.15
-        // notes.push_back(int(random(24, 48)));
-        Drumset::snare->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+        if (Globals::active_song->get_setup_state())
+        {
+            Globals::active_song->resetInstruments();  // reset all instruments to "Monitor" mode
+            Synthesizers::mKorg->sendProgramChange(4); // A.15
+            // notes.push_back(int(random(24, 48)));
+            Drumset::snare->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
 
-        Drumset::kick->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-        Drumset::tom1->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-        Drumset::tom2->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 50, -0.1);
-        Drumset::standtom->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-        Drumset::tom2->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 20, -0.06);
+            Drumset::kick->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+            Drumset::tom1->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+            Drumset::tom2->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 50, -0.1);
+            Drumset::standtom->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+            Drumset::tom2->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 20, -0.06);
 
-        Globals::active_song->increase_step();
+            Globals::active_song->increase_step();
+        }
         break;
 
     case 1: // PlayMidi

@@ -10,6 +10,20 @@
 
 class Synthesizer;
 
+// TODO: REORGANIZE SYNTHESIZERS CLASS:
+// put "synths" into "Instruments"?, delete "Synthesizers"
+class Synthesizers
+{
+    public:
+    static Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
+    static Synthesizer *volca; // create a KORG Volca Keys instrument called volca
+    static Synthesizer *dd200;
+    static Synthesizer *whammy;
+    static Synthesizer *kaossPad3;
+
+    static std::vector<Synthesizer*> synths;
+};
+
 class Instrument
 {
 
@@ -18,7 +32,8 @@ public:
     {
         pin = pin_;
         drumtype = drumtype_;
-        // allocateNotesToTarget(midiTargets.at(0), note_input); // assigns one random note so the array is not empty if not provided otherwise in input parameters
+        addMidiTarget(CC_None, Synthesizers::volca);
+        allocateNotesToTarget(midiTargets.at(0), note_input); // assigns one random note so the array is not empty if not provided otherwise in input parameters
     }
 
     int pin;
@@ -189,18 +204,4 @@ public:
     static Instrument *crash2;
 
     static std::vector<Instrument *> instruments; // all instruments go in here
-};
-
-// TODO: REORGANIZE SYNTHESIZERS CLASS:
-// put "synths" into "Instruments"?, delete "Synthesizers"
-class Synthesizers
-{
-    public:
-    static Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
-    static Synthesizer *volca; // create a KORG Volca Keys instrument called volca
-    static Synthesizer *dd200;
-    static Synthesizer *whammy;
-    static Synthesizer *kaossPad3;
-
-    static std::vector<Synthesizer*> synths;
 };

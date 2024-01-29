@@ -31,6 +31,15 @@ void Instrument::addMidiTarget(CC_Type cc_type, Synthesizer *synth, int cc_max, 
   midiTarget->cc_standard = (cc_tidyUp_factor > 0) ? midiTarget->cc_min : midiTarget->cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
 }
 
+// add midiTarget without params
+void Instrument::addMidiTarget(CC_Type cc_type, Synthesizer *synth)
+{
+  midiTargets.push_back(new MIDI_TARGET);
+  MIDI_TARGET *midiTarget = midiTargets.back();
+  midiTarget->cc_type = cc_type;
+  midiTarget->synth = synth;
+}
+
 // change values of specific midiTarget
 void Instrument::setMidiTarget(MIDI_TARGET *midiTarget, CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor)
 {
@@ -41,14 +50,6 @@ void Instrument::setMidiTarget(MIDI_TARGET *midiTarget, CC_Type cc_type, Synthes
     midiTarget->cc_increase_factor = cc_increase_factor;
     midiTarget->cc_tidyUp_factor = cc_tidyUp_factor;
 }
-
-// setup midi without params
-// TODO: this one seems broken! fix it!
-// void Instrument::addMidiTarget(CC_Type cc_type, Synthesizer *synth)
-// {
-//   midi.cc_type = cc_type;
-//   midi.synth = synth;
-// }
 
 // set instrument sensitivity
 void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean countAfterFirstStroke)
