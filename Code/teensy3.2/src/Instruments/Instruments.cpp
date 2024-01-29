@@ -1,6 +1,5 @@
 #include <Instruments.h>
 
-// #include <Tsunami.h>
 #include <Song.h>
 #include <Hardware.h>
 #include <settings.h>
@@ -43,12 +42,12 @@ void Instrument::addMidiTarget(CC_Type cc_type, Synthesizer *synth)
 // change values of specific midiTarget
 void Instrument::setMidiTarget(MIDI_TARGET *midiTarget, CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor)
 {
-    midiTarget->cc_type = cc_type;
-    midiTarget->synth = synth;
-    midiTarget->cc_max = cc_max;
-    midiTarget->cc_min = cc_min;
-    midiTarget->cc_increase_factor = cc_increase_factor;
-    midiTarget->cc_tidyUp_factor = cc_tidyUp_factor;
+  midiTarget->cc_type = cc_type;
+  midiTarget->synth = synth;
+  midiTarget->cc_max = cc_max;
+  midiTarget->cc_min = cc_min;
+  midiTarget->cc_increase_factor = cc_increase_factor;
+  midiTarget->cc_tidyUp_factor = cc_tidyUp_factor;
 }
 
 // set instrument sensitivity

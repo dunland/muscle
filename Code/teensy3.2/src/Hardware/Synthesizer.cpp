@@ -34,6 +34,8 @@ void Synthesizer::sendControlChange(CC_Type cc_type, int val)
   if (cc_type < 0)
   {
     Devtools::println_to_console("could not send MIDI CC Command: CC_Type not defined.");
+    Hardware::lcd->setCursor(15,1);
+    Hardware::lcd->print("!");
   }
   else if (val != previous_val)
   {

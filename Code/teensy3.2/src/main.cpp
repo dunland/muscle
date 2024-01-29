@@ -201,7 +201,7 @@ void setup()
   // Globals::songlist.push_back(new Song(run_b_36, "b_36"));
 
   Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
-  Globals::songlist.push_back(new Song(run_sturmUndDrang, "sturmUndDrang"));
+  Globals::songlist.push_back(new Song(run_sturmUndDrang, "strmDrang"));
   // Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
   // Globals::songlist.push_back(new Song(run_A_72, "intro"));
   // Globals::songlist.push_back(new Song(run_PogoNumberOne, "pogoNumberOne"));

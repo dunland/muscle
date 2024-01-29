@@ -556,7 +556,9 @@ void Instrument::change_cc_out() // changes (mostly decreases) value of CC effec
     midiTarget->cc_val += midiTarget->cc_tidyUp_factor;
     midiTarget->cc_val = min(max(midiTarget->cc_val, midiTarget->cc_min), midiTarget->cc_max);
     midiTarget->synth->sendControlChange(midiTarget->cc_type, int(min(midiTarget->cc_val, 127)));
-    ccString += String(midiTarget->cc_val);
+    ccString += String(int(midiTarget->cc_val));
+    if (midiTarget != midiTargets.back()) // not last element
+      ccString += "|";
   }
   output_string = ccString;
   output_string += "\t";

@@ -55,6 +55,7 @@ enum CC_Type
 
     // mikroKORG CC channels:
     mKORG_Arpeggio_onOff = 2, // 0-63: off, 64-127: on
+    mKORG_LFO_Speed = 12,
     mKORG_Osc2_semitone = 18,
     mKORG_Osc2_tune = 19,
     mKORG_Mix_Level_1 = 20,
@@ -71,6 +72,7 @@ enum CC_Type
     mKORG_Release = 26,
     mKORG_DelayTime = 51,
     mKORG_Filter_Type = 83,
+    mKORG_Mod_FX_Depth = 93,
     mKORG_DelayDepth = 94,
     mKORG_TimbreSelect = 95,
 
