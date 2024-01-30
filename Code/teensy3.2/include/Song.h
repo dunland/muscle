@@ -14,9 +14,9 @@ class Song
 {
 public:
     typedef std::function<void()> Callback;
-    Callback trigger_function;
+    Callback song_function;
 
-    Song(Callback f, String songName) : trigger_function(f)
+    Song(Callback f, String songName) : song_function(f)
     {
         // setup names of elements for display on Serial Monitor:
         // beat_sum.tag = "v";
