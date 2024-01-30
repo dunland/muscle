@@ -131,4 +131,6 @@ public:
   void sendProgramChange(int number);
 
   void whammyPedal(int value);
+
+  void sendPitchBend(double pitch);
 };

@@ -103,10 +103,10 @@ void run_sturmUndDrang()
 
             Drumset::kick->set_effect(Change_CC);
             Drumset::kick->addMidiTarget(dd200_DelayTime, Synthesizers::dd200, 107, 20, 10, -0.2);
-            Drumset::kick->addMidiTarget(mKORG_Mod_FX_Depth, Synthesizers::mKorg, 127, 82, 4, -1);
+            Drumset::kick->addMidiTarget(mKORG_Mod_FX_Depth, Synthesizers::mKorg, 127, 82, 4, -0.3);
 
             Drumset::snare->addMidiTarget(whammyPedal, Synthesizers::whammy, 127, 0, 20, -1);
-            Drumset::snare->addMidiTarget(mKORG_LFO_Speed, Synthesizers::mKorg, 10, 100, 20, -1);
+            Drumset::snare->addMidiTarget(mKORG_LFO_Speed, Synthesizers::mKorg, 100, 10, 20, -0.3);
             Drumset::snare->set_effect(Change_CC);
 
             for (auto &instrument : {Drumset::snare, Drumset::standtom, Drumset::kick})

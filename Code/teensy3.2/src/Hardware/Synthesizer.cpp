@@ -80,3 +80,8 @@ void Synthesizer::whammyPedal(int value){
   Serial2.write(11);
   Serial2.write(value);
 }
+
+// send pitch bend (float -1.0 to 1.0)
+void Synthesizer::sendPitchBend(double pitch){
+  MIDI.sendPitchBend(pitch, midi_channel);
+}
