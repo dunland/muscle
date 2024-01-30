@@ -165,12 +165,16 @@ void setup()
   Drumset::tom1->setup_sensitivity(TOM1_THRESHOLD, TOM1_CROSSINGS, TOM1_DELAY_AFTER_STROKE, TOM1_FIRST_STROKE);
 
   if (!Devtools::overwrite_SD_data)
+  {
     if (!JSON::read_sensitivity_data_from_SD(Drumset::instruments))
     {
       Globals::bUsingSDCard = true;
     }
     else
       Devtools::println_to_console("using sensitivity data from settings.h file!");
+  }
+  else
+    Devtools::println_to_console("using sensitivity data from settings.h file!");
 
   // ------------------ calculate noise floor -------------------------
   for (auto &instrument : Drumset::instruments)

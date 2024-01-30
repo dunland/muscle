@@ -95,7 +95,25 @@ enum CC_Type
   KP3_Sample_D = 39,
 
   // whammy CC Channels:
-  whammyPedal = 11
+  whammyPedal = 11,
+
+  // KORG Volca Keys Channels:
+  volca_Portamento = 5,
+  volca_Expression = 11,
+  volca_Voice = 40,
+  volca_Octave = 41,
+  volca_Detune = 42,
+  volca_VCO_EG_INT = 43,
+  volca_Cutoff = 44,
+  volca_VCF_EG_INT = 45,
+  volca_LFO_Rate = 46,
+  volca_LFO_Pitch_INT = 47,
+  volca_LFO_Cutoff_INT = 48,
+  volca_EG_Attack = 49,
+  volca_EG_DecayRelease = 50,
+  volca_EG_Sustain = 51,
+  volca_DelayTime = 52,
+  volca_DelayFeedback = 53
 
 };
 
