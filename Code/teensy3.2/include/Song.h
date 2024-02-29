@@ -132,6 +132,8 @@ void run_intro();
 
 void run_sturmUndDrang();
 
+void run_triathlon();
+
 // ------------------------------- MODES: (deprecated) ------------
 void playRhythmicNotes(Synthesizer *synth, int note_change_pos_ = 0); // initiates a continuous bass note from score
 
