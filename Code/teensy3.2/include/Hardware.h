@@ -119,6 +119,8 @@ public:
 
   boolean notes[127];
   int midi_values[127];
+  int previousMidiVal = -1; // stores last midi CC value to see whether it has changed
+
 
   void sendControlChange(CC_Type cc_type, int val); // sets cc_value (used for JSON comm) and sends MIDI-ControlChange
 

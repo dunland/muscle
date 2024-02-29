@@ -89,6 +89,10 @@ void Hardware::footswitch_pressed()
     //     instrument->set_effect(Change_CC);
     //   break;
 
+  case Increment_Score:
+    Devtools::println_to_console("increment score.");
+    break;
+
   default:
     Devtools::println_to_console("Footswitch mode not defined!");
     break;
@@ -116,11 +120,11 @@ void Hardware::footswitch_released()
   case (Experimental):
     for (auto &instrument : Drumset::instruments)
     {
-        for (auto &midiTarget : instrument->midiTargets)
-        {
-          instrument->shuffle_cc(midiTarget, false);
-          instrument->set_effect(Change_CC);
-        }
+      for (auto &midiTarget : instrument->midiTargets)
+      {
+        instrument->shuffle_cc(midiTarget, false);
+        instrument->set_effect(Change_CC);
+      }
     }
     break;
 

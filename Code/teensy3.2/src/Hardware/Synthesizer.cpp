@@ -28,7 +28,6 @@ void Hardware::sendMidiClock(){
 // sets cc_value (for JSON communication) and sends MIDI-ControlChange:
 void Synthesizer::sendControlChange(CC_Type cc_type, int val)
 {
-  static int previous_val = -1;
   midi_values[cc_type] = val; // store value
 
   if (cc_type < 0)
@@ -37,10 +36,10 @@ void Synthesizer::sendControlChange(CC_Type cc_type, int val)
     Hardware::lcd->setCursor(15,1);
     Hardware::lcd->print("!");
   }
-  else if (val != previous_val)
+  else if (val != previousMidiVal)
   {
     MIDI.sendControlChange(int(cc_type), val, midi_channel);
-    previous_val = val;
+    previousMidiVal = val;
   }
 }
 

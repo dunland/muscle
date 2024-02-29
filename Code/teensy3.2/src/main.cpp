@@ -206,7 +206,7 @@ void setup()
   // Globals::songlist.push_back(new Song(run_b_36, "b_36"));
 
   Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
-  Globals::songlist.push_back(new Song(run_triathlon, "monitoring"));
+  Globals::songlist.push_back(new Song(run_triathlon, "triathlon"));
   Globals::songlist.push_back(new Song(run_sturmUndDrang, "sturmUndDrang"));
   // Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
   // Globals::songlist.push_back(new Song(run_A_72, "intro"));
