@@ -15,7 +15,7 @@ void run_nanokontrol()
         {
             Hardware::footswitch_mode = Increment_Score;
             // Globals::machine_state = NanoKontrol_Test;
-            Drumset::snare->setup_midi(mKORG_LFO2_Rate, Synthesizers::mKorg, 127, 30, 18.0, -0.11);
+            Drumset::snare->addMidiTarget(mKORG_LFO2_Rate, Synthesizers::mKorg, 127, 30, 18.0, -0.11);
             Drumset::snare->set_effect(Change_CC);
 
             Synthesizers::mKorg->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx]);

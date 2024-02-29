@@ -1,6 +1,5 @@
 #include <Instruments.h>
 
-// #include <Tsunami.h>
 #include <Song.h>
 #include <Hardware.h>
 #include <settings.h>
@@ -8,34 +7,48 @@
 // ---------------------- SETUP FUNCTIONS -----------------------------
 
 // set instrument notes via list
-void Instrument::set_notes(std::vector<int> list)
+void Instrument::allocateNotesToTarget(Instrument::MIDI_TARGET *midiTarget, std::vector<int> list)
 {
   for (uint8_t i = 0; i < list.size(); i++)
   {
-    midi.notes.push_back(list[i]);
+    midiTarget->notes.push_back(list[i]);
   }
 }
 
-// setup midi settings with params
-void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor)
+// add Midi Target and set settings with params
+void Instrument::addMidiTarget(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor)
 {
-  midi.cc_chan = cc_type;
-  midi.synth = synth;
-  midi.cc_max = cc_max;
-  midi.cc_min = cc_min;
-  midi.cc_increase_factor = cc_increase_factor;
-  midi.cc_tidyUp_factor = cc_tidyUp_factor;
+  midiTargets.push_back(new MIDI_TARGET);
+  MIDI_TARGET *midiTarget = midiTargets.back();
+  midiTarget->cc_type = cc_type;
+  midiTarget->synth = synth;
+  midiTarget->cc_max = cc_max;
+  midiTarget->cc_min = cc_min;
+  midiTarget->cc_increase_factor = cc_increase_factor;
+  midiTarget->cc_tidyUp_factor = cc_tidyUp_factor;
 
-  midi.cc_standard = (cc_tidyUp_factor > 0) ? midi.cc_min : midi.cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
+  midiTarget->cc_standard = (cc_tidyUp_factor > 0) ? midiTarget->cc_min : midiTarget->cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
 }
 
-// setup midi without params
-// TODO: this one seems broken! fix it!
-// void Instrument::setup_midi(CC_Type cc_type, Synthesizer *synth)
-// {
-//   midi.cc_chan = cc_type;
-//   midi.synth = synth;
-// }
+// add midiTarget without params
+void Instrument::addMidiTarget(CC_Type cc_type, Synthesizer *synth)
+{
+  midiTargets.push_back(new MIDI_TARGET);
+  MIDI_TARGET *midiTarget = midiTargets.back();
+  midiTarget->cc_type = cc_type;
+  midiTarget->synth = synth;
+}
+
+// change values of specific midiTarget
+void Instrument::setMidiTarget(MIDI_TARGET *midiTarget, CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor)
+{
+  midiTarget->cc_type = cc_type;
+  midiTarget->synth = synth;
+  midiTarget->cc_max = cc_max;
+  midiTarget->cc_min = cc_min;
+  midiTarget->cc_increase_factor = cc_increase_factor;
+  midiTarget->cc_tidyUp_factor = cc_tidyUp_factor;
+}
 
 // set instrument sensitivity
 void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfterStroke_, boolean countAfterFirstStroke)
@@ -58,34 +71,42 @@ void Instrument::set_effect(EffectsType effect_)
   switch (effect_)
   {
   case PlayMidi:
-    if (midi.notes.size() > 0 && midi.active_note > 0)
+    for (auto &midiTarget : midiTargets)
     {
-      effect = effect_;
-      Devtools::println_to_console("done.");
-    }
-    else
-    {
-      Devtools::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
+
+      if (midiTarget->notes.size() > 0 && midiTarget->active_note > 0)
+      {
+        effect = effect_;
+        Devtools::println_to_console("done.");
+      }
+      else
+      {
+        Devtools::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
+      }
     }
     break;
 
   case Reflex_and_PlayMidi:
     score.ready_to_shuffle = true;
-    shuffle_cc(false);
-    if (midi.notes.size() > 0 && midi.active_note > 0)
+    for (auto &midiTarget : midiTargets)
     {
-      effect = effect_;
-      Devtools::println_to_console("done.");
-    }
-    else
-    {
-      Devtools::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
+      shuffle_cc(midiTarget, false);
+      if (midiTarget->notes.size() > 0 && midiTarget->active_note > 0)
+      {
+        effect = effect_;
+        Devtools::println_to_console("done.");
+      }
+      else
+      {
+        Devtools::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
+      }
     }
     break;
 
   case Random_CC_Effect:
     score.ready_to_shuffle = true;
-    shuffle_cc(false);
+    for (auto &midiTarget : midiTargets)
+      shuffle_cc(midiTarget, false);
     effect = effect_;
     Devtools::println_to_console("done.");
     break;
@@ -347,7 +368,8 @@ void Instrument::trigger()
     random_change_cc_in();
     break;
   case MainNoteIteration:
-    mainNoteIteration(midi.synth);
+    for (auto &midiTarget : midiTargets)
+      mainNoteIteration(midiTarget->synth);
     break;
 
   case Reflex_and_PlayMidi: // combines PlayMidi and Change_CC
@@ -405,7 +427,8 @@ void Instrument::tidyUp()
 
   case Reflex_and_PlayMidi:
     turnMidiNoteOff();
-    shuffle_cc(false);
+    for (auto &midiTarget : midiTargets)
+      shuffle_cc(midiTarget, false);
     break;
 
   case Change_CC:
@@ -414,7 +437,8 @@ void Instrument::tidyUp()
 
   case Random_CC_Effect:
     change_cc_out(); // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
-    shuffle_cc(false);
+    for (auto &midiTarget : midiTargets)
+      shuffle_cc(midiTarget, false);
     break;
 
   default:

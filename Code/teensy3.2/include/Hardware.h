@@ -61,7 +61,7 @@ public:
   static LiquidCrystal *lcd;
   static void lcd_display();
   static void display_scores();
-  static void display_Midi_values(); // display midi values of instruments with FX-Type CC_Change
+  static void display_Midi_values(int numOfInstrumentsWithCCTrigger); // display midi values of instruments with FX-Type CC_Change
   static volatile boolean FLAG_CLEAR_LCD; // CAUTION: USED IN INTERRUPTS! DON'T CHANGE WITHOUT STOPPING THEM
   // --------------------------------------------------------------------
 
@@ -131,4 +131,6 @@ public:
   void sendProgramChange(int number);
 
   void whammyPedal(int value);
+
+  void sendPitchBend(double pitch);
 };

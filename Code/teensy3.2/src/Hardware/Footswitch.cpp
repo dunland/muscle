@@ -116,8 +116,11 @@ void Hardware::footswitch_released()
   case (Experimental):
     for (auto &instrument : Drumset::instruments)
     {
-      instrument->shuffle_cc(false);
-      instrument->set_effect(Change_CC);
+        for (auto &midiTarget : instrument->midiTargets)
+        {
+          instrument->shuffle_cc(midiTarget, false);
+          instrument->set_effect(Change_CC);
+        }
     }
     break;
 

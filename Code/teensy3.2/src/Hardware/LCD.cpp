@@ -51,14 +51,14 @@ void Hardware::lcd_display()
             if (running_mode == true) // mode A: display scores
                 display_scores();
             else // mode B: display Midi Values
-                display_Midi_values();
+                display_Midi_values(instruments_with_CC_mode);
         }
 
         // display both score and midi vals:
         else
         {
             display_scores();
-            display_Midi_values();
+            display_Midi_values(instruments_with_CC_mode);
         }
     }
     break;
@@ -206,16 +206,29 @@ void Hardware::display_scores()
 
 // ------------------------------------------------------------------------------
 // display midi values of instruments with FX-Type CC_Change
-void Hardware::display_Midi_values()
+void Hardware::display_Midi_values(int instruments_with_CC_mode)
 {
-    for (uint8_t i = 0; i < Drumset::instruments.size(); i++)
+
+  const int toggleTime = 1000; // ms timeout to iterate midiTargets
+  static unsigned long lastToggle;
+  static int toggleIndex = 0;
+
+  if (millis() > (lastToggle + toggleTime))
+  {
+    toggleIndex++;
+    lastToggle = millis();
+  }
+
+    for (auto &instrument : Drumset::instruments)
     {
-        if (Drumset::instruments[i]->effect == Change_CC)
+        static int i = 0;
+        if (instrument->effect == Change_CC)
         {
             Hardware::lcd->setCursor(((i % 4) * 4), int(i >= 4));
-            Hardware::lcd->print(Globals::DrumtypeToHumanreadable(Drumset::instruments[i]->drumtype)[0]);
+            Hardware::lcd->print(Globals::DrumtypeToHumanreadable(instrument->drumtype)[0]);
             Hardware::lcd->setCursor(((i % 4) * 4) + 1, int(i >= 4));
-            Hardware::lcd->print(int(Drumset::instruments[i]->midi.cc_val));
+            Hardware::lcd->print(int(instrument->midiTargets.at(toggleIndex % instrument->midiTargets.size())->cc_val));
+            i = (i + 1) % instruments_with_CC_mode;
         }
     }
 }

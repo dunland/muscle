@@ -10,6 +10,20 @@
 
 class Synthesizer;
 
+// TODO: REORGANIZE SYNTHESIZERS CLASS:
+// put "synths" into "Instruments"?, delete "Synthesizers"
+class Synthesizers
+{
+    public:
+    static Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
+    static Synthesizer *volca; // create a KORG Volca Keys instrument called volca
+    static Synthesizer *dd200;
+    static Synthesizer *whammy;
+    static Synthesizer *kaossPad3;
+
+    static std::vector<Synthesizer*> synths;
+};
+
 class Instrument
 {
 
@@ -18,7 +32,8 @@ public:
     {
         pin = pin_;
         drumtype = drumtype_;
-        set_notes(note_input); // assigns one random note so the array is not empty if not provided otherwise in input parameters
+        addMidiTarget(CC_None, Synthesizers::volca);
+        allocateNotesToTarget(midiTargets.at(0), note_input); // assigns one random note so the array is not empty if not provided otherwise in input parameters
     }
 
     int pin;
@@ -52,11 +67,11 @@ public:
 
     } timing;
 
-    struct MIDI_SETTINGS
+    struct MIDI_TARGET
     {
         std::vector<int> notes;
         int active_note;
-        CC_Type cc_chan;
+        CC_Type cc_type;
         int random_cc_chan = 0; // integer standing for CC_Type in Random_CC_Effects
         float cc_val = 0;
         int cc_max = 127;              // MIDI values cannot be greater than this
@@ -66,7 +81,9 @@ public:
         float cc_tidyUp_factor = -0.1; // factor by which MIDI vals decay/increase each loop
         Synthesizer *synth;            // associated midi-instrument to address
 
-    } midi;
+    };
+
+    std::vector<MIDI_TARGET*> midiTargets;
 
     struct SCORE
     {
@@ -88,7 +105,7 @@ public:
         int tsunami_track; // tracks will be allocated in tsunami_beat_playback
         int tsunami_channel = 0;
 
-        boolean ready_to_shuffle = false; // a flag for Random_CC_Effect: resets midi.cc_chan to random (once) when true
+        boolean ready_to_shuffle = false; // a flag for Random_CC_Effect: resets midi.cc_type to random (once) when true
 
     } score;
 
@@ -108,11 +125,13 @@ public:
     ////////////////////// SETUP FUNCTIONS ////////////////////////////
 
     // set MIDI notes according to a vector list:
-    void set_notes(std::vector<int> list);
+    void allocateNotesToTarget(MIDI_TARGET* midiTarget, std::vector<int> list);
 
-    void setup_midi(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor);
+    void addMidiTarget(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor);
 
-    void setup_midi(CC_Type cc_type, Synthesizer *synth); // setup midi without CC params
+    void addMidiTarget(CC_Type cc_type, Synthesizer *synth); // setup midi without CC params
+
+    void setMidiTarget(MIDI_TARGET*, CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor);
 
     // TODO: setup midi for ADSR Reflex effect!)
 
@@ -168,7 +187,7 @@ public:
 
     void change_cc_out();
 
-    void shuffle_cc(boolean force_);
+    void shuffle_cc(MIDI_TARGET*, boolean force_);
 };
 
 class Drumset
@@ -185,18 +204,4 @@ public:
     static Instrument *crash2;
 
     static std::vector<Instrument *> instruments; // all instruments go in here
-};
-
-// TODO: REORGANIZE SYNTHESIZERS CLASS:
-// put "synths" into "Instruments"?, delete "Synthesizers"
-class Synthesizers
-{
-    public:
-    static Synthesizer *mKorg; // create a KORG microKorg instrument called mKorg
-    static Synthesizer *volca; // create a KORG Volca Keys instrument called volca
-    static Synthesizer *dd200;
-    static Synthesizer *whammy;
-    static Synthesizer *kaossPad3;
-
-    static std::vector<Synthesizer*> synths;
 };

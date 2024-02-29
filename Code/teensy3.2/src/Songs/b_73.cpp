@@ -13,13 +13,13 @@ void run_b_73()
         Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
         Synthesizers::mKorg->sendProgramChange(114);
         // notes.push_back(int(random(24, 48)));
-        Drumset::snare->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+        Drumset::snare->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
 
-        Drumset::kick->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-        Drumset::tom1->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-        Drumset::tom2->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 50, -0.1);
-        Drumset::standtom->setup_midi(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
-        Drumset::tom2->setup_midi(CC_None, Synthesizers::mKorg, 115, 15, 20, -0.06);
+        Drumset::kick->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+        Drumset::tom1->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+        Drumset::tom2->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 50, -0.1);
+        Drumset::standtom->addMidiTarget(CC_None, Synthesizers::mKorg, 127, 0, 10, -0.1);
+        Drumset::tom2->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 20, -0.06);
 
         Globals::active_song->increase_step();
         break;
@@ -29,21 +29,21 @@ void run_b_73()
         {
             Hardware::footswitch_mode = Increment_Score;
 
-            Drumset::kick->midi.notes.push_back(int(random(21, 128)));
-            Drumset::kick->midi.active_note = Drumset::kick->midi.notes.size() - 1;
+            Drumset::kick->midiTargets.back()->notes.push_back(int(random(21, 128)));
+            Drumset::kick->midiTargets.back()->active_note = Drumset::kick->midiTargets.back()->notes.size() - 1;
 
-            Drumset::snare->midi.notes.push_back(int(random(33, 72)));
-            Drumset::snare->midi.active_note = Drumset::snare->midi.notes.size() - 1;
+            Drumset::snare->midiTargets.back()->notes.push_back(int(random(33, 72)));
+            Drumset::snare->midiTargets.back()->active_note = Drumset::snare->midiTargets.back()->notes.size() - 1;
 
-            Drumset::tom1->midi.notes.push_back(int(random(33, 72)));
-            Drumset::tom1->midi.active_note = Drumset::tom1->midi.notes.size() - 1;
+            Drumset::tom1->midiTargets.back()->notes.push_back(int(random(33, 72)));
+            Drumset::tom1->midiTargets.back()->active_note = Drumset::tom1->midiTargets.back()->notes.size() - 1;
 
-            Drumset::tom2->midi.notes.push_back(int(random(33, 72)));
-            Drumset::tom2->midi.active_note = Drumset::tom2->midi.notes.size() - 1;
+            Drumset::tom2->midiTargets.back()->notes.push_back(int(random(33, 72)));
+            Drumset::tom2->midiTargets.back()->active_note = Drumset::tom2->midiTargets.back()->notes.size() - 1;
 
-            Drumset::standtom->midi.notes.push_back(int(random(33, 72)));
-            Drumset::standtom->midi.active_note = Drumset::standtom->midi.notes.size() - 1;
-            // Drumset::standtom->setup_midi(mKORG_Resonance, Synthesizers::mKorg, 115, 15, 10, -0.6);
+            Drumset::standtom->midiTargets.back()->notes.push_back(int(random(33, 72)));
+            Drumset::standtom->midiTargets.back()->active_note = Drumset::standtom->midiTargets.back()->notes.size() - 1;
+            // Drumset::standtom->addMidiTarget(mKORG_Resonance, Synthesizers::mKorg, 115, 15, 10, -0.6);
 
             Drumset::kick->set_effect(PlayMidi);
             Drumset::snare->set_effect(PlayMidi);

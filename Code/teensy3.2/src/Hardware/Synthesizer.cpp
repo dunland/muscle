@@ -34,6 +34,8 @@ void Synthesizer::sendControlChange(CC_Type cc_type, int val)
   if (cc_type < 0)
   {
     Devtools::println_to_console("could not send MIDI CC Command: CC_Type not defined.");
+    Hardware::lcd->setCursor(15,1);
+    Hardware::lcd->print("!");
   }
   else if (val != previous_val)
   {
@@ -77,4 +79,9 @@ void Synthesizer::whammyPedal(int value){
   Serial2.write(midi_channel);
   Serial2.write(11);
   Serial2.write(value);
+}
+
+// send pitch bend (float -1.0 to 1.0)
+void Synthesizer::sendPitchBend(double pitch){
+  MIDI.sendPitchBend(pitch, midi_channel);
 }

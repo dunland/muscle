@@ -13,26 +13,33 @@
 
 void Instrument::change_cc_in() // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 {
-  midi.cc_val += midi.cc_increase_factor;
-  midi.cc_val = min(midi.cc_val, midi.cc_max);
-  midi.synth->sendControlChange(midi.cc_chan, int(min(midi.cc_val, 127)));
-  output_string = String(midi.cc_val);
-  output_string += "\t";
+  for (auto &midiTarget : midiTargets)
+  {
+    midiTarget->cc_val += midiTarget->cc_increase_factor;
+    midiTarget->cc_val = min(midiTarget->cc_val, midiTarget->cc_max);
+    midiTarget->synth->sendControlChange(midiTarget->cc_type, int(min(midiTarget->cc_val, 127)));
+    output_string = String(midiTarget->cc_val);
+    output_string += "\t";
+  }
 }
 
 void Instrument::random_change_cc_in() // instead of stroke detection, MIDI CC val is altered when sensitivity threshold is crossed.
 {
-  midi.cc_val += midi.cc_increase_factor;
-  midi.cc_val = min(midi.cc_val, midi.cc_max);
-  midi.synth->sendControlChange(midi.random_cc_chan, int(min(midi.cc_val, 127)));
-  output_string = String(midi.cc_val);
-  output_string += "\t";
+  for (auto &midiTarget : midiTargets)
+  {
+    midiTarget->cc_val += midiTarget->cc_increase_factor;
+    midiTarget->cc_val = min(midiTarget->cc_val, midiTarget->cc_max);
+    midiTarget->synth->sendControlChange(midiTarget->random_cc_chan, int(min(midiTarget->cc_val, 127)));
+    output_string = String(midiTarget->cc_val);
+    output_string += "\t";
+  }
 }
 
 // plays a Midi note:
 void Instrument::playMidi()
 {
-  midi.synth->sendNoteOn(midi.active_note);
+  for (auto &midiTarget : midiTargets)
+    midiTarget->synth->sendNoteOn(midiTarget->active_note);
   score.last_notePlayed = millis();
 }
 
@@ -230,9 +237,9 @@ void Instrument::mainNoteIteration(Synthesizer *synth_)
 
   if (millis() > lastNoteChange + 4000) // only do this once in an interval of 4 seconds, because there are always many hits on a cymbal..
   {
-    synth_->sendNoteOff(Globals::active_song->notes[Globals::active_song->note_idx]);  // turn previous note off
+    synth_->sendNoteOff(Globals::active_song->notes[Globals::active_song->note_idx]);                           // turn previous note off
     Globals::active_song->note_idx = (Globals::active_song->note_idx + 1) % Globals::active_song->notes.size(); // iterate note pointer
-    synth_->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx]);  // turn next note on
+    synth_->sendNoteOn(Globals::active_song->notes[Globals::active_song->note_idx]);                            // turn next note on
 
     lastNoteChange = millis();
   }
@@ -248,10 +255,12 @@ void Instrument::sendMidiNotes_timed()
     {
       setInstrumentPrintString();
       // TODO: SHOULD BE HANDLED LIKE FOOTSWITCHLOOPER!
-      midi.synth->sendNoteOn(midi.active_note);
+      for (auto &midiTarget : midiTargets)
+        midiTarget->synth->sendNoteOn(midiTarget->active_note);
     }
     else
-      midi.synth->sendNoteOff(midi.active_note);
+      for (auto &midiTarget : midiTargets)
+        midiTarget->synth->sendNoteOff(midiTarget->active_note);
   }
 }
 
@@ -289,7 +298,8 @@ void Instrument::swell_perform() // updates once a 32nd-beat-step
       output_string += "\t";
 
       if (!Globals::footswitch_is_pressed)
-        midi.synth->sendControlChange(midi.cc_chan, score.swell_val * score.swell_factor);
+        for (auto &midiTarget : midiTargets)
+          midiTarget->synth->sendControlChange(midiTarget->cc_type, score.swell_val * score.swell_factor);
 
       /* channels on mKORG: 44=cutoff, 50=amplevel, 23=attack, 25=sustain, 26=release
         finding the right CC# on microKORG: (manual p.61):
@@ -323,7 +333,8 @@ void Instrument::swell_perform() // updates once a 32nd-beat-step
         score.swell_val = 10;
         score.swell_beatPos_sum = 0;
         score.swell_beatStep = 0;
-        midi.synth->sendNoteOff(midi.active_note);
+        for (auto &midiTarget : midiTargets)
+          midiTarget->synth->sendNoteOff(midiTarget->active_note);
       }
     }
   }
@@ -502,7 +513,8 @@ void Instrument::topography_midi_effects(std::vector<Instrument *> instruments)
     int vol = min(Globals::active_song->topo_midi_effect.a_16[Globals::current_16th_count] * 13, 255);
 
     if (topography.a_16[Globals::current_16th_count] > 0)
-      midi.synth->sendControlChange(midi.cc_chan, vol);
+      for (auto &midiTarget : midiTargets)
+        midiTarget->synth->sendControlChange(midiTarget->cc_type, vol);
 
     // Debug:
     Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
@@ -526,7 +538,8 @@ void Instrument::turnMidiNoteOff()
 {
   if (millis() > score.last_notePlayed + 200) // Swell effect turns notes off itself
   {
-    midi.synth->sendNoteOff(midi.active_note);
+    for (auto &midiTarget : midiTargets)
+      midiTarget->synth->sendNoteOff(midiTarget->active_note);
     // Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
     // Devtools::print_to_console(": turning midi note ");
     // Devtools::print_to_console(midi.active_note);
@@ -537,19 +550,26 @@ void Instrument::turnMidiNoteOff()
 // TODO: make this decrease with 32nd-notes.
 void Instrument::change_cc_out() // changes (mostly decreases) value of CC effect each loop (!)
 {
-  midi.cc_val += midi.cc_tidyUp_factor;
-  midi.cc_val = min(max(midi.cc_val, midi.cc_min), midi.cc_max);
-  midi.synth->sendControlChange(midi.cc_chan, int(min(midi.cc_val, 127)));
-  output_string = String(midi.cc_val);
+  String ccString = "";
+  for (auto &midiTarget : midiTargets)
+  {
+    midiTarget->cc_val += midiTarget->cc_tidyUp_factor;
+    midiTarget->cc_val = min(max(midiTarget->cc_val, midiTarget->cc_min), midiTarget->cc_max);
+    midiTarget->synth->sendControlChange(midiTarget->cc_type, int(min(midiTarget->cc_val, 127)));
+    ccString += String(int(midiTarget->cc_val));
+    if (midiTarget != midiTargets.back()) // not last element
+      ccString += "|";
+  }
+  output_string = ccString;
   output_string += "\t";
 }
 
 // sets the midi channel to a random value of all implemented channels
-void Instrument::shuffle_cc(boolean force_ = false)
+void Instrument::shuffle_cc(Instrument::MIDI_TARGET *midiTarget, boolean force_ = false)
 {
   if (score.ready_to_shuffle || force_ == true)
   {
-    if (midi.cc_val == midi.cc_standard || force_ == true)
+    if (midiTarget->cc_val == midiTarget->cc_standard || force_ == true)
     {
 
       // ATTENTION:
@@ -558,22 +578,22 @@ void Instrument::shuffle_cc(boolean force_ = false)
 
       do
       {
-        midi.random_cc_chan = int(random(128));
-        midi.cc_chan = Globals::int_to_cc_type(midi.random_cc_chan);
-      } while (midi.cc_chan == CC_None);
+        midiTarget->random_cc_chan = int(random(128));
+        midiTarget->cc_type = Globals::int_to_cc_type(midiTarget->random_cc_chan);
+      } while (midiTarget->cc_type == CC_None);
 
       score.ready_to_shuffle = false;
-      Devtools::print_to_console("cc_chan of ");
+      Devtools::print_to_console("cc_type of ");
       Devtools::print_to_console(drumtype);
       Devtools::print_to_console(" is ");
-      Devtools::println_to_console(midi.cc_chan);
+      Devtools::println_to_console(midiTarget->cc_type);
     }
     else
     {
       Devtools::print_to_console("waiting for cc_val to be at standard: ");
-      Devtools::print_to_console(midi.cc_val);
+      Devtools::print_to_console(midiTarget->cc_val);
       Devtools::print_to_console("/");
-      Devtools::println_to_console(midi.cc_standard);
+      Devtools::println_to_console(midiTarget->cc_standard);
     }
   }
   else

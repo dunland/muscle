@@ -21,7 +21,9 @@ public:
     static boolean newData;
 
     static Instrument *instrument;
-    static const int SET_INSTRUMENT = 0;
+    static Instrument::MIDI_TARGET *midiTarget;
+    static const int SET_INSTRUMENT = 0; // select instrument
+    static const int SET_MIDI_TARGET = 0; // select instrument's midiTarget
     static const int SET_CC_TYPE = 0;
     static const int SET_DEST = 1; // midi device destination
     static const int SET_CC_MIN = 0;

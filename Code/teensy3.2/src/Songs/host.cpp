@@ -23,14 +23,14 @@ void run_host()
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::mKorg->sendControlChange(mKORG_DelayDepth, 0);
-            Drumset::snare->midi.active_note = 55;                                     // G = 55
-            Drumset::snare->setup_midi(mKORG_Amplevel, Synthesizers::mKorg, 127, 0, 3, -0.002); // changes Gate in Vocoder-Mode
+            Drumset::snare->addMidiTarget(mKORG_Amplevel, Synthesizers::mKorg, 127, 0, 3, -0.002); // changes Gate in Vocoder-Mode
+            Drumset::snare->midiTargets.back()->active_note = 55;                                     // G = 55
             Drumset::snare->set_effect(Change_CC);
-            Drumset::snare->midi.synth->sendNoteOn(55); // play note 55 (G) if it is not playing at the moment
+            Drumset::snare->midiTargets.back()->synth->sendNoteOn(55); // play note 55 (G) if it is not playing at the moment
         }
 
-        if (Drumset::snare->midi.synth->notes[55] == false)
-            Drumset::snare->midi.synth->sendNoteOn(55); // play note 55 (G) if it is not playing at the moment
+        if (Drumset::snare->midiTargets.back()->synth->notes[55] == false)
+            Drumset::snare->midiTargets.back()->synth->sendNoteOn(55); // play note 55 (G) if it is not playing at the moment
 
         // proceed:
         if (Drumset::crash1->timing.wasHit)
@@ -43,8 +43,8 @@ void run_host()
         if (Globals::active_song->get_setup_state())
         {
             Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 127);
-            Drumset::snare->midi.cc_val = 0;
-            Drumset::snare->setup_midi(mKORG_DelayDepth, Synthesizers::mKorg, 90, 0, 3, -0.002);
+            Drumset::snare->midiTargets.back()->cc_val = 0;
+            Drumset::snare->addMidiTarget(mKORG_DelayDepth, Synthesizers::mKorg, 90, 0, 3, -0.002);
         }
         break;
 
