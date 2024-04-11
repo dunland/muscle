@@ -25,8 +25,8 @@ void run_alhambra()
     case 1:
         if (Globals::active_song->get_setup_state())
         {
-            Synthesizers::kaossPad3->sendControlChange(92, 127); // Touch Pad on
-            Synthesizers::kaossPad3->sendProgramChange(58);
+            Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_on_off, 127); // Touch Pad on
+            Synthesizers::kaossPad3->sendProgramChange(58);      // Delay2
         }
 
         if (Drumset::snare->timing.wasHit)
@@ -39,7 +39,7 @@ void run_alhambra()
         valueX = (valueX < valueXgoal) ? valueX + (valueXgoal - valueX) / 5 : valueX - (valueX - valueXgoal) / 5;
         Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_x, valueX);
         valueY = (valueY < valueYgoal) ? valueY + (valueYgoal - valueY) / 5 : valueY - (valueY - valueYgoal) / 5;
-            Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_y, valueY);
+        Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_y, valueY);
 
         Hardware::lcd->setCursor(6, 0);
         Hardware::lcd->print("X:");

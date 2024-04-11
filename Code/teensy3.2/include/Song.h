@@ -80,6 +80,8 @@ public:
 
 void run_monitoring();
 
+void run_tapTempo(); // wie monitoring nur mit hihat-tap
+
 void run_sattelstein();
 
 void run_doubleSquirrel(); // TODO: tentative, as this should be dynamic later..
@@ -133,6 +135,8 @@ void run_intro();
 void run_sturmUndDrang();
 
 void run_triathlon();
+
+void run_sloJam();
 
 // ------------------------------- MODES: (deprecated) ------------
 void playRhythmicNotes(Synthesizer *synth, int note_change_pos_ = 0); // initiates a continuous bass note from score

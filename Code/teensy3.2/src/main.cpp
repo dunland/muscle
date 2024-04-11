@@ -33,7 +33,7 @@ const String VERSION_NUMBER = "1.0.0";
 const boolean USING_TSUNAMI = false;
 boolean Devtools::use_responsiveCalibration = false;
 boolean Devtools::do_print_beat_sum = false; // prints active_score->beat_sum topography array
-boolean Devtools::do_print_to_console = true;
+boolean Devtools::do_print_to_console = false;
 boolean Devtools::use_serial_comm = false; // sends instrument names upon stroke and song names, if true
 boolean Devtools::do_print_JSON = false;
 boolean Devtools::do_send_to_processing = false;
@@ -99,6 +99,7 @@ void setup()
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
   pinMode(FOOTSWITCH, INPUT_PULLUP);
+  pinMode(FOOTSWITCH2, INPUT_PULLUP);
   pinMode(PUSHBUTTON, INPUT_PULLUP);
   // HINT: all analog pins are inputs anyway; they don't have to be set up
 
@@ -205,7 +206,8 @@ void setup()
   // Globals::songlist.push_back(new Song(run_b_27, "b_27"));
   // Globals::songlist.push_back(new Song(run_b_36, "b_36"));
 
-  Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
+  Globals::songlist.push_back(new Song(run_tapTempo, "tapTempo"));
+  Globals::songlist.push_back(new Song(run_sloJam, "sloJam"));
   Globals::songlist.push_back(new Song(run_triathlon, "triathlon"));
   Globals::songlist.push_back(new Song(run_sturmUndDrang, "sturmUndDrang"));
   // Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));

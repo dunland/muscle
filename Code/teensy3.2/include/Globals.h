@@ -91,10 +91,10 @@ enum CC_Type
     KP3_Level_Slider = 93,
     KP3_FX_Depth = 94,
     KP3_Hold = 95,
-    KP3_Sample_A = 36,
-    KP3_Sample_B = 37,
-    KP3_Sample_C = 38,
-    KP3_Sample_D = 39,
+    KP3_Sample_A = 33,
+    KP3_Sample_B = 34,
+    KP3_Sample_C = 35,
+    KP3_Sample_D = 36,
 
   // whammy CC Channels:
   whammyPedal = 11,
