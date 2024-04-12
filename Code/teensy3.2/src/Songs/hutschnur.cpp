@@ -28,7 +28,7 @@ void run_hutschnur()
           if (Globals::active_song->setup)
             {
                 // ------- general initialization routine --------------
-                Hardware::footswitch_mode = Increment_Score;
+                FootSwitch::mode = Increment_Score;
                 resetInstruments();
                 notes.clear();
 

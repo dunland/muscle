@@ -31,7 +31,7 @@ void run_sloJam()
             Globals::tapInterval = 60000 / Globals::current_BPM;
             Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128);
 
-            // Hardware::footswitch_mode = SloJamPlaySample;
+            // FootSwitch::mode = SloJamPlaySample;
 
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();

@@ -89,7 +89,7 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         // Devtools::print_to_console(".");
         // Devtools::println_to_console(Globals::active_score->step);
 
-        // Globals::active_song->beat_regularity.derive_from(&Globals::active_song->beat_sum); // TODO: also do this for all instruments
+        // Globals::active_song->beat_regularity.derive_from(&Globals::active_song->beat_sum);
 
         // print topo arrays:
         // if (Globals::do_print_beat_sum)

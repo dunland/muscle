@@ -33,7 +33,7 @@ void run_A_25()
     case 1: //  PlayMidi
         if (Globals::active_song->get_setup_state())
         {
-            Hardware::footswitch_mode = Increment_Score;
+            FootSwitch::mode = Increment_Score;
 
             Drumset::kick->midiTargets.back()->notes.push_back(int(random(0, 128)));
             Drumset::kick->midiTargets.back()->active_note = Drumset::kick->midiTargets.back()->notes[0];
@@ -66,7 +66,7 @@ void run_A_25()
     case 2: // change CC only
         if (Globals::active_song->get_setup_state())
         {
-            // Hardware::footswitch_mode = Experimental;
+            // FootSwitch::mode = Experimental;
             Drumset::kick->shuffle_cc(Drumset::kick->midiTargets.back(), true);     // set a random midi CC channel
             Drumset::snare->shuffle_cc(Drumset::kick->midiTargets.back(), true);    // set a random midi CC channel
             Drumset::tom1->shuffle_cc(Drumset::kick->midiTargets.back(), true);     // set a random midi CC channel

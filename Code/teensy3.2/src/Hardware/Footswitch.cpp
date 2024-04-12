@@ -8,15 +8,16 @@
 ////////////////////////////////// FOOT SWITCH ////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-FootswitchMode Hardware::footswitch_mode = Increment_Score;
+FootswitchMode FootSwitch::mode = Increment_Score;
 
 // ------------------------------------------------------------------------------
-void Hardware::footswitch_pressed()
+// trigger function: footswitch press
+void FootSwitch::callbackPressed()
 {
-  lcd->setCursor(11, 0);
-  lcd->print("!");
+  Hardware::lcd->setCursor(11, 0);
+  Hardware::lcd->print("!");
 
-  switch (footswitch_mode)
+  switch (mode)
   {
   case (Log_Beats):
     // set pinMode of all instruments to 3 (record what is being played)
@@ -100,13 +101,14 @@ void Hardware::footswitch_pressed()
 }
 
 // ------------------------------------------------------------------------------
-void Hardware::footswitch_released()
+// trigger function: footswitch release
+void FootSwitch::callbackReleased()
 {
 
-  lcd->setCursor(11, 0);
-  lcd->print(" ");
+  Hardware::lcd->setCursor(11, 0);
+  Hardware::lcd->print(" ");
 
-  switch (footswitch_mode)
+  switch (mode)
   {
   case (Log_Beats):
     for (auto &instrument : Drumset::instruments)
@@ -139,7 +141,7 @@ void Hardware::footswitch_released()
 }
 
 // ------------------------------------------------------------------------------
-void Hardware::checkFootSwitch()
+void FootSwitch::checkFootSwitch()
 {
 
   static int switch_state;
@@ -151,12 +153,12 @@ void Hardware::checkFootSwitch()
   {
     if (switch_state == LOW)
     {
-      footswitch_pressed();
+      callbackPressed();
       Devtools::println_to_console("Footswitch pressed.");
     }
     else
     {
-      footswitch_released();
+      callbackReleased();
       Devtools::println_to_console("Footswitch released.");
     }
     last_switch_state = switch_state;

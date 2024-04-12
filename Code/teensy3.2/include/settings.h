@@ -12,6 +12,7 @@
 /////////////////////////// AUXILIARY HARDWARE ////////////////////////
 #define VIBR 0
 #define FOOTSWITCH 2
+#define FOOTSWITCH2 A9
 
 /* LCD AV1623 pinout:
 1   Vss       GND

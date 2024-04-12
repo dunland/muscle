@@ -9,14 +9,15 @@
 class Score;
 class Instrument;
 
-enum FootswitchMode
+enum FootswitchMode // TODO: use callback functions instead!
 {
   Log_Beats,
   Hold_CC,
   Reset_Topo, // resets beat_topography (of all instruments)
   Reset_Topo_and_Proceed_Score,
   Experimental, // hold = mute, release = randomize and increase score step
-  Increment_Score
+  Increment_Score,
+  SloJamPlaySample // TODO: use callback functions instead!
 };
 
 class Knob
@@ -40,33 +41,22 @@ public:
 class Hardware
 {
 public:
-
   static void begin_MIDI();
   static void sendMidiClock();
 
-  ////////////////////////////////// FOOT SWITCH ////////////////////////
-  ///////////////////////////////////////////////////////////////////////
+  // ------------------------------------------------------------
 
-  static FootswitchMode footswitch_mode;
-
-  static void footswitch_pressed();
-
-  static void footswitch_released();
-
-  static void checkFootSwitch();
-  // --------------------------------------------------------------------
-
-  ////////////////////////////////// LCD ////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////
+  ////////////////////////// LCD ////////////////////////////////
+  ///////////////////////////////////////////////////////////////
   static LiquidCrystal *lcd;
   static void lcd_display();
   static void display_scores();
   static void display_Midi_values(int numOfInstrumentsWithCCTrigger); // display midi values of instruments with FX-Type CC_Change
-  static volatile boolean FLAG_CLEAR_LCD; // CAUTION: USED IN INTERRUPTS! DON'T CHANGE WITHOUT STOPPING THEM
-  // --------------------------------------------------------------------
+  static volatile boolean FLAG_CLEAR_LCD;                             // CAUTION: USED IN INTERRUPTS! DON'T CHANGE WITHOUT STOPPING THEM
+  // ------------------------------------------------------------
 
-  ///////////////////////////// ROTARY ENCODER //////////////////////////
-  ///////////////////////////////////////////////////////////////////////
+  ///////////////////// ROTARY ENCODER //////////////////////////
+  ///////////////////////////////////////////////////////////////
   static Encoder *myEnc;
   static int encoder_value;
   static int encoder_count;
@@ -74,15 +64,15 @@ public:
 
   static void checkEncoder();
 
-  /////////////////////////////// PUSHBUTTON ////////////////////////////
-  ///////////////////////////////////////////////////////////////////////
-  static void checkPushButton();          // checks whether pushbutton is pressed and executes action
+  /////////////////////// PUSHBUTTON ////////////////////////////
+  ///////////////////////////////////////////////////////////////
+  static void checkPushButton();     // checks whether pushbutton is pressed and executes action
   static boolean pushbutton_state(); // only checks whether pushbutton is pressed
   static unsigned long last_pushbutton_release;
-  // --------------------------------------------------------------------
+  // ------------------------------------------------------------
 
-  ////////////////////////////// VIBRATION MOTOR ////////////////////////
-  ///////////////////////////////////////////////////////////////////////
+  ////////////////////// VIBRATION MOTOR ////////////////////////
+  ///////////////////////////////////////////////////////////////
 
   static unsigned long motor_vibration_begin;
   static int motor_vibration_duration;
@@ -91,8 +81,8 @@ public:
 
   static void request_motor_deactivation();
 
-  //////////////////////////////// DD-200 /////////////////////////////
-  /////////////////////////////////////////////////////////////////////
+  ///////////////////////////// DD-200 //////////////////////////
+  ///////////////////////////////////////////////////////////////
 
   static int dd_200_midi_interval_map[128];
 };
@@ -100,7 +90,7 @@ public:
 class Synthesizer
 {
 public:
-  Synthesizer(int midi_channel_, String name_="None")
+  Synthesizer(int midi_channel_, String name_ = "None")
   {
     midi_channel = midi_channel_;
     name = name_;
@@ -121,7 +111,6 @@ public:
   int midi_values[127];
   int previousMidiVal = -1; // stores last midi CC value to see whether it has changed
 
-
   void sendControlChange(CC_Type cc_type, int val); // sets cc_value (used for JSON comm) and sends MIDI-ControlChange
 
   void sendControlChange(int cc_type, int val); // sets cc_value using an integer and sends MIDI-ControlChange // for Random_CC_Effect
@@ -135,4 +124,18 @@ public:
   void whammyPedal(int value);
 
   void sendPitchBend(double pitch);
+};
+
+//////////////////////// FOOT SWITCH //////////////////////
+///////////////////////////////////////////////////////////
+class FootSwitch
+{
+public:
+  static FootswitchMode mode;
+
+  static void callbackPressed();
+
+  static void callbackReleased();
+
+  static void checkFootSwitch();
 };

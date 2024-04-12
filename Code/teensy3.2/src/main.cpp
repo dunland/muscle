@@ -386,7 +386,7 @@ void loop()
   Globals::last_16th_count = Globals::current_16th_count;
 
   // Hardware:
-  Hardware::checkFootSwitch(); // check step of footswitch
+  FootSwitch::checkFootSwitch(); // check step of footswitch
 
   // rotary encoder:
   Hardware::checkEncoder();

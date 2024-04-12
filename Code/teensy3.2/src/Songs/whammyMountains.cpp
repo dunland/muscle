@@ -21,7 +21,7 @@ void run_whammyMountains()
         if (Globals::active_song->get_setup_state())
         {
             /* ------- general initialization routine -------------- */
-            Hardware::footswitch_mode = Increment_Score;
+            FootSwitch::mode = Increment_Score;
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
 

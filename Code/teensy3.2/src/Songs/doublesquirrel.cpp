@@ -118,7 +118,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
 
     case 0: // init state
 
-        Hardware::footswitch_mode = Reset_Topo_and_Proceed_Score;
+        FootSwitch::mode = Reset_Topo_and_Proceed_Score;
 
         static std::vector<int> locrian_mode = {active_song->notes[0] + 1, active_song->notes[0] + 3, active_song->notes[0] + 5, active_song->notes[0] + 6, active_song->notes[0] + 8, active_song->notes[0] + 11};
 

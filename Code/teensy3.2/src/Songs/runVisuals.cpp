@@ -18,7 +18,7 @@ void run_visuals()
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
 
-            Hardware::footswitch_mode = Increment_Score;
+            FootSwitch::mode = Increment_Score;
 
             Globals::active_song->increase_step();
         }

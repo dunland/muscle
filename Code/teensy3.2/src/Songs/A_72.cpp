@@ -26,7 +26,7 @@ void run_A_72()
             Globals::active_song->notes.clear();
             Globals::active_song->notes.push_back(int(random(12, 24)));
 
-            Hardware::footswitch_mode = Increment_Score;
+            FootSwitch::mode = Increment_Score;
             Synthesizers::mKorg->sendProgramChange(49); // switches to Voice A.72
             delay(200);
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, 1); // Select Timbre 2

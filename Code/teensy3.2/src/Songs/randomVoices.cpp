@@ -27,7 +27,7 @@ void run_randomVoice()
     case 1: // change CC ("Reflex") + PlayMidi
         if (Globals::active_song->get_setup_state())
         {
-            Hardware::footswitch_mode = Increment_Score;
+            FootSwitch::mode = Increment_Score;
 
             Drumset::kick->midiTargets.back()->notes.push_back(int(random(0, 128)));
             Drumset::kick->midiTargets.back()->active_note = Drumset::kick->midiTargets.back()->notes[0];
@@ -57,7 +57,7 @@ void run_randomVoice()
     case 2: // change CC only
         if (Globals::active_song->get_setup_state())
         {
-            // Hardware::footswitch_mode = Experimental;
+            // FootSwitch::footswitch_mode = Experimental;
             Drumset::kick->shuffle_cc(Drumset::kick->midiTargets.back(), true);     // set a random midi CC channel
             Drumset::snare->shuffle_cc(Drumset::snare->midiTargets.back(), true);    // set a random midi CC channel
             Drumset::tom1->shuffle_cc(Drumset::tom1->midiTargets.back(), true);     // set a random midi CC channel
