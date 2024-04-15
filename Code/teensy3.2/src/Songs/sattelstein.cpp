@@ -16,7 +16,6 @@ void run_sattelstein()
             Globals::active_song->resetInstruments();         // reset all instruments to "Monitor" mode
             Synthesizers::mKorg->sendProgramChange(38); // selects mKORG Voice A.57
             Synthesizers::whammy->sendProgramChange(83); // Whammy off!!
-            FootSwitch::mode = Increment_Score;
             Globals::tapInterval = 392; // 153 BPM
             Globals::current_BPM = 60000 / Globals::tapInterval;
             Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128); // 4 beats (1 bar) with 128 divisions in microseconds; initially 120 BPM

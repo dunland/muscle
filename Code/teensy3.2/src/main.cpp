@@ -96,6 +96,9 @@ void samplePins()
 
 void setup()
 {
+
+  // Hardware::footswitch->callbackReleased = Song::incrementStep;
+
   //------------------------ initialize pins --------------------------
   pinMode(VIBR, OUTPUT);
   pinMode(FOOTSWITCH, INPUT_PULLUP);
@@ -242,14 +245,14 @@ void setup()
   Globals::active_song = Globals::songlist.at(0);
 
   // link midi synth to instruments:
-//   Drumset::snare->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::kick->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::hihat->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::crash1->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::ride->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::tom1->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::tom2->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::standtom->midiTarget.synth = Synthesizers::mKorg;
+  //   Drumset::snare->midiTarget.synth = Synthesizers::mKorg;
+  //   Drumset::kick->midiTarget.synth = Synthesizers::mKorg;
+  //   Drumset::hihat->midiTarget.synth = Synthesizers::mKorg;
+  //   Drumset::crash1->midiTarget.synth = Synthesizers::mKorg;
+  //   Drumset::ride->midiTarget.synth = Synthesizers::mKorg;
+  //   Drumset::tom1->midiTarget.synth = Synthesizers::mKorg;
+  //   Drumset::tom2->midiTarget.synth = Synthesizers::mKorg;
+  //   Drumset::standtom->midiTarget.synth = Synthesizers::mKorg;
 
   // an initial midi note must be defined, otherwise there is a problem with the tidyUp function
   // Drumset::snare->midi.active_note = 50;
@@ -329,7 +332,7 @@ void loop()
       instrument->trigger();            // runs trigger function according to instrument's EffectType
       instrument->timing.wasHit = true; // a flag to show that the instrument was hit (for transmission via JSON)
 
-    //   TODO: send song notes! //Synthesizers::volca->sendNoteOn(instrument->midiTarget.notes[0]);
+      //   TODO: send song notes! //Synthesizers::volca->sendNoteOn(instrument->midiTarget.notes[0]);
 
       instrument->timing.lastHit = millis();
     }
@@ -386,7 +389,7 @@ void loop()
   Globals::last_16th_count = Globals::current_16th_count;
 
   // Hardware:
-  FootSwitch::checkFootSwitch(); // check step of footswitch
+  Hardware::footswitch->poll(); // check step of footswitch
 
   // rotary encoder:
   Hardware::checkEncoder();
@@ -411,9 +414,9 @@ void loop()
     //   Synthesizers::volca->sendNoteOff(instrument->midiTarget.notes[0]);
   }
 
-  if (Devtools::do_print_to_console){
+  if (Devtools::do_print_to_console)
+  {
     NanoKontrol::loop();
   }
-
 }
 // --------------------------------------------------------------------

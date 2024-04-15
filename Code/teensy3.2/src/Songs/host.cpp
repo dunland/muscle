@@ -15,7 +15,6 @@ void run_host()
             Synthesizers::mKorg->sendProgramChange(56); // selects mKORG Voice A.57
             Globals::active_song->resetInstruments();         // reset all instruments to "Monitor" mode
             Drumset::snare->set_effect(Monitor);
-            FootSwitch::mode = Increment_Score;
             Synthesizers::mKorg->midi_values[mKORG_DelayDepth] = 0;
         }
     case 1:

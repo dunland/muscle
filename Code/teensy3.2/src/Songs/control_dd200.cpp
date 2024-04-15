@@ -20,7 +20,6 @@ void run_control_dd200()
 
         if (Globals::active_song->get_setup_state())
         {
-            FootSwitch::mode = Increment_Score;
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
 
@@ -205,7 +204,6 @@ void run_control_dd200()
 
             if (Globals::active_song->setup)
             {
-                FootSwitch::mode = No_Footswitch_Mode;
                 Drumset::hihat->set_effect(TapTempo);
                 Synthesizers::dd200->sendControlChange(dd200_DelayLevel, 80; // I think 80 was a good value
                 Globals::active_song->setup = false;

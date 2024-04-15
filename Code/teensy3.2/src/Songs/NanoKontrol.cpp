@@ -13,7 +13,6 @@ void run_nanokontrol()
     case 0:  // A.43
         if (Globals::active_song->get_setup_state())
         {
-            FootSwitch::mode = Increment_Score;
             // Globals::machine_state = NanoKontrol_Test;
             Drumset::snare->addMidiTarget(mKORG_LFO2_Rate, Synthesizers::mKorg, 127, 30, 18.0, -0.11);
             Drumset::snare->set_effect(Change_CC);

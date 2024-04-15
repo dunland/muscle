@@ -1,5 +1,5 @@
 #include <Song.h>
-
+#include <Globals.h>
 #include <Instruments.h>
 #include <Hardware.h>
 
@@ -34,6 +34,11 @@ void Song::set_notes(std::vector<int> list)
     }
     Devtools::println_to_console("");
 }
+
+void Song::incrementStep(){
+	Globals::active_song->increase_step();
+}
+
 
 void Song::increase_step()
 {

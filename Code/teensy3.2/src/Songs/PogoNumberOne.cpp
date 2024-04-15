@@ -22,7 +22,6 @@ void run_PogoNumberOne()
             Synthesizers::dd200->sendProgramChange(3); // Program #3
 
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0); // ATTENTION: must be after programChange!
-            FootSwitch::mode = Increment_Score;
         }
         break;
 

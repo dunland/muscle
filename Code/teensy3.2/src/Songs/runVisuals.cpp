@@ -18,8 +18,6 @@ void run_visuals()
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
 
-            FootSwitch::mode = Increment_Score;
-
             Globals::active_song->increase_step();
         }
         break;

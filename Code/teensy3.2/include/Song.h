@@ -2,10 +2,8 @@
 #include <functional>
 #include <Topography.h>
 #include <Devtools.h>
-#include <Globals.h>
 #include <vector>
 // #include <Instruments.h>
-
 
 class Instrument;
 class Synthesizer;
@@ -48,6 +46,9 @@ public:
 
     bool setup_state; // when true, current score_step's setup function is executed.
     bool get_setup_state();
+
+    static void incrementStep();
+
 
     // TODO: move this to Rhythmics
     TOPOGRAPHY beat_sum;         // sum of all instrument topographies
@@ -138,6 +139,18 @@ void run_triathlon();
 
 void run_sloJam();
 
+void run_A_15();
+
+void run_A_25();
+
+void run_b_11();
+
+void run_b_36();
+
+void run_b_63();
+
+void run_b_73();
+
 // ------------------------------- MODES: (deprecated) ------------
 void playRhythmicNotes(Synthesizer *synth, int note_change_pos_ = 0); // initiates a continuous bass note from score
 
@@ -152,15 +165,3 @@ void envelope_volume(TOPOGRAPHY *topography, Synthesizer *synth); // creates an 
 void crazyDelays(Instrument *instrument, Synthesizer *synth); // changes the delay times on each 16th-step
 
 // void set_ramp( , CC_Type cc_type, MIDI_Instrument midi_instr, int start_value, int end_value, int duration);
-
-void run_A_15();
-
-void run_A_25();
-
-void run_b_11();
-
-void run_b_36();
-
-void run_b_63();
-
-void run_b_73();

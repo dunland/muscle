@@ -16,7 +16,6 @@ void run_monitoring()
 
             Synthesizers::whammy->sendProgramChange(83); // Whammy off!!
 
-            FootSwitch::mode = Increment_Score;
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
 

@@ -27,8 +27,6 @@ void run_b_73()
     case 1: // Instruments: PlayMidi
         if (Globals::active_song->get_setup_state())
         {
-            FootSwitch::mode = Increment_Score;
-
             Drumset::kick->midiTargets.back()->notes.push_back(int(random(21, 128)));
             Drumset::kick->midiTargets.back()->active_note = Drumset::kick->midiTargets.back()->notes.size() - 1;
 

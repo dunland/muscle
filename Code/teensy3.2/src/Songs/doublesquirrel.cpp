@@ -4,6 +4,36 @@
 #include <Hardware.h>
 #include <settings.h>
 
+void resetTopoAndProceedToScore(){
+        if (Globals::active_song->beat_sum.average_smooth >= Globals::active_song->beat_sum.activation_thresh) // score proceed criterion reached
+    {
+      Devtools::println_to_console("regularity height > 10: reset!");
+      Globals::active_song->increase_step(); // go to next score step
+      for (auto &instrument : Drumset::instruments)
+        for (int j = 0; j < 16; j++)
+          instrument->topography.a_16[j] = 0;
+
+      Devtools::println_to_console("all instrument topographies were reset.");
+
+      for (int j = 0; j < 16; j++)
+        Globals::active_song->beat_sum.a_16[j] = 0; // reset topography
+      Globals::active_song->beat_sum.average_smooth = 0;
+    }
+
+    else // not enough strokes to proceed yet.
+    {
+      Devtools::print_to_console("regularity too low to proceed.. is at ");
+      Devtools::println_to_console(Globals::active_song->beat_sum.average_smooth);
+    }
+
+    // either way, shuffle instruments with Random_CC_Effect:
+    for (auto &instrument : Drumset::instruments)
+    {
+      if (instrument->effect == Random_CC_Effect)
+        instrument->score.ready_to_shuffle = true;
+    }
+}
+
 //////////////////////////// DOUBLE SQUIRREL /////////////////////////////
 // old routine from master thesis presentation
 // THIS SONG IS COMPOSED FOR microKORG A.63
@@ -118,7 +148,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
 
     case 0: // init state
 
-        FootSwitch::mode = Reset_Topo_and_Proceed_Score;
+        Hardware::footswitch->callbackPressed = resetTopoAndProceedToScore;
 
         static std::vector<int> locrian_mode = {active_song->notes[0] + 1, active_song->notes[0] + 3, active_song->notes[0] + 5, active_song->notes[0] + 6, active_song->notes[0] + 8, active_song->notes[0] + 11};
 

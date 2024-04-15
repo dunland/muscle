@@ -5,20 +5,10 @@
 #include <LiquidCrystal.h>
 #include <Encoder.h>
 #include <Devtools.h>
+#include <Song.h>
+#include <functional>
 
-class Score;
 class Instrument;
-
-enum FootswitchMode // TODO: use callback functions instead!
-{
-  Log_Beats,
-  Hold_CC,
-  Reset_Topo, // resets beat_topography (of all instruments)
-  Reset_Topo_and_Proceed_Score,
-  Experimental, // hold = mute, release = randomize and increase score step
-  Increment_Score,
-  SloJamPlaySample // TODO: use callback functions instead!
-};
 
 class Knob
 {
@@ -36,6 +26,25 @@ public:
   void pressed();
 
   void released();
+};
+
+//////////////////////// FOOT SWITCH //////////////////////
+///////////////////////////////////////////////////////////
+class FootSwitch
+{
+public:
+  FootSwitch(u_int8_t _pin)
+  {
+    pin = _pin;
+    callbackPressed = nullptr;
+    callbackReleased = Song::incrementStep;
+  }
+
+  u_int8_t pin;
+  std::function<void()> callbackPressed;
+  std::function<void()> callbackReleased;
+
+  void poll();
 };
 
 class Hardware
@@ -85,6 +94,12 @@ public:
   ///////////////////////////////////////////////////////////////
 
   static int dd_200_midi_interval_map[128];
+
+  //////////////////////// FOOT SWITCH //////////////////////
+  ///////////////////////////////////////////////////////////
+
+  static FootSwitch *footswitch;
+
 };
 
 class Synthesizer
@@ -124,18 +139,4 @@ public:
   void whammyPedal(int value);
 
   void sendPitchBend(double pitch);
-};
-
-//////////////////////// FOOT SWITCH //////////////////////
-///////////////////////////////////////////////////////////
-class FootSwitch
-{
-public:
-  static FootswitchMode mode;
-
-  static void callbackPressed();
-
-  static void callbackReleased();
-
-  static void checkFootSwitch();
 };

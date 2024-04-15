@@ -19,7 +19,6 @@ void run_intro()
 
         if (Globals::active_song->get_setup_state())
         {
-            FootSwitch::mode = Increment_Score;
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
 
