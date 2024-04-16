@@ -68,7 +68,7 @@ void Hardware::checkPushButton()
       case Running:
         if (button_state == false) // button released
         {
-          Globals::active_song->proceed_to_next_score();
+          Globals::active_song->proceedToNextSong();
         }
         break;
 

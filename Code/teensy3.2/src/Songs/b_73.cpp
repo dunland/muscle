@@ -60,7 +60,7 @@ void run_b_73()
         Globals::active_song->step = 1; // reset
         Globals::active_song->setup_state = true;
         Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] = false;
-        // proceed_to_next_score();
+        // proceedToNextSong();
         break;
     }
 }

@@ -75,7 +75,7 @@ void run_dd200_timeControl()
 
     default:
         Synthesizers::mKorg->sendNoteOff(31);
-        Globals::active_song->proceed_to_next_score();
+        Globals::active_song->proceedToNextSong();
         break;
     }
 }

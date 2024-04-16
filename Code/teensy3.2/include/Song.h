@@ -13,6 +13,7 @@ class Song
 public:
     typedef std::function<void()> Callback;
     Callback song_function;
+    Callback onLeave;
 
     Song(Callback f, String songName) : song_function(f)
     {
@@ -26,6 +27,7 @@ public:
         // Devtools::println_to_console(notes[0]);
         name = songName;
         setup_state = true;
+        onLeave = proceedToNextSong;
     }
 
     String name; // name to be displayed on LCD
@@ -48,7 +50,7 @@ public:
     bool get_setup_state();
 
     static void incrementStep();
-
+    // std::function<void()> onLeave;
 
     // TODO: move this to Rhythmics
     TOPOGRAPHY beat_sum;         // sum of all instrument topographies
@@ -59,7 +61,7 @@ public:
     void set_notes(std::vector<int> list);
     void add_bassNote(int note); // adds a NOTE to notes[]
     void increase_step();
-    void proceed_to_next_score();
+    static std::function<void()> proceedToNextSong();
     void setTempoRange(int min_tempo_, int max_tempo_);
     void resetInstruments();
 

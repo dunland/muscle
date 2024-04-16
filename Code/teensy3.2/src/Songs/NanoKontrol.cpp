@@ -26,7 +26,7 @@ void run_nanokontrol()
         Globals::active_song->note_idx = (Globals::active_song->note_idx + 1) % sizeof(Globals::active_song->notes);
         Globals::active_song->step = 0;
         // Globals::machine_state = Running;
-        // Globals::active_song->proceed_to_next_score();
+        // Globals::active_song->proceedToNextSong();
         break;
     }
 }

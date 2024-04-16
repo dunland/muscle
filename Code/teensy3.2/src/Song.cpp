@@ -2,6 +2,7 @@
 #include <Globals.h>
 #include <Instruments.h>
 #include <Hardware.h>
+#include <functional>
 
 ///////////////////////// SETUP FUNCTIONS /////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -39,7 +40,6 @@ void Song::incrementStep(){
 	Globals::active_song->increase_step();
 }
 
-
 void Song::increase_step()
 {
     step++;
@@ -50,7 +50,7 @@ void Song::increase_step()
 }
 
 // proceed to step 0 of next song and set all instruments effects to "Monitor":
-void Song::proceed_to_next_score() // TODO: make this a callback function/the songs' individual "tidyUp function", so they can be programmed individually.
+std::function<void()> Song::proceedToNextSong() // TODO: make this a callback function/the songs' individual "tidyUp function", so they can be programmed individually.
 {
     // proceed to next song in list:
     Globals::active_song_pointer = (Globals::active_song_pointer + 1) % Globals::songlist.size();

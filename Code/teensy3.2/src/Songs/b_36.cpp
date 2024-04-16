@@ -66,7 +66,7 @@ void run_b_36()
         break;
 
     default:
-        Globals::active_song->proceed_to_next_score();
+        Globals::active_song->proceedToNextSong();
         // TODO: Destroy last created midiTargets!
         break;
     }

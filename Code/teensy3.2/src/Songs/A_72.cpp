@@ -80,7 +80,7 @@ void run_A_72()
         // Globals::active_song->notes.push_back(Globals::active_song->notes[Globals::active_song->note_idx] + note_increase);
         // Globals::active_song->note_idx++;
         Synthesizers::mKorg->sendControlChange(mKORG_Arpeggio_onOff, 0); // arp off
-        Globals::active_song->proceed_to_next_score();
+        Globals::active_song->proceedToNextSong();
 
         break;
     }

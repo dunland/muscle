@@ -41,7 +41,7 @@ void run_donnerwetter()
 
     default:
         Synthesizers::mKorg->sendNoteOff(31);
-        Globals::active_song->proceed_to_next_score();
+        Globals::active_song->proceedToNextSong();
         Globals::active_song->step = 0;
         break;
     }

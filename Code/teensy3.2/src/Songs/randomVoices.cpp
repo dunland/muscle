@@ -86,7 +86,7 @@ void run_randomVoice()
         Globals::active_song->step = 1;
         Globals::active_song->setup_state = true;
         Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] = false;
-        // Globals::active_song->proceed_to_next_score();
+        // Globals::active_song->proceedToNextSong();
         break;
     }
 }

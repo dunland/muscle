@@ -38,7 +38,7 @@ void run_monitoring()
         break;
 
     default:
-        Globals::active_song->proceed_to_next_score();
+        Globals::active_song->proceedToNextSong();
         break;
     }
 }
@@ -74,7 +74,7 @@ void run_tapTempo()
         break;
 
     default:
-        Globals::active_song->proceed_to_next_score();
+        Globals::active_song->proceedToNextSong();
         break;
     }
 }

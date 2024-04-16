@@ -18,7 +18,7 @@ void run_ferdinandPiech()
         break;
 
     default:
-        Globals::active_song->proceed_to_next_score();
+        Globals::active_song->proceedToNextSong();
         break;
     }
 }

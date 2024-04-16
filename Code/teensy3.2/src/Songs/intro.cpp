@@ -57,7 +57,7 @@ void run_intro()
 
     default:
         Synthesizers::kaossPad3->sendControlChange(92, 0); // Touch Pad off
-        Globals::active_song->proceed_to_next_score();
+        Globals::active_song->proceedToNextSong();
         Globals::active_song->step = 0;
         break;
     }

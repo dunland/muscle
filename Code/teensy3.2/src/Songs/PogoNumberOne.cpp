@@ -27,7 +27,7 @@ void run_PogoNumberOne()
 
     default:
         Globals::bSendMidiClock = true;
-        Globals::active_song->proceed_to_next_score();
+        Globals::active_song->proceedToNextSong();
         break;
     }
 }

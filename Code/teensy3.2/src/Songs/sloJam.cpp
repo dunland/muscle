@@ -5,6 +5,37 @@
 #include <Notes.h>
 #include <settings.h>
 
+void sloJamFootswitchFunction()
+{
+    static unsigned long lastTriggerMoment = 1000; // some pre-delay to prevent initial misdetection
+    // static int eighthNoteDuration = int(60000.0 / float(Globals::current_BPM) * 2); funzt nicht...
+    static int siebenAchtelNoten = 2307; // 60000 / 65 * 2 * 5
+    static bool playNote = false;
+
+    if (digitalRead(FOOTSWITCH2) == LOW && millis() > lastTriggerMoment + 50)
+    {
+        // play sample:
+        Synthesizers::kaossPad3->sendNoteOn(KP3_Sample_A);
+
+        lastTriggerMoment = millis();
+        playNote = true;
+    }
+
+    // spiel A 7/8 später:
+    if (millis() > (lastTriggerMoment + (siebenAchtelNoten)) && playNote)
+    {
+        static Notes mKorgNote = Note_A5;
+        // turn note off:
+        Synthesizers::mKorg->sendNoteOff(mKorgNote);
+        // change note:
+        mKorgNote = (mKorgNote == Note_A5) ? Note_A6 : Note_A5;
+        // turn note on:
+        Synthesizers::mKorg->sendNoteOn(mKorgNote);
+
+        playNote = false;
+    }
+}
+
 ///////////////////////////// MONITORING //////////////////////////////
 void run_sloJam()
 {
@@ -139,46 +170,7 @@ void run_sloJam()
         break;
 
     default:
-        Synthesizers::mKorg->sendNoteOff(Note_A5);
-        Synthesizers::mKorg->sendNoteOff(Note_A6);
-        Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_on_off, 0); // Touch Pad off
-
-        Globals::active_song->proceed_to_next_score();
-
-        delete footswitch2;
-        footswitch2 = nullptr;
-
+    Globals::active_song->onLeave();
         break;
-    }
-}
-
-void sloJamFootswitchFunction()
-{
-    static unsigned long lastTriggerMoment = 1000; // some pre-delay to prevent initial misdetection
-    // static int eighthNoteDuration = int(60000.0 / float(Globals::current_BPM) * 2); funzt nicht...
-    static int siebenAchtelNoten = 2307; // 60000 / 65 * 2 * 5
-    static bool playNote = false;
-
-    if (digitalRead(FOOTSWITCH2) == LOW && millis() > lastTriggerMoment + 50)
-    {
-        // play sample:
-        Synthesizers::kaossPad3->sendNoteOn(KP3_Sample_A);
-
-        lastTriggerMoment = millis();
-        playNote = true;
-    }
-
-    // spiel A 7/8 später:
-    if (millis() > (lastTriggerMoment + (siebenAchtelNoten)) && playNote)
-    {
-        static Notes mKorgNote = Note_A5;
-        // turn note off:
-        Synthesizers::mKorg->sendNoteOff(mKorgNote);
-        // change note:
-        mKorgNote = (mKorgNote == Note_A5) ? Note_A6 : Note_A5;
-        // turn note on:
-        Synthesizers::mKorg->sendNoteOn(mKorgNote);
-
-        playNote = false;
     }
 }
