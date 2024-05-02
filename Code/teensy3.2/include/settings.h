@@ -12,6 +12,7 @@
 /////////////////////////// AUXILIARY HARDWARE ////////////////////////
 #define VIBR 0
 #define FOOTSWITCH 2
+#define FOOTSWITCH2 A9
 
 /* LCD AV1623 pinout:
 1   Vss       GND
@@ -53,7 +54,6 @@
 // ATTENTION: PCB-Layout ist falsch!!
 // PCB-pin 38 == teensy-pin 16 == A2 statt A0!!
 
-#define INPUT_PIN_CRASH1 A9
 #define INPUT_PIN_KICK A3
 #define INPUT_PIN_STANDTOM A4
 #define INPUT_PIN_RIDE A2

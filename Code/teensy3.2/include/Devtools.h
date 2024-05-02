@@ -15,6 +15,8 @@ public:
     static boolean do_print_JSON;     // determines whether to use USB Serial communication for monitoring via processing/console or not
     static bool overwrite_SD_data;
 
+    static String endOfLine;
+
     // DEBUG FUNCTIONS: ---------------------------------------------------
     // print the play log to Serial monitor:
     static void print_to_console(String message_to_print);
@@ -24,5 +26,7 @@ public:
     static void println_to_console(String message_to_print);
     static void println_to_console(int int_to_print);
     static void println_to_console(float float_to_print);
-    // --------------------------------------------------------------------
+
+    static void printLine(); // prints endOfLine String
+    // -------------------------------------------------
 };

@@ -453,7 +453,7 @@ Instrument *Drumset::kick = new Instrument(INPUT_PIN_KICK, Kick);
 Instrument *Drumset::tom1 = new Instrument(INPUT_PIN_TOM1, Tom1);
 Instrument *Drumset::tom2 = new Instrument(INPUT_PIN_TOM2, Tom2);
 Instrument *Drumset::standtom = new Instrument(INPUT_PIN_STANDTOM, Standtom);
-Instrument *Drumset::crash1 = new Instrument(INPUT_PIN_CRASH1, Crash1);
+// Instrument *Drumset::crash1 = new Instrument(INPUT_PIN_CRASH1, Crash1);
 Instrument *Drumset::ride = new Instrument(INPUT_PIN_RIDE, Ride);
 
 std::vector<Instrument *> Drumset::instruments = {Drumset::snare, Drumset::hihat, Drumset::kick, Drumset::tom1, Drumset::tom2, Drumset::standtom}; // TODO: add this to calibration mode

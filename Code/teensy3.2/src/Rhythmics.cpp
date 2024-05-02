@@ -44,7 +44,7 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         {
         }
 
-        // --------------------------- 8th notes: -------------------------
+        // ------------------- 8th notes: -----------------
         if (Globals::current_beat_pos % 4 == 0)
         {
             // increase 8th note counter:
@@ -55,21 +55,23 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
             digitalWrite(LED_BUILTIN, toggleLED);
         }
 
-        // --------------------------- 16th notes: ------------------------
+        // ------------------ 16th notes: -----------------
         if (Globals::current_beat_pos % 2 == 0)
         {
             // increase 16th note counter:
             Globals::current_16th_count = (Globals::current_16th_count + 1) % 16;
         }
 
-        // ----------------------------- draw play log to console
+        // ------------------ 32th notes: -----------------
+
+        // draw play log to console:
 
         for (auto &instrument : instruments)
         {
             Devtools::print_to_console(instrument->output_string);
             instrument->output_string = "\t";
         }
-        Devtools::println_to_console("");
+        Devtools::printLine();
 
         // sum up all topographies of all instruments:
         // Globals::active_song->beat_sum.reset();

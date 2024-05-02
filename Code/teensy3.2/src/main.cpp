@@ -33,7 +33,7 @@ const String VERSION_NUMBER = "1.0.0";
 const boolean USING_TSUNAMI = false;
 boolean Devtools::use_responsiveCalibration = false;
 boolean Devtools::do_print_beat_sum = false; // prints active_score->beat_sum topography array
-boolean Devtools::do_print_to_console = false;
+boolean Devtools::do_print_to_console = true;
 boolean Devtools::use_serial_comm = false; // sends instrument names upon stroke and song names, if true
 boolean Devtools::do_print_JSON = false;
 boolean Devtools::do_send_to_processing = false;
@@ -159,7 +159,6 @@ void setup()
   Drumset::kick->setup_sensitivity(KICK_THRESHOLD, KICK_CROSSINGS, KICK_DELAY_AFTER_STROKE, KICK_FIRST_STROKE);
   Drumset::tom2->setup_sensitivity(TOM2_THRESHOLD, TOM2_CROSSINGS, TOM2_DELAY_AFTER_STROKE, TOM2_FIRST_STROKE);
   Drumset::standtom->setup_sensitivity(STANDTOM_THRESHOLD, STANDTOM_CROSSINGS, STANDTOM_DELAY_AFTER_STROKE, STANDTOM_FIRST_STROKE);
-  Drumset::crash1->setup_sensitivity(CRASH1_THRESHOLD, CRASH1_CROSSINGS, CRASH1_DELAY_AFTER_STROKE, CRASH1_FIRST_STROKE);
   Drumset::ride->setup_sensitivity(RIDE_THRESHOLD, RIDE_CROSSINGS, RIDE_DELAY_AFTER_STROKE, RIDE_FIRST_STROKE);
   Drumset::tom1->setup_sensitivity(TOM1_THRESHOLD, TOM1_CROSSINGS, TOM1_DELAY_AFTER_STROKE, TOM1_FIRST_STROKE);
 
@@ -241,31 +240,9 @@ void setup()
 
   Globals::active_song = Globals::songlist.at(0);
 
-  // link midi synth to instruments:
-//   Drumset::snare->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::kick->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::hihat->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::crash1->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::ride->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::tom1->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::tom2->midiTarget.synth = Synthesizers::mKorg;
-//   Drumset::standtom->midiTarget.synth = Synthesizers::mKorg;
-
-  // an initial midi note must be defined, otherwise there is a problem with the tidyUp function
-  // Drumset::snare->midi.active_note = 50;
-  // Drumset::kick->midi.active_note = 50;
-  // Drumset::hihat->midi.active_note = 50;
-  // Drumset::crash1->midi.active_note = 50;
-  // Drumset::ride->midi.active_note = 50;
-  // Drumset::tom2->midi.active_note = 50;
-  // Drumset::standtom->midi.active_note = 50;
-  // Drumset::cowbell->midi.active_note = 50;
-
   // assign startup instrument effects:
   Drumset::hihat->effect = Monitor;
-  Drumset::crash1->effect = Monitor;
   Drumset::tom1->effect = Monitor;
-  Drumset::ride->effect = Monitor;
 
   // Debug:
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
