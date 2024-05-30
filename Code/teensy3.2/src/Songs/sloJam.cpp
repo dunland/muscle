@@ -28,11 +28,9 @@ void run_sloJam()
 
             Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_on_off, 0); // Touch Pad off
 
-            Globals::current_BPM = 130;
+            Globals::current_BPM = 65;
             Globals::tapInterval = 60000 / Globals::current_BPM;
             Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128);
-
-            // Hardware::footswitch_mode = SloJamPlaySample;
 
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
@@ -59,6 +57,11 @@ void run_sloJam()
             }
         }
 
+        Hardware::lcd->setCursor(0, 0);
+        Hardware::lcd->print(Globals::current_BPM);
+        Hardware::lcd->setCursor(3, 0);
+        Hardware::lcd->print("BPM");
+        
         Hardware::lcd->setCursor(6, 1);
         Hardware::lcd->print("drmFX");
 
@@ -86,7 +89,7 @@ void run_sloJam()
         if (playMelody)
         {
             int currentNote = melody[noteIdx];
-            if (Globals::current_beat_pos % 4 == 0) // 8tel
+            if (Globals::current_beat_pos % 2 == 0) // 16tel
             {
                 if (currentNote != 0)
                 {
