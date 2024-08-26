@@ -17,7 +17,7 @@ void run_intro()
 
     case 0: // some ramp effect on snare. Used as intro for Concert at Stasi's. Works fine with DD200-DUAL mode @ ~150 BPM quarter notes
 
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Hardware::footswitch_mode = Increment_Score;
             Globals::active_song->resetInstruments();

@@ -10,7 +10,7 @@ void run_PogoNumberOne()
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::mKorg->sendProgramChange(3); // just to kill the Arpeggiator...
 

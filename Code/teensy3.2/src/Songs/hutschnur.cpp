@@ -13,7 +13,7 @@ void run_hutschnur()
     switch(Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0);
             Synthesizers::whammy->sendProgramChange(62); // HARMONY UP OCT / UP 2 OCT

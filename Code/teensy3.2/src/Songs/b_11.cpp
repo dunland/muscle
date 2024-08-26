@@ -11,7 +11,7 @@ void run_b_11()
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::mKorg->sendProgramChange(64); // b.11
             // Globals::active_song->playSingleNote(Synthesizers::mKorg;
@@ -44,7 +44,7 @@ void run_b_11()
         break;
 
     default:
-        Globals::active_song->setup_state = true;
+        Globals::active_song->initState = true;
         Globals::active_song->step = 0;
         break;
     }

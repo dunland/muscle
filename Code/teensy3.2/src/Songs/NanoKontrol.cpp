@@ -11,7 +11,7 @@ void run_nanokontrol()
     switch (Globals::active_song->step)
     {
     case 0:  // A.43
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Hardware::footswitch_mode = Increment_Score;
             // Globals::machine_state = NanoKontrol_Test;

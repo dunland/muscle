@@ -10,7 +10,7 @@ void run_TEMPLATE()
     switch(Globals::active_song->step)
     {
     case 0: // Snare → Vocoder (D+F)
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
@@ -19,7 +19,7 @@ void run_TEMPLATE()
         break;
 
     case 1:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
         }
 

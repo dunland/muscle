@@ -25,7 +25,7 @@ void run_b_73()
         break;
 
     case 1: // Instruments: PlayMidi
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Hardware::footswitch_mode = Increment_Score;
 
@@ -60,7 +60,7 @@ void run_b_73()
 
     default: // start over again
         Globals::active_song->step = 1; // reset
-        Globals::active_song->setup_state = true;
+        Globals::active_song->initState = true;
         Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] = false;
         // proceed_to_next_score();
         break;

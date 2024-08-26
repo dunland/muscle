@@ -18,7 +18,8 @@ void Hardware::begin_MIDI()
   }
 }
 
-void Hardware::sendMidiClock(){
+void Hardware::sendMidiClock()
+{
   MIDI.sendRealTime(midi::Clock);
 }
 
@@ -26,26 +27,35 @@ void Hardware::sendMidiClock(){
 ///////////////////////////////////////////////////////////////////////
 
 // sets cc_value (for JSON communication) and sends MIDI-ControlChange:
-void Synthesizer::sendControlChange(CC_Type cc_type, int val)
+void Synthesizer::sendControlChange(CC_Type cc_type, int val, bool force = false)
 {
   midi_values[cc_type] = val; // store value
 
   if (cc_type < 0)
   {
     Devtools::println_to_console("could not send MIDI CC Command: CC_Type not defined.");
-    Hardware::lcd->setCursor(15,1);
+    Hardware::lcd->setCursor(15, 1);
     Hardware::lcd->print("!");
   }
-  else if (val != previousMidiVal)
+  else if (val != previousMidiVal || force == true)
   {
     MIDI.sendControlChange(int(cc_type), val, midi_channel);
     previousMidiVal = val;
+    if (Devtools::verbose)
+    {
+      Devtools::print_to_console("Sending MIDI ");
+      Devtools::print_to_console(int(cc_type));
+      Devtools::print_to_console(":");
+      Devtools::print_to_console(val);
+      Devtools::print_to_console(" @ ");
+      Devtools::println_to_console(midi_channel);
+    }
   }
 }
 
 void Synthesizer::sendControlChange(int cc_type, int val)
 {
-midi_values[cc_type] = val;
+  midi_values[cc_type] = val;
 
   if (cc_type < 0)
   {
@@ -74,13 +84,15 @@ void Synthesizer::sendProgramChange(int number)
   MIDI.sendProgramChange(number, midi_channel);
 }
 
-void Synthesizer::whammyPedal(int value){
+void Synthesizer::whammyPedal(int value)
+{
   Serial2.write(midi_channel);
   Serial2.write(11);
   Serial2.write(value);
 }
 
 // send pitch bend (float -1.0 to 1.0)
-void Synthesizer::sendPitchBend(double pitch){
+void Synthesizer::sendPitchBend(double pitch)
+{
   MIDI.sendPitchBend(pitch, midi_channel);
 }

@@ -10,7 +10,7 @@ void run_besen()
     switch(Globals::active_song->step)
     {
     case 0: // Snare → Vocoder (D+F)
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
@@ -37,7 +37,7 @@ void run_besen()
         break;
 
     case 1: // Teil B: MIDI-Clock aus
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Drumset::hihat->set_effect(Monitor); // no more tempo trigger
         }

@@ -10,7 +10,7 @@ void run_wueste()
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::whammy->sendProgramChange(83); // WHAMMY UP 2 OCT
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, 13);

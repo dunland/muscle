@@ -10,7 +10,7 @@ void run_sattelstein()
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::bSendMidiClock = true;
             Globals::active_song->resetInstruments();         // reset all instruments to "Monitor" mode
@@ -29,7 +29,7 @@ void run_sattelstein()
         break;
 
     case 1: // play notes G2 and G3
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
         }
 
@@ -40,7 +40,7 @@ void run_sattelstein()
         break;
 
     case 2: // stop playing notes and leave
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::mKorg->sendNoteOff(55); // play note 55 (G) if it is not playing at the moment
             Synthesizers::mKorg->sendNoteOff(43); // play note 43 (G) if it is not playing at the moment

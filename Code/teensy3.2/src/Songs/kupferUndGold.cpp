@@ -9,7 +9,7 @@ void run_kupferUndGold()
     switch(Globals::active_song->step)
     {
     case 0: // Intro
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::dd200->sendProgramChange(4);
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 127);
@@ -23,14 +23,14 @@ void run_kupferUndGold()
         break;
 
     case 1: // Fetz
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::whammy->sendProgramChange(58); // HARMONY UP 5TH → UP  OCT
         }
         break;
 
     case 2: // Gesangpart
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::whammy->sendProgramChange(62); // HARMONY UP OCT → UP 2 OCT
 
@@ -38,7 +38,7 @@ void run_kupferUndGold()
         break;
 
     case 3: // Groove
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::whammy->sendProgramChange(61); // HARMONY UP OCT → UP 10TH
 
@@ -46,7 +46,7 @@ void run_kupferUndGold()
         break;
 
     case 4: // Finale
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::whammy->sendProgramChange(62); // HARMONY UP OCT → UP 2 OCT
 

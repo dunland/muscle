@@ -18,7 +18,7 @@ void run_whammyMountains()
     {
 
     case 0: // continuous test mode
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             /* ------- general initialization routine -------------- */
             Hardware::footswitch_mode = Increment_Score;
@@ -62,7 +62,7 @@ void run_whammyMountains()
     case 1:
 
         /* CONTROLLING DIGITECH WHAMMY VIA DRUMS AT MIDI CHANNEL 4 // CLASSIC MODE (pitch)*/
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
         }
 

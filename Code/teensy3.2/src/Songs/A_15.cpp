@@ -8,7 +8,7 @@ void run_A_15() // wie randomVoices
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::active_song->resetInstruments();  // reset all instruments to "Monitor" mode
             Synthesizers::mKorg->sendProgramChange(4); // A.15
@@ -26,7 +26,7 @@ void run_A_15() // wie randomVoices
         break;
 
     case 1: // PlayMidi
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Hardware::footswitch_mode = Increment_Score;
 
@@ -58,7 +58,7 @@ void run_A_15() // wie randomVoices
         break;
 
     case 2: // change CC only
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             // Hardware::footswitch_mode = Experimental;
             Drumset::kick->shuffle_cc(Drumset::kick->midiTargets.back(), true);         // set a random midi CC channel
@@ -92,7 +92,7 @@ void run_A_15() // wie randomVoices
 
     default: // start over again
         Globals::active_song->step = 1;
-        Globals::active_song->setup_state = true;
+        Globals::active_song->initState = true;
         Synthesizers::mKorg->notes[Globals::active_song->notes[Globals::active_song->note_idx]] = false;
         // proceed_to_next_score();
         break;

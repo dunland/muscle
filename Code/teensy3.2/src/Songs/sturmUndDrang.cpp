@@ -11,7 +11,7 @@ void run_sturmUndDrang()
     switch (Globals::active_song->step)
     {
     case 0: // nichts
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Drumset::hihat->set_effect(TapTempo);
             for (auto &instrument : Drumset::instruments)
@@ -32,7 +32,7 @@ void run_sturmUndDrang()
         break;
 
     case 1: // Vocoder, nur D spielend
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
@@ -70,7 +70,7 @@ void run_sturmUndDrang()
         break;
 
     case 2: // Vocoder D,D,F
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
@@ -95,7 +95,7 @@ void run_sturmUndDrang()
         break;
 
     case 3: // alles zerhechseln
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::active_song->notes.clear();
             Drumset::standtom->set_effect(Change_CC);

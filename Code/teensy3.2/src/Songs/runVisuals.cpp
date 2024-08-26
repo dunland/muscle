@@ -13,7 +13,7 @@ void run_visuals()
     switch (Globals::active_song->step)
     {
     case 0: // nix
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
@@ -25,7 +25,7 @@ void run_visuals()
         break;
 
     case 1: // Theodolit
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
 
             Serial.println("Theodolit");
@@ -37,7 +37,7 @@ void run_visuals()
 
     case 2: // Improvisation
             /* crash and ride increase delay_time, automatic decrease */
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
 
             Serial.println("Improvisation");
@@ -81,7 +81,7 @@ void run_visuals()
 
     case 3: // Sattelstein 1
             /* keine Noten */
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::mKorg->sendProgramChange(38); // selects mKORG Voice A.57
             Synthesizers::dd200->sendControlChange(dd200_DelayTime, 3);
@@ -94,7 +94,7 @@ void run_visuals()
 
     case 4: // Sattelstein 2
         /* play notes G2 and G3 */
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
 
             Serial.println("Sattelstein");
@@ -110,7 +110,7 @@ void run_visuals()
         break;
 
     case 5: // KupferUndGold
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();
@@ -129,7 +129,7 @@ void run_visuals()
 
     default:
         Globals::active_song->step = 1;
-        Globals::active_song->setup_state = true;
+        Globals::active_song->initState = true;
         break;
     }
 }

@@ -27,7 +27,7 @@ public:
         // Devtools::print_to_console("active_score->note[0] = ");
         // Devtools::println_to_console(notes[0]);
         name = songName;
-        setup_state = true;
+        initState = true;
     }
 
     String name; // name to be displayed on LCD
@@ -46,8 +46,8 @@ public:
         unsigned int tapTempoTimeOut = 2000; // do not count second tap, if time gap to first one exceeds this
     } tempo;
 
-    bool setup_state; // when true, current score_step's setup function is executed.
-    bool get_setup_state();
+    bool initState; // when true, current score_step's setup function is executed.
+    bool isStateInit();
 
     // TODO: move this to Rhythmics
     TOPOGRAPHY beat_sum;         // sum of all instrument topographies

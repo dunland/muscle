@@ -31,10 +31,6 @@ public:
   int knob_pin;
 
   void poll();
-
-  void pressed();
-
-  void released();
 };
 
 class Hardware
@@ -122,7 +118,7 @@ public:
   int previousMidiVal = -1; // stores last midi CC value to see whether it has changed
 
 
-  void sendControlChange(CC_Type cc_type, int val); // sets cc_value (used for JSON comm) and sends MIDI-ControlChange
+  void sendControlChange(CC_Type cc_type, int val, bool force); // sets cc_value (used for JSON comm) and sends MIDI-ControlChange
 
   void sendControlChange(int cc_type, int val); // sets cc_value using an integer and sends MIDI-ControlChange // for Random_CC_Effect
 

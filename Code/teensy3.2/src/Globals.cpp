@@ -113,28 +113,17 @@ String Globals::DrumtypeToHumanreadable(DrumType type)
 {
 	switch (type)
 	{
-	case Snare:
-		return "Snare";
-	case Hihat:
-		return "Hihat";
-	case Kick:
-		return "Kick";
-	case Tom1:
-		return "Tom1";
-	case Tom2:
-		return "Tom2";
-	case Standtom:
-		return "STom1";
-	case Standtom2:
-		return "STom2";
-	case Ride:
-		return "Ride";
-	case Crash1:
-		return "Crash1";
-	case Crash2:
-		return "Crash2";
-	case Cowbell:
-		return "Cowbell";
+	case Snare:		return	 "Snare";
+	case Hihat:		return	 "Hihat";
+	case Kick:		return	 "Kick";
+	case Tom1:		return	 "Tom1";
+	case Tom2:		return	 "Tom2";
+	case Standtom:	return	 "STom1";
+	case Standtom2:	return	 "STom2";
+	case Ride:		return	 "Ride";
+	case Crash1:	return	 "Crash1";
+	case Crash2:	return	 "Crash2";
+	case Cowbell:	return	 "Cowbell";
 	}
 	return "";
 }
@@ -143,34 +132,20 @@ String Globals::EffectstypeToHumanReadable(EffectsType type)
 {
 	switch (type)
 	{
-	case PlayMidi:
-		return "PlayMidi";
-	case Monitor:
-		return "Monitor";
-	case ToggleRhythmSlot:
-		return "ToggleRhythmSlot";
-	case FootSwitchLooper:
-		return "FootSwitchLooper";
-	case TapTempo:
-		return "TapTempo";
-	case TapTempoRange:
-		return "TapTempoRange";
-	case Swell:
-		return "Swell";
-	case TsunamiLink:
-		return "TsunamiLink";
-	case CymbalSwell:
-		return "CymbalSwell";
-	case TopographyMidiEffect:
-		return "TopographyMidiEffect";
-	case Change_CC:
-		return "Change_CC";
-	case Random_CC_Effect:
-		return "Random_CC_Effect";
-	case MainNoteIteration:
-		return "MainNoteIteration";
-	case Reflex_and_PlayMidi:
-		return "Reflex_and_PlayMidi";
+	case PlayMidi:				return "PlayMidi";
+	case Monitor:				return "Monitor";
+	case ToggleRhythmSlot:		return "ToggleRhythmSlot";
+	case FootSwitchLooper:		return "FootSwitchLooper";
+	case TapTempo:				return "TapTempo";
+	case TapTempoRange:			return "TapTempoRange";
+	case Swell:					return "Swell";
+	case TsunamiLink:			return "TsunamiLink";
+	case CymbalSwell:			return "CymbalSwell";
+	case TopographyMidiEffect:	return "TopographyMidiEffect";
+	case Change_CC:				return "Change_CC";
+	case Random_CC_Effect:		return "Random_CC_Effect";
+	case MainNoteIteration:		return "MainNoteIteration";
+	case Reflex_and_PlayMidi:	return "Reflex_and_PlayMidi";
 	}
 	return "";
 }
@@ -180,43 +155,43 @@ String Globals::CCTypeToHumanReadable(CC_Type type)
 {
 	switch (type)
 	{
-		case CC_None: 				      return "None"; 				break;
-		case dd200_DelayTime: 	  	return "dTim"; 				break;
-		case dd200_DelayFeedback: 	return "dFbk";			 	break;
-		case dd200_param:			      return "dprm";				break;
-		case dd200_DelayLevel: 	  	return "dLvl";		 		break;
-		case mKORG_Osc2_semitone: 	return "O2smi"; 			break;
+		case CC_None: 				return "None"; 	break;
+		case dd200_DelayTime: 	  	return "dTim"; 	break;
+		case dd200_DelayFeedback: 	return "dFbk";	break;
+		case dd200_param:			return "dprm";	break;
+		case dd200_DelayLevel: 	  	return "dLvl";	break;
+		case mKORG_Osc2_semitone: 	return "O2smi"; break;
 		// case Osc2_tune: 		    	return "Osc2_tune"; 		break;
-		case mKORG_Mix_Level_1:   	return "Mix1"; 				break;
-		case mKORG_Mix_Level_2:   	return "Mix2";		 		break;
-		case dd200_OnOff: 	    		return "OnOf";		 		break;
-		case mKORG_Patch_1_Depth: 	return "P1D"; 				break;
-		case mKORG_Patch_3_Depth: 	return "P3D"; 				break;
-		case mKORG_Cutoff: 		    	return "Cut"; 				break;
-		case mKORG_LFO1_Rate: 	   	return "LF1r"; 				break;
-		case mKORG_LFO2_Rate:    		return "LF2r"; 				break;
-		case mKORG_Resonance:   		return "Reso";		 		break;
+		case mKORG_Mix_Level_1:   	return "Mix1"; 	break;
+		case mKORG_Mix_Level_2:   	return "Mix2";	break;
+		case dd200_OnOff: 	    	return "OnOf";	break;
+		case mKORG_Patch_1_Depth: 	return "P1D"; 	break;
+		case mKORG_Patch_3_Depth: 	return "P3D"; 	break;
+		case mKORG_Cutoff: 		    return "Cut"; 	break;
+		case mKORG_LFO1_Rate: 	   	return "LF1r"; 	break;
+		case mKORG_LFO2_Rate:    	return "LF2r"; 	break;
+		case mKORG_Resonance:   	return "Reso";	break;
 		// case mKORG_Amplevel: 	    	return "Amp"; 				break; // TODO: doppelt belegt!
-		case mKORG_Attack: 		    	return "atk"; 				break;
-		case mKORG_Sustain: 	    	return "sus"; 				break;
-		case mKORG_Release: 	    	return "Rls"; 				break;
-		case mKORG_DelayTime: 	  	return "dTim"; 				break;
-		case mKORG_TimbreSelect:  	return "Tmbr"; 				break;
-    case volca_Portamento:      return "prtm";        break;
-    case volca_Expression:      return "expr";        break;
-    case volca_Voice:           return "voic";        break;
-    case volca_Octave:          return "octv";        break;
-    case volca_Detune:          return "detu";        break;
-    case volca_VCO_EG_INT:      return "VCOe";        break;
-    case volca_VCF_EG_INT:      return "VCFe";        break;
-    case volca_LFO_Pitch_INT:   return "LFOp";        break;
-    case volca_LFO_Cutoff_INT:  return "LFOc";        break;
-    case volca_EG_Attack:       return "EGat";        break;
-    case volca_EG_DecayRelease: return "EGdr";        break;
-    // case volca_EG_Sustain:      return "EGs";         break; // TODO: doppelt belegt (== mKORG_DelayTime)!
-    case volca_DelayTime:       return "dlT";         break;
-    case volca_DelayFeedback:   return "dlFb";        break;
-		default: 				          	return "n.d.";		 		break;
+		case mKORG_Attack: 		    return "atk"; 	break;
+		case mKORG_Sustain: 	    return "sus"; 	break;
+		case mKORG_Release: 	    return "Rls"; 	break;
+		case mKORG_DelayTime: 	  	return "dTim"; 	break;
+		case mKORG_TimbreSelect:  	return "Tmbr"; 	break;
+		case volca_Portamento:      return "prtm";  break;
+		case volca_Expression:      return "expr";  break;
+		case volca_Voice:           return "voic";  break;
+		case volca_Octave:          return "octv";  break;
+		case volca_Detune:          return "detu";  break;
+		case volca_VCO_EG_INT:      return "VCOe";  break;
+		case volca_VCF_EG_INT:      return "VCFe";  break;
+		case volca_LFO_Pitch_INT:   return "LFOp";  break;
+		case volca_LFO_Cutoff_INT:  return "LFOc";  break;
+		case volca_EG_Attack:       return "EGat";  break;
+		case volca_EG_DecayRelease: return "EGdr";  break;
+		// case volca_EG_Sustain:      return "EGs";         break; // TODO: doppelt belegt (== mKORG_DelayTime)!
+		case volca_DelayTime:       return "dlT";   break;
+		case volca_DelayFeedback:   return "dlFb";  break;
+		default: 				    return "n.d.";	break;
 	}
 }
 

@@ -2,9 +2,6 @@
 
 #include <Instruments.h>
 #include <Hardware.h>
-/*
-    DD-200 test code compendium
-*/
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
 void run_donnerwetter()
@@ -13,7 +10,7 @@ void run_donnerwetter()
     {
 
     case 0:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0);
             Synthesizers::whammy->sendProgramChange(83); // Whammy off!!
@@ -22,7 +19,7 @@ void run_donnerwetter()
 
     case 1: // some ramp effect on snare. Works fine with DD200-DUAL mode @ ~150 BPM quarter notes
 
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Hardware::footswitch_mode = Increment_Score;
             Globals::active_song->resetInstruments();

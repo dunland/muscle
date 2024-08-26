@@ -9,7 +9,7 @@ void run_monitoring()
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
 
             Synthesizers::kaossPad3->sendControlChange(92, 0); // Touch Pad off - JUST BECAUSE ALHAMBRA IS BEFORE!// TODO: execute this when leaving the song with push button! at best, by using callback functions for song.proceed_to_next_score
@@ -49,7 +49,7 @@ void run_tapTempo()
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::active_song->resetInstruments();
             Globals::active_song->notes.clear();

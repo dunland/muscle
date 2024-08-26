@@ -10,7 +10,7 @@ void run_dd200_timeControl()
     switch(Globals::active_song->step)
     {
     case 0: // just using midi clock
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
 
             Drumset::hihat->set_effect(TapTempo);
@@ -21,7 +21,7 @@ void run_dd200_timeControl()
         break;
 
     case 1: // crash triggers dd200-time-reallocation
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             delay_time = 0;
 

@@ -18,7 +18,7 @@ void run_randomSelect()
     static int sel_song_int = 0;
     static Song *randomSong;
 
-    if (Globals::active_song->get_setup_state())
+    if (Globals::active_song->isStateInit())
     {
         sel_song_int = list_of_songs.at(int(random(list_of_songs.size() - 1)));
         if (Globals::active_song != randomSong)

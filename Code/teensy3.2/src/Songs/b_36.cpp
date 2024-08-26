@@ -10,7 +10,7 @@ void run_b_36()
     switch (Globals::active_song->step)
     {
     case 0: // snare+standtom --> change mKORG Filter Type
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::mKorg->sendProgramChange(85);
 
@@ -32,7 +32,7 @@ void run_b_36()
         break;
 
     case 1: // PlayMidi
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
             Globals::active_song->notes = {Note_B5, Note_E5, Note_B6, Note_E6};

@@ -141,7 +141,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
         break;
 
     case 1:                                  // fade in the synth's amplitude
-        if (active_song->get_setup_state()) // score setup is run once and reset when next score step is activated.
+        if (active_song->isStateInit()) // score setup is run once and reset when next score step is activated.
         {
             // assign effects to instruments:
             // the hihat will change the allocated (AmpLevel) value on the synth, whenever hit:
@@ -177,7 +177,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
              snare -> play note
           */
 
-        if (active_song->get_setup_state())
+        if (active_song->isStateInit())
         {
             // assign effects to instruments:
             kick->set_effect(PlayMidi);
@@ -204,7 +204,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
 
     case 3:
         static int note_iterator;
-        if (active_song->get_setup_state())
+        if (active_song->isStateInit())
         {
             note_iterator = int(random(32));
         }
@@ -219,7 +219,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
         // snare, kick, ride, crash = FX
         static float step_factor;
 
-        if (active_song->get_setup_state())
+        if (active_song->isStateInit())
         {
             active_song->beat_sum.activation_thresh = 10;
             step_factor = 127 / active_song->beat_sum.activation_thresh;
@@ -256,7 +256,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
 
         // active_song->set_ramp(...);
 
-        if (active_song->get_setup_state())
+        if (active_song->isStateInit())
         {
             active_song->beat_sum.activation_thresh = 15;
             snare->effect = Change_CC;
@@ -280,7 +280,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
     {
         static int random_note_change = int(random(32));
 
-        if (active_song->get_setup_state())
+        if (active_song->isStateInit())
         {
             active_song->beat_sum.activation_thresh = 15;
 
@@ -305,7 +305,7 @@ void run_doubleSquirrel() // TODO: make this much more automatic!!
 
     {
         static int random_note_change = int(random(32));
-        if (active_song->get_setup_state())
+        if (active_song->isStateInit())
         {
             // active_song->add_bassNote(active_song->notes[0] + int(random(6)));
 

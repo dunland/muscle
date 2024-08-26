@@ -6,11 +6,11 @@
 ///////////////////////// SETUP FUNCTIONS /////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-bool Song::get_setup_state()
+// get state and leave setup state
+bool Song::isStateInit()
 {
-
-    bool currentState = setup_state;
-    setup_state = false;
+    bool currentState = initState;
+    initState = false;
     return currentState;
 }
 
@@ -38,7 +38,7 @@ void Song::set_notes(std::vector<int> list)
 void Song::increase_step()
 {
     step++;
-    setup_state = true;
+    initState = true;
     Serial.println("step");
     Serial.println(step);
     Hardware::lcd->clear();
@@ -49,12 +49,12 @@ void Song::proceed_to_next_score() // TODO: make this a callback function/the so
 {
     // proceed to next song in list:
     Globals::active_song_pointer = (Globals::active_song_pointer + 1) % Globals::songlist.size();
-    Globals::active_song = Globals::songlist.at(Globals::active_song_pointer);
+    Globals::active_song = Globals::songlist[Globals::active_song_pointer];
     Devtools::print_to_console("switching to song ");
     Devtools::println_to_console(Globals::active_song->name);
     // ...and begin at step 0:
     Globals::active_song->step = 0;
-    Globals::active_song->setup_state = true;
+    Globals::active_song->initState = true;
 
     // reset effects:
     for (auto &instrument : Drumset::instruments)

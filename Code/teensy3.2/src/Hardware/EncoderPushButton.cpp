@@ -107,6 +107,11 @@ void Hardware::checkPushButton()
       if (Globals::active_song_pointer < 0)
         Globals::active_song_pointer = Globals::songlist.size() - 1;
       Globals::active_song = Globals::songlist[Globals::active_song_pointer];
+      Devtools::print_to_console("going back to song ");
+      Devtools::println_to_console(Globals::active_song->name);
+
+      Globals::active_song->step = 0;
+      Globals::active_song->initState = true;
       break;
 
     case Calibrating:

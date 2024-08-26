@@ -9,7 +9,7 @@ void run_theodolit()
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::dd200->sendProgramChange(3);
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0); // ATTENTION: must be after programChange!

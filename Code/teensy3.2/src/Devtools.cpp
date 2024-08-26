@@ -27,21 +27,26 @@ void Devtools::println_to_console(String message_to_print)
 {
 	if (do_print_to_console)
 		endOfLine += message_to_print;
+	printLine();
 }
 
 void Devtools::println_to_console(int int_to_print) // print int
 {
 	if (do_print_to_console)
 		endOfLine += int_to_print;
+	printLine();
 }
 
 void Devtools::println_to_console(float float_to_print) // print float
 {
 	if (do_print_to_console)
 		endOfLine += float_to_print;
+	printLine();
 }
 
-void Devtools::printLine(){
+// print end of Line:
+void Devtools::printLine()
+{
 	Serial.println(endOfLine);
 	endOfLine = "";
 }

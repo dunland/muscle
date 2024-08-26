@@ -10,7 +10,7 @@ void run_host()
     switch (Globals::active_song->step)
     {
     case 0: // Vocoder not activated
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::mKorg->sendProgramChange(56); // selects mKORG Voice A.57
             Globals::active_song->resetInstruments();         // reset all instruments to "Monitor" mode
@@ -20,7 +20,7 @@ void run_host()
         }
     case 1:
 
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::mKorg->sendControlChange(mKORG_DelayDepth, 0);
             Drumset::snare->addMidiTarget(mKORG_Amplevel, Synthesizers::mKorg, 127, 0, 3, -0.002); // changes Gate in Vocoder-Mode
@@ -40,7 +40,7 @@ void run_host()
         break;
 
     case 2: // Snare → increase delay depth
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 127);
             Drumset::snare->midiTargets.back()->cc_val = 0;
@@ -49,7 +49,7 @@ void run_host()
         break;
 
     case 3: // kill switch
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Drumset::snare->set_effect(Monitor);
             Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, 0);

@@ -18,7 +18,7 @@ void run_A_72()
     switch (Globals::active_song->step)
     {
     case 0: // increase amplitude until max
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             val = 60;
 
@@ -26,7 +26,7 @@ void run_A_72()
             Globals::active_song->notes.clear();
             Globals::active_song->notes.push_back(int(random(12, 24)));
 
-            Hardware::footswitch_mode = Increment_Score;
+            // Hardware::footswitch_mode = Increment_Score;
             Synthesizers::mKorg->sendProgramChange(49); // switches to Voice A.72
             delay(200);
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, 1); // Select Timbre 2
@@ -63,7 +63,7 @@ void run_A_72()
         break;
 
     case 1:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             int val = (Synthesizers::mKorg->midi_values[mKORG_TimbreSelect] == 0) ? 127 : 0;
             Synthesizers::mKorg->sendControlChange(mKORG_TimbreSelect, val); // Select Timbre 2
@@ -76,7 +76,7 @@ void run_A_72()
 
     default:
         // Globals::active_song->step = 1; // reset
-        // Globals::active_song->setup_state = true;
+        // Globals::active_song->initState = true;
         // note_increase = (note_increase == 4) ? 5 : 4;
         // Globals::active_song->notes.push_back(Globals::active_song->notes[Globals::active_song->note_idx] + note_increase);
         // Globals::active_song->note_idx++;

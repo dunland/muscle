@@ -13,7 +13,7 @@ void run_roeskur()
     switch(Globals::active_song->step)
     {
     case 0:
-    if (Globals::active_song->get_setup_state())
+    if (Globals::active_song->isStateInit())
     {
         Synthesizers::whammy->sendProgramChange(62); // HARMONY UP OCT / UP 2 OCT
 

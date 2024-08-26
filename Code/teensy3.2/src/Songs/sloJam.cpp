@@ -13,7 +13,7 @@ void run_sloJam()
     switch (Globals::active_song->step)
     {
     case 0: // 65 BPM
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             for (auto &instrument : Drumset::instruments)
             {
@@ -25,6 +25,9 @@ void run_sloJam()
                 instrument->midiTargets.clear();
             }
             Devtools::println_to_console("SloJam: All midiTargets deleted!");
+
+            Synthesizers::dd200->sendProgramChange(1);
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, true); // FORCE OFF
 
             Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_on_off, 0); // Touch Pad off
 
@@ -43,17 +46,11 @@ void run_sloJam()
             Synthesizers::kaossPad3->sendControlChange(KP3_FX_Depth, 100);
             Synthesizers::kaossPad3->sendControlChange(KP3_Hold, 1);
 
-            Synthesizers::dd200->sendProgramChange(1);
-            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0); // OFF
-
             // turn off all currently playing MIDI notes:
-            for (int channel = 1; channel < 3; channel++)
+            for (int note_number = 0; note_number < 127; note_number++)
             {
-                for (auto &synth : Synthesizers::synths)
-                    for (int note_number = 0; note_number < 127; note_number++)
-                    {
-                        synth->sendNoteOff(note_number);
-                    }
+                Synthesizers::mKorg->sendNoteOff(note_number);
+                Synthesizers::volca->sendNoteOff(note_number);
             }
         }
 
@@ -61,7 +58,7 @@ void run_sloJam()
         Hardware::lcd->print(Globals::current_BPM);
         Hardware::lcd->setCursor(3, 0);
         Hardware::lcd->print("BPM");
-        
+
         Hardware::lcd->setCursor(6, 1);
         Hardware::lcd->print("drmFX");
 
@@ -69,7 +66,7 @@ void run_sloJam()
 
     case 1: // keyboardpart nach dem loop
 
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::kaossPad3->sendControlChange(KP3_Hold, 0);
         }
@@ -118,11 +115,12 @@ void run_sloJam()
 
     case 2: // 169 BPM fest für superLoop part
 
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
 
             Synthesizers::mKorg->sendNoteOff(Note_A5);
             Synthesizers::mKorg->sendNoteOff(Note_A6);
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 127, true); // FORCE ON
 
             Globals::current_BPM = 169;
             Globals::tapInterval = 60000 / Globals::current_BPM;
@@ -135,7 +133,7 @@ void run_sloJam()
         break;
 
     case 3: // triolensupport
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::mKorg->sendNoteOn(Note_A5);
             Synthesizers::mKorg->sendNoteOn(Note_A6);
@@ -148,7 +146,7 @@ void run_sloJam()
 
     case 4: // das finale nach dem loop
 
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::kaossPad3->sendControlChange(KP3_Hold, 1);
             Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_on_off, 127); // Touch Pad on

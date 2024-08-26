@@ -11,7 +11,7 @@ void run_alhambra()
     switch (Globals::active_song->step)
     {
     case 0:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::whammy->sendProgramChange(0); // HARMONY UP 2 OCT
             Synthesizers::dd200->sendProgramChange(3);
@@ -23,7 +23,7 @@ void run_alhambra()
         break;
 
     case 1:
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_on_off, 127); // Touch Pad on
             Synthesizers::kaossPad3->sendProgramChange(58);      // Delay2

@@ -11,7 +11,7 @@ void run_triathlon()
     switch (Globals::active_song->step)
     {
     case 0: // A
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Globals::current_BPM = 137;
             Globals::tapInterval = 60000 / Globals::current_BPM;
@@ -21,52 +21,83 @@ void run_triathlon()
             Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_x, 105);
             Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_y, 60);
             Synthesizers::kaossPad3->sendControlChange(KP3_FX_Depth, 35);
-            
+
             Synthesizers::kaossPad3->sendControlChange(KP3_Hold, 1);
             Synthesizers::dd200->sendProgramChange(6);
-            Synthesizers::dd200->sendControlChange(dd200_OnOff, 127); // ON
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 127);            // ON
             Synthesizers::whammy->sendProgramChange(whammy_CHORDS_OCT_2OCT_OFF); // 83
         }
+
+        Hardware::lcd->setCursor(9, 1);
+        Hardware::lcd->print(".A1");
+
         break;
 
     case 1: // B1
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::kaossPad3->sendControlChange(KP3_Hold, 0);
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0); // OFF
             Synthesizers::whammy->sendProgramChange(whammy_CHORDS_OCT_2OCT_OFF);
         }
+
+        Hardware::lcd->setCursor(9, 1);
+        Hardware::lcd->print(".B1");
+
         break;
 
     case 2: // A
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::kaossPad3->sendControlChange(KP3_Hold, 1);
-            Synthesizers::dd200->sendControlChange(dd200_OnOff, 127); // ON
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 127);           // ON
             Synthesizers::whammy->sendProgramChange(whammy_CHORDS_OCT_2OCT_ON); // ON
             delay(200);
         }
+
+        Hardware::lcd->setCursor(9, 1);
+        Hardware::lcd->print(".A2");
+
         break;
 
     case 3: // B2
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::kaossPad3->sendControlChange(KP3_Hold, 0);
-            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0); // OFF
+            Synthesizers::dd200->sendControlChange(dd200_OnOff, 0);              // OFF
             Synthesizers::whammy->sendProgramChange(whammy_CHORDS_OCT_2OCT_OFF); // 83
-
         }
+
+        Hardware::lcd->setCursor(9, 1);
+        Hardware::lcd->print(".B2");
+
         break;
 
     case 4: // LOOPISTAMPF
-        if (Globals::active_song->get_setup_state())
+        if (Globals::active_song->isStateInit())
         {
             Synthesizers::whammy->sendProgramChange(whammy_CHORDS_OCT_2OCT_ON);
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 127); // ON
-            Synthesizers::mKorg->sendProgramChange(85); // b.36
+            Synthesizers::mKorg->sendProgramChange(85);               // b.36
             Synthesizers::mKorg->sendNoteOn(Note_D4);
             Synthesizers::mKorg->sendNoteOn(Note_D5);
         }
+
+        Hardware::lcd->setCursor(9, 1);
+        Hardware::lcd->print(".loop");
+
+        break;
+
+    case 5: // A3: KP3 wieder an
+
+        if (Globals::active_song->isStateInit())
+        {
+            Synthesizers::kaossPad3->sendControlChange(KP3_Hold, 1);
+        }
+
+        Hardware::lcd->setCursor(9, 1);
+        Hardware::lcd->print(".A3");
+
         break;
 
     default:

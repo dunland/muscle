@@ -26,13 +26,19 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
         // print millis and current beat:
         if (Devtools::do_send_to_processing)
             Devtools::print_to_console("m");
-        Devtools::print_to_console(String(millis()));
-        Devtools::print_to_console("\t");
+        if (Devtools::printRhythm)
+        {
+            Devtools::print_to_console(String(millis()));
+            Devtools::print_to_console("\t");
+        }
         // Devtools::print_to_console(Globals::current_eighth_count + 1); // if you want to print 8th-steps only
         if (Devtools::do_send_to_processing)
             Devtools::print_to_console("b");
-        Devtools::print_to_console(Globals::current_beat_pos);
-        Devtools::print_to_console("\t");
+        if (Devtools::printRhythm)
+        {
+            Devtools::print_to_console(Globals::current_beat_pos);
+            Devtools::print_to_console("\t");
+        }
 
         // -------------------------- full notes: -------------------------
         if (Globals::current_beat_pos == 0)
@@ -71,7 +77,8 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
             Devtools::print_to_console(instrument->output_string);
             instrument->output_string = "\t";
         }
-        Devtools::printLine();
+        if (Devtools::printRhythm)
+            Devtools::printLine();
 
         // sum up all topographies of all instruments:
         // Globals::active_song->beat_sum.reset();

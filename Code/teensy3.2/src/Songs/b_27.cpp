@@ -11,7 +11,7 @@ void run_b_27()
         switch (Globals::active_song->step)
         {
         case 0: // setup only
-                if (Globals::active_song->get_setup_state())
+                if (Globals::active_song->isStateInit())
                 {
                         Synthesizers::mKorg->sendProgramChange(78); // load b_27
 
@@ -58,7 +58,7 @@ void run_b_27()
 
         case 1: // change notes -- kick resets mKORG OSC2semitone
 
-                if (Globals::active_song->get_setup_state())
+                if (Globals::active_song->isStateInit())
                 {
                         int idx = random(sizeof(notes));
                         Drumset::kick->midiTargets.back()->active_note = notes[idx];
@@ -83,7 +83,7 @@ void run_b_27()
 
         default:
                 Globals::active_song->step = 1; // reset
-                Globals::active_song->setup_state = true;
+                Globals::active_song->initState = true;
                 break;
         }
 }
