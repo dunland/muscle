@@ -66,6 +66,29 @@ void Hardware::lcd_display()
     // -------------------------- CALIBRATION ---------------------------
     case Calibrating:
     {
+
+        static int lastRead = -1;
+        int read = analogRead(Calibration::selected_instrument->pin);
+        if (lastRead != read)
+        {
+            Devtools::print_to_console(Calibration::selected_instrument->sensitivity.noiseFloor);
+            Devtools::print_to_console("\t");
+            Devtools::print_to_console(Calibration::selected_instrument->sensitivity.threshold);
+            Devtools::print_to_console("\t");
+            Devtools::print_to_console(Calibration::selected_instrument->sensitivity.crossings);
+            Devtools::print_to_console("\t");
+            Devtools::print_to_console(Calibration::selected_instrument->sensitivity.delayAfterStroke);
+            Devtools::print_to_console("\t\t");
+            Devtools::print_to_console(read);
+            Devtools::print_to_console("\t");
+            Devtools::print_to_console(abs(Calibration::selected_instrument->sensitivity.noiseFloor - read));
+            Devtools::print_to_console("\t");
+            Devtools::print_to_console(Calibration::selected_instrument->timing.countAfterFirstStroke);
+            Devtools::print_to_console("\t");
+            Devtools::print_to_console(Calibration::selected_instrument->timing.countsCopy);
+            lastRead = read;
+        }
+
         switch (Calibration::calibration_mode)
         {
         // level 1: display instrument with sensitivity values
@@ -209,15 +232,15 @@ void Hardware::display_scores()
 void Hardware::display_Midi_values(int instruments_with_CC_mode)
 {
 
-  const int toggleTime = 1000; // ms timeout to iterate midiTargets
-  static unsigned long lastToggle;
-  static int toggleIndex = 0;
+    const int toggleTime = 1000; // ms timeout to iterate midiTargets
+    static unsigned long lastToggle;
+    static int toggleIndex = 0;
 
-  if (millis() > (lastToggle + toggleTime))
-  {
-    toggleIndex++;
-    lastToggle = millis();
-  }
+    if (millis() > (lastToggle + toggleTime))
+    {
+        toggleIndex++;
+        lastToggle = millis();
+    }
 
     for (auto &instrument : Drumset::instruments)
     {
@@ -228,6 +251,15 @@ void Hardware::display_Midi_values(int instruments_with_CC_mode)
             Hardware::lcd->print(Globals::DrumtypeToHumanreadable(instrument->drumtype)[0]);
             Hardware::lcd->setCursor(((i % 4) * 4) + 1, int(i >= 4));
             Hardware::lcd->print(int(instrument->midiTargets.at(toggleIndex % instrument->midiTargets.size())->cc_val));
+            i = (i + 1) % instruments_with_CC_mode;
+        }
+        // display midi notes of instruments with FX-Type PlayMidi
+        if (instrument->effect == PlayMidi)
+        {
+            Hardware::lcd->setCursor(((i % 4) * 4), int(i >= 4));
+            Hardware::lcd->print(Globals::DrumtypeToHumanreadable(instrument->drumtype)[0]);
+            Hardware::lcd->setCursor(((i % 4) * 4) + 1, int(i >= 4));
+            Hardware::lcd->print(int(instrument->midiTargets.at(toggleIndex % instrument->midiTargets.size())->active_note));
             i = (i + 1) % instruments_with_CC_mode;
         }
     }

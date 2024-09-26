@@ -10,6 +10,8 @@ void Rhythmics::run_beat(int last_beat_pos, std::vector<Instrument *> instrument
 {
     static boolean toggleLED = true;
 
+    if (!Globals::machine_state == Running) return;
+
     if (Globals::current_beat_pos != last_beat_pos)
     {
         // tidy up with previous beat position ----------------------------
