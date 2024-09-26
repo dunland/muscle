@@ -15,11 +15,10 @@ void Calibration::setup()
 
 // set LCD menu using pushButton:
 void Calibration::set(int val)
-{
+{  
     Hardware::lcd->clear();
     switch (calibration_mode)
     {
-
     case Select_Instrument:
         calibration_mode = Select_Sensitivity_Param;
         Serial.println("changing calibration mode to select_sensitivity_param");

@@ -564,7 +564,7 @@ void Instrument::change_cc_out() // changes (mostly decreases) value of CC effec
   output_string += "\t";
 }
 
-// sets the midi channel to a random value of all implemented channels
+// set instrument's midiTarget to one arbitrary midi channel of all implemented:
 void Instrument::shuffle_cc(Instrument::MIDI_TARGET *midiTarget, boolean force_ = false)
 {
   if (score.ready_to_shuffle || force_ == true)

@@ -35,6 +35,7 @@ void Song::set_notes(std::vector<int> list)
     Devtools::println_to_console("");
 }
 
+// go to next step in Song and initState = true
 void Song::increase_step()
 {
     step++;

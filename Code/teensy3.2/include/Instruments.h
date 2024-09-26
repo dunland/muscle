@@ -54,12 +54,12 @@ public:
 
     struct TIMING
     {
-        volatile unsigned long lastPinActiveTime;
-        volatile unsigned long firstPinActiveTime;
+        volatile unsigned long _lastPinActiveTime;
+        volatile unsigned long _firstPinActiveTime;
         unsigned long lastPinActiveTimeCopy;
         unsigned long firstPinActiveTimeCopy;
         boolean countAfterFirstStroke = false; // start counting after first threshold crossing or using delayAfterStroke
-        volatile int counts = 0;
+        volatile int _counts = 0;
         boolean stroke_flag = false;
         int countsCopy;
         boolean wasHit = false;

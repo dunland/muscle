@@ -84,10 +84,10 @@ void samplePins()
   {
     if (pinValue(instrument) > instrument->sensitivity.threshold)
     {
-      if (instrument->timing.counts < 1)
-        instrument->timing.firstPinActiveTime = millis();
-      instrument->timing.lastPinActiveTime = millis();
-      instrument->timing.counts++;
+      if (instrument->timing._counts < 1)
+        instrument->timing._firstPinActiveTime = millis();
+      instrument->timing._lastPinActiveTime = millis();
+      instrument->timing._counts++;
     }
   }
 }

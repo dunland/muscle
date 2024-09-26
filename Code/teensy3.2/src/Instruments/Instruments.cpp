@@ -133,8 +133,8 @@ bool Instrument::stroke_detected()
   // static boolean toggleState = false; // for LED toggle
 
   noInterrupts();
-  timing.lastPinActiveTimeCopy = timing.lastPinActiveTime;
-  timing.firstPinActiveTimeCopy = timing.firstPinActiveTime;
+  timing.lastPinActiveTimeCopy = timing._lastPinActiveTime;
+  timing.firstPinActiveTimeCopy = timing._firstPinActiveTime;
   interrupts();
 
   boolean stroke_criterion = false;
@@ -148,8 +148,8 @@ bool Instrument::stroke_detected()
   {
     static int countsCopy;
     noInterrupts();
-    countsCopy = timing.counts;
-    timing.counts = 0;
+    countsCopy = timing._counts;
+    timing._counts = 0;
     interrupts();
 
     // ---------------------------- found significant count!
