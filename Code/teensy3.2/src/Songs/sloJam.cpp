@@ -75,14 +75,21 @@ void run_sloJam()
         // static int eighthNoteDuration = int(60000.0 / float(Globals::current_BPM) * 2); funzt nicht...
         static bool playMelody = false;
 
-        if (digitalRead(FOOTSWITCH2) == LOW && millis() > lastTriggerMoment + 50)
-        {
-            playMelody = true;
-        }
-
-        static int melody[] = {Note_C5, 0, 0, Note_D5, 0, 0, Note_G6, 0, Note_A6, 0, Note_A5};
+        static int melody[] = {
+            Note_C5, 0, 0,
+            Note_D5, 0, 0,
+            Note_G6, 0,
+            Note_A6, 0,
+            Note_A5};
         static int noteIdx = 0;
         static int prevNote = Note_C5;
+
+        if (digitalRead(FOOTSWITCH2) == LOW && millis() > lastTriggerMoment + 10)
+        {
+            playMelody = true;
+            noteIdx = 0;
+        }
+
         if (playMelody)
         {
             int currentNote = melody[noteIdx];
@@ -101,11 +108,11 @@ void run_sloJam()
                 }
                 noteIdx = (noteIdx + 1) % 11;
             }
-            Devtools::print_to_console("\t");
-            Devtools::print_to_console(noteIdx);
-            Devtools::print_to_console("\t");
-            Devtools::print_to_console(currentNote);
-            Devtools::print_to_console("\n");
+            Devtools::endOfLine += "\t";
+            Devtools::endOfLine += noteIdx;
+            Devtools::endOfLine += "\t";
+            Devtools::endOfLine += currentNote;
+            Devtools::endOfLine += "\n";
         }
 
         Hardware::lcd->setCursor(6, 1);
