@@ -159,7 +159,8 @@ void Hardware::checkPushButton()
   }
 }
 
-bool Hardware::pushbutton_state()
+// get pushbutton true (pressed) or false
+bool Hardware::get_pushbutton_state()
 {
   static unsigned long lastPush = 0;
   if (digitalRead(PUSHBUTTON) == LOW && millis() > lastPush + 200)

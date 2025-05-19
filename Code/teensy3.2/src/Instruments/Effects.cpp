@@ -579,7 +579,8 @@ void Instrument::shuffle_cc(Instrument::MIDI_TARGET *midiTarget, boolean force_ 
       do
       {
         midiTarget->random_cc_chan = int(random(128));
-        midiTarget->cc_type = Globals::int_to_cc_type(midiTarget->random_cc_chan);
+        // cast int to CC_Type:
+        midiTarget->cc_type = CC_Type(midiTarget->random_cc_chan);
       } while (midiTarget->cc_type == CC_None);
 
       score.ready_to_shuffle = false;

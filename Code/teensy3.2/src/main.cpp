@@ -247,7 +247,7 @@ void setup()
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
   // tracknum, channel
 
-  if (Hardware::pushbutton_state()) // pushbutton is pressed
+  if (Hardware::get_pushbutton_state()) // pushbutton is pressed
   {
     noInterrupts();
     Globals::machine_state = Calibrating;

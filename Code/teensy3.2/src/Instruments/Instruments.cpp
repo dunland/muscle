@@ -251,53 +251,31 @@ void Instrument::setInstrumentPrintString()
   switch (effect)
   {
   case FootSwitchLooper: // add an ! if pinAction == 3 (replay logged rhythm)
-    if (drumtype == Kick)
-      output_string = "!■\t"; // Kickdrum
-    else if (drumtype == Cowbell)
-      output_string = "!▲\t"; // Cowbell
-    else if (drumtype == Standtom)
-      output_string = "!□\t"; // Standtom
-    else if (drumtype == Standtom2)
-      output_string = "!O\t"; // Standtom2
-    else if (drumtype == Hihat)
-      output_string = "!x\t"; // Hi-Hat
-    else if (drumtype == Tom1)
-      output_string = "!°\t"; // Tom 1
-    else if (drumtype == Snare)
-      output_string = "!※\t"; // Snaredrum
-    else if (drumtype == Tom2)
-      output_string = "!o\t"; // Tom 2
-    else if (drumtype == Ride)
-      output_string = "!xx\t"; // Ride
-    else if (drumtype == Crash1)
-      output_string = "!-X-\t"; // Crash1
-    else if (drumtype == Crash2)
-      output_string = "!-XX-\t"; // Crash2
+    if (drumtype == Kick)           output_string = "!■\t"; // Kickdrum
+    else if (drumtype == Cowbell)   output_string = "!▲\t"; // Cowbell
+    else if (drumtype == Standtom)  output_string = "!□\t"; // Standtom
+    else if (drumtype == Standtom2) output_string = "!O\t"; // Standtom2
+    else if (drumtype == Hihat)     output_string = "!x\t"; // Hi-Hat
+    else if (drumtype == Tom1)      output_string = "!°\t"; // Tom 1
+    else if (drumtype == Snare)     output_string = "!※\t"; // Snaredrum
+    else if (drumtype == Tom2)      output_string = "!o\t"; // Tom 2
+    else if (drumtype == Ride)      output_string = "!xx\t"; // Ride
+    else if (drumtype == Crash1)    output_string = "!-X-\t"; // Crash1
+    else if (drumtype == Crash2)    output_string = "!-XX-\t"; // Crash2
     break;
 
   default: // just print what is being played
-    if (drumtype == Kick)
-      output_string = "■\t"; // Kickdrum
-    else if (drumtype == Cowbell)
-      output_string = "▲\t"; // Cowbell
-    else if (drumtype == Standtom)
-      output_string = "□\t"; // Standtom
-    else if (drumtype == Standtom2)
-      output_string = "O\t"; // Standtom2
-    else if (drumtype == Hihat)
-      output_string = "x\t"; // Hi-Hat
-    else if (drumtype == Tom1)
-      output_string = "°\t"; // Tom 1
-    else if (drumtype == Snare)
-      output_string = "※\t"; // Snaredrum
-    else if (drumtype == Tom2)
-      output_string = "o\t"; // Tom 2
-    else if (drumtype == Ride)
-      output_string = "xx\t"; // Ride
-    else if (drumtype == Crash1)
-      output_string = "-X-\t"; // Crash1
-    else if (drumtype == Crash2)
-      output_string = "-XX-\t"; // Crash2
+    if (drumtype == Kick)           output_string = "■\t"; // Kickdrum
+    else if (drumtype == Cowbell)   output_string = "▲\t"; // Cowbell
+    else if (drumtype == Standtom)  output_string = "□\t"; // Standtom
+    else if (drumtype == Standtom2) output_string = "O\t"; // Standtom2
+    else if (drumtype == Hihat)     output_string = "x\t"; // Hi-Hat
+    else if (drumtype == Tom1)      output_string = "°\t"; // Tom 1
+    else if (drumtype == Snare)     output_string = "※\t"; // Snaredrum
+    else if (drumtype == Tom2)      output_string = "o\t"; // Tom 2
+    else if (drumtype == Ride)      output_string = "xx\t"; // Ride
+    else if (drumtype == Crash1)    output_string = "-X-\t"; // Crash1
+    else if (drumtype == Crash2)    output_string = "-XX-\t"; // Crash2
     break;
   }
 }

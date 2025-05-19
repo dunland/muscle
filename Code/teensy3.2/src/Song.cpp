@@ -51,8 +51,8 @@ void Song::proceed_to_next_score() // TODO: make this a callback function/the so
     // proceed to next song in list:
     Globals::active_song_pointer = (Globals::active_song_pointer + 1) % Globals::songlist.size();
     Globals::active_song = Globals::songlist[Globals::active_song_pointer];
-    Devtools::print_to_console("switching to song ");
-    Devtools::println_to_console(Globals::active_song->name);
+    Serial.println(Globals::active_song->name);
+
     // ...and begin at step 0:
     Globals::active_song->step = 0;
     Globals::active_song->initState = true;
@@ -87,7 +87,7 @@ void Song::resetInstruments()
     {
         drum->set_effect(Monitor);
     }
-    //TODO: also reset synthesizers' CC values and turn notes off!
+    // TODO: also reset synthesizers' CC values and turn notes off!
 }
 
 //////////////////////////// MUSICAL FUNCTIONS ////////////////////////
@@ -238,7 +238,8 @@ Song *Globals::get_song(String songName)
 	for (auto &thisSong : songlist)
 	{
         Devtools::println_to_console(thisSong->name == songName);
-		if (strcmp(thisSong->name.c_str(), songName.c_str()) == 0){ //string to const char conversion
+        if (strcmp(thisSong->name.c_str(), songName.c_str()) == 0)
+        { // string to const char conversion
             Devtools::print_to_console("randomly selected song ");
             Devtools::println_to_console(thisSong->name);
 			return thisSong;

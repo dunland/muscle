@@ -72,8 +72,8 @@ public:
 
   /////////////////////////////// PUSHBUTTON ////////////////////////////
   ///////////////////////////////////////////////////////////////////////
-  static void checkPushButton();          // checks whether pushbutton is pressed and executes action
-  static boolean pushbutton_state(); // only checks whether pushbutton is pressed
+  static void checkPushButton();          // lowlevel func to routinely check whether pushbutton is pressed and executes action
+  static boolean get_pushbutton_state(); // highlevel func to check whether pushbutton is pressed
   static unsigned long last_pushbutton_release;
   // --------------------------------------------------------------------
 
