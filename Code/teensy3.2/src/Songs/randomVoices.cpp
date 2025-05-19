@@ -10,18 +10,33 @@ void run_randomVoice()
     switch (Globals::active_song->step)
     {
     case 0:
-        Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
-        Synthesizers::mKorg->sendProgramChange(int(random(0, 128)));
-        // notes.push_back(int(random(24, 48)));
-        Drumset::snare->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
 
-        Drumset::kick->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
-        Drumset::tom1->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
-        Drumset::tom2->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 50, -0.1);
-        Drumset::standtom->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
-        Drumset::tom2->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 20, -0.06);
+        if (Globals::active_song->isStateInit())
+        {
+            // delete all midiTargets:
+            for (auto &instrument : Drumset::instruments)
+            {
+                for (auto &midiTarget : instrument->midiTargets)
+                {
+                    delete midiTarget;
+                    midiTarget = nullptr;
+                }
+                instrument->midiTargets.clear();
+            }
 
-        Globals::active_song->step = 1;
+            Globals::active_song->resetInstruments(); // reset all instruments to "Monitor" mode
+            Synthesizers::mKorg->sendProgramChange(int(random(0, 128)));
+            // notes.push_back(int(random(24, 48)));
+            Drumset::snare->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
+
+            Drumset::kick->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
+            Drumset::tom1->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
+            Drumset::tom2->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 50, -0.1);
+            Drumset::standtom->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 10, -0.1);
+            Drumset::tom2->addMidiTarget(CC_None, Synthesizers::mKorg, 115, 15, 20, -0.06);
+
+            Globals::active_song->increase_step(); // go to 1
+        }
         break;
 
     case 1: // change CC ("Reflex") + PlayMidi
@@ -58,10 +73,10 @@ void run_randomVoice()
         if (Globals::active_song->isStateInit())
         {
             // Hardware::footswitch_mode = Experimental;
-            Drumset::kick->shuffle_cc(Drumset::kick->midiTargets.back(), true);     // set a random midi CC channel
-            Drumset::snare->shuffle_cc(Drumset::snare->midiTargets.back(), true);    // set a random midi CC channel
-            Drumset::tom1->shuffle_cc(Drumset::tom1->midiTargets.back(), true);     // set a random midi CC channel
-            Drumset::tom2->shuffle_cc(Drumset::tom2->midiTargets.back(), true);     // set a random midi CC channel
+            Drumset::kick->shuffle_cc(Drumset::kick->midiTargets.back(), true);         // set a random midi CC channel
+            Drumset::snare->shuffle_cc(Drumset::snare->midiTargets.back(), true);       // set a random midi CC channel
+            Drumset::tom1->shuffle_cc(Drumset::tom1->midiTargets.back(), true);         // set a random midi CC channel
+            Drumset::tom2->shuffle_cc(Drumset::tom2->midiTargets.back(), true);         // set a random midi CC channel
             Drumset::standtom->shuffle_cc(Drumset::standtom->midiTargets.back(), true); // set a random midi CC channel
 
             // Drumset::snare->addMidiTarget(dd200_DelayTime, Synthesizers::dd200, 89, 0, -9.96, 0.08);
@@ -75,12 +90,12 @@ void run_randomVoice()
             Drumset::hihat->set_effect(TapTempo);
 
             Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127);
-            // Globals::active_song->playSingleNote(Synthesizers::mKorg;
+            // Globals::active_song->playSingleNote(Synthesizers::mKorg);
         }
-        // Globals::active_song->playSingleNote(Synthesizers::mKorg;
+        // Globals::active_song->playSingleNote(Synthesizers::mKorg);
 
         static int randomNote = int(random(16, 72));
-        if (Globals::current_beat_pos == 0 && Synthesizers::mKorg->notes[randomNote] == false)
+        if (Globals::current_beat_pos == 0)
             Synthesizers::mKorg->sendNoteOn(randomNote);
 
         break;

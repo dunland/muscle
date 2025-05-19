@@ -30,7 +30,6 @@ const String VERSION_NUMBER = "1.0.0";
 
 //---------------------- Global / Debug values ----------------------
 
-const boolean USING_TSUNAMI = false;
 int Devtools::verbose = 0;
 boolean Devtools::use_responsiveCalibration = false;
 boolean Devtools::do_print_beat_sum = false; // prints active_score->beat_sum topography array
@@ -38,8 +37,8 @@ boolean Devtools::do_print_to_console = true;
 boolean Devtools::use_serial_comm = false; // sends instrument names upon stroke and song names, if true
 boolean Devtools::do_print_JSON = false;
 boolean Devtools::do_send_to_processing = false;
-boolean Devtools::printRhythm = true; // print timestamp and current bar
-boolean Devtools::printStrokes = true;
+boolean Devtools::printRhythm = false; // print timestamp and current bar
+boolean Devtools::printStrokes = false;
 boolean Devtools::overwrite_SD_data = true; // overwrites sensitivity data on SD card with settings.h
 
 // ----------------------------- variables ----------------------------
@@ -111,12 +110,17 @@ void setup()
 
   Serial.begin(115200);
   // Serial3.begin(57600); // contained in tsunami.begin()
-  unsigned long wait_for_Serial = millis();
+
+  Hardware::lcd->begin(16, 2);
 
   while (!Serial) // prevents Serial flow from just stopping at some (early) point.
   {
+  Hardware::lcd->setCursor(0, 0);
+  Hardware::lcd->print("waiting for USB conn...");
+  Hardware::lcd->setCursor(0, 1);
+  Hardware::lcd->print("BUTTON -> SKIP");
 
-    if (millis() > wait_for_Serial + STARTUP_TIME_WAIT_FOR_USB)
+    if (Hardware::get_pushbutton_state() == true)
     {
       Devtools::do_print_JSON = false;
       Devtools::do_print_to_console = false;
@@ -134,9 +138,11 @@ void setup()
   // LCD
   Hardware::lcd->begin(16, 2);
   Hardware::lcd->setCursor(0, 0);
-  Hardware::lcd->print("SUPER MUSCLE");
-  Hardware::lcd->setCursor(0, 1);
+  Hardware::lcd->print("SUPERMUSCLE");
+  Hardware::lcd->setCursor(11, 0);
   Hardware::lcd->print(VERSION_NUMBER);
+  Hardware::lcd->setCursor(0, 1);
+  Hardware::lcd->print("DIRTY DANCING");
 
   rhythmics = new Rhythmics();
 
@@ -209,23 +215,31 @@ void setup()
 
   // Globals::songlist.push_back(new Song(run_A_72, "intro"));
   // Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
+  Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
   Globals::songlist.push_back(new Song(run_sturmUndDrang, "sturmUndDrang"));
-  Globals::songlist.push_back(new Song(run_monitoring, "mrWimbledon")); // mrWimbledon
   Globals::songlist.push_back(new Song(run_PogoNumberOne, "pogoNumberOne"));
   Globals::songlist.push_back(new Song(run_hutschnur, "hutschnur"));
+  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
+  Globals::songlist.push_back(new Song(run_besen, "besen"));
+  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
+  Globals::songlist.push_back(new Song(run_nosferatu, "nosferatu"));
+  Globals::songlist.push_back(new Song(run_monitoring, "mrWimbledon")); // mrWimbledon
   Globals::songlist.push_back(new Song(run_roeskur, "roeskur"));
-  Globals::songlist.push_back(new Song(run_sloJam, "sloJam"));
+
   Globals::songlist.push_back(new Song(run_kupferUndGold, "kupferUndGold"));
-  Globals::songlist.push_back(new Song(run_triathlon, "triathlon"));
+  Globals::songlist.push_back(new Song(run_norbert, "norbert"));
+
+  // Zugabe:
+  Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
+  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
+  Globals::songlist.push_back(new Song(run_donnerwetter, "donnerwetter"));
+  Globals::songlist.push_back(new Song(run_sattelstein, "sattelstein"));
 
   // Globals::songlist.push_back(new Song(run_tapTempo, "tapTempo"));
   // Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
   Globals::songlist.push_back(new Song(run_wueste, "wueste"));
-  Globals::songlist.push_back(new Song(run_besen, "besen"));
   Globals::songlist.push_back(new Song(run_alhambra, "alhambra"));
-  Globals::songlist.push_back(new Song(run_sattelstein, "sattelstein"));
   Globals::songlist.push_back(new Song(run_theodolit, "theodolit"));
-  Globals::songlist.push_back(new Song(run_donnerwetter, "donnerwetter"));
 
   // Globals::songlist.at(sizeof(Globals::songlist))->setTempoRange(150, 170); // TODO: make this work!
   // Globals::songlist.push_back(new Song(run_host));

@@ -5,7 +5,7 @@
 #include <Notes.h>
 
 //////////////////////////// CONTROL DD200 /////////////////////////////
-void run_triathlon()
+void run_norbert()
 {
 
     switch (Globals::active_song->step)
@@ -79,8 +79,6 @@ void run_triathlon()
             Synthesizers::whammy->sendProgramChange(whammy_CHORDS_OCT_2OCT_ON);
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 127); // ON
             Synthesizers::mKorg->sendProgramChange(85);               // b.36
-            Synthesizers::mKorg->sendNoteOn(Note_D4);
-            Synthesizers::mKorg->sendNoteOn(Note_D5);
         }
 
         Hardware::lcd->setCursor(9, 1);

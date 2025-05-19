@@ -24,6 +24,8 @@ void run_sturmUndDrang()
                 instrument->midiTargets.clear();
             }
             Devtools::println_to_console("Sturm&Drang: All midiTargets deleted!");
+
+            Synthesizers::kaossPad3->sendNoteOn(KP3_Sample_A); // turn Grillenzirpen off
         }
 
         Hardware::lcd->setCursor(0, 0);
@@ -97,6 +99,12 @@ void run_sturmUndDrang()
     case 3: // alles zerhechseln
         if (Globals::active_song->isStateInit())
         {
+            Synthesizers::kaossPad3->sendProgramChange(40);  // LFO9: Deep Flanger
+            Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_x, 0);
+            Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_y, 0);
+            Synthesizers::kaossPad3->sendControlChange(KP3_Hold, 1);
+
+
             Globals::active_song->notes.clear();
             Drumset::standtom->set_effect(Change_CC);
             Drumset::standtom->addMidiTarget(dd200_mod, Synthesizers::dd200, 127, 0, 4, -0.02);

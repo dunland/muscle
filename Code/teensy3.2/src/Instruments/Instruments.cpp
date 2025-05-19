@@ -73,15 +73,17 @@ void Instrument::set_effect(EffectsType effect_)
   case PlayMidi:
     for (auto &midiTarget : midiTargets)
     {
-
       if (midiTarget->notes.size() > 0 && midiTarget->active_note > 0)
       {
         effect = effect_;
+        // midiTarget->synth->sendControlChange(mKORG_Attack, 0);
+        // midiTarget->synth->sendControlChange(volca_EG_Attack, 0); // TODO: allocate CC channels to midi aux devices to enable generic naming like midiTarget.attack
         Devtools::println_to_console("done.");
       }
       else
       {
         Devtools::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
+        effect = Monitor;
       }
     }
     break;
@@ -288,8 +290,11 @@ void Instrument::setInstrumentPrintString()
 
 ////////////////////////////// TRIGGERS ///////////////////////////////
 // defines what happens when instrument was hit within this beat
-void Instrument::trigger()
+void Instrument::trigger() // TODO: use as callback function
 {
+
+  if (Globals::machine_state != Running) return;
+
   // print instrument name to receive using external programs via Serial connection:
   if (Devtools::use_serial_comm)
     Serial.println(Globals::DrumtypeToHumanreadable(drumtype));

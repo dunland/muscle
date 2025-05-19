@@ -6,7 +6,7 @@
 #include <settings.h>
 
 ///////////////////////////// MONITORING //////////////////////////////
-void run_sloJam()
+void run_nosferatu()
 {
     static int valueXgoal, valueYgoal, valueX, valueY;
 
@@ -24,7 +24,7 @@ void run_sloJam()
                 }
                 instrument->midiTargets.clear();
             }
-            Devtools::println_to_console("SloJam: All midiTargets deleted!");
+            Devtools::println_to_console("Nosferatu: All midiTargets deleted!");
 
             Synthesizers::dd200->sendProgramChange(1);
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 0, true); // FORCE OFF
@@ -151,10 +151,9 @@ void run_sloJam()
 
         break;
 
-    case 4: // das finale nach dem loop
+    case 4: // Schlagzeugeffekte zur Zerhechselung
 
-        if (Globals::active_song->isStateInit())
-        {
+        if (Globals::active_song->isStateInit()) {
             Synthesizers::kaossPad3->sendControlChange(KP3_Hold, 1);
             Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_on_off, 127); // Touch Pad on
 
@@ -173,6 +172,9 @@ void run_sloJam()
         Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_x, valueX);
         valueY = (valueY < valueYgoal) ? valueY + (valueYgoal - valueY) / 5 : valueY - (valueY - valueYgoal) / 5;
         Synthesizers::kaossPad3->sendControlChange(KP3_touch_pad_y, valueY);
+    break;
+
+    case 5: // das finale nach dem loop
 
         Hardware::lcd->setCursor(6, 1);
         Hardware::lcd->print("finale");
