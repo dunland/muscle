@@ -2,6 +2,7 @@
 
 #include <Song.h>
 #include <Hardware.h>
+#include <cstdlib>
 #include <settings.h>
 
 // ---------------------- SETUP FUNCTIONS -----------------------------
@@ -20,6 +21,7 @@ void Instrument::addMidiTarget(CC_Type cc_type, Synthesizer *synth, int cc_max, 
 {
   midiTargets.push_back(new MIDI_TARGET);
   MIDI_TARGET *midiTarget = midiTargets.back();
+  Devtools::println_to_console(midiTarget->cc_type);
   midiTarget->cc_type = cc_type;
   midiTarget->synth = synth;
   midiTarget->cc_max = cc_max;
@@ -28,7 +30,24 @@ void Instrument::addMidiTarget(CC_Type cc_type, Synthesizer *synth, int cc_max, 
   midiTarget->cc_tidyUp_factor = cc_tidyUp_factor;
 
   midiTarget->cc_standard = (cc_tidyUp_factor > 0) ? midiTarget->cc_min : midiTarget->cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
+  Serial.printf("Added %s as midiTarget for %s", midiTarget->synth->name, Globals::DrumtypeToHumanreadable(drumtype));
 }
+
+void Instrument::addMidiTarget(int cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increment, float cc_release){
+  midiTargets.push_back(new MIDI_TARGET);
+  MIDI_TARGET *midiTarget = midiTargets.back();
+  Devtools::println_to_console(midiTarget->cc_type);
+  midiTarget->cc_type = static_cast<CC_Type>(cc_type); // finds nearest type from int
+  midiTarget->synth = synth;
+  midiTarget->cc_max = cc_max;
+  midiTarget->cc_min = cc_min;
+  midiTarget->cc_increase_factor = cc_increment;
+  midiTarget->cc_tidyUp_factor = cc_release;
+
+  midiTarget->cc_standard = (cc_release > 0) ? midiTarget->cc_min : midiTarget->cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
+  // Serial.printf("Added %s as midiTarget for %s", midiTarget->synth->name, Globals::DrumtypeToHumanreadable(drumtype));
+} 
+
 
 // add midiTarget without params
 void Instrument::addMidiTarget(CC_Type cc_type, Synthesizer *synth)
@@ -82,8 +101,8 @@ void Instrument::set_effect(EffectsType effect_)
       }
       else
       {
-        Devtools::println_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
-        effect = Monitor;
+        midiTarget->notes.push_back(int(random(0, 128))); // TODO: add notes according to global scale
+        effect = effect_;
       }
     }
     break;

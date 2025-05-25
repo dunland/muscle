@@ -69,10 +69,10 @@ public:
 
     struct MIDI_TARGET
     {
-        std::vector<int> notes;
-        int active_note;
-        CC_Type cc_type;
-        int random_cc_chan = 0; // integer standing for CC_Type in Random_CC_Effects
+        std::vector<int> notes = {int(random(128))};
+        int active_note = notes[0];
+        CC_Type cc_type = CC_None;
+        int random_cc_chan = 0;        // integer standing for CC_Type in Random_CC_Effects
         float cc_val = 0;
         int cc_max = 127;              // MIDI values cannot be greater than this
         int cc_min = 30;               // MIDI values cannot be smaller than this
@@ -128,6 +128,8 @@ public:
     void allocateNotesToTarget(MIDI_TARGET* midiTarget, std::vector<int> list);
 
     void addMidiTarget(CC_Type cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor);
+
+    void addMidiTarget(int cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increase_factor, float cc_tidyUp_factor);
 
     void addMidiTarget(CC_Type cc_type, Synthesizer *synth); // setup midi without CC params
 

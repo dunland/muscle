@@ -571,21 +571,10 @@ void Instrument::shuffle_cc(Instrument::MIDI_TARGET *midiTarget, boolean force_ 
   {
     if (midiTarget->cc_val == midiTarget->cc_standard || force_ == true)
     {
-
-      // ATTENTION:
-      // IMPORTANT:
-      // TODO: define all CC channels, otherwise this procedure can take forever in the while loop!
-
-      do
-      {
-        midiTarget->random_cc_chan = int(random(128));
-        // cast int to CC_Type:
-        midiTarget->cc_type = CC_Type(midiTarget->random_cc_chan);
-      } while (midiTarget->cc_type == CC_None);
-
+      midiTarget->cc_type = static_cast<CC_Type>(int(random(0, 128)));
       score.ready_to_shuffle = false;
       Devtools::print_to_console("cc_type of ");
-      Devtools::print_to_console(drumtype);
+      Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
       Devtools::print_to_console(" is ");
       Devtools::println_to_console(midiTarget->cc_type);
     }

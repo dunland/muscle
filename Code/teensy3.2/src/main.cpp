@@ -26,7 +26,7 @@
 #include <Calibration.h>
 #include <SD.h>
 
-const String VERSION_NUMBER = "1.0.0";
+const String VERSION_NUMBER = "2025-05";
 
 //---------------------- Global / Debug values ----------------------
 
@@ -142,7 +142,7 @@ void setup()
   Hardware::lcd->setCursor(11, 0);
   Hardware::lcd->print(VERSION_NUMBER);
   Hardware::lcd->setCursor(0, 1);
-  Hardware::lcd->print("DIRTY DANCING");
+  Hardware::lcd->print("fix randomVoices");
 
   rhythmics = new Rhythmics();
 
@@ -254,8 +254,9 @@ void setup()
   Globals::active_song = Globals::songlist.at(0);
 
   // assign startup instrument effects:
-  Drumset::hihat->effect = Monitor;
-  Drumset::tom1->effect = Monitor;
+  for (auto &instrument : Drumset::instruments){
+    instrument->effect = Monitor;
+  }
 
   // Debug:
   // tsunami.trackPlayPoly(1, 0, true); // If TRUE, the track will not be subject to Tsunami's voice stealing algorithm.
