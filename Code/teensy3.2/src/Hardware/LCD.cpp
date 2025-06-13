@@ -39,16 +39,16 @@ void Hardware::lcd_display()
         if (instruments_with_CC_mode > 3)
         {
             static unsigned long last_running_state_switch = 0;
-            static boolean running_mode = true;
+            static boolean toggle = true;
 
             if (millis() > (last_running_state_switch + 3000))
             {
-                running_mode = !running_mode;
+                toggle = !toggle;
                 lcd->clear();
                 last_running_state_switch = millis();
-            } ///////////////////////////////////////////////////////////////////////
+            } ////////////////////////////////////////////////////////
 
-            if (running_mode == true) // mode A: display scores
+            if (toggle) // mode A: display scores
                 display_scores();
             else // mode B: display Midi Values
                 display_Midi_values(instruments_with_CC_mode);
@@ -231,6 +231,8 @@ void Hardware::display_scores()
 // display midi values of instruments with FX-Type CC_Change
 void Hardware::display_Midi_values(int instruments_with_CC_mode)
 {
+
+    if (instruments_with_CC_mode < 1) return;
 
     const int toggleTime = 1000; // ms timeout to iterate midiTargets
     static unsigned long lastToggle;
