@@ -1,7 +1,7 @@
 /*
    SUPER MUSCLE
    ------------------------------------
-   October 2020-November 2023
+   October 2020-2025
    by David Unland email[at]davidunland[dot]de
    github.com/dunland/muscle
    ------------------------------------
@@ -26,7 +26,7 @@
 #include <Calibration.h>
 #include <SD.h>
 
-const String VERSION_NUMBER = "2025-05";
+const String VERSION_NUMBER = "2025-09";
 
 //---------------------- Global / Debug values ----------------------
 
@@ -58,21 +58,18 @@ int pinValue(Instrument *instrument)
 // useful debugger for column-wise output of raw/normalised values
 void printNormalizedValues(boolean letsDoThis)
 {
-
-  if (letsDoThis == true)
+  if (!letsDoThis) return;
+  static unsigned long lastMillis;
+  if (millis() != lastMillis)
   {
-    static unsigned long lastMillis;
-    if (millis() != lastMillis)
+    for (auto &instrument : Drumset::instruments)
     {
-      for (auto &instrument : Drumset::instruments)
-      {
-        Devtools::print_to_console(pinValue(instrument));
-        Devtools::print_to_console("\t");
-      }
-      Devtools::println_to_console("");
+      Devtools::print_to_console(pinValue(instrument));
+      Devtools::print_to_console("\t");
     }
-    lastMillis = millis();
+    Devtools::println_to_console("");
   }
+  lastMillis = millis();
 }
 
 //////////////////// interrupt for sensor reading /////////////////////
@@ -170,7 +167,7 @@ void setup()
   Drumset::ride->setup_sensitivity(RIDE_THRESHOLD, RIDE_CROSSINGS, RIDE_DELAY_AFTER_STROKE, RIDE_FIRST_STROKE);
   Drumset::tom1->setup_sensitivity(TOM1_THRESHOLD, TOM1_CROSSINGS, TOM1_DELAY_AFTER_STROKE, TOM1_FIRST_STROKE);
 
-  if (!Devtools::overwrite_SD_data)
+  if (!Devtools::sensitivityFromHeaderFile)
   {
     if (!JSON::read_sensitivity_data_from_SD(Drumset::instruments))
     {
@@ -252,6 +249,7 @@ void setup()
   // Globals::songlist.push_back(new Song(run_nanokontrol));
 
   Globals::active_song = Globals::songlist.at(0);
+  Serial.println(Globals::active_song->name); // init call for visuals
 
   // assign startup instrument effects:
   for (auto &instrument : Drumset::instruments){
@@ -296,17 +294,16 @@ void setup()
   Serial.println("hello");
 }
 
-/* --------------------------------------------------------------------- */
-/* ------------------------------- LOOP -------------------------------- */
-/* --------------------------------------------------------------------- */
+/* -------------------------------------------------------------- */
+/* ---------------------------- LOOP ---------------------------- */
+/* -------------------------------------------------------------- */
 
 void loop()
 {
   // Globals::tsunami.update(); // keeps variables for playing tracks etc up to date
 
   // ------------------------- DEBUG AREA -----------------------------
-  printNormalizedValues(false);
-
+  // printNormalizedValues(true);
   // --------------------- INCOMING SIGNALS FROM PIEZOS ---------------
   // (define what should happen when instruments are hit)
   for (auto &instrument : Drumset::instruments)
@@ -388,7 +385,7 @@ void loop()
 
   if (Globals::machine_state == Calibrating)
   {
-    Calibration::update();
+    Calibration::update(); // TODO: move to Hardware & use callback functions!
   }
 
   // tidying up what's left from performing functions..

@@ -15,7 +15,7 @@ public:
     static bool printRhythm; // print timestamp and current bar
     static boolean do_print_beat_sum; // prints Score::beat_sum topography array
     static boolean do_print_JSON;     // determines whether to use USB Serial communication for monitoring via processing/console or not
-    static bool overwrite_SD_data;
+    static bool sensitivityFromHeaderFile;
 
     static String endOfLine;
 

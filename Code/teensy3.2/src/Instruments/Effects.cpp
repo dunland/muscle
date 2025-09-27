@@ -86,6 +86,7 @@ void Instrument::getTapTempo()
       num_of_taps = 0;
       clock_sum = 0;
       Devtools::println_to_console("-----------TAP RESET!-----------\n");
+      output_string = "TAP\t";
     }
     timeSinceFirstTap = millis(); // record time of first hit
     tapState = 2;                 // next: wait for second hit
@@ -560,6 +561,7 @@ void Instrument::change_cc_out() // changes (mostly decreases) value of CC effec
     if (midiTarget != midiTargets.back()) // not last element
       ccString += "|";
   }
+  if (!Devtools::printRhythm) return;
   output_string = ccString;
   output_string += "\t";
 }

@@ -48,10 +48,20 @@ void Song::increase_step()
 // proceed to step 0 of next song and set all instruments effects to "Monitor":
 void Song::proceed_to_next_score() // TODO: make this a callback function/the songs' individual "tidyUp function", so they can be programmed individually.
 {
+    for (auto &instrument : Drumset::instruments)
+    {
+        for (auto &midiTarget : instrument->midiTargets)
+        {
+            delete midiTarget;
+            midiTarget = nullptr;
+        }
+        instrument->midiTargets.clear();
+    }
+            
     // proceed to next song in list:
     Globals::active_song_pointer = (Globals::active_song_pointer + 1) % Globals::songlist.size();
     Globals::active_song = Globals::songlist[Globals::active_song_pointer];
-    Serial.println(Globals::active_song->name);
+    Serial.println(Globals::active_song->name); // control visuals etc
 
     // ...and begin at step 0:
     Globals::active_song->step = 0;
@@ -88,6 +98,15 @@ void Song::resetInstruments()
         drum->set_effect(Monitor);
     }
     // TODO: also reset synthesizers' CC values and turn notes off!
+    for (auto &instrument : Drumset::instruments)
+    {
+        for (auto &midiTarget : instrument->midiTargets)
+        {
+            delete midiTarget;
+            midiTarget = nullptr;
+        }
+        instrument->midiTargets.clear();
+    }
 }
 
 //////////////////////////// MUSICAL FUNCTIONS ////////////////////////

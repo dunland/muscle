@@ -6,8 +6,6 @@
 IntervalTimer Globals::masterClock; // 1 bar
 MachineState Globals::machine_state = Running;
 
-// Tsunami Globals::tsunami;
-
 // ------------------------------- Score ----------------------------
 std::vector<Song *> Globals::songlist; // all relevant scores
 int Globals::active_song_pointer = 0;	  // points at active score of scores_list

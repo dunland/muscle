@@ -9,7 +9,7 @@
 LiquidCrystal *Hardware::lcd = new LiquidCrystal(RS, EN, D4, D5, D6, D7);
 volatile boolean Hardware::FLAG_CLEAR_LCD = false;
 
-// ------------------------------------------------------------------------------
+// ----------------------------------------------------------------
 void Hardware::lcd_display()
 {
     // clear LCD display three times per second:
@@ -216,7 +216,7 @@ void Hardware::lcd_display()
     }
 }
 
-// ------------------------------------------------------------------------------
+// ----------------------------------------------------------------
 void Hardware::display_scores()
 {
     // active score display:
@@ -227,7 +227,7 @@ void Hardware::display_scores()
     lcd->print(Globals::active_song->step);
 }
 
-// ------------------------------------------------------------------------------
+// ----------------------------------------------------------------
 // display midi values of instruments with FX-Type CC_Change
 void Hardware::display_Midi_values(int instruments_with_CC_mode)
 {
