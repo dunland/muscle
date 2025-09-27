@@ -29,8 +29,12 @@ struct ModeArray {
 std::vector<ModeArray> musicModes;
 ModeArray musicMode;
 
-int randomNote(int baseNote) {
+int randomNoteFromBase(int baseNote) {
   int idx = int(random(0, musicMode.size));
+  int note = baseNote + musicMode.data[idx];
+  if (note > 127){
+    int note = (127 - 1) - ((127 - 1) % baseNote);
+  }
   return min(baseNote + musicMode.data[idx], 127);
   // return min(baseNote + baseNote * int(random(0, 6)), 128);
 }
@@ -98,24 +102,24 @@ void run_randomVoice() {
     if (Globals::active_song->isStateInit()) {
       Hardware::footswitch_mode = Increment_Score;
 
-      Drumset::kick->midiTargets.back()->notes.push_back(randomNote(Note_D3));
+      Drumset::kick->midiTargets.back()->notes.push_back(randomNoteFromBase(Note_D3));
       Drumset::kick->midiTargets.back()->active_note =
           Drumset::kick->midiTargets.back()->notes[0];
 
-      Drumset::snare->midiTargets.back()->notes.push_back(randomNote(Note_D3));
+      Drumset::snare->midiTargets.back()->notes.push_back(randomNoteFromBase(Note_D3));
       Drumset::snare->midiTargets.back()->active_note =
           Drumset::snare->midiTargets.back()->notes[0];
 
-      Drumset::tom1->midiTargets.back()->notes.push_back(randomNote(Note_D3));
+      Drumset::tom1->midiTargets.back()->notes.push_back(randomNoteFromBase(Note_D3));
       Drumset::tom1->midiTargets.back()->active_note =
           Drumset::tom1->midiTargets.back()->notes[0];
 
-      Drumset::tom2->midiTargets.back()->notes.push_back(randomNote(Note_D3));
+      Drumset::tom2->midiTargets.back()->notes.push_back(randomNoteFromBase(Note_D3));
       Drumset::tom2->midiTargets.back()->active_note =
           Drumset::tom2->midiTargets.back()->notes[0];
 
       Drumset::standtom->midiTargets.back()->notes.push_back(
-          randomNote(Note_D3));
+          randomNoteFromBase(Note_D3));
       Drumset::standtom->midiTargets.back()->active_note =
           Drumset::standtom->midiTargets.back()->notes[0];
       // Drumset::standtom->addMidiTarget(mKORG_Resonance, Synthesizers::mKorg,
@@ -156,14 +160,11 @@ void run_randomVoice() {
       Drumset::hihat->set_effect(TapTempo);
 
       Synthesizers::mKorg->sendControlChange(mKORG_Sustain, 127);
-      // Globals::active_song->playSingleNote(Synthesizers::mKorg);
     }
-    // Globals::active_song->playSingleNote(Synthesizers::mKorg);
 
-    static int randomNote = int(random(16, 72));
+
     if (Globals::current_beat_pos == 0)
-      Synthesizers::mKorg->sendNoteOn(randomNote);
-
+      Synthesizers::mKorg->sendNoteOn(randomNoteFromBase(Note_D1));
     break;
 
   default: // start over again
