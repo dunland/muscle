@@ -12,6 +12,8 @@
  --------------------------------- GLOBAL -----------------------------
  ------------------------------------------------------------------- */
 
+#include "core_pins.h"
+#include "usb_serial.h"
 #include <Arduino.h>
 #include <vector>
 #include <ArduinoJson.h>
@@ -38,8 +40,8 @@ boolean Devtools::use_serial_comm = false; // sends instrument names upon stroke
 boolean Devtools::do_print_JSON = false;
 boolean Devtools::do_send_to_processing = false;
 boolean Devtools::printRhythm = false; // print timestamp and current bar
-boolean Devtools::printStrokes = false;
-boolean Devtools::overwrite_SD_data = true; // overwrites sensitivity data on SD card with settings.h
+boolean Devtools::printStrokes = true;
+boolean Devtools::sensitivityFromHeaderFile = true; // overwrites sensitivity data on SD card with settings.h
 
 // ----------------------------- variables ----------------------------
 
@@ -201,22 +203,19 @@ void setup()
   Devtools::println_to_console("-----------------------------------------------");
 
   // -------------------------------- songlist ------------------------
-  // Globals::songlist.push_back(new Song(run_b_11, "b_11"));
-  // Globals::songlist.push_back(new Song(run_b_73, "b_73"));
-  // Globals::songlist.push_back(new Song(run_b_63, "b_63"));
-  // Globals::songlist.push_back(new Song(run_A_15, "A_15"));
-  // Globals::songlist.push_back(new Song(run_A_25, "A_25"));
-  // Globals::songlist.push_back(new Song(run_A_72, "A_72"));
-  // Globals::songlist.push_back(new Song(run_b_27, "b_27"));
-  // Globals::songlist.push_back(new Song(run_b_36, "b_36"));
+  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
+  Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
+  // Globals::songlist.push_back(new Song(run_A_72, "A_72")); // TODO: Hangup! fix this song!
+  // Globals::songlist.push_back(new Song(run_b_27, "b_27")); // TODO: Hangup! fix this song!
+  // Globals::songlist.push_back(new Song(run_b_36, "b_36")); // TODO> Hangup! fix this song!
 
   // Globals::songlist.push_back(new Song(run_A_72, "intro"));
   // Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
-  Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
   Globals::songlist.push_back(new Song(run_sturmUndDrang, "sturmUndDrang"));
   Globals::songlist.push_back(new Song(run_PogoNumberOne, "pogoNumberOne"));
   Globals::songlist.push_back(new Song(run_hutschnur, "hutschnur"));
   Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
+  Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
   Globals::songlist.push_back(new Song(run_besen, "besen"));
   Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
   Globals::songlist.push_back(new Song(run_nosferatu, "nosferatu"));
@@ -237,6 +236,12 @@ void setup()
   Globals::songlist.push_back(new Song(run_wueste, "wueste"));
   Globals::songlist.push_back(new Song(run_alhambra, "alhambra"));
   Globals::songlist.push_back(new Song(run_theodolit, "theodolit"));
+
+  Globals::songlist.push_back(new Song(run_b_11, "b_11"));
+  Globals::songlist.push_back(new Song(run_b_73, "b_73"));
+  Globals::songlist.push_back(new Song(run_b_63, "b_63"));
+  Globals::songlist.push_back(new Song(run_A_15, "A_15"));
+  Globals::songlist.push_back(new Song(run_A_25, "A_25"));
 
   // Globals::songlist.at(sizeof(Globals::songlist))->setTempoRange(150, 170); // TODO: make this work!
   // Globals::songlist.push_back(new Song(run_host));
@@ -387,6 +392,37 @@ void loop()
   {
     Calibration::update(); // TODO: move to Hardware & use callback functions!
   }
+  /*
+  
+  else {
+    static int previous_encoder_count = -1;
+    static unsigned long lastPush = millis();
+    if (Hardware::encoder_count != previous_encoder_count && millis() > lastPush + 100){
+      if (Hardware::encoder_count < previous_encoder_count){
+        // go back one song:
+        Globals::active_song_pointer--;
+        if (Globals::active_song_pointer < 0)
+          Globals::active_song_pointer = Globals::songlist.size() - 1;
+        Globals::active_song = Globals::songlist[Globals::active_song_pointer];
+        Devtools::print_to_console("going back to song ");
+        Devtools::println_to_console(Globals::active_song->name);
+      }
+      else {
+        // go to next song:
+        Globals::active_song_pointer++;
+        if (Globals::active_song_pointer > Globals::songlist.size() - 1)
+          Globals::active_song_pointer = 0;
+        Globals::active_song = Globals::songlist[Globals::active_song_pointer];
+        Devtools::print_to_console("proceeding to song ");
+        Devtools::println_to_console(Globals::active_song->name);
+      }
+      Serial.printf("encoder_count:%d, prev:%d\n", Hardware::encoder_count, previous_encoder_count);
+      Globals::active_song = Globals::songlist.at(Hardware::encoder_count % Globals::songlist.size());
+      Serial.println(Globals::active_song->name);
+    }
+    previous_encoder_count = Hardware::encoder_count;
+  }
+  */
 
   // tidying up what's left from performing functions..
   for (auto &instrument : Drumset::instruments)
