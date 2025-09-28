@@ -102,6 +102,20 @@ void Hardware::checkPushButton()
     switch (Globals::machine_state)
     {
     case Running:
+
+      noInterrupts();
+      Globals::machine_state = Calibrating;
+      interrupts();
+      Hardware::lcd->clear();
+      Hardware::lcd->setCursor(0, 0);
+      Hardware::lcd->print("entering");
+      Hardware::lcd->setCursor(0, 1);
+      Hardware::lcd->print("Calibration Mode");
+      Calibration::setup();
+      Serial.println("Entering Calibration Mode.");
+      delay(1000);
+      break;
+
       // go back one song:
       Globals::active_song_pointer--;
       if (Globals::active_song_pointer < 0)
