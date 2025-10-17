@@ -15,11 +15,17 @@ void Instrument::change_cc_in() // instead of stroke detection, MIDI CC val is a
 {
   for (auto &midiTarget : midiTargets)
   {
+    static int prevVal = 0;
     midiTarget->cc_val += midiTarget->cc_increase_factor;
     midiTarget->cc_val = min(midiTarget->cc_val, midiTarget->cc_max);
-    midiTarget->synth->sendControlChange(midiTarget->cc_type, int(min(midiTarget->cc_val, 127)));
+    int val = int(min(midiTarget->cc_val, 127));
+    if (val != prevVal){
+      midiTarget->synth->sendControlChange(midiTarget->cc_type, val);
+      prevVal = midiTarget->cc_val;
+    }
     output_string = String(midiTarget->cc_val);
     output_string += "\t";
+
   }
 }
 
@@ -38,6 +44,8 @@ void Instrument::random_change_cc_in() // instead of stroke detection, MIDI CC v
 // plays a Midi note:
 void Instrument::playMidi()
 {
+  // if (sizeof(midiTargets) == 0) 
+  // Devtools::println_to_console("cannot play midi: no midiTargets.");
   for (auto &midiTarget : midiTargets)
     midiTarget->synth->sendNoteOn(midiTarget->active_note);
   score.last_notePlayed = millis();
@@ -554,9 +562,23 @@ void Instrument::change_cc_out() // changes (mostly decreases) value of CC effec
   String ccString = "";
   for (auto &midiTarget : midiTargets)
   {
+    static int prevVal = 0;
     midiTarget->cc_val += midiTarget->cc_tidyUp_factor;
     midiTarget->cc_val = min(max(midiTarget->cc_val, midiTarget->cc_min), midiTarget->cc_max);
-    midiTarget->synth->sendControlChange(midiTarget->cc_type, int(min(midiTarget->cc_val, 127)));
+    
+    int val = int(min(midiTarget->cc_val, 127));
+    if (val != prevVal){
+      midiTarget->synth->sendControlChange(midiTarget->cc_type, val);
+      prevVal = midiTarget->cc_val;
+      if (Devtools::visualsOn){ // send like "Snare:12"
+      // Serial.printf("%s:%s", Globals::DrumtypeToHumanreadable(this->drumtype), val);
+        Serial.print(Globals::DrumtypeToHumanreadable(this->drumtype));
+        Serial.print(":");
+        Serial.println(val);
+      }
+    }
+    
+    // midiTarget->synth->sendControlChange(midiTarget->cc_type, int(min(midiTarget->cc_val, 127)));
     ccString += String(int(midiTarget->cc_val));
     if (midiTarget != midiTargets.back()) // not last element
       ccString += "|";
@@ -575,17 +597,11 @@ void Instrument::shuffle_cc(Instrument::MIDI_TARGET *midiTarget, boolean force_ 
     {
       midiTarget->cc_type = static_cast<CC_Type>(int(random(0, 128)));
       score.ready_to_shuffle = false;
-      Devtools::print_to_console("cc_type of ");
-      Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
-      Devtools::print_to_console(" is ");
-      Devtools::println_to_console(midiTarget->cc_type);
+      // Serial.printf("cc_type of %s is %s", Globals::DrumtypeToHumanreadable(drumtype), midiTarget->cc_type);
     }
     else
     {
-      Devtools::print_to_console("waiting for cc_val to be at standard: ");
-      Devtools::print_to_console(midiTarget->cc_val);
-      Devtools::print_to_console("/");
-      Devtools::println_to_console(midiTarget->cc_standard);
+      // Serial.printf("waiting for cc_val to be at standard: %s/%s", midiTarget->cc_val, midiTarget->cc_standard);
     }
   }
   else

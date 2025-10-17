@@ -1,3 +1,4 @@
+#include "Globals.h"
 #include <Song.h>
 
 #include <Instruments.h>
@@ -7,13 +8,13 @@
 //////////////////////////// CONTROL DD200 /////////////////////////////
 void run_norbert()
 {
-
+    // TODO: ACHTUNG!! DARF NICHT ERSTER SONG SEIN: CRASHT SONST!
     switch (Globals::active_song->step)
     {
     case 0: // A
         if (Globals::active_song->isStateInit())
         {
-            Globals::current_BPM = 137;
+            Globals::current_BPM = 143; // on recording: 137;
             Globals::tapInterval = 60000 / Globals::current_BPM;
             Globals::masterClock.begin(Globals::masterClockTimer, Globals::tapInterval * 1000 * 4 / 128);
 
@@ -26,6 +27,10 @@ void run_norbert()
             Synthesizers::dd200->sendProgramChange(6);
             Synthesizers::dd200->sendControlChange(dd200_OnOff, 127);            // ON
             Synthesizers::whammy->sendProgramChange(whammy_CHORDS_OCT_2OCT_OFF); // 83
+
+            Drumset::snare->addMidiTarget(visuals_snare, Synthesizers::visuals,
+                                    127, 0, 10, -0.1);
+            Drumset::snare->set_effect(Change_CC);
         }
 
         Hardware::lcd->setCursor(9, 1);

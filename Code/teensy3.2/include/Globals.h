@@ -153,8 +153,16 @@ enum CC_Type
     volca_EG_DecayRelease = 50,
     volca_EG_Sustain = 51,
     volca_DelayTime = 52,
-    volca_DelayFeedback = 53
+    volca_DelayFeedback = 53,
 
+    // visuals
+    visuals_crash = 0,
+    visuals_kick = 1,
+    visuals_standtom = 2,
+    visuals_tom2 = 3,
+    visuals_hihat = 4,
+    visuals_tom1 = 5,
+    visuals_snare = 6
 };
 
 ///////////////////////////////////////////////////////////////////////

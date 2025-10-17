@@ -51,53 +51,25 @@ unsigned long Hardware::last_pushbutton_release = 0;
 void Hardware::checkPushButton()
 {
   static bool last_button_state = false;
-  static unsigned long last_button_toggle = 1000; // some pre-delay to prevent initial misdetection
-  static unsigned long last_hold_trigger = 0;
-  static bool readyToPush = false;
+  static unsigned long lastButtonToggle = 1000; // some pre-delay to prevent initial misdetection
+  static unsigned long lastButtonRelease = millis();
+  static unsigned long lastCallback = 0;
+  static int timesPressed = 0;
+  const int timeUntilCallback = 500; // ms, time to detect pushes
 
-  bool button_state = !digitalRead(PUSHBUTTON);
+  bool button_state = !digitalRead(PUSHBUTTON); // -> true = pushed
 
   // ---------------------- BUTTON TOGGLE: ------------------
-  if (button_state != last_button_state && millis() > last_button_toggle + 20) // button status changed
+  if (button_state != last_button_state && millis() > lastButtonToggle + 20) // button status changed
   {
-    if (readyToPush)
-    {
+    if (button_state == true) timesPressed++;
 
-      switch (Globals::machine_state)
-      {
-      case Running:
-        if (button_state == false) // button released
-        {
-          Globals::active_song->proceed_to_next_score();
-        }
-        break;
-
-      case Calibrating:
-
-        if (button_state == false && millis() > last_button_toggle + 200) // button released
-        {
-          // save current encoder value:
-          encoder_value = encoder_count;
-
-          // go one level down and setup new mode:
-          Calibration::set(encoder_value);
-        }
-
-        break;
-
-      default:
-        Serial.println("no machine state for push button!");
-
-        break;
-      }
-    }
     last_button_state = button_state;
-    last_button_toggle = millis();
-    readyToPush = true;
+    lastButtonToggle = millis();
   }
 
   // -------------------- BUTTON HOLD: ----------------------
-  else if (button_state == true && millis() > last_button_toggle + 1000 && millis() > 5000 && millis() > last_hold_trigger + 1000) // button pushed + held for 1000ms
+  else if (button_state == true && millis() > lastButtonToggle + timeUntilCallback && millis() > 5000 && millis() > lastCallback + timeUntilCallback) // button pushed + held
   {
     switch (Globals::machine_state)
     {
@@ -121,8 +93,6 @@ void Hardware::checkPushButton()
       if (Globals::active_song_pointer < 0)
         Globals::active_song_pointer = Globals::songlist.size() - 1;
       Globals::active_song = Globals::songlist[Globals::active_song_pointer];
-      Devtools::print_to_console("going back to song ");
-      Devtools::println_to_console(Globals::active_song->name);
 
       Globals::active_song->step = 0;
       Globals::active_song->initState = true;
@@ -168,8 +138,39 @@ void Hardware::checkPushButton()
     default:
       break;
     }
-    last_hold_trigger = millis();
-    readyToPush = false; // button needs to be pushed first before next action upon release
+    lastCallback = millis();
+  }
+
+  // callback: button released
+  else if (button_state == false && millis() > lastButtonToggle + timeUntilCallback && millis() > 5000 && millis() > lastCallback + timeUntilCallback)
+  {
+    if (timesPressed == 1) // single-push
+    {
+      switch (Globals::machine_state)
+      {
+      case Running:
+            Globals::active_song->proceed_to_next_score();
+        break;
+
+      case Calibrating:
+          // save current encoder value:
+          encoder_value = encoder_count;
+
+          // go one level down and setup new mode:
+          Calibration::set(encoder_value);
+        break;
+
+      default:
+        Serial.println("no machine state for push button!");
+        break;
+      }
+    }
+    if (timesPressed == 2) // double-push
+    {
+      Globals::active_song->previousSong();
+    }
+    timesPressed = 0;
+    lastCallback = millis();
   }
 }
 

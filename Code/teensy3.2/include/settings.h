@@ -8,6 +8,7 @@
 #define MIDI_CHANNEL_DD200 3
 #define MIDI_CHANNEL_WHAMMY 4
 #define MIDI_CHANNEL_KP3 5
+#define MIDI_CHANNEL_VISUALS 6
 
 /////////////////////////// AUXILIARY HARDWARE ////////////////////////
 #define VIBR 0

@@ -58,7 +58,7 @@ void run_randomVoice() {
   }
 
   switch (Globals::active_song->step) {
-  case 0:
+  case 0: // just init
 
     if (Globals::active_song->isStateInit()) {
 

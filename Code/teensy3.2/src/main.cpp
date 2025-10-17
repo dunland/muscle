@@ -28,7 +28,7 @@
 #include <Calibration.h>
 #include <SD.h>
 
-const String VERSION_NUMBER = "2025-09";
+const String VERSION_NUMBER = "2025-10";
 
 //---------------------- Global / Debug values ----------------------
 
@@ -36,12 +36,12 @@ int Devtools::verbose = 0;
 boolean Devtools::use_responsiveCalibration = false;
 boolean Devtools::do_print_beat_sum = false; // prints active_score->beat_sum topography array
 boolean Devtools::do_print_to_console = true;
-boolean Devtools::use_serial_comm = false; // sends instrument names upon stroke and song names, if true
 boolean Devtools::do_print_JSON = false;
 boolean Devtools::do_send_to_processing = false;
 boolean Devtools::printRhythm = false; // print timestamp and current bar
-boolean Devtools::printStrokes = true;
+boolean Devtools::printStrokes = false;
 boolean Devtools::sensitivityFromHeaderFile = true; // overwrites sensitivity data on SD card with settings.h
+bool Devtools::visualsOn = true; // use special serial communication to control visuals; sends instrument names upon stroke and song names, if true
 
 // ----------------------------- variables ----------------------------
 
@@ -140,8 +140,6 @@ void setup()
   Hardware::lcd->print("SUPERMUSCLE");
   Hardware::lcd->setCursor(11, 0);
   Hardware::lcd->print(VERSION_NUMBER);
-  Hardware::lcd->setCursor(0, 1);
-  Hardware::lcd->print("fix randomVoices");
 
   rhythmics = new Rhythmics();
 
@@ -203,7 +201,6 @@ void setup()
   Devtools::println_to_console("-----------------------------------------------");
 
   // -------------------------------- songlist ------------------------
-  Globals::songlist.push_back(new Song(run_randomVoice, "randomVoice"));
   Globals::songlist.push_back(new Song(run_monitoring, "monitoring"));
   // Globals::songlist.push_back(new Song(run_A_72, "A_72")); // TODO: Hangup! fix this song!
   // Globals::songlist.push_back(new Song(run_b_27, "b_27")); // TODO: Hangup! fix this song!

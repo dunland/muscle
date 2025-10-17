@@ -40,8 +40,7 @@ void Song::increase_step()
 {
     step++;
     initState = true;
-    Serial.println("step");
-    Serial.println(step);
+    if (Devtools::visualsOn) Serial.printf("step:%d\n",step);
     Hardware::lcd->clear();
 }
 
@@ -61,11 +60,12 @@ void Song::proceed_to_next_score() // TODO: make this a callback function/the so
     // proceed to next song in list:
     Globals::active_song_pointer = (Globals::active_song_pointer + 1) % Globals::songlist.size();
     Globals::active_song = Globals::songlist[Globals::active_song_pointer];
-    Serial.println(Globals::active_song->name); // control visuals etc
+    if (Devtools::visualsOn) Serial.println(Globals::active_song->name); // control visuals etc
 
     // ...and begin at step 0:
     Globals::active_song->step = 0;
     Globals::active_song->initState = true;
+    // if (Devtools::visualsOn) Serial.println("step:0");
 
     // reset effects:
     for (auto &instrument : Drumset::instruments)
@@ -81,6 +81,19 @@ void Song::proceed_to_next_score() // TODO: make this a callback function/the so
     }
 
     Hardware::lcd->clear();
+}
+
+void Song::previousSong(){
+	Globals::active_song_pointer--;
+	if (Globals::active_song_pointer < 0)
+    	Globals::active_song_pointer = Globals::songlist.size() - 1;
+    Globals::active_song = Globals::songlist[Globals::active_song_pointer];
+    Globals::active_song->step = 0;
+    Globals::active_song->initState = true;
+    if (Devtools::visualsOn) {
+        Serial.println(Globals::active_song->name);
+        Serial.println("step:0");
+    }
 }
 
 // set tempo of the song:
@@ -169,7 +182,7 @@ void Song::playRhythmicNotes(Synthesizer *synth, int rhythmic_iterator) // initi
 //     if (notes.size() > 0)
 //     {
 //         if (synth->notes[note_idx] == false)
-//             synth->sendNoteOn(notes[note_idx];
+//             synth->sendNoteOn(notes[note_idx]);
 //     }
 //     else
 //         Devtools::println_to_console("cannot play MIDI note, because Score::notes is empty.");

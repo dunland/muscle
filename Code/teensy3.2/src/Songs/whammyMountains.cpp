@@ -97,11 +97,8 @@ void run_whammyMountains()
         Hardware::lcd->setCursor(0, 0);
         Hardware::lcd->print(val);
 
-        Devtools::print_to_console("whammy channel: ");
-        Devtools::println_to_console(channel);
-        Devtools::print_to_console("whammy value: ");
-        Devtools::print_to_console(val);
-
+        // Serial.printf("whammy channel: %s\n", channel);
+        // Serial.printf("whammy value: %s\n", val);
         break;
 
     default:

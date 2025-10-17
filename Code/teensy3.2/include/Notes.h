@@ -1,6 +1,6 @@
 #pragma once
 
-enum Notes{
+enum Notes {
   Note_C1 = 0,
   Note_Db1 = 1,
   Note_D1 = 2,
@@ -142,7 +142,6 @@ enum Notes{
 };
 
 /*
-
 MIDI Note Number to Frequency Conversion Chart
 
  MIDI                   MIDI                   MIDI
@@ -201,7 +200,9 @@ MIDI Note Number to Frequency Conversion Chart
 
 NOTES: Middle C is note #60. Frequency is in Hertz.
 
-Here is C code to calculate an array with all of the above frequencies (ie, so that midi[0], which is midi note #0, is assigned the value of 8.1757989156). Tuning is based upon A=440.
+Here is C code to calculate an array with all of the above frequencies (ie, so
+that midi[0], which is midi note #0, is assigned the value of 8.1757989156).
+Tuning is based upon A=440.
 
 float midi[127];
 int a = 440; // a is 440 hz...

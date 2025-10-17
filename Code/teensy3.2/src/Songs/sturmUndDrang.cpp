@@ -58,6 +58,7 @@ void run_sturmUndDrang()
         {
             mKorgAmpLvl += 0.5;
             Synthesizers::mKorg->sendControlChange(mKORG_Amplevel, int(mKorgAmpLvl));
+            if (Devtools::visualsOn) Serial.printf("visuals:%d", int(mKorgAmpLvl));
         }
 
         Hardware::lcd->setCursor(0, 0);

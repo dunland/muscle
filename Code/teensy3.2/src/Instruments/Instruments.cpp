@@ -30,7 +30,7 @@ void Instrument::addMidiTarget(CC_Type cc_type, Synthesizer *synth, int cc_max, 
   midiTarget->cc_tidyUp_factor = cc_tidyUp_factor;
 
   midiTarget->cc_standard = (cc_tidyUp_factor > 0) ? midiTarget->cc_min : midiTarget->cc_max; // standard value either cc_min or cc_max, depending on increasing or decreasing tidyUp-factor
-  Serial.printf("Added %s as midiTarget for %s", midiTarget->synth->name, Globals::DrumtypeToHumanreadable(drumtype));
+  Serial.printf("Added %s as midiTarget for %s\n", midiTarget->synth->name, Globals::DrumtypeToHumanreadable(drumtype));
 }
 
 void Instrument::addMidiTarget(int cc_type, Synthesizer *synth, int cc_max, int cc_min, float cc_increment, float cc_release){
@@ -81,11 +81,7 @@ void Instrument::setup_sensitivity(int threshold_, int crossings_, int delayAfte
 // set effect without handle for variable:
 void Instrument::set_effect(EffectsType effect_)
 {
-  Devtools::print_to_console("Setting effect for ");
-  Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
-  Devtools::print_to_console(" to ");
-  Devtools::print_to_console(Globals::EffectstypeToHumanReadable(effect_));
-  Devtools::print_to_console("... ");
+  Serial.printf("Setting effect for %s to %s ... ", Globals::DrumtypeToHumanreadable(drumtype), Globals::EffectstypeToHumanReadable(effect_));
 
   switch (effect_)
   {
@@ -102,6 +98,7 @@ void Instrument::set_effect(EffectsType effect_)
       else
       {
         midiTarget->notes.push_back(int(random(0, 128))); // TODO: add notes according to global scale
+        Devtools::print_to_console("effect could not be set! no MIDI notes defined or no active_note defined for this instrument!");
         effect = effect_;
       }
     }
@@ -207,11 +204,7 @@ void Instrument::calculateNoiseFloor()
   unsigned long beginNoiseFloorCaluclation = millis();
   int led_idx = 0;
 
-  Devtools::print_to_console("calculating noiseFloor for ");
-  Devtools::print_to_console(Globals::DrumtypeToHumanreadable(drumtype));
-  Devtools::print_to_console(" (A");
-  Devtools::print_to_console(pin - 14);
-  Devtools::print_to_console(")");
+  // Serial.printf("calculating noiseFloor for %s (A%s)", Globals::DrumtypeToHumanreadable(drumtype), pin - 14);
   if (Devtools::use_responsiveCalibration)
   {
     Devtools::print_to_console(" ..waiting for stroke");
@@ -256,8 +249,7 @@ void Instrument::calculateNoiseFloor()
   sensitivity.noiseFloor = totalSamples / 400;
   digitalWrite(led, LOW);
   led_idx++;
-  Devtools::print_to_console("noiseFloor = ");
-  Devtools::println_to_console(sensitivity.noiseFloor);
+  // Serial.printf("noiseFloor = %s", sensitivity.noiseFloor);
 
   // turn LEDs off again:
   digitalWrite(led, LOW);
@@ -315,8 +307,12 @@ void Instrument::trigger() // TODO: use as callback function
   if (Globals::machine_state != Running) return;
 
   // print instrument name to receive using external programs via Serial connection:
-  if (Devtools::use_serial_comm)
-    Serial.println(Globals::DrumtypeToHumanreadable(drumtype));
+  // if (Devtools::visualsOn){
+  //   Serial.print(Globals::DrumtypeToHumanreadable(drumtype));
+  //   Serial.printf(":127\n");
+  // } 
+  // ATTENTION: alles wird übelst langsam hierdurch...
+
   Hardware::lcd->setCursor(12, 0);
   Hardware::lcd->print(Globals::DrumtypeToHumanreadable(drumtype));
 
@@ -466,5 +462,6 @@ Synthesizer *Synthesizers::volca = new Synthesizer(MIDI_CHANNEL_VOLCA, "vlca");
 Synthesizer *Synthesizers::dd200 = new Synthesizer(MIDI_CHANNEL_DD200, "d200");
 Synthesizer *Synthesizers::whammy = new Synthesizer(MIDI_CHANNEL_WHAMMY, "whmy");
 Synthesizer *Synthesizers::kaossPad3 = new Synthesizer(MIDI_CHANNEL_KP3, "KP3");
+Synthesizer *Synthesizers::visuals = new Synthesizer(MIDI_CHANNEL_VISUALS, "viz");
 
 std::vector<Synthesizer *> Synthesizers::synths = {Synthesizers::mKorg, Synthesizers::volca, Synthesizers::whammy, Synthesizers::dd200};

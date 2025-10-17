@@ -59,6 +59,7 @@ public:
     void add_bassNote(int note); // adds a NOTE to notes[]
     void increase_step();
     void proceed_to_next_score();
+    void previousSong(); // go to previous from songList;
     void setTempoRange(int min_tempo_, int max_tempo_);
     void resetInstruments();
 
